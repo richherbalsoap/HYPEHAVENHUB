@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Glamour Store - Premium Makeup & Beauty{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center min-vh-85">
+      <div class="col-lg-6 hero-content">
+        <div class="hero-badge"><i class="fas fa-star me-1"></i> New Collection 2026</div>
+        <h1 class="hero-title">
+          Define Your<br><span class="accent">Signature</span><br>Beauty
+        </h1>
+        <p class="hero-subtitle">Discover premium makeup curated for the modern woman. From bold lips to flawless skin, find your perfect shade.</p>
+        <div class="hero-cta">
+          <a href="{% url 'product_list' %}" class="btn-glamour-primary">
+            <i class="fas fa-shopping-bag"></i> Shop Now
+          </a>
+          <a href="{% url 'product_list' %}?discount=20" class="btn-glamour-outline">
+            View Sale <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-number">500+</div>
+            <div class="hero-stat-label">Products</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-number">50+</div>
+            <div class="hero-stat-label">Brands</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-number">100K+</div>
+            <div class="hero-stat-label">Happy Customers</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 hero-image-area d-none d-lg-block">
+        <div class="text-center position-relative">
+          <div style="background: rgba(233,30,140,0.15); border-radius: 50%; width: 450px; height: 450px; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 1px solid rgba(233,30,140,0.3);">
+            <div style="font-size: 160px; line-height: 1;">
+              <i class="fas fa-spa" style="color: var(--pink); opacity: 0.8;"></i>
+            </div>
+          </div>
+          <div class="hero-badges">
+            <i class="fas fa-certificate text-pink me-2"></i> 100% Authentic Products
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+{% if categories %}
+<section class="py-5">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Shop by Category</h2>
+      <p class="section-subtitle">Explore our curated makeup categories</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="row g-3">
+      {% for cat in categories %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="{% url 'category_products' cat.slug %}" class="category-card" style="aspect-ratio: 1; background: linear-gradient(135deg, #f9f0f5, #fff0f8);">
+          {% if cat.image %}
+            <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+          {% else %}
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--pink); opacity: 0.5; background: var(--pink-pale);">
+              <i class="fas fa-spa"></i>
+            </div>
+          {% endif %}
+          <div class="category-card-overlay">
+            <div class="category-card-name">{{ cat.name }}</div>
+            <div class="category-card-count">{{ cat.products.count }} Products</div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured Products -->
+{% if featured %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Featured Picks</h2>
+      <p class="section-subtitle">Handpicked products our beauty experts love</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="row g-3">
+      {% for product in featured %}
+      <div class="col-6 col-md-4 col-lg-3">
+        {% include 'store/_product_card.html' with product=product %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'product_list' %}?is_featured=1" class="btn-glamour-primary d-inline-flex">View All Featured</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Flash Sale -->
+{% if flash_sale %}
+<section class="flash-sale-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="hero-badge mb-3"><i class="fas fa-fire me-1"></i> Limited Time</div>
+      <h2 class="section-title" style="color: white;">Flash Sale</h2>
+      <p class="section-subtitle" style="color: rgba(255,255,255,0.6);">Grab these deals before they disappear!</p>
+    </div>
+    <div class="flash-timer" id="flashTimer">
+      <div class="timer-box">
+        <div class="timer-number" id="timerHH">00</div>
+        <div class="timer-label">Hours</div>
+      </div>
+      <div class="timer-sep">:</div>
+      <div class="timer-box">
+        <div class="timer-number" id="timerMM">00</div>
+        <div class="timer-label">Mins</div>
+      </div>
+      <div class="timer-sep">:</div>
+      <div class="timer-box">
+        <div class="timer-number" id="timerSS">00</div>
+        <div class="timer-label">Secs</div>
+      </div>
+    </div>
+    <div class="row g-3">
+      {% for product in flash_sale %}
+      <div class="col-6 col-md-4 col-lg-2">
+        {% include 'store/_product_card.html' with product=product %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'product_list' %}?discount=30" class="btn-glamour-primary d-inline-flex">View All Deals</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- New Arrivals -->
+{% if new_arrivals %}
+<section class="py-5">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">New Arrivals</h2>
+      <p class="section-subtitle">Fresh drops from your favourite brands</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="row g-3">
+      {% for product in new_arrivals %}
+      <div class="col-6 col-md-4 col-lg-3">
+        {% include 'store/_product_card.html' with product=product %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Best Sellers -->
+{% if bestsellers %}
+<section class="py-5" style="background: var(--pink-pale);">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Best Sellers</h2>
+      <p class="section-subtitle">Loved by thousands of beauty enthusiasts</p>
+      <div class="section-line"></div>
+    </div>
+    <div class="row g-3">
+      {% for product in bestsellers %}
+      <div class="col-6 col-md-4 col-lg-3">
+        {% include 'store/_product_card.html' with product=product %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Brands -->
+{% if brands %}
+<section class="brands-strip">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h6 class="text-muted text-uppercase letter-spacing fw-600" style="letter-spacing: 2px; font-size: 12px;">Our Premium Brands</h6>
+    </div>
+    <div class="d-flex flex-wrap gap-3 justify-content-center">
+      {% for brand in brands %}
+      <a href="{% url 'brand_products' brand.slug %}" class="brand-pill">{{ brand.name }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- USP Strip -->
+<section class="py-4 border-top">
+  <div class="container">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3">
+        <div class="py-3">
+          <i class="fas fa-truck fa-2x mb-2" style="color: var(--pink);"></i>
+          <div class="fw-600">Free Delivery</div>
+          <div class="text-muted small">On orders above ₹499</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="py-3">
+          <i class="fas fa-shield-alt fa-2x mb-2" style="color: var(--pink);"></i>
+          <div class="fw-600">100% Authentic</div>
+          <div class="text-muted small">All products verified</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="py-3">
+          <i class="fas fa-undo fa-2x mb-2" style="color: var(--pink);"></i>
+          <div class="fw-600">Easy Returns</div>
+          <div class="text-muted small">7-day return policy</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="py-3">
+          <i class="fas fa-headset fa-2x mb-2" style="color: var(--pink);"></i>
+          <div class="fw-600">24/7 Support</div>
+          <div class="text-muted small">Always here for you</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

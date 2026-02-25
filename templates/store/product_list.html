@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - Glamour Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  <div class="row">
+    <!-- Filters Sidebar -->
+    <div class="col-lg-2 d-none d-lg-block">
+      <form method="GET" id="filterForm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-700 mb-0" style="font-size: 16px;">Filters</h6>
+          <a href="{% url 'product_list' %}" class="text-pink small">Clear All</a>
+        </div>
+
+        {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+
+        <!-- Category -->
+        <div class="filter-card">
+          <div class="filter-title">Category</div>
+          {% for cat in categories %}
+          <label class="filter-option">
+            <input type="radio" name="category" value="{{ cat.slug }}" {% if selected_category == cat.slug %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+            {{ cat.name }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- Brand -->
+        <div class="filter-card">
+          <div class="filter-title">Brand</div>
+          {% for brand in brands %}
+          <label class="filter-option">
+            <input type="radio" name="brand" value="{{ brand.slug }}" {% if selected_brand == brand.slug %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+            {{ brand.name }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- Price -->
+        <div class="filter-card">
+          <div class="filter-title">Price Range</div>
+          <div class="d-flex gap-2">
+            <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min" value="{{ request.GET.min_price }}">
+            <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max" value="{{ request.GET.max_price }}">
+          </div>
+          <button type="submit" class="btn btn-sm mt-2 w-100" style="background: var(--pink); color: white; border-radius: 8px;">Apply</button>
+        </div>
+
+        <!-- Discount -->
+        <div class="filter-card">
+          <div class="filter-title">Discount</div>
+          {% for d in discount_opts %}
+          <label class="filter-option">
+            <input type="radio" name="discount" value="{{ d }}" {% if request.GET.discount == d %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+            {{ d }}% & above
+          </label>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="col-lg-10">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h5 class="fw-600 mb-0">
+            {% if q %}Search: "{{ q }}" — {% endif %}
+            {{ page_obj.paginator.count }} Products
+          </h5>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <label class="text-muted small me-1">Sort:</label>
+          <select class="form-select form-select-sm" style="width: auto;" onchange="window.location.href='?sort='+this.value+'{% if q %}&q={{ q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}'">
+            <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+            <option value="popularity" {% if sort == 'popularity' %}selected{% endif %}>Popularity</option>
+          </select>
+        </div>
+      </div>
+
+      {% if products %}
+      <div class="row g-3">
+        {% for product in products %}
+        <div class="col-6 col-md-4 col-lg-3">
+          {% include 'store/_product_card.html' with product=product %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <nav class="mt-5 d-flex justify-content-center">
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&sort={{ sort }}&q={{ q }}&category={{ selected_category }}&brand={{ selected_brand }}">&laquo;</a></li>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}&sort={{ sort }}&q={{ q }}&category={{ selected_category }}&brand={{ selected_brand }}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&sort={{ sort }}&q={{ q }}&category={{ selected_category }}&brand={{ selected_brand }}">&raquo;</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-search"></i></div>
+        <h3 class="empty-state-title">No Products Found</h3>
+        <p class="empty-state-text">We couldn't find any products matching your filters. Try adjusting your search or filters.</p>
+        <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Browse All Products</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

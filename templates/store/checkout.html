@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - Glamour Store{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
+    <i class="fas fa-lock text-pink me-2"></i>Secure Checkout
+  </h2>
+  <form id="checkoutForm">
+    {% csrf_token %}
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <!-- Delivery Address -->
+        <div class="checkout-step">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="step-number">1</div>
+            <h5 class="step-title mb-0">Delivery Address</h5>
+          </div>
+          {% if addresses %}
+          <div class="row g-3">
+            {% for addr in addresses %}
+            <div class="col-12">
+              <div class="address-card {% if forloop.first %}selected{% endif %}" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.address-card').forEach(c=>c.classList.remove('selected'));this.classList.add('selected')">
+                <div class="d-flex gap-3 align-items-start">
+                  <input type="radio" name="address_id" value="{{ addr.id }}" {% if forloop.first %}checked{% endif %}>
+                  <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between">
+                      <div class="fw-700">{{ addr.full_name }}</div>
+                      <span class="badge" style="background: var(--pink-pale); color: var(--pink); font-size: 11px;">{{ addr.get_type_display }}</span>
+                    </div>
+                    <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">
+                      {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+                      {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}<br>
+                      <i class="fas fa-phone-alt text-pink me-1"></i>{{ addr.phone }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <a href="{% url 'add_address' %}" class="btn btn-sm mt-3" style="color: var(--pink); border: 1px solid var(--pink); border-radius: 8px;">
+            <i class="fas fa-plus me-1"></i> Add New Address
+          </a>
+          {% else %}
+          <div class="text-center py-4">
+            <p class="text-muted">No addresses saved. Add one to continue.</p>
+            <a href="{% url 'add_address' %}" class="btn-pink" style="width: auto; padding: 10px 24px; display: inline-block; text-decoration: none;">Add Address</a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-step">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="step-number">2</div>
+            <h5 class="step-title mb-0">Payment Method</h5>
+          </div>
+          <div class="row g-3">
+            <div class="col-6 col-md-4">
+              <div class="payment-method selected" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.payment-method').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
+                <input type="radio" name="payment_method" value="cod" checked style="display:none;">
+                <div class="payment-method-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div><div class="fw-600" style="font-size: 14px;">Cash on Delivery</div><div class="text-muted" style="font-size: 11px;">Pay on arrival</div></div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="payment-method" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.payment-method').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
+                <input type="radio" name="payment_method" value="upi" style="display:none;">
+                <div class="payment-method-icon"><i class="fas fa-mobile-alt"></i></div>
+                <div><div class="fw-600" style="font-size: 14px;">UPI</div><div class="text-muted" style="font-size: 11px;">GPay, PhonePe</div></div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="payment-method" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.payment-method').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
+                <input type="radio" name="payment_method" value="card" style="display:none;">
+                <div class="payment-method-icon"><i class="fas fa-credit-card"></i></div>
+                <div><div class="fw-600" style="font-size: 14px;">Card</div><div class="text-muted" style="font-size: 11px;">Credit / Debit</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-pink" style="font-size: 16px; padding: 16px;">
+          <i class="fas fa-lock me-2"></i>Place Order Securely
+        </button>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="col-lg-5">
+        <div class="order-summary">
+          <h5 class="order-summary-title">Order Summary ({{ items|length }} items)</h5>
+          {% for item in items %}
+          <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+            {% if item.product.primary_image %}
+            <img src="{{ item.product.primary_image.image.url }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" alt="{{ item.product.name }}">
+            {% endif %}
+            <div class="flex-grow-1">
+              <div style="font-size: 14px; font-weight: 500;">{{ item.product.name }}</div>
+              {% if item.variant %}<div style="font-size: 12px; color: var(--gray);">{{ item.variant.label }}</div>{% endif %}
+              <div style="font-size: 13px; color: var(--gray);">Qty: {{ item.quantity }}</div>
+            </div>
+            <div class="fw-700">₹{{ item.total_price|floatformat:"0" }}</div>
+          </div>
+          {% endfor %}
+          <div class="summary-row"><span class="text-muted">Subtotal</span><span>₹{{ cart.subtotal|floatformat:"0" }}</span></div>
+          {% if cart.discount_amount > 0 %}<div class="summary-row"><span class="text-success">Discount</span><span class="text-success">-₹{{ cart.discount_amount|floatformat:"0" }}</span></div>{% endif %}
+          <div class="summary-row"><span class="text-muted">Delivery</span><span>{% if cart.delivery_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹{{ cart.delivery_charge }}{% endif %}</span></div>
+          <div class="summary-row"><span class="fw-700">Grand Total</span><span class="summary-total">₹{{ cart.grand_total|floatformat:"0" }}</span></div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

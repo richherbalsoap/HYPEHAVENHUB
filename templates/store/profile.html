@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - Glamour Store{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+      <div class="profile-sidebar">
+        <div class="text-center p-4 border-bottom">
+          {% if user.profile_photo %}
+            <img src="{{ user.profile_photo.url }}" class="profile-avatar mb-3" alt="Profile">
+          {% else %}
+            <div class="profile-avatar d-flex align-items-center justify-content-center mx-auto mb-3" style="background: var(--pink-pale); color: var(--pink); font-size: 36px; font-weight: 700;">
+              {{ user.first_name|first|upper|default:user.email|first|upper }}
+            </div>
+          {% endif %}
+          <div class="fw-700" style="font-size: 16px;">{{ user.get_full_name }}</div>
+          <div class="text-muted small">{{ user.email }}</div>
+        </div>
+        <div>
+          <a href="{% url 'profile' %}" class="profile-nav-link active"><i class="fas fa-user"></i>My Profile</a>
+          <a href="{% url 'order_list' %}" class="profile-nav-link"><i class="fas fa-box"></i>My Orders</a>
+          <a href="{% url 'wishlist' %}" class="profile-nav-link"><i class="fas fa-heart"></i>Wishlist <span class="badge ms-auto" style="background: var(--pink);">{{ wishlist_count }}</span></a>
+          <a href="{% url 'address_list' %}" class="profile-nav-link"><i class="fas fa-map-marker-alt"></i>Addresses</a>
+          <a href="{% url 'notifications' %}" class="profile-nav-link"><i class="fas fa-bell"></i>Notifications</a>
+          <a href="{% url 'logout' %}" class="profile-nav-link" style="color: #ef4444 !important; border-left-color: #ef4444 !important;"><i class="fas fa-sign-out-alt"></i>Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <div class="row g-4">
+        <!-- Profile Form -->
+        <div class="col-12">
+          <div class="checkout-step">
+            <h5 class="fw-700 mb-4">Personal Information</h5>
+            <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">First Name</label>
+                  <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone</label>
+                  <input type="text" name="phone" class="form-control" value="{{ user.phone }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Date of Birth</label>
+                  <input type="date" name="date_of_birth" class="form-control" value="{{ user.date_of_birth|date:'Y-m-d' }}">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Profile Photo</label>
+                  <input type="file" name="profile_photo" class="form-control" accept="image/*">
+                </div>
+              </div>
+              <button type="submit" class="btn-pink mt-4" style="width: auto; padding: 12px 32px;">Save Changes</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        {% if orders %}
+        <div class="col-12">
+          <div class="checkout-step">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="fw-700 mb-0">Recent Orders</h5>
+              <a href="{% url 'order_list' %}" class="text-pink small text-decoration-none">View All</a>
+            </div>
+            {% for order in orders %}
+            <div class="d-flex justify-content-between align-items-center py-3 {% if not forloop.last %}border-bottom{% endif %}">
+              <div>
+                <div class="fw-600 text-pink">#{{ order.order_id }}</div>
+                <div class="text-muted small">{{ order.created_at|date:"M d, Y" }} &middot; {{ order.items.count }} item(s)</div>
+              </div>
+              <div class="text-end">
+                <div class="fw-700">₹{{ order.grand_total|floatformat:"0" }}</div>
+                <span class="badge" style="font-size: 11px; background: var(--pink-pale); color: var(--pink);">{{ order.get_status_display }}</span>
+              </div>
+              <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm" style="color: var(--pink); border: 1px solid var(--pink); border-radius: 8px; margin-left: 12px;">Details</a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

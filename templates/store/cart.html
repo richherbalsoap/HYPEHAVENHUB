@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Cart - Glamour Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
+    <i class="fas fa-shopping-bag text-pink me-2"></i>My Cart
+    {% if cart.total_items %}<span class="badge" style="background: var(--pink); font-size: 16px; border-radius: 20px; margin-left: 8px;">{{ cart.total_items }} items</span>{% endif %}
+  </h2>
+
+  {% if items %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% for item in items %}
+      <div class="cart-item" id="cart-item-{{ item.id }}" data-cart-item>
+        {% if item.product.primary_image %}
+          <img src="{{ item.product.primary_image.image.url }}" class="cart-item-image" alt="{{ item.product.name }}">
+        {% else %}
+          <div class="cart-item-image" style="display:flex;align-items:center;justify-content:center;background:var(--pink-pale);border-radius:10px;color:var(--pink);font-size:32px;">
+            <i class="fas fa-spa"></i>
+          </div>
+        {% endif %}
+        <div class="cart-item-details flex-grow-1">
+          <div class="cart-item-brand">{{ item.product.brand.name }}</div>
+          <div class="cart-item-name">
+            <a href="{% url 'product_detail' item.product.slug %}" class="text-decoration-none text-dark">{{ item.product.name }}</a>
+          </div>
+          {% if item.variant %}
+          <div class="cart-item-variant">
+            {% if item.variant.color_code %}
+              <span class="d-inline-block rounded-circle border me-1" style="width: 14px; height: 14px; background: {{ item.variant.color_code }};"></span>
+            {% endif %}
+            {{ item.variant.label }}
+          </div>
+          {% endif %}
+          <div class="cart-item-price">₹{{ item.unit_price|floatformat:"0" }}</div>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-3">
+          <div class="qty-selector">
+            <button class="qty-btn" data-cart-action="decrease" data-item-id="{{ item.id }}">-</button>
+            <span class="qty-num" id="qty-{{ item.id }}">{{ item.quantity }}</span>
+            <button class="qty-btn" data-cart-action="increase" data-item-id="{{ item.id }}">+</button>
+          </div>
+          <div class="fw-700" id="total-{{ item.id }}">₹{{ item.total_price|floatformat:"0" }}</div>
+          <button class="btn btn-sm text-danger" data-cart-action="remove" data-item-id="{{ item.id }}" title="Remove">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Coupon -->
+      <div class="order-summary mb-3">
+        <h6 class="fw-700 mb-3">Have a Coupon?</h6>
+        <form id="couponForm">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" id="couponInput" class="form-control" placeholder="Enter coupon code" style="text-transform: uppercase;">
+            <button type="submit" class="btn" style="background: var(--pink); color: white;">Apply</button>
+          </div>
+          <div id="couponMsg" class="mt-2 small"></div>
+        </form>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h5 class="order-summary-title">Order Summary</h5>
+        <div class="summary-row">
+          <span class="text-muted">Subtotal ({{ cart.total_items }} items)</span>
+          <span id="summary-subtotal">₹{{ cart.subtotal|floatformat:"0" }}</span>
+        </div>
+        <div class="summary-row" id="discount-row" {% if not cart.discount_amount %}style="display: none;"{% endif %}>
+          <span class="text-success">Discount (Coupon)</span>
+          <span class="text-success" id="discount-amt">-₹{{ cart.discount_amount|floatformat:"0" }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="text-muted">Delivery</span>
+          <span>
+            {% if cart.delivery_charge == 0 %}
+              <span class="text-success">FREE</span>
+            {% else %}
+              ₹{{ cart.delivery_charge }}
+            {% endif %}
+          </span>
+        </div>
+        <div class="summary-row">
+          <span class="fw-700">Total</span>
+          <span class="summary-total" id="summary-total">₹{{ cart.grand_total|floatformat:"0" }}</span>
+        </div>
+        {% if cart.discount_amount > 0 %}
+        <div class="text-success small mt-2"><i class="fas fa-tag me-1"></i> You're saving ₹{{ cart.discount_amount|floatformat:"0" }}</div>
+        {% endif %}
+        <a href="{% url 'checkout' %}" class="btn-pink mt-4 d-block text-center text-decoration-none" style="padding: 14px; border-radius: 12px; font-size: 16px;">
+          Proceed to Checkout <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+        <a href="{% url 'product_list' %}" class="d-block text-center text-muted small mt-3 text-decoration-none">
+          <i class="fas fa-arrow-left me-1"></i> Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><i class="fas fa-shopping-bag"></i></div>
+    <h3 class="empty-state-title">Your cart is empty</h3>
+    <p class="empty-state-text">Looks like you haven't added any products yet. Start shopping!</p>
+    <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Glamour Store - Premium Makeup{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="container-fluid px-4">
+    <div class="row align-items-center">
+      <div class="col-md-6 d-none d-md-block">
+        <span class="top-bar-text"><i class="fas fa-truck me-1"></i> Free delivery on orders above ₹499 &nbsp;|&nbsp; <i class="fas fa-tag me-1"></i> Use code <strong>GLAM10</strong> for 10% off</span>
+      </div>
+      <div class="col-md-6 text-md-end text-center">
+        {% if user.is_authenticated %}
+          <span class="top-bar-text">Hi, {{ user.first_name|default:user.email }} &nbsp;|&nbsp;</span>
+          <a href="{% url 'logout' %}" class="top-bar-link">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="top-bar-link">Login</a> &nbsp;|&nbsp;
+          <a href="{% url 'signup' %}" class="top-bar-link">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-glamour sticky-top">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand" href="{% url 'home' %}">
+      <span class="brand-icon"><i class="fas fa-spa"></i></span>
+      <span class="brand-name">Glamour<span class="brand-accent">Store</span></span>
+    </a>
+
+    <!-- Search Bar -->
+    <div class="search-bar-container mx-auto d-none d-lg-flex">
+      <form class="search-form" action="{% url 'product_list' %}" method="GET">
+        <div class="input-group search-group">
+          <input type="text" name="q" id="searchInput" class="form-control search-input" placeholder="Search makeup, brands, shades..." autocomplete="off" value="{{ request.GET.q }}">
+          <button class="btn search-btn" type="submit"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="search-suggestions" id="searchSuggestions"></div>
+      </form>
+    </div>
+
+    <!-- Nav Icons -->
+    <div class="nav-icons d-flex align-items-center gap-2 ms-auto">
+      {% if user.is_authenticated %}
+        <a href="{% url 'profile' %}" class="nav-icon-btn" title="Profile">
+          <i class="fas fa-user"></i>
+        </a>
+        <a href="{% url 'notifications' %}" class="nav-icon-btn position-relative" title="Notifications">
+          <i class="fas fa-bell"></i>
+          {% if user.notifications.filter.is_read == False %}
+            <span class="badge-dot"></span>
+          {% endif %}
+        </a>
+        <a href="{% url 'wishlist' %}" class="nav-icon-btn position-relative" title="Wishlist">
+          <i class="fas fa-heart"></i>
+          {% if wishlist_count > 0 %}<span class="cart-badge">{{ wishlist_count }}</span>{% endif %}
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}" class="nav-icon-btn" title="Login"><i class="fas fa-user"></i></a>
+      {% endif %}
+      <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="Cart">
+        <i class="fas fa-shopping-bag"></i>
+        {% if cart_count > 0 %}<span class="cart-badge" id="cartBadge">{{ cart_count }}</span>{% endif %}
+      </a>
+      <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Category Nav -->
+  <div class="collapse navbar-collapse" id="navMenu">
+    <div class="container-fluid px-4">
+      <!-- Mobile Search -->
+      <form class="d-lg-none my-3" action="{% url 'product_list' %}" method="GET">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search...">
+          <button class="btn search-btn" type="submit"><i class="fas fa-search"></i></button>
+        </div>
+      </form>
+      <ul class="navbar-nav category-nav">
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">All Products</a></li>
+        {% for cat in all_categories %}
+          <li class="nav-item dropdown">
+            <a class="nav-link cat-link dropdown-toggle" href="{% url 'category_products' cat.slug %}" data-bs-toggle="dropdown">{{ cat.name }}</a>
+            {% if cat.subcategories.all %}
+              <ul class="dropdown-menu cat-dropdown">
+                {% for sub in cat.subcategories.all %}
+                  <li><a class="dropdown-item" href="{% url 'product_list' %}?category={{ cat.slug }}&subcategory={{ sub.slug }}">{{ sub.name }}</a></li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+        <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=20"><i class="fas fa-fire me-1"></i>Sale</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Messages -->
+{% if messages %}
+<div class="messages-container">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show glamour-alert" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Main Content -->
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="glamour-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <div class="footer-brand">
+          <span class="brand-icon me-2"><i class="fas fa-spa"></i></span>
+          <span class="brand-name">Glamour<span class="brand-accent">Store</span></span>
+        </div>
+        <p class="footer-desc mt-3">Your one-stop destination for premium makeup & beauty products. Curated for the modern woman.</p>
+        <div class="social-links mt-3">
+          <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-pinterest"></i></a>
+        </div>
+      </div>
+      <div class="col-lg-2 col-md-6">
+        <h6 class="footer-title">Shop</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'product_list' %}">All Products</a></li>
+          <li><a href="{% url 'product_list' %}?sort=newest">New Arrivals</a></li>
+          <li><a href="{% url 'product_list' %}?discount=20">Sale</a></li>
+          <li><a href="{% url 'product_list' %}?sort=popularity">Best Sellers</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-2 col-md-6">
+        <h6 class="footer-title">My Account</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'profile' %}">Profile</a></li>
+          <li><a href="{% url 'order_list' %}">My Orders</a></li>
+          <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
+          <li><a href="{% url 'address_list' %}">Addresses</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <h6 class="footer-title">Stay in the Loop</h6>
+        <p class="footer-desc">Get exclusive offers and beauty tips straight to your inbox.</p>
+        <div class="input-group newsletter-input">
+          <input type="email" class="form-control" placeholder="Enter your email">
+          <button class="btn btn-pink">Subscribe</button>
+        </div>
+        <div class="payment-icons mt-3">
+          <span class="pay-icon"><i class="fas fa-credit-card"></i> Card</span>
+          <span class="pay-icon"><i class="fas fa-mobile-alt"></i> UPI</span>
+          <span class="pay-icon"><i class="fas fa-wallet"></i> Wallet</span>
+          <span class="pay-icon"><i class="fas fa-money-bill"></i> COD</span>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-hr">
+    <div class="text-center footer-bottom">
+      <p>© 2026 GlamourStore. All Rights Reserved. Made with <i class="fas fa-heart text-pink"></i> for beauty lovers.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Cart Toast -->
+<div class="cart-toast" id="cartToast">
+  <i class="fas fa-check-circle me-2"></i>
+  <span id="cartToastMsg">Added to cart!</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% load static %}
+<script src="{% static 'js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
