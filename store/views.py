@@ -11,7 +11,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Case, IntegerField, Q, When
+from django.db.models import Q
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -24,7 +24,6 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale,
-    JEWELRY_CATEGORY_SLUGS,
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -34,21 +33,11 @@ from .forms import (
 logger = logging.getLogger(__name__)
 
 
-def jewelry_category_order():
-    return Case(
-        *[
-            When(slug=slug, then=position)
-            for position, slug in enumerate(JEWELRY_CATEGORY_SLUGS)
-        ],
-        output_field=IntegerField(),
-    )
-
-
-def jewelry_categories():
-    return Category.objects.filter(
-        is_active=True,
-        slug__in=JEWELRY_CATEGORY_SLUGS,
-    ).annotate(_jewelry_order=jewelry_category_order()).order_by('_jewelry_order')
+def active_categories():
+    """All active categories, ordered by name. Replaces the old hardcoded
+    2-category jhumka-box-set list so any category an admin creates
+    actually shows up across the site."""
+    return Category.objects.filter(is_active=True)
 
 
 def generate_otp():
@@ -262,24 +251,20 @@ def get_or_create_cart(request):
 
 
 def home(request):
-    storefront_products = Product.objects.filter(
-        is_active=True,
-        category__slug__in=JEWELRY_CATEGORY_SLUGS,
-    )
+    storefront_products = Product.objects.filter(is_active=True)
     featured = storefront_products.filter(is_featured=True).prefetch_related('images', 'variants')[:8]
     new_arrivals = storefront_products.filter(is_new_arrival=True).prefetch_related('images')[:8]
     bestsellers = storefront_products.filter(is_bestseller=True).prefetch_related('images')[:8]
     flash_sale = storefront_products.filter(is_flash_sale=True).prefetch_related('images')[:6]
+    categories = active_categories()[:3]
     hero_products = [
-        storefront_products.filter(category__slug=slug).prefetch_related('images').first()
-        for slug in JEWELRY_CATEGORY_SLUGS
+        storefront_products.filter(category=cat).prefetch_related('images').first()
+        for cat in categories
     ]
     hero_products = [product for product in hero_products if product]
-    categories = jewelry_categories()[:3]
     brands = Brand.objects.filter(
         is_active=True,
         products__is_active=True,
-        products__category__slug__in=JEWELRY_CATEGORY_SLUGS,
     ).distinct()[:10]
     flash_sale_obj = FlashSale.objects.filter(is_active=True).first()
     return render(request, 'store/home.html', {
@@ -295,15 +280,11 @@ def home(request):
 
 
 def product_list(request):
-    products = Product.objects.filter(
-        is_active=True,
-        category__slug__in=JEWELRY_CATEGORY_SLUGS,
-    ).prefetch_related('images', 'variants')
-    categories = jewelry_categories()
+    products = Product.objects.filter(is_active=True).prefetch_related('images', 'variants')
+    categories = active_categories()
     brands = Brand.objects.filter(
         is_active=True,
         products__is_active=True,
-        products__category__slug__in=JEWELRY_CATEGORY_SLUGS,
     ).distinct()
 
     q = request.GET.get('q', '')
@@ -386,7 +367,6 @@ def product_detail(request, slug):
         Product,
         slug=slug,
         is_active=True,
-        category__slug__in=JEWELRY_CATEGORY_SLUGS,
     )
     try:
         product.view_count += 1
@@ -445,7 +425,6 @@ def category_products(request, slug):
         Category,
         slug=slug,
         is_active=True,
-        slug__in=JEWELRY_CATEGORY_SLUGS,
     )
     return redirect(f'/products/?category={slug}')
 
@@ -462,7 +441,6 @@ def search_suggestions(request):
         products = Product.objects.filter(
             Q(name__icontains=q) | Q(brand__name__icontains=q),
             is_active=True,
-            category__slug__in=JEWELRY_CATEGORY_SLUGS,
         ).values('name', 'slug', 'brand__name')[:6]
         for p in products:
             results.append({'name': p['name'], 'brand': p['brand__name'], 'slug': p['slug']})

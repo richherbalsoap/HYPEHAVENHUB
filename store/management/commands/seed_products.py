@@ -10,7 +10,6 @@ from django.utils.text import slugify
 from store.models import (
     Brand,
     Category,
-    JEWELRY_CATEGORY_SLUGS,
     Product,
     ProductImage,
     ProductVariant,
@@ -139,16 +138,6 @@ class Command(BaseCommand):
             variant.stock = item["stock"]
             variant.is_active = True
             variant.save()
-
-        Product.objects.filter(is_active=True).exclude(
-            category__slug__in=JEWELRY_CATEGORY_SLUGS
-        ).update(is_active=False)
-        SubCategory.objects.filter(is_active=True).exclude(
-            category__slug__in=JEWELRY_CATEGORY_SLUGS
-        ).update(is_active=False)
-        Category.objects.filter(is_active=True).exclude(
-            slug__in=JEWELRY_CATEGORY_SLUGS
-        ).update(is_active=False)
 
         self.stdout.write(
             self.style.SUCCESS(

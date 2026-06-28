@@ -1,77 +1,20 @@
 import uuid
-import hashlib
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-def _pexels_url(photo_id):
-    return f"https://images.pexels.com/photos/{photo_id}/pexels-photo-{photo_id}.jpeg?auto=compress&cs=tinysrgb&w=1200"
-
-
-def _unsplash_url(photo_id, width=1200):
-    return f"https://images.unsplash.com/{photo_id}?auto=format&fit=crop&w={width}&q=82"
-
-
-def _stable_gallery(url_pool, seed, count=3):
-    if not url_pool:
-        return []
-    digest = hashlib.md5(seed.encode("utf-8")).hexdigest()
-    start = int(digest[:8], 16) % len(url_pool)
-    rotated = url_pool[start:] + url_pool[:start]
-    result = rotated[:count]
-    while len(result) < count:
-        result += rotated[: count - len(result)]
-    return result
-
-
-REAL_CATEGORY_IMAGE_URLS = {
-    "12-piece-jhumka-box-set": "/static/images/hero-jhumka-large.jpeg",
-    "16-piece-jhumka-box-set": "/static/images/hero-jhumka-small.jpeg",
-}
-
-JEWELRY_CATEGORY_SLUGS = (
-    "12-piece-jhumka-box-set",
-    "16-piece-jhumka-box-set",
-)
-
-CATEGORY_PRODUCT_IMAGE_POOLS = {
-    "12-piece-jhumka-box-set": ["/static/images/hero-jhumka-large.jpeg"],
-    "16-piece-jhumka-box-set": ["/static/images/hero-jhumka-small.jpeg"],
-}
-DEFAULT_PRODUCT_IMAGE_POOL = []
-
-REAL_PRODUCT_IMAGE_URLS = {
-    "12-piece-assorted-jhumka-box-classic-gold": [
-        "/static/images/hero-jhumka-large.jpeg",
-        "/static/images/hero-jhumka-small.jpeg"
-    ],
-    "12-piece-assorted-jhumka-box-oxidized": [
-        "/static/images/hero-jhumka-large.jpeg",
-        "/static/images/hero-jhumka-small.jpeg"
-    ],
-    "12-piece-assorted-jhumka-box-pearl-mix": [
-        "/static/images/hero-jhumka-large.jpeg",
-        "/static/images/hero-jhumka-small.jpeg"
-    ],
-    "16-piece-assorted-jhumka-box-classic-gold": [
-        "/static/images/hero-jhumka-small.jpeg",
-        "/static/images/hero-jhumka-large.jpeg"
-    ],
-    "16-piece-assorted-jhumka-box-antique": [
-        "/static/images/hero-jhumka-small.jpeg",
-        "/static/images/hero-jhumka-large.jpeg"
-    ],
-    "16-piece-assorted-jhumka-box-oxidized": [
-        "/static/images/hero-jhumka-small.jpeg",
-        "/static/images/hero-jhumka-large.jpeg"
-    ],
-    "16-piece-assorted-jhumka-box-rainbow-mix": [
-        "/static/images/hero-jhumka-small.jpeg",
-        "/static/images/hero-jhumka-large.jpeg"
-    ]
-}
+# NOTE: Earlier versions of this file hardcoded two demo category slugs
+# (12/16-piece jhumka box set) plus fallback image URL pools so that every
+# product/category without a real uploaded image would show one of two
+# static hero images. That made every catalog page show duplicate images
+# and made it impossible to add new categories. All of that has been
+# removed — categories and products now always use whatever images are
+# actually uploaded (stored in cloud Blob storage, see ProductImage.url
+# and Category.display_image_url below). If no image has been uploaded,
+# a clean "no image" placeholder is shown in templates instead of a fake
+# product photo.
 
 
 
@@ -120,6 +63,7 @@ class Address(models.Model):
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, max_length=255)
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
     image = models.ImageField(upload_to='categories/', null=True, blank=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
@@ -139,7 +83,14 @@ class Category(models.Model):
 
     @property
     def display_image_url(self):
-        return (self.image.url if self.image else "") or REAL_CATEGORY_IMAGE_URLS.get(self.slug, "")
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""
 
 
 class SubCategory(models.Model):
@@ -266,53 +217,18 @@ class Product(models.Model):
         primary = self.primary_image
         if primary and primary.url:
             return primary.url
-        urls = REAL_PRODUCT_IMAGE_URLS.get(self.slug)
-        if not urls:
-            category_slug = self.category.slug if self.category else ""
-            urls = _stable_gallery(
-                CATEGORY_PRODUCT_IMAGE_POOLS.get(category_slug, DEFAULT_PRODUCT_IMAGE_POOL),
-                self.slug,
-                count=3,
-            )
-        if urls:
-            return urls[0]
         return ""
 
     @property
     def secondary_image_url(self):
-        all_imgs = self.images.all()
-        if len(all_imgs) > 1 and all_imgs[1].url:
+        all_imgs = [img for img in self.images.all() if img.url]
+        if len(all_imgs) > 1:
             return all_imgs[1].url
-        urls = REAL_PRODUCT_IMAGE_URLS.get(self.slug)
-        if urls and len(urls) > 1:
-            return urls[1]
-        category_slug = self.category.slug if self.category else ""
-        urls = _stable_gallery(
-            CATEGORY_PRODUCT_IMAGE_POOLS.get(category_slug, DEFAULT_PRODUCT_IMAGE_POOL),
-            self.slug,
-            count=3,
-        )
-        if len(urls) > 1:
-            return urls[1]
         return self.display_image_url
-
 
     @property
     def display_gallery_urls(self):
-        local_urls = [img.url for img in self.images.all() if img.url]
-        if local_urls:
-            return local_urls
-        urls = REAL_PRODUCT_IMAGE_URLS.get(self.slug)
-        if not urls:
-            category_slug = self.category.slug if self.category else ""
-            urls = _stable_gallery(
-                CATEGORY_PRODUCT_IMAGE_POOLS.get(category_slug, DEFAULT_PRODUCT_IMAGE_POOL),
-                self.slug,
-                count=3,
-            )
-        if urls:
-            return urls
-        return []
+        return [img.url for img in self.images.all() if img.url]
 
     def __str__(self):
         return self.name
@@ -320,6 +236,7 @@ class Product(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     image_base64 = models.TextField(blank=True, null=True)
     alt_text = models.CharField(max_length=200, blank=True)
@@ -334,15 +251,20 @@ class ProductImage(models.Model):
 
     @property
     def url(self):
+        # Preferred: a real, persistent URL from Vercel Blob storage.
+        if self.image_url:
+            return self.image_url
+        # Legacy fallback: images saved as base64 directly in the DB
+        # (from before Blob storage was wired up). Still rendered so old
+        # rows keep working, but new uploads should always set image_url.
         if self.image_base64:
             return f"data:image/jpeg;base64,{self.image_base64}"
+        # Legacy fallback: local filesystem ImageField. This only works
+        # on a persistent disk — on Vercel the filesystem is wiped on
+        # every cold start, so this branch is effectively dead there.
         if self.image:
-            import os
-            from django.conf import settings
             try:
-                full_path = os.path.join(settings.MEDIA_ROOT, self.image.name)
-                if os.path.exists(full_path):
-                    return self.image.url
+                return self.image.url
             except Exception:
                 pass
         return ""

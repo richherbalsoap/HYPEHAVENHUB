@@ -97,7 +97,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'glamour_store.wsgi.application'
 
 PGDATABASE = config('PGDATABASE', default='')
-if PGDATABASE and HAS_PSYCOPG:
+POSTGRES_URL = (
+    config('POSTGRES_URL', default='')
+    or config('DATABASE_URL', default='')
+    or config('POSTGRES_PRISMA_URL', default='')
+)
+
+if POSTGRES_URL and HAS_PSYCOPG:
+    # Vercel Postgres (via Neon/Supabase/etc. through the Vercel
+    # Marketplace) and most other managed Postgres providers give you a
+    # single connection string instead of separate host/user/password
+    # vars. dj_database_url parses that reliably (including query-string
+    # options like sslmode) instead of us hand-rolling urlparse.
+    import dj_database_url
+
+    DATABASES = {
+        'default': dj_database_url.parse(
+            POSTGRES_URL,
+            conn_max_age=0,
+            ssl_require=True,
+        )
+    }
+elif PGDATABASE and HAS_PSYCOPG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -108,23 +129,10 @@ if PGDATABASE and HAS_PSYCOPG:
             'PORT': config('PGPORT', default='5432'),
         }
     }
-elif os.environ.get('VERCEL'):
-    # Vercel: filesystem is read-only except /tmp — copy DB there on startup
-    import shutil as _shutil
-    _src_db = str(BASE_DIR / 'db.sqlite3')
-    _tmp_db = '/tmp/db.sqlite3'
-    try:
-        if not os.path.exists(_tmp_db) and os.path.exists(_src_db):
-            _shutil.copy2(_src_db, _tmp_db)
-    except Exception:
-        pass
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': _tmp_db,
-        }
-    }
 else:
+    # Local development only. NEVER used on Vercel — if you see this
+    # branch running in production, POSTGRES_URL / PGDATABASE env vars
+    # are missing and nothing you save will persist between deploys.
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -153,10 +161,12 @@ if HAS_WHITENOISE:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-if os.environ.get('VERCEL') == '1' or os.environ.get('PGDATABASE'):
-    MEDIA_ROOT = Path('/tmp/media')
-else:
-    MEDIA_ROOT = BASE_DIR / 'media'
+# NOTE: product/category images are now stored in Vercel Blob storage
+# (see store/storage.py and image_url fields on Category/ProductImage) —
+# this MEDIA_ROOT only matters for local development or any leftover
+# legacy ImageField uploads, since Vercel's filesystem is wiped on every
+# cold start and was never a safe place to keep uploaded files.
+MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

@@ -1,6 +1,4 @@
-from django.db.models import Case, IntegerField, When
-
-from .models import Category, Cart, Wishlist, JEWELRY_CATEGORY_SLUGS
+from .models import Category, Cart, Wishlist
 
 
 def cart_count(request):
@@ -32,16 +30,7 @@ def wishlist_count(request):
 def categories_list(request):
     categories = Category.objects.filter(
         is_active=True,
-        slug__in=JEWELRY_CATEGORY_SLUGS,
-    ).annotate(
-        _jewelry_order=Case(
-            *[
-                When(slug=slug, then=position)
-                for position, slug in enumerate(JEWELRY_CATEGORY_SLUGS)
-            ],
-            output_field=IntegerField(),
-        )
-    ).order_by('_jewelry_order').prefetch_related('subcategories')
+    ).order_by('name').prefetch_related('subcategories')
     return {'all_categories': categories}
 
 
