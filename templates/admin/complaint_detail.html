@@ -1,0 +1,148 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Complaint {{ complaint.complaint_id }}{% endblock %}
+{% block page_title %}Complaint {{ complaint.complaint_id }}{% endblock %}
+
+{% block content %}
+<div class="admin-page-actions">
+    <a href="{% url 'admin_complaints' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Complaints
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Customer Issue</div>
+                    <h6>{{ complaint.subject }}</h6>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
+                    <span class="status-pill">{{ complaint.get_priority_display }}</span>
+                </div>
+            </div>
+            <div class="admin-detail-grid mb-4">
+                <div>
+                    <span>Complaint ID</span>
+                    <strong>{{ complaint.complaint_id }}</strong>
+                </div>
+                <div>
+                    <span>Type</span>
+                    <strong>{{ complaint.get_complaint_type_display }}</strong>
+                </div>
+                <div>
+                    <span>Submitted</span>
+                    <strong>{{ complaint.created_at|date:"d M Y" }}</strong>
+                    <small>{{ complaint.created_at|date:"h:i A" }}</small>
+                </div>
+                <div>
+                    <span>Updated</span>
+                    <strong>{{ complaint.updated_at|date:"d M Y" }}</strong>
+                    <small>{{ complaint.updated_at|date:"h:i A" }}</small>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="eyebrow">Description</div>
+                <p style="white-space: pre-wrap; margin-bottom: 0;">{{ complaint.description }}</p>
+            </div>
+
+            {% if complaint.order %}
+            <div class="admin-card" style="box-shadow: none;">
+                <div class="admin-card-header mb-2">
+                    <div>
+                        <div class="eyebrow">Related Order</div>
+                        <h6>{{ complaint.order.order_id }}</h6>
+                    </div>
+                    <a href="{% url 'admin_order_detail' complaint.order.order_id %}" class="btn btn-sm btn-outline-primary">
+                        Open Order
+                    </a>
+                </div>
+                <div class="admin-detail-grid">
+                    <div>
+                        <span>Total</span>
+                        <strong>Rs. {{ complaint.order.grand_total|floatformat:0 }}</strong>
+                    </div>
+                    <div>
+                        <span>Order Status</span>
+                        <strong>{{ complaint.order.get_status_display }}</strong>
+                    </div>
+                    <div>
+                        <span>Placed</span>
+                        <strong>{{ complaint.order.created_at|date:"d M Y" }}</strong>
+                    </div>
+                    <div>
+                        <span>Items</span>
+                        <strong>{{ complaint.order.items.count }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if complaint.admin_response %}
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Response Sent</div>
+                    <h6>Admin Response</h6>
+                </div>
+                {% if complaint.resolved_at %}
+                <span class="text-muted small">{{ complaint.resolved_at|date:"d M Y, h:i A" }}</span>
+                {% endif %}
+            </div>
+            <p style="white-space: pre-wrap; margin-bottom: 0;">{{ complaint.admin_response }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-xl-4">
+        <div class="admin-card mb-4">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Customer</div>
+                    <h6>{{ complaint.user.get_full_name|default:complaint.user.email }}</h6>
+                </div>
+            </div>
+            <div class="address-block">
+                <span>{{ complaint.user.email }}</span>
+                {% if complaint.user.phone %}<span>{{ complaint.user.phone }}</span>{% endif %}
+                <span>{{ complaint.user.orders.count }} orders placed</span>
+            </div>
+        </div>
+
+        <div class="admin-card sticky-panel">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Admin Action</div>
+                    <h6>Update complaint</h6>
+                </div>
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    {{ form.status }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Priority</label>
+                    {{ form.priority }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Assign To</label>
+                    {{ form.assigned_to }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Admin Response</label>
+                    {{ form.admin_response }}
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-save"></i> Save Complaint
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

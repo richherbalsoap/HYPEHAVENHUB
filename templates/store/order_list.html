@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}My Orders - Glamour Store{% endblock %}
+{% block title %}My Orders - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
   <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
@@ -29,10 +29,10 @@
         <div class="col-md-8">
           {% for item in order.items.all|slice:":3" %}
           <div class="d-flex align-items-center gap-3 {% if not forloop.last %}mb-2{% endif %}">
-            {% if item.product and item.product.primary_image %}
-            <img src="{{ item.product.primary_image.image.url }}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;" alt="{{ item.product_name }}">
+            {% if item.product and item.product.display_image_url %}
+            <img src="{{ item.product.display_image_url }}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;" alt="{{ item.product_name }}">
             {% else %}
-            <div style="width:50px; height:50px; background:var(--pink-pale); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--pink);"><i class="fas fa-spa"></i></div>
+            <div style="width:50px; height:50px; background:var(--pink-pale); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--pink);"><i class="fas fa-gem"></i></div>
             {% endif %}
             <div>
               <div style="font-size: 14px; font-weight: 500;">{{ item.product_name }}</div>
@@ -58,7 +58,7 @@
     <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
     <h3 class="empty-state-title">No Orders Yet</h3>
     <p class="empty-state-text">You haven't placed any orders yet. Start shopping to see your orders here.</p>
-    <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Shop Now</a>
+    <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Shop Jewelry</a>
   </div>
   {% endif %}
 </div>

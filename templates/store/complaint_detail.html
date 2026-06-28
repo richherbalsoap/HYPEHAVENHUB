@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Complaint #{{ complaint.complaint_id }} - HYPEHAVENHUB{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <a href="{% url 'user_complaints' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Back to Complaints
+            </a>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-3">{{ complaint.complaint_id }}</h4>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <small class="text-muted">Complaint Type</small>
+                                    <div>
+                                        <span class="badge bg-info">{{ complaint.get_complaint_type_display }}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Status</small>
+                                    <div>
+                                        <span class="badge" style="background-color: 
+                                        {% if complaint.status == 'open' %}#EF4444
+                                        {% elif complaint.status == 'in_progress' %}#F59E0B
+                                        {% elif complaint.status == 'resolved' %}#10B981
+                                        {% else %}#6B7280{% endif %};">
+                                            {{ complaint.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="text-muted">Submitted On</small>
+                                    <div>{{ complaint.created_at|date:"d M Y H:i" }}</div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h5 class="mt-4 mb-3">Subject</h5>
+                            <p>{{ complaint.subject }}</p>
+
+                            <h5 class="mt-4 mb-3">Description</h5>
+                            <p style="white-space: pre-wrap;">{{ complaint.description }}</p>
+
+                            {% if complaint.order %}
+                            <hr>
+                            <h5 class="mt-4 mb-3">Related Order</h5>
+                            <p>
+                                <strong>Order ID:</strong> 
+                                <a href="{% url 'order_detail' complaint.order.order_id %}">
+                                    {{ complaint.order.order_id }}
+                                </a>
+                                <br>
+                                <strong>Order Date:</strong> {{ complaint.order.created_at|date:"d M Y" }}
+                                <br>
+                                <strong>Order Total:</strong> ₹{{ complaint.order.grand_total }}
+                                <br>
+                                <strong>Status:</strong> <span class="badge bg-info">{{ complaint.order.get_status_display }}</span>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="mb-3">
+                                <i class="fas fa-info-circle"></i> Complaint Info
+                            </h6>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Priority</small>
+                                <div>
+                                    <span class="badge" style="background-color:
+                                    {% if complaint.priority == 'high' %}#EF4444
+                                    {% elif complaint.priority == 'medium' %}#F59E0B
+                                    {% else %}#10B981{% endif %};">
+                                        {{ complaint.get_priority_display }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {% if complaint.assigned_to %}
+                            <div class="mb-3">
+                                <small class="text-muted">Assigned To</small>
+                                <div>{{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.email }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if complaint.resolved_at %}
+                            <div class="mb-3">
+                                <small class="text-muted">Resolved On</small>
+                                <div>{{ complaint.resolved_at|date:"d M Y H:i" }}</div>
+                            </div>
+                            {% endif %}
+
+                            <div class="alert alert-info">
+                                <strong>Status:</strong> 
+                                {% if complaint.status == 'open' %}
+                                    Your complaint has been received and is pending review.
+                                {% elif complaint.status == 'in_progress' %}
+                                    Our team is investigating your complaint.
+                                {% elif complaint.status == 'resolved' %}
+                                    Your complaint has been resolved.
+                                {% else %}
+                                    Your complaint has been closed.
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if complaint.admin_response %}
+                    <div class="card shadow-sm mt-3">
+                        <div class="card-body" style="background-color: #f0f9ff; border-left: 4px solid #3B82F6;">
+                            <h6 class="mb-3">
+                                <i class="fas fa-reply"></i> Admin Response
+                            </h6>
+                            <p style="white-space: pre-wrap; margin-bottom: 0;">{{ complaint.admin_response }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        background: white;
+        border-radius: 10px;
+        border: none;
+    }
+</style>
+{% endblock %}

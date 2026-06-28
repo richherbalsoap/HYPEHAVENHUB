@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Complaint - HYPEHAVENHUB{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h2 class="mb-4">
+                <i class="fas fa-envelope"></i> Submit a Complaint
+            </h2>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Complaint Type *</label>
+                            {{ form.complaint_type }}
+                            {% if form.complaint_type.errors %}
+                            <div class="text-danger mt-2">{{ form.complaint_type.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Order (Optional)</label>
+                            {{ form.order }}
+                            <small class="text-muted">Select if complaint is related to an order</small>
+                            {% if form.order.errors %}
+                            <div class="text-danger mt-2">{{ form.order.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Subject *</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                            <div class="text-danger mt-2">{{ form.subject.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description *</label>
+                            {{ form.description }}
+                            <small class="text-muted">Please provide detailed information about your issue</small>
+                            {% if form.description.errors %}
+                            <div class="text-danger mt-2">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Complaint
+                            </button>
+                            <a href="{% url 'user_complaints' %}" class="btn btn-outline-secondary">
+                                View My Complaints
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle"></i>
+                <strong>Help:</strong> Please describe your issue in detail. Our support team will respond within 24 hours.
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select {
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #8B5CF6;
+        box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
+    }
+    textarea.form-control {
+        min-height: 120px;
+    }
+</style>
+{% endblock %}

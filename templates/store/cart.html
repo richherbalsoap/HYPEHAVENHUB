@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Cart - Glamour Store{% endblock %}
+{% block title %}My Cart - HYPEHAVENHUB{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -15,11 +15,11 @@
     <div class="col-lg-8">
       {% for item in items %}
       <div class="cart-item" id="cart-item-{{ item.id }}" data-cart-item>
-        {% if item.product.primary_image %}
-          <img src="{{ item.product.primary_image.image.url }}" class="cart-item-image" alt="{{ item.product.name }}">
+        {% if item.product.display_image_url %}
+          <img src="{{ item.product.display_image_url }}" class="cart-item-image" alt="{{ item.product.name }}">
         {% else %}
           <div class="cart-item-image" style="display:flex;align-items:center;justify-content:center;background:var(--pink-pale);border-radius:10px;color:var(--pink);font-size:32px;">
-            <i class="fas fa-spa"></i>
+            <i class="fas fa-gem"></i>
           </div>
         {% endif %}
         <div class="cart-item-details flex-grow-1">
@@ -108,7 +108,7 @@
   <div class="empty-state">
     <div class="empty-state-icon"><i class="fas fa-shopping-bag"></i></div>
     <h3 class="empty-state-title">Your cart is empty</h3>
-    <p class="empty-state-text">Looks like you haven't added any products yet. Start shopping!</p>
+    <p class="empty-state-text">Looks like you haven't added any jewelry pieces yet. Start shopping!</p>
     <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Start Shopping</a>
   </div>
   {% endif %}

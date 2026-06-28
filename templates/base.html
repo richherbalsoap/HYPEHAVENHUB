@@ -3,114 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Glamour Store - Premium Makeup{% endblock %}</title>
+<title>{% block title %}HYPEHAVENHUB - Jhumka Box Sets{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260612-jewels">
+<link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
 {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-<!-- Top Bar -->
-<div class="top-bar">
-  <div class="container-fluid px-4">
-    <div class="row align-items-center">
-      <div class="col-md-6 d-none d-md-block">
-        <span class="top-bar-text"><i class="fas fa-truck me-1"></i> Free delivery on orders above ₹499 &nbsp;|&nbsp; <i class="fas fa-tag me-1"></i> Use code <strong>GLAM10</strong> for 10% off</span>
-      </div>
-      <div class="col-md-6 text-md-end text-center">
-        {% if user.is_authenticated %}
-          <span class="top-bar-text">Hi, {{ user.first_name|default:user.email }} &nbsp;|&nbsp;</span>
-          <a href="{% url 'logout' %}" class="top-bar-link">Logout</a>
-        {% else %}
-          <a href="{% url 'login' %}" class="top-bar-link">Login</a> &nbsp;|&nbsp;
-          <a href="{% url 'signup' %}" class="top-bar-link">Sign Up</a>
-        {% endif %}
-      </div>
-    </div>
+<!-- Announcement Bar -->
+{% block header %}
+<div class="announcement-bar">
+  <div class="container text-center">
+    <span class="announcement-text"><i class="fas fa-truck me-1"></i> Free delivery on orders above ₹499 &nbsp;|&nbsp; <i class="fas fa-tag me-1"></i> Use code <strong>JHUMKA10</strong> for 10% off</span>
   </div>
 </div>
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-glamour sticky-top">
-  <div class="container-fluid px-4">
-    <a class="navbar-brand" href="{% url 'home' %}">
-      <span class="brand-icon"><i class="fas fa-spa"></i></span>
-      <span class="brand-name">Glamour<span class="brand-accent">Store</span></span>
+  <div class="container-fluid px-3 px-md-4">
+    <!-- Left: Brand Logo & Name -->
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+      <img src="{% static 'images/logo.jpg' %}" alt="HYPEHAVENHUB Logo" class="brand-logo-img" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--pink-light);">
+      <span class="brand-name ms-2">HYPEHAVEN<span class="brand-accent">HUB</span></span>
     </a>
 
-    <!-- Search Bar -->
-    <div class="search-bar-container mx-auto d-none d-lg-flex">
+    <!-- Center: Desktop Navigation Links -->
+    <div class="d-none d-lg-flex ms-4">
+      <ul class="navbar-nav gap-3">
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'home' %}">Home</a></li>
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">All Box Sets</a></li>
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">12 Piece Box</a></li>
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">16 Piece Box</a></li>
+        <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=10"><i class="fas fa-fire me-1"></i>Offers</a></li>
+      </ul>
+    </div>
+
+    <!-- Center-Right: Search Input -->
+    <div class="search-bar-container mx-auto d-none d-lg-flex" style="max-width: 250px;">
       <form class="search-form" action="{% url 'product_list' %}" method="GET">
         <div class="input-group search-group">
-          <input type="text" name="q" id="searchInput" class="form-control search-input" placeholder="Search makeup, brands, shades..." autocomplete="off" value="{{ request.GET.q }}">
+          <input type="text" name="q" id="searchInput" class="form-control search-input" placeholder="Search..." autocomplete="off" value="{{ request.GET.q }}">
           <button class="btn search-btn" type="submit"><i class="fas fa-search"></i></button>
         </div>
         <div class="search-suggestions" id="searchSuggestions"></div>
       </form>
     </div>
 
-    <!-- Nav Icons -->
-    <div class="nav-icons d-flex align-items-center gap-2 ms-auto">
+    <!-- Right: Icons cluster -->
+    <div class="nav-icons d-flex align-items-center gap-2">
       {% if user.is_authenticated %}
-        <a href="{% url 'profile' %}" class="nav-icon-btn" title="Profile">
+        <a href="{% url 'profile' %}" class="nav-icon-btn d-none d-lg-flex" title="Profile">
           <i class="fas fa-user"></i>
         </a>
-        <a href="{% url 'notifications' %}" class="nav-icon-btn position-relative" title="Notifications">
+        <a href="{% url 'settings' %}" class="nav-icon-btn d-none d-lg-flex" title="Settings">
+          <i class="fas fa-gear"></i>
+        </a>
+        <a href="{% url 'notifications' %}" class="nav-icon-btn d-none d-lg-flex position-relative" title="Notifications">
           <i class="fas fa-bell"></i>
           {% if user.notifications.filter.is_read == False %}
             <span class="badge-dot"></span>
           {% endif %}
         </a>
-        <a href="{% url 'wishlist' %}" class="nav-icon-btn position-relative" title="Wishlist">
+        <a href="{% url 'wishlist' %}" class="nav-icon-btn d-none d-lg-flex position-relative" title="Wishlist">
           <i class="fas fa-heart"></i>
           {% if wishlist_count > 0 %}<span class="cart-badge">{{ wishlist_count }}</span>{% endif %}
         </a>
       {% else %}
-        <a href="{% url 'login' %}" class="nav-icon-btn" title="Login"><i class="fas fa-user"></i></a>
+        <a href="{% url 'login' %}" class="nav-icon-btn d-none d-lg-flex" title="Login"><i class="fas fa-user"></i></a>
       {% endif %}
       <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="Cart">
         <i class="fas fa-shopping-bag"></i>
         {% if cart_count > 0 %}<span class="cart-badge" id="cartBadge">{{ cart_count }}</span>{% endif %}
       </a>
-      <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      
+      <!-- Mobile hamburger toggle (triggers Offcanvas) -->
+      <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
         <i class="fas fa-bars"></i>
       </button>
     </div>
   </div>
+</nav>
 
-  <!-- Category Nav -->
-  <div class="collapse navbar-collapse" id="navMenu">
-    <div class="container-fluid px-4">
-      <!-- Mobile Search -->
-      <form class="d-lg-none my-3" action="{% url 'product_list' %}" method="GET">
-        <div class="input-group">
-          <input type="text" name="q" class="form-control" placeholder="Search...">
+<!-- Mobile Menu Drawer (Offcanvas) -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title brand-name" id="mobileMenuLabel">HYPEHAVEN<span class="brand-accent">HUB</span></h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column justify-content-between">
+    <div>
+      <!-- Mobile Search Bar -->
+      <form class="mb-4" action="{% url 'product_list' %}" method="GET">
+        <div class="input-group search-group">
+          <input type="text" name="q" class="form-control search-input" placeholder="Search..." autocomplete="off">
           <button class="btn search-btn" type="submit"><i class="fas fa-search"></i></button>
         </div>
       </form>
-      <ul class="navbar-nav category-nav">
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">All Products</a></li>
-        {% for cat in all_categories %}
-          <li class="nav-item dropdown">
-            <a class="nav-link cat-link dropdown-toggle" href="{% url 'category_products' cat.slug %}" data-bs-toggle="dropdown">{{ cat.name }}</a>
-            {% if cat.subcategories.all %}
-              <ul class="dropdown-menu cat-dropdown">
-                {% for sub in cat.subcategories.all %}
-                  <li><a class="dropdown-item" href="{% url 'product_list' %}?category={{ cat.slug }}&subcategory={{ sub.slug }}">{{ sub.name }}</a></li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-          </li>
-        {% endfor %}
-        <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=20"><i class="fas fa-fire me-1"></i>Sale</a></li>
+      
+      <!-- Navigation Links -->
+      <ul class="nav flex-column gap-3 fs-5">
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'home' %}">Home</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}">All Box Sets</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">12 Piece Box</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">16 Piece Box</a></li>
+        <li class="nav-item"><a class="nav-link text-danger fw-600" href="{% url 'product_list' %}?discount=10"><i class="fas fa-fire me-1"></i>Offers</a></li>
+        {% if user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'wishlist' %}"><i class="far fa-heart me-2"></i>Wishlist</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'notifications' %}"><i class="far fa-bell me-2"></i>Notifications</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'settings' %}"><i class="fas fa-gear me-2"></i>Settings</a></li>
+        {% endif %}
       </ul>
     </div>
+    
+    <!-- Drawer Footer (Account + Socials) -->
+    <div class="border-top pt-3 mt-4">
+      {% if user.is_authenticated %}
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <i class="fas fa-user text-muted"></i>
+          <span class="fw-500">Hi, {{ user.first_name|default:user.email }}</span>
+        </div>
+        <a href="{% url 'profile' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">My Profile</a>
+        <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100">Logout</a>
+      {% else %}
+        <div class="d-flex gap-2">
+          <a href="{% url 'login' %}" class="btn btn-outline-dark btn-sm w-50">Login</a>
+          <a href="{% url 'signup' %}" class="btn btn-dark btn-sm w-50">Sign Up</a>
+        </div>
+      {% endif %}
+      
+      <div class="d-flex justify-content-center gap-4 mt-4 text-muted fs-4">
+        <a href="https://instagram.com/" class="text-reset" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://facebook.com/" class="text-reset" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://pinterest.com/" class="text-reset" target="_blank"><i class="fab fa-pinterest"></i></a>
+      </div>
+    </div>
   </div>
-</nav>
+</div>
+{% endblock %}
+
 
 <!-- Messages -->
 {% if messages %}
@@ -130,15 +165,16 @@
 </main>
 
 <!-- Footer -->
+{% block footer %}
 <footer class="glamour-footer">
   <div class="container">
     <div class="row g-4">
       <div class="col-lg-4 col-md-6">
-        <div class="footer-brand">
-          <span class="brand-icon me-2"><i class="fas fa-spa"></i></span>
-          <span class="brand-name">Glamour<span class="brand-accent">Store</span></span>
+        <div class="footer-brand d-flex align-items-center">
+          <img src="{% static 'images/logo.jpg' %}" alt="HYPEHAVENHUB Logo" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--pink-light);" class="me-2">
+          <span class="brand-name">HYPEHAVEN<span class="brand-accent">HUB</span></span>
         </div>
-        <p class="footer-desc mt-3">Your one-stop destination for premium makeup & beauty products. Curated for the modern woman.</p>
+        <p class="footer-desc mt-3">Your simple destination for assorted jhumka box sets in 12 piece and 16 piece options.</p>
         <div class="social-links mt-3">
           <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
           <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
@@ -149,16 +185,17 @@
       <div class="col-lg-2 col-md-6">
         <h6 class="footer-title">Shop</h6>
         <ul class="footer-links">
-          <li><a href="{% url 'product_list' %}">All Products</a></li>
-          <li><a href="{% url 'product_list' %}?sort=newest">New Arrivals</a></li>
-          <li><a href="{% url 'product_list' %}?discount=20">Sale</a></li>
-          <li><a href="{% url 'product_list' %}?sort=popularity">Best Sellers</a></li>
+          <li><a href="{% url 'product_list' %}">All Box Sets</a></li>
+          <li><a href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">12 Piece Box</a></li>
+          <li><a href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">16 Piece Box</a></li>
+          <li><a href="{% url 'product_list' %}?discount=10">Offers</a></li>
         </ul>
       </div>
       <div class="col-lg-2 col-md-6">
         <h6 class="footer-title">My Account</h6>
         <ul class="footer-links">
           <li><a href="{% url 'profile' %}">Profile</a></li>
+          <li><a href="{% url 'settings' %}">Settings</a></li>
           <li><a href="{% url 'order_list' %}">My Orders</a></li>
           <li><a href="{% url 'wishlist' %}">Wishlist</a></li>
           <li><a href="{% url 'address_list' %}">Addresses</a></li>
@@ -166,7 +203,7 @@
       </div>
       <div class="col-lg-4 col-md-6">
         <h6 class="footer-title">Stay in the Loop</h6>
-        <p class="footer-desc">Get exclusive offers and beauty tips straight to your inbox.</p>
+        <p class="footer-desc">Get jhumka box restock updates and simple festive offers straight to your inbox.</p>
         <div class="input-group newsletter-input">
           <input type="email" class="form-control" placeholder="Enter your email">
           <button class="btn btn-pink">Subscribe</button>
@@ -181,10 +218,11 @@
     </div>
     <hr class="footer-hr">
     <div class="text-center footer-bottom">
-      <p>© 2026 GlamourStore. All Rights Reserved. Made with <i class="fas fa-heart text-pink"></i> for beauty lovers.</p>
+      <p>Copyright 2026 HYPEHAVENHUB. All Rights Reserved. Made with <i class="fas fa-heart text-pink"></i> for jhumka lovers.</p>
     </div>
   </div>
 </footer>
+{% endblock %}
 
 <!-- Cart Toast -->
 <div class="cart-toast" id="cartToast">
@@ -192,9 +230,29 @@
   <span id="cartToastMsg">Added to cart!</span>
 </div>
 
+<!-- Quick View Modal -->
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0" style="border-radius: 16px; overflow: hidden; background: var(--white); box-shadow: var(--shadow-lg);">
+      <div class="modal-header border-0 pb-0 justify-content-end">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="padding: 1rem;"></button>
+      </div>
+      <div class="modal-body pt-0 px-4 pb-4">
+        <div id="quickViewContent">
+          <!-- Loaded dynamically via AJAX -->
+          <div class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--pink);"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% load static %}
-<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/main.js' %}?v=20260626-razorpay-v2"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
+

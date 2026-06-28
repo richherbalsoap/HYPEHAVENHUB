@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}My Profile - Glamour Store{% endblock %}
+{% block title %}My Profile - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
   <div class="row g-4">
@@ -23,6 +23,7 @@
           <a href="{% url 'wishlist' %}" class="profile-nav-link"><i class="fas fa-heart"></i>Wishlist <span class="badge ms-auto" style="background: var(--pink);">{{ wishlist_count }}</span></a>
           <a href="{% url 'address_list' %}" class="profile-nav-link"><i class="fas fa-map-marker-alt"></i>Addresses</a>
           <a href="{% url 'notifications' %}" class="profile-nav-link"><i class="fas fa-bell"></i>Notifications</a>
+          <a href="{% url 'settings' %}" class="profile-nav-link"><i class="fas fa-gear"></i>Settings</a>
           <a href="{% url 'logout' %}" class="profile-nav-link" style="color: #ef4444 !important; border-left-color: #ef4444 !important;"><i class="fas fa-sign-out-alt"></i>Logout</a>
         </div>
       </div>

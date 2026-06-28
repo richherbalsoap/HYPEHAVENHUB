@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Reset OTP - Glamour Store{% endblock %}
+{% block title %}Reset OTP - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="auth-bg">
   <div class="container">
@@ -7,11 +7,17 @@
       <div style="font-size: 48px; color: var(--pink); margin-bottom: 16px;"><i class="fas fa-key"></i></div>
       <h2 class="glamour-form-title">Enter Reset OTP</h2>
       <p class="glamour-form-subtitle">OTP sent to <strong>{{ email }}</strong></p>
+      {% if otp_preview %}
+      <div class="alert alert-warning text-start mb-3" style="border-radius: 10px; font-size: 14px;">
+        <div class="fw-600 mb-1">Email service unavailable</div>
+        <div>Use this OTP: <strong>{{ otp_preview }}</strong></div>
+      </div>
+      {% endif %}
       <form method="POST" class="text-start">
         {% csrf_token %}
         <div class="mb-3">
           <label class="form-label">Enter OTP</label>
-          <input type="text" name="otp" class="form-control text-center" style="font-size: 24px; letter-spacing: 12px; font-weight: 700;" placeholder="• • • • • •" maxlength="6" required>
+          <input type="text" name="otp" class="form-control text-center otp-code-input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)" required autocomplete="one-time-code" autofocus>
         </div>
         <button type="submit" class="btn-pink">Verify OTP</button>
       </form>

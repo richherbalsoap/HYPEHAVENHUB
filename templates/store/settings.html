@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Settings - HYPEHAVENHUB{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-lg-3">
+      <div class="profile-sidebar">
+        <div class="text-center p-4 border-bottom">
+          {% if user.profile_photo %}
+            <img src="{{ user.profile_photo.url }}" class="profile-avatar mb-3" alt="Profile">
+          {% else %}
+            <div class="profile-avatar d-flex align-items-center justify-content-center mx-auto mb-3" style="background: var(--pink-pale); color: var(--pink); font-size: 36px; font-weight: 700;">
+              {{ user.first_name|first|upper|default:user.email|first|upper }}
+            </div>
+          {% endif %}
+          <div class="fw-700" style="font-size: 16px;">{{ user.get_full_name }}</div>
+          <div class="text-muted small">{{ user.email }}</div>
+        </div>
+        <div>
+          <a href="{% url 'profile' %}" class="profile-nav-link"><i class="fas fa-user"></i>My Profile</a>
+          <a href="{% url 'order_list' %}" class="profile-nav-link"><i class="fas fa-box"></i>My Orders</a>
+          <a href="{% url 'wishlist' %}" class="profile-nav-link"><i class="fas fa-heart"></i>Wishlist <span class="badge ms-auto" style="background: var(--pink);">{{ wishlist_count }}</span></a>
+          <a href="{% url 'address_list' %}" class="profile-nav-link"><i class="fas fa-map-marker-alt"></i>Addresses</a>
+          <a href="{% url 'notifications' %}" class="profile-nav-link"><i class="fas fa-bell"></i>Notifications</a>
+          <a href="{% url 'settings' %}" class="profile-nav-link active"><i class="fas fa-gear"></i>Settings</a>
+          <a href="{% url 'logout' %}" class="profile-nav-link" style="color: #ef4444 !important; border-left-color: #ef4444 !important;"><i class="fas fa-sign-out-alt"></i>Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="checkout-step">
+        <h5 class="fw-700 mb-4">Notification Settings</h5>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="email_order_updates" name="email_order_updates" {% if form.email_order_updates.value %}checked{% endif %}>
+                <label class="form-check-label" for="email_order_updates">Email Order Updates</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="email_promotions" name="email_promotions" {% if form.email_promotions.value %}checked{% endif %}>
+                <label class="form-check-label" for="email_promotions">Email Promotions</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="sms_order_updates" name="sms_order_updates" {% if form.sms_order_updates.value %}checked{% endif %}>
+                <label class="form-check-label" for="sms_order_updates">SMS Order Updates</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="sms_promotions" name="sms_promotions" {% if form.sms_promotions.value %}checked{% endif %}>
+                <label class="form-check-label" for="sms_promotions">SMS Promotions</label>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn-pink mt-4" style="width: auto; padding: 12px 32px;">Save Settings</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

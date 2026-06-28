@@ -1,4 +1,6 @@
-from .models import Category, Cart, Wishlist
+from django.db.models import Case, IntegerField, When
+
+from .models import Category, Cart, Wishlist, JEWELRY_CATEGORY_SLUGS
 
 
 def cart_count(request):
@@ -28,5 +30,28 @@ def wishlist_count(request):
 
 
 def categories_list(request):
-    categories = Category.objects.filter(is_active=True).prefetch_related('subcategories')
+    categories = Category.objects.filter(
+        is_active=True,
+        slug__in=JEWELRY_CATEGORY_SLUGS,
+    ).annotate(
+        _jewelry_order=Case(
+            *[
+                When(slug=slug, then=position)
+                for position, slug in enumerate(JEWELRY_CATEGORY_SLUGS)
+            ],
+            output_field=IntegerField(),
+        )
+    ).order_by('_jewelry_order').prefetch_related('subcategories')
     return {'all_categories': categories}
+
+
+def company_dashboard_access(request):
+    can_access = False
+    if request.user.is_authenticated:
+        can_access = (
+            request.user.is_superuser or
+            request.user.is_staff or
+            request.user.groups.filter(name='Company').exists()
+        )
+    return {'can_access_company_dashboard': can_access}
+

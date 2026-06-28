@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Sign Up - Glamour Store{% endblock %}
+{% block title %}Sign Up - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="auth-bg">
   <div class="container">
     <div class="glamour-form-card">
       <div class="text-center mb-4">
-        <div style="font-size: 40px; color: var(--pink); margin-bottom: 12px;"><i class="fas fa-spa"></i></div>
+        <div style="font-size: 40px; color: var(--pink); margin-bottom: 12px;"><i class="fas fa-gem"></i></div>
         <h2 class="glamour-form-title">Create Account</h2>
-        <p class="glamour-form-subtitle">Join thousands of beauty lovers</p>
+        <p class="glamour-form-subtitle">Join thousands of jewelry lovers</p>
       </div>
       <form method="POST">
         {% csrf_token %}
@@ -25,7 +25,8 @@
           </div>
           <div class="col-6">
             <label class="form-label">Last Name</label>
-            <input type="text" name="last_name" class="form-control" placeholder="Last Name" value="{{ form.last_name.value|default:'' }}">
+            <input type="text" name="last_name" class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" placeholder="Last Name" value="{{ form.last_name.value|default:'' }}">
+            {% for err in form.last_name.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
           </div>
         </div>
         <div class="mt-3">
@@ -35,15 +36,18 @@
         </div>
         <div class="mt-3">
           <label class="form-label">Phone Number</label>
-          <input type="text" name="phone" class="form-control" placeholder="+91 00000 00000">
+          <input type="text" name="phone" class="form-control {% if form.phone.errors %}is-invalid{% endif %}" placeholder="+91 00000 00000" value="{{ form.phone.value|default:'' }}">
+          {% for err in form.phone.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
         </div>
         <div class="mt-3">
           <label class="form-label">Password</label>
-          <input type="password" name="password" class="form-control" placeholder="Min. 8 characters">
+          <input type="password" name="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" placeholder="Min. 8 characters">
+          {% for err in form.password.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
         </div>
         <div class="mt-3">
           <label class="form-label">Confirm Password</label>
-          <input type="password" name="confirm_password" class="form-control" placeholder="Repeat password">
+          <input type="password" name="confirm_password" class="form-control {% if form.confirm_password.errors %}is-invalid{% endif %}" placeholder="Repeat password">
+          {% for err in form.confirm_password.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
         </div>
         <button type="submit" class="btn-pink mt-4">Create Account</button>
       </form>

@@ -1,4 +1,4 @@
-# Glamour Store - Premium Makeup E-commerce Platform
+# HYPEHAVENHUB - Premium Makeup E-commerce Platform
 
 ## Overview
 A Myntra-level, production-ready makeup e-commerce website built with Django targeting women aged 18–35. Luxury fashion-brand feel with Pink + Black + White color palette.
@@ -65,7 +65,7 @@ media/          # Uploaded files
 
 ## Admin Access
 - URL: /admin/
-- Email: admin@glamourstore.com
+- Email: admin@hypehavenhub.com
 - Password: Admin@1234
 
 ## Coupon Codes
