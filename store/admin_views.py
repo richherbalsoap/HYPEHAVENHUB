@@ -126,6 +126,14 @@ def admin_product_create(request):
         if form.is_valid():
             product = form.save()
 
+            if 'video_upload' in request.FILES:
+                from .storage import upload_file
+                try:
+                    product.video_url = upload_file(request.FILES['video_upload'], folder="videos")
+                    product.save()
+                except Exception as e:
+                    messages.error(request, f"Video upload failed: {e}")
+
             # Save uploaded images as base64 (permanent in DB)
             images = request.FILES.getlist('multiple_images')
             for i, img in enumerate(images):
@@ -155,6 +163,14 @@ def admin_product_edit(request, pk):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save()
+
+            if 'video_upload' in request.FILES:
+                from .storage import upload_file
+                try:
+                    product.video_url = upload_file(request.FILES['video_upload'], folder="videos")
+                    product.save()
+                except Exception as e:
+                    messages.error(request, f"Video upload failed: {e}")
 
             # Save newly uploaded images as base64
             images = request.FILES.getlist('multiple_images')

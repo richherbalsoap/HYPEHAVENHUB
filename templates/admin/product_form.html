@@ -91,6 +91,21 @@
                 <div class="form-text text-muted">Supports PNG, JPEG, WEBP and other image formats.</div>
             </div>
 
+            <div class="mb-3">
+                <label class="form-label">Upload Product Video</label>
+                {{ form.video_upload }}
+                <div class="form-text text-muted">Supports MP4, WebM, and other video formats.</div>
+            </div>
+
+            {% if product and product.video_url %}
+            <div class="mb-3">
+                <label class="form-label">Currently Uploaded Video</label>
+                <div>
+                    <video src="{{ product.video_url }}" controls style="max-height: 200px; max-width: 100%;"></video>
+                </div>
+            </div>
+            {% endif %}
+
             {% if product and product.images.all %}
             <div class="mb-3">
                 <label class="form-label">Currently Uploaded Images</label>

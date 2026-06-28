@@ -173,6 +173,11 @@ class AdminOrderUpdateForm(forms.ModelForm):
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
+    def value_from_datadict(self, data, files, name):
+        if hasattr(files, 'getlist'):
+            return files.getlist(name)
+        return files.get(name)
+
 class MultipleFileField(forms.FileField):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("widget", MultipleFileInput(attrs={'multiple': True, 'class': 'form-control', 'accept': 'image/*'}))
@@ -191,6 +196,11 @@ class ProductForm(forms.ModelForm):
     multiple_images = MultipleFileField(
         label="Product Images",
         required=False
+    )
+    video_upload = forms.FileField(
+        label="Product Video",
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'video/*'})
     )
 
     class Meta:

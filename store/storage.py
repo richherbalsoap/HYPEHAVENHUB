@@ -31,7 +31,7 @@ def is_configured():
     return bool(os.environ.get('BLOB_READ_WRITE_TOKEN'))
 
 
-def upload_image(file_obj, folder="uploads"):
+def upload_file(file_obj, folder="uploads"):
     """
     Uploads a single in-memory file (e.g. from request.FILES) to Vercel
     Blob storage and returns its public URL.
@@ -47,9 +47,9 @@ def upload_image(file_obj, folder="uploads"):
             "Database -> Blob) and redeploy."
         )
 
-    original_name = getattr(file_obj, 'name', 'image')
+    original_name = getattr(file_obj, 'name', 'file')
     ext = original_name.rsplit('.', 1)[-1].lower() if '.' in original_name else ''
-    safe_ext = ext if ext and len(ext) <= 5 else 'jpg'
+    safe_ext = ext if ext and len(ext) <= 5 else 'bin'
     pathname = f"{folder}/{uuid.uuid4().hex}.{safe_ext}"
 
     file_obj.seek(0)
@@ -66,7 +66,7 @@ def upload_image(file_obj, folder="uploads"):
     return url
 
 
-def delete_image(url):
+def delete_file(url):
     """Best-effort delete of a blob given its public URL. Failures are
     swallowed — a stray orphaned blob is harmless, but a crash here
     should never block a product/category delete in the admin panel."""

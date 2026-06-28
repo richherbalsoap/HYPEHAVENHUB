@@ -222,26 +222,28 @@ def send_order_bill_sms(order):
         return False
 
 
+def merge_anonymous_cart(request, user):
+    sk = request.session.session_key
+    if not sk:
+        return
+    try:
+        anon_cart = Cart.objects.get(session_key=sk)
+        cart, _ = Cart.objects.get_or_create(user=user)
+        for item in anon_cart.items.all():
+            ci, created = CartItem.objects.get_or_create(
+                cart=cart, product=item.product, variant=item.variant,
+                defaults={'quantity': item.quantity}
+            )
+            if not created:
+                ci.quantity += item.quantity
+                ci.save()
+        anon_cart.delete()
+    except Cart.DoesNotExist:
+        pass
+
 def get_or_create_cart(request):
     if request.user.is_authenticated:
         cart, _ = Cart.objects.get_or_create(user=request.user)
-        if not request.user.is_authenticated:
-            return cart
-        sk = request.session.session_key
-        if sk:
-            try:
-                anon_cart = Cart.objects.get(session_key=sk)
-                for item in anon_cart.items.all():
-                    ci, created = CartItem.objects.get_or_create(
-                        cart=cart, product=item.product, variant=item.variant,
-                        defaults={'quantity': item.quantity}
-                    )
-                    if not created:
-                        ci.quantity += item.quantity
-                        ci.save()
-                anon_cart.delete()
-            except Cart.DoesNotExist:
-                pass
         return cart
     else:
         if not request.session.session_key:
@@ -460,6 +462,7 @@ def signup_view(request):
         user.otp_created_at = None
         user.save()
         login(request, user)
+        merge_anonymous_cart(request, user)
         messages.success(request, 'Account created successfully. You are now logged in.')
         return redirect('home')
     return render(request, 'auth/signup.html', {'form': form})
@@ -490,6 +493,7 @@ def login_view(request):
     if request.method == 'POST' and form.is_valid():
         user = form.cleaned_data['user']
         login(request, user)
+        merge_anonymous_cart(request, user)
         next_url = request.GET.get('next', '')
         messages.success(request, f'Welcome back, {user.first_name or user.email}!')
         if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
