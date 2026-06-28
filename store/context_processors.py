@@ -44,3 +44,10 @@ def company_dashboard_access(request):
         )
     return {'can_access_company_dashboard': can_access}
 
+
+def shiprocket_settings(request):
+    from django.conf import settings
+    return {
+        'SHIPROCKET_CHECKOUT_API_KEY': getattr(settings, 'SHIPROCKET_CHECKOUT_API_KEY', ''),
+    }
+

@@ -919,7 +919,7 @@ def place_order(request):
         # Log checkout configuration loaded from settings
         logger.info(f"Processing order {order.order_id} using Shiprocket Checkout (API Key: {settings.SHIPROCKET_CHECKOUT_API_KEY[:4]}...)")
 
-        email_sent = send_order_confirmation_email(order)
+        email_sent = send_order_bill_email(order)
         sms_sent = send_order_bill_sms(order)
 
         # Trigger Shiprocket booking for Shiprocket Checkout prepaid order

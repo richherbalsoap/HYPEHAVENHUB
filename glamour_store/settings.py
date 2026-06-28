@@ -89,6 +89,7 @@ TEMPLATES = [
                 'store.context_processors.wishlist_count',
                 'store.context_processors.categories_list',
                 'store.context_processors.company_dashboard_access',
+                'store.context_processors.shiprocket_settings',
             ],
         },
     },
