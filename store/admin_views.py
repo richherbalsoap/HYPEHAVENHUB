@@ -134,16 +134,19 @@ def admin_product_create(request):
                 except Exception as e:
                     messages.error(request, f"Video upload failed: {e}")
 
-            # Save uploaded images as base64 (permanent in DB)
+            # Save uploaded images directly to Vercel Blob
             images = request.FILES.getlist('multiple_images')
             for i, img in enumerate(images):
-                img_data = img.read()
-                b64 = base64.b64encode(img_data).decode('utf-8')
-                ProductImage.objects.create(
-                    product=product,
-                    image_base64=b64,
-                    is_primary=(i == 0)
-                )
+                from .storage import upload_file
+                try:
+                    url = upload_file(img, folder="products")
+                    ProductImage.objects.create(
+                        product=product,
+                        image_url=url,
+                        is_primary=(i == 0)
+                    )
+                except Exception as e:
+                    messages.error(request, f"Image upload failed: {e}")
 
             messages.success(request, 'Product created successfully!')
             return redirect('admin_products')
@@ -172,18 +175,20 @@ def admin_product_edit(request, pk):
                 except Exception as e:
                     messages.error(request, f"Video upload failed: {e}")
 
-            # Save newly uploaded images as base64
+            # Save newly uploaded images directly to Vercel Blob
             images = request.FILES.getlist('multiple_images')
             for img in images:
-                img_data = img.read()
-                b64 = base64.b64encode(img_data).decode('utf-8')
-                # If product has no existing primary image, make the first new one primary
-                has_primary = product.images.filter(is_primary=True).exists()
-                ProductImage.objects.create(
-                    product=product,
-                    image_base64=b64,
-                    is_primary=not has_primary
-                )
+                from .storage import upload_file
+                try:
+                    url = upload_file(img, folder="products")
+                    has_primary = product.images.filter(is_primary=True).exists()
+                    ProductImage.objects.create(
+                        product=product,
+                        image_url=url,
+                        is_primary=not has_primary
+                    )
+                except Exception as e:
+                    messages.error(request, f"Image upload failed: {e}")
 
             messages.success(request, 'Product updated successfully!')
             return redirect('admin_products')

@@ -98,6 +98,18 @@ class SubCategory(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=255)
     image = models.ImageField(upload_to='subcategories/', null=True, blank=True)
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
+
+    @property
+    def display_image_url(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except ValueError:
+                pass
+        return ''
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -119,6 +131,18 @@ class Brand(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, max_length=255)
     logo = models.ImageField(upload_to='brands/', null=True, blank=True)
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
+
+    @property
+    def logo_url(self):
+        if self.image_url:
+            return self.image_url
+        if self.logo:
+            try:
+                return self.logo.url
+            except ValueError:
+                pass
+        return ''
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -508,6 +532,18 @@ class Review(models.Model):
 class ReviewImage(models.Model):
     review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='reviews/')
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
+
+    @property
+    def display_image_url(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except ValueError:
+                pass
+        return ''
 
     def __str__(self):
         return f"Image for review {self.review.id}"
