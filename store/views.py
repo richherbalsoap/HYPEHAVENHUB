@@ -911,38 +911,42 @@ def place_order(request):
             'sms_sent': sms_sent,
         })
 
-    elif payment_method == 'shiprocket':
-        payment.payment_method = 'shiprocket'
-        payment.status = 'completed'
-        payment.save()
-
-        # Log checkout configuration loaded from settings
-        logger.info(f"Processing order {order.order_id} using Shiprocket Checkout (API Key: {settings.SHIPROCKET_CHECKOUT_API_KEY[:4]}...)")
-
-        email_sent = send_order_bill_email(order)
-        sms_sent = send_order_bill_sms(order)
-
-        # Trigger Shiprocket booking for Shiprocket Checkout prepaid order
+    elif payment_method == 'razorpay':
+        import razorpay
         try:
-            from .shipping import ShiprocketService
-            shipment_id = ShiprocketService.create_shipment(order)
-            if shipment_id:
-                order.shipping_tracking_id = str(shipment_id)
-                order.save()
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            amount_in_paise = int(order.grand_total * 100)
+            
+            # Create Razorpay Order
+            razorpay_order = client.order.create(data={
+                'amount': amount_in_paise,
+                'currency': 'INR',
+                'receipt': str(order.order_id),
+            })
+            
+            payment.transaction_id = razorpay_order['id']
+            payment.save()
+            
+            customer_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
+            
+            return JsonResponse({
+                'success': True,
+                'payment_method': 'razorpay',
+                'razorpay_order_id': razorpay_order['id'],
+                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+                'amount': amount_in_paise,
+                'order_id': order.order_id,
+                'customer_name': customer_name,
+                'customer_email': request.user.email,
+                'customer_phone': address.phone or '',
+            })
         except Exception as e:
-            logger.error(f"Error booking Shiprocket for order {order.order_id}: {str(e)}")
-
-        cart.items.all().delete()
-        cart.coupon = None
-        cart.save()
-
-        return JsonResponse({
-            'success': True,
-            'order_id': order.order_id,
-            'redirect': f'/orders/{order.order_id}/',
-            'email_sent': email_sent,
-            'sms_sent': sms_sent,
-        })
+            logger.error(f"Razorpay order creation failed: {str(e)}")
+            order.delete() # cleanup order on failure
+            return JsonResponse({
+                'success': False,
+                'message': 'Failed to initiate Razorpay payment. Please try again.'
+            })
 
     return JsonResponse({'success': False, 'message': 'Invalid payment method.'})
 

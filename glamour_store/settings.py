@@ -89,7 +89,6 @@ TEMPLATES = [
                 'store.context_processors.wishlist_count',
                 'store.context_processors.categories_list',
                 'store.context_processors.company_dashboard_access',
-                'store.context_processors.shiprocket_settings',
             ],
         },
     },
@@ -241,5 +240,3 @@ RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET', default='')
 SHIPROCKET_EMAIL = config('SHIPROCKET_EMAIL', default='')
 SHIPROCKET_PASSWORD = config('SHIPROCKET_PASSWORD', default='')
 SHIPROCKET_PICKUP_LOCATION = config('SHIPROCKET_PICKUP_LOCATION', default='Primary')
-SHIPROCKET_CHECKOUT_API_KEY = config('SHIPROCKET_CHECKOUT_API_KEY', default='ZiNLS1tiXq2YM1uo')
-SHIPROCKET_CHECKOUT_SECRET_KEY = config('SHIPROCKET_CHECKOUT_SECRET_KEY', default='KNvcYdm7MhC9DeEKeCnhs9t8umpa6R4q')

@@ -114,9 +114,3 @@
   {% endif %}
 </div>
 {% endblock %}
-
-{% block extra_js %}
-{% if SHIPROCKET_CHECKOUT_API_KEY %}
-<script src="https://checkout-sdk.shiprocket.in/v1/shiprocket-checkout-sdk.js" id="shiprocket-checkout-sdk" data-app-key="{{ SHIPROCKET_CHECKOUT_API_KEY }}"></script>
-{% endif %}
-{% endblock %}
