@@ -388,7 +388,7 @@ class Cart(models.Model):
 
     @property
     def delivery_charge(self):
-        return 0 if self.subtotal >= 499 else 40
+        return 0
 
 
 class CartItem(models.Model):
