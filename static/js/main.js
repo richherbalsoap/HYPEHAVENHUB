@@ -88,13 +88,14 @@ document.addEventListener('click', async (e) => {
       const row = document.getElementById(`cart-item-${itemId}`);
       if (row) row.remove();
       updateCartBadge(data.cart_count);
+      refreshOrderSummary(data);
       showToast('Item removed');
       if (document.querySelectorAll('[data-cart-item]').length === 0) location.reload();
     } else {
       const qtyEl = document.getElementById(`qty-${itemId}`);
       const totalEl = document.getElementById(`total-${itemId}`);
       if (qtyEl) qtyEl.textContent = data.quantity;
-      if (totalEl) totalEl.textContent = '₹' + data.item_total.toFixed(2);
+      if (totalEl) totalEl.textContent = '₹' + Math.round(data.item_total);
       updateCartBadge(data.cart_count);
       refreshOrderSummary(data);
     }
@@ -104,8 +105,26 @@ document.addEventListener('click', async (e) => {
 function refreshOrderSummary(data) {
   const sub = document.getElementById('summary-subtotal');
   const total = document.getElementById('summary-total');
-  if (sub) sub.textContent = '₹' + data.cart_subtotal.toFixed(2);
-  if (total) total.textContent = '₹' + data.cart_total.toFixed(2);
+  if (sub) sub.textContent = '₹' + Math.round(data.cart_subtotal);
+  if (total) total.textContent = '₹' + Math.round(data.cart_total);
+
+  // Update item count text in the subtotal line
+  const subtotalLabel = sub ? sub.parentElement.querySelector('.text-muted') : null;
+  if (subtotalLabel) subtotalLabel.textContent = `Subtotal (${data.cart_count} items)`;
+
+  // Update the header badge
+  const headerBadge = document.querySelector('h2 .badge');
+  if (headerBadge) headerBadge.textContent = `${data.cart_count} items`;
+
+  // Update delivery line
+  const deliveryVal = document.getElementById('delivery-value');
+  if (deliveryVal) {
+    if (data.delivery_charge === 0) {
+      deliveryVal.innerHTML = '<span class="text-success">FREE</span>';
+    } else {
+      deliveryVal.innerHTML = '₹' + Math.round(data.delivery_charge);
+    }
+  }
 }
 
 /* ====== WISHLIST TOGGLE ====== */

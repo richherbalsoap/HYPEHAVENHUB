@@ -384,7 +384,7 @@ class Cart(models.Model):
 
     @property
     def grand_total(self):
-        return self.subtotal - self.discount_amount
+        return self.subtotal - self.discount_amount + self.delivery_charge
 
     @property
     def delivery_charge(self):

@@ -711,10 +711,22 @@ def update_cart(request):
                 item.save()
             else:
                 item.delete()
-                return JsonResponse({'success': True, 'removed': True, 'cart_count': cart.total_items})
+                return JsonResponse({
+                    'success': True, 'removed': True,
+                    'cart_count': cart.total_items,
+                    'cart_subtotal': float(cart.subtotal),
+                    'cart_total': float(cart.grand_total),
+                    'delivery_charge': float(cart.delivery_charge),
+                })
         elif action == 'remove':
             item.delete()
-            return JsonResponse({'success': True, 'removed': True, 'cart_count': cart.total_items})
+            return JsonResponse({
+                'success': True, 'removed': True,
+                'cart_count': cart.total_items,
+                'cart_subtotal': float(cart.subtotal),
+                'cart_total': float(cart.grand_total),
+                'delivery_charge': float(cart.delivery_charge),
+            })
     except CartItem.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Item not found'})
 
@@ -725,6 +737,7 @@ def update_cart(request):
         'cart_subtotal': float(cart.subtotal),
         'cart_total': float(cart.grand_total),
         'cart_count': cart.total_items,
+        'delivery_charge': float(cart.delivery_charge),
     })
 
 
@@ -841,7 +854,7 @@ def place_order(request):
         subtotal=cart.subtotal,
         discount_amount=cart.discount_amount,
         delivery_charge=cart.delivery_charge,
-        grand_total=cart.grand_total + cart.delivery_charge,
+        grand_total=cart.grand_total,
         coupon=cart.coupon,
         status='pending',
     )
