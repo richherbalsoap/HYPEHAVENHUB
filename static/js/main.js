@@ -85,12 +85,10 @@ document.addEventListener('click', async (e) => {
 
   if (data.success) {
     if (data.removed) {
-      const row = document.getElementById(`cart-item-${itemId}`);
-      if (row) row.remove();
-      updateCartBadge(data.cart_count);
-      refreshOrderSummary(data);
+      /* Reload the page so the server re-renders with correct totals */
       showToast('Item removed');
-      if (document.querySelectorAll('[data-cart-item]').length === 0) location.reload();
+      updateCartBadge(data.cart_count);
+      setTimeout(() => location.reload(), 300);
     } else {
       const qtyEl = document.getElementById(`qty-${itemId}`);
       const totalEl = document.getElementById(`total-${itemId}`);
