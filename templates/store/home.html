@@ -1,48 +1,52 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}HYPEHAVENHUB - Jhumka Box Sets{% endblock %}
+{% block title %}HYPEHAVENHUB - Handcrafted Indian Jewelry{% endblock %}
 
 {% block content %}
 
-<!-- Hero Section Banner -->
+<!-- Hero Section Banner (unchanged placement/asset, same as before) -->
 <section class="hero-section-banner position-relative">
   <a href="{% url 'product_list' %}" class="d-block w-100 position-relative hero-banner-link">
-    <img src="{% static 'images/hero-slide-1.jpg' %}?v=2" alt="HYPEHAVENHUB - Premium Assorted Jhumka Box Sets" class="hero-banner-img d-block w-100 object-fit-cover" loading="eager">
+    <img src="{% static 'images/hero-slide-1.jpg' %}?v=2" alt="HYPEHAVENHUB - Handcrafted Indian Jewelry" class="hero-banner-img d-block w-100 object-fit-cover" loading="eager">
   </a>
 </section>
 
 <!-- Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
   <div class="marquee-content">
-    <span>FREE Shipping on orders above ₹499 &nbsp;✦&nbsp; Use Code JHUMKA10 &nbsp;✦&nbsp; Authentic Oxidised Silver &nbsp;✦&nbsp; Free Delivery Above ₹499 &nbsp;✦&nbsp; Use Code JHUMKA10 &nbsp;✦&nbsp; Authentic Oxidised Silver &nbsp;✦&nbsp;</span>
-    <span>FREE Shipping on orders above ₹499 &nbsp;✦&nbsp; Use Code JHUMKA10 &nbsp;✦&nbsp; Authentic Oxidised Silver &nbsp;✦&nbsp; Free Delivery Above ₹499 &nbsp;✦&nbsp; Use Code JHUMKA10 &nbsp;✦&nbsp; Authentic Oxidised Silver &nbsp;✦&nbsp;</span>
+    <span>FREE Shipping on orders above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp; Free Delivery Above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp;</span>
+    <span>FREE Shipping on orders above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp; Free Delivery Above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp;</span>
   </div>
 </div>
 
-
-<!-- Shop by Category Grid -->
+<!-- Shop by Category — 3 categories, each with a finish-tinted accent so the
+     section still looks intentional even before every category has a photo -->
 {% if categories %}
-<section class="py-5" id="box-categories">
+<section class="py-5 category-section">
   <div class="container">
-    <div class="section-header text-center mb-4">
-      <h2 class="section-title">Shop by Box Size</h2>
-      <p class="text-muted">Only two jhumka categories are available: 12 piece box set and 16 piece box set.</p>
+    <div class="section-header text-center mb-5">
+      <span class="section-eyebrow">Shop the Collection</span>
+      <h2 class="section-title">Three Ways to Shine</h2>
+      <p class="text-muted">Jhumkas, necklaces and bracelets, handcrafted for everyday wear and festive occasions.</p>
     </div>
-    <div class="row g-4 justify-content-center">
+    <div class="row g-4">
       {% for cat in categories %}
-      <div class="col-12 col-md-6">
-        <a href="{% url 'category_products' cat.slug %}" class="category-card jhumka-category-card">
-          {% if cat.display_image_url %}
-            <img src="{{ cat.display_image_url }}" alt="{{ cat.name }}">
-          {% else %}
-            <div class="category-fallback">
-              <i class="fas fa-box-open"></i>
-            </div>
-          {% endif %}
-          <div class="category-card-overlay">
+      <div class="col-12 col-md-4">
+        <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="category-card category-card--{{ forloop.counter }}">
+          <div class="category-card-media">
+            {% if cat.display_image_url %}
+              <img src="{{ cat.display_image_url }}" alt="{{ cat.name }}" loading="lazy">
+            {% else %}
+              <div class="category-fallback">
+                <i class="fas {% if 'bracelet' in cat.slug %}fa-circle-notch{% elif 'necklace' in cat.slug %}fa-gem{% else %}fa-ring{% endif %}"></i>
+              </div>
+            {% endif %}
+          </div>
+          <div class="category-card-body">
             <div class="category-card-name">{{ cat.name }}</div>
-            <div class="category-card-count">{{ cat.products.count }} Box Set</div>
+            <div class="category-card-count">{{ cat.products.count }} design{{ cat.products.count|pluralize }}</div>
+            <span class="category-card-cta">Shop now <i class="fas fa-arrow-right ms-1"></i></span>
           </div>
         </a>
       </div>
@@ -52,26 +56,26 @@
 </section>
 {% endif %}
 
-<!-- Best Selling Box Sets Collection Row (Horizontal Scroll) -->
-{% if featured %}
+<!-- Best Selling Row (Horizontal Scroll) -->
+{% if bestsellers %}
 <section class="py-5 bg-light-green position-relative overflow-hidden">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="section-title mb-0" style="font-family: var(--font-display); font-weight: 700; color: var(--pink);">Best Selling Box Sets</h2>
-      <a href="{% url 'product_list' %}" class="text-decoration-none fw-600 text-gold hover-underline">View All <i class="fas fa-arrow-right ms-1"></i></a>
+      <div>
+        <span class="section-eyebrow">Customer Favorites</span>
+        <h2 class="section-title mb-0">Best Sellers</h2>
+      </div>
+      <a href="{% url 'product_list' %}?sort=popularity" class="text-decoration-none fw-600 text-gold hover-underline">View All <i class="fas fa-arrow-right ms-1"></i></a>
     </div>
-    
-    <!-- Horizontal Scrollable Container -->
+
     <div class="product-scroll-row position-relative">
       <div class="product-scroll-wrapper d-flex gap-4 overflow-auto pb-4 scroll-snap-x">
-        {% for product in featured %}
+        {% for product in bestsellers %}
         <div class="product-scroll-item col-10 col-sm-6 col-md-4 col-lg-3 flex-shrink-0 scroll-snap-align-start">
           {% include 'store/_product_card.html' with product=product %}
         </div>
         {% endfor %}
       </div>
-      
-      <!-- Row Controls for Desktop -->
       <button class="scroll-btn scroll-prev d-none d-lg-flex" type="button"><i class="fas fa-chevron-left"></i></button>
       <button class="scroll-btn scroll-next d-none d-lg-flex" type="button"><i class="fas fa-chevron-right"></i></button>
     </div>
@@ -79,7 +83,71 @@
 </section>
 {% endif %}
 
-<!-- Trust Badges Strip (Authentic content only) -->
+<!-- New Arrivals Row -->
+{% if new_arrivals %}
+<section class="py-5 position-relative overflow-hidden">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <span class="section-eyebrow">Just Added</span>
+        <h2 class="section-title mb-0">New Arrivals</h2>
+      </div>
+      <a href="{% url 'product_list' %}?sort=-created_at" class="text-decoration-none fw-600 text-gold hover-underline">View All <i class="fas fa-arrow-right ms-1"></i></a>
+    </div>
+
+    <div class="product-scroll-row position-relative">
+      <div class="product-scroll-wrapper d-flex gap-4 overflow-auto pb-4 scroll-snap-x">
+        {% for product in new_arrivals %}
+        <div class="product-scroll-item col-10 col-sm-6 col-md-4 col-lg-3 flex-shrink-0 scroll-snap-align-start">
+          {% include 'store/_product_card.html' with product=product %}
+        </div>
+        {% endfor %}
+      </div>
+      <button class="scroll-btn scroll-prev d-none d-lg-flex" type="button"><i class="fas fa-chevron-left"></i></button>
+      <button class="scroll-btn scroll-next d-none d-lg-flex" type="button"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Brand Story Strip -->
+<section class="py-5 brand-strip">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-7">
+        <span class="section-eyebrow">Our Craft</span>
+        <h2 class="section-title">Jewelry with a Story</h2>
+        <p class="text-muted mb-0" style="max-width: 540px;">
+          Every piece is hand-finished by artisans who specialise in oxidised silver work, Meenakari enamel, and Kundan setting — techniques passed down through generations. We check each piece by hand before it ships to you.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-3 text-center">
+          <div class="col-4">
+            <div class="brand-stat">
+              <i class="fas fa-hand-sparkles"></i>
+              <span>Handcrafted</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="brand-stat">
+              <i class="fas fa-magnifying-glass"></i>
+              <span>Quality Checked</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="brand-stat">
+              <i class="fas fa-leaf"></i>
+              <span>Tarnish Resistant</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Badges Strip -->
 <section class="py-5 border-top jhumka-usp-strip bg-white">
   <div class="container">
     <div class="row g-4 text-center">
@@ -88,7 +156,7 @@
           <div class="usp-icon-wrapper mb-3">
             <i class="fas fa-box-open fa-2x"></i>
           </div>
-          <h5 class="fw-700">Box Packed</h5>
+          <h5 class="fw-700">Securely Packed</h5>
           <p class="text-muted small mb-0">Carefully sorted & ready for display</p>
         </div>
       </div>
@@ -97,8 +165,8 @@
           <div class="usp-icon-wrapper mb-3">
             <i class="fas fa-gem fa-2x"></i>
           </div>
-          <h5 class="fw-700">Assorted Designs</h5>
-          <p class="text-muted small mb-0">Beautiful mix of colors and traditional styles</p>
+          <h5 class="fw-700">Authentic Designs</h5>
+          <p class="text-muted small mb-0">Traditional craftsmanship, modern finish</p>
         </div>
       </div>
       <div class="col-6 col-md-3">
@@ -107,7 +175,7 @@
             <i class="fas fa-shield-alt fa-2x"></i>
           </div>
           <h5 class="fw-700">Quality Checked</h5>
-          <p class="text-muted small mb-0">Each earring finish is manually verified</p>
+          <p class="text-muted small mb-0">Each piece's finish is manually verified</p>
         </div>
       </div>
       <div class="col-6 col-md-3">
@@ -122,6 +190,5 @@
     </div>
   </div>
 </section>
-
 
 {% endblock %}

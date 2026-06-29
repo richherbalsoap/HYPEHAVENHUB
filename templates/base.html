@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}HYPEHAVENHUB - Jhumka Box Sets{% endblock %}</title>
+<title>{% block title %}HYPEHAVENHUB - Handcrafted Indian Jewelry{% endblock %}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 {% load static %}
-<link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260612-jewels">
+<link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260629-jewelry-redesign">
 <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
 {% block extra_css %}{% endblock %}
 </head>
@@ -36,9 +36,10 @@
     <div class="d-none d-lg-flex ms-4">
       <ul class="navbar-nav gap-3">
         <li class="nav-item"><a class="nav-link cat-link" href="{% url 'home' %}">Home</a></li>
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">All Box Sets</a></li>
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">12 Piece Box</a></li>
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">16 Piece Box</a></li>
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">All Jewelry</a></li>
+        {% for cat in all_categories %}
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+        {% endfor %}
         <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=10"><i class="fas fa-fire me-1"></i>Offers</a></li>
       </ul>
     </div>
@@ -108,9 +109,10 @@
       <!-- Navigation Links -->
       <ul class="nav flex-column gap-3 fs-5">
         <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'home' %}">Home</a></li>
-        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}">All Box Sets</a></li>
-        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">12 Piece Box</a></li>
-        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">16 Piece Box</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}">All Jewelry</a></li>
+        {% for cat in all_categories %}
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+        {% endfor %}
         <li class="nav-item"><a class="nav-link text-danger fw-600" href="{% url 'product_list' %}?discount=10"><i class="fas fa-fire me-1"></i>Offers</a></li>
         {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'wishlist' %}"><i class="far fa-heart me-2"></i>Wishlist</a></li>
@@ -174,7 +176,7 @@
           <img src="{% static 'images/logo.jpg' %}" alt="HYPEHAVENHUB Logo" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--pink-light);" class="me-2">
           <span class="brand-name">HYPEHAVEN<span class="brand-accent">HUB</span></span>
         </div>
-        <p class="footer-desc mt-3">Your simple destination for assorted jhumka box sets in 12 piece and 16 piece options.</p>
+        <p class="footer-desc mt-3">Handcrafted jhumkas, necklaces, and bracelets — authentic Indian jewelry for every occasion.</p>
         <div class="social-links mt-3">
           <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
           <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
@@ -185,9 +187,10 @@
       <div class="col-lg-2 col-md-6">
         <h6 class="footer-title">Shop</h6>
         <ul class="footer-links">
-          <li><a href="{% url 'product_list' %}">All Box Sets</a></li>
-          <li><a href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">12 Piece Box</a></li>
-          <li><a href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">16 Piece Box</a></li>
+          <li><a href="{% url 'product_list' %}">All Jewelry</a></li>
+          {% for cat in all_categories %}
+          <li><a href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+          {% endfor %}
           <li><a href="{% url 'product_list' %}?discount=10">Offers</a></li>
         </ul>
       </div>

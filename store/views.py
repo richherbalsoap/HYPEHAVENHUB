@@ -346,6 +346,12 @@ def product_list(request):
     query_without_page = request.GET.copy()
     query_without_page.pop('page', None)
 
+    selected_category_name = None
+    if cat_slug:
+        matched_cat = next((c for c in categories if c.slug == cat_slug), None)
+        if matched_cat:
+            selected_category_name = matched_cat.name
+
     return render(request, 'store/product_list.html', {
         'page_obj': page_obj,
         'products': page_obj,
@@ -353,6 +359,7 @@ def product_list(request):
         'brands': brands,
         'q': q,
         'selected_category': cat_slug,
+        'selected_category_name': selected_category_name,
         'selected_subcategory': subcat_slug,
         'selected_brand': brand_slug,
         'selected_discount': discount,

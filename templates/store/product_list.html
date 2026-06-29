@@ -10,25 +10,21 @@
     <div class="catalog-hero-inner row align-items-center">
       <div class="col-lg-8 text-center text-lg-start">
         <div class="jewel-ad-kicker d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(255,255,255,0.6); color: var(--pink-deep); font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid var(--border); box-shadow: var(--shadow);">
-          {% if selected_category == '12-piece-jhumka-box-set' %}
-            12 Piece Jhumka Box
-          {% elif selected_category == '16-piece-jhumka-box-set' %}
-            16 Piece Jhumka Box
+          {% if selected_category %}
+            {{ selected_category_name|default:"Jewelry Collection" }}
           {% else %}
-            Jhumka Collection
+            Jewelry Collection
           {% endif %}
         </div>
         <h1 class="display-4 fw-bold mb-3" style="font-family: var(--font-display); color: var(--black); line-height: 1.2;">
-          {% if selected_category == '12-piece-jhumka-box-set' %}
-            Exclusive 12-Piece Assorted Sets
-          {% elif selected_category == '16-piece-jhumka-box-set' %}
-            Premium 16-Piece Assorted Sets
+          {% if selected_category %}
+            {{ selected_category_name|default:"Handcrafted Jewelry" }}
           {% else %}
-            The Ultimate Jhumka Box Sets
+            Handcrafted Indian Jewelry
           {% endif %}
         </h1>
         <p class="lead text-muted mb-0" style="font-size: 16px; max-width: 600px; margin: 0 auto 0 0;">
-          Discover our handcrafted, premium assorted boxes. Perfectly curated to add that extra spark to your ethnic wardrobe.
+          Discover our handcrafted jhumkas, necklaces and bracelets. Perfectly curated to add that extra spark to your ethnic wardrobe.
         </p>
       </div>
       <div class="col-lg-4 text-center mt-4 mt-lg-0">
@@ -56,10 +52,10 @@
         {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
 
         <div class="filter-card">
-          <div class="filter-title">Box Size</div>
+          <div class="filter-title">Category</div>
           <label class="filter-option">
             <input type="radio" name="category" value="" {% if not selected_category %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
-            All Box Sets
+            All Jewelry
           </label>
           {% for cat in categories %}
           <label class="filter-option">
@@ -99,9 +95,9 @@
         <div>
           <h5 class="fw-600 mb-1">
             {% if q %}Search: "{{ q }}" - {% endif %}
-            {{ page_obj.paginator.count }} Jhumka Box Sets
+            {{ page_obj.paginator.count }} Jewelry Piece{{ page_obj.paginator.count|pluralize }}
           </h5>
-          <div class="text-muted small">Only 12 piece and 16 piece box set categories are shown.</div>
+          <div class="text-muted small">Jhumkas, necklaces and bracelets, handcrafted for every occasion.</div>
         </div>
         <form class="d-flex gap-2 align-items-center" method="GET" id="sortForm">
           {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
@@ -151,9 +147,9 @@
       {% else %}
       <div class="empty-state">
         <div class="empty-state-icon"><i class="fas fa-search"></i></div>
-        <h3 class="empty-state-title">No Jhumka Box Sets Found</h3>
-        <p class="empty-state-text">Try clearing the filters to see the 12 piece and 16 piece jhumka box sets.</p>
-        <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Browse Box Sets</a>
+        <h3 class="empty-state-title">No Jewelry Found</h3>
+        <p class="empty-state-text">Try clearing the filters to see our full jhumka, necklace, and bracelet collection.</p>
+        <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Browse Jewelry</a>
       </div>
       {% endif %}
     </div>

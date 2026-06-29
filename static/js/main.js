@@ -677,7 +677,7 @@ const setupQuickView = () => {
             
             <div class="d-flex gap-3">
               <button class="btn btn-emerald px-4 py-2 flex-grow-1" id="qvAddToCartBtn">
-                <i class="fas fa-shopping-bag me-1"></i> Add Box
+                <i class="fas fa-shopping-bag me-1"></i> Add to Bag
               </button>
               <a href="/product/${data.slug}/" class="btn btn-outline-dark px-3 py-2" title="View Details">
                 <i class="fas fa-arrow-up-right-from-square"></i>
@@ -705,7 +705,7 @@ const setupQuickView = () => {
               addToCartBtn.textContent = 'Out of Stock';
             } else {
               addToCartBtn.disabled = false;
-              addToCartBtn.innerHTML = '<i class="fas fa-shopping-bag me-1"></i> Add Box';
+              addToCartBtn.innerHTML = '<i class="fas fa-shopping-bag me-1"></i> Add to Bag';
             }
           }
         });
