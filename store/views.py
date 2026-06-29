@@ -253,7 +253,7 @@ def get_or_create_cart(request):
 
 
 def home(request):
-    storefront_products = Product.objects.filter(is_active=True)
+    storefront_products = Product.objects.filter(is_active=True).select_related('brand', 'category')
     featured = storefront_products.filter(is_featured=True).prefetch_related('images', 'variants')[:8]
     new_arrivals = storefront_products.filter(is_new_arrival=True).prefetch_related('images')[:8]
     bestsellers = storefront_products.filter(is_bestseller=True).prefetch_related('images')[:8]
@@ -282,7 +282,7 @@ def home(request):
 
 
 def product_list(request):
-    products = Product.objects.filter(is_active=True).prefetch_related('images', 'variants')
+    products = Product.objects.filter(is_active=True).select_related('brand', 'category').prefetch_related('images', 'variants')
     categories = active_categories()
     brands = Brand.objects.filter(
         is_active=True,
