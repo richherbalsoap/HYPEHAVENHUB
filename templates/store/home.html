@@ -33,22 +33,31 @@
     <div class="row g-4">
       {% for cat in categories %}
       <div class="col-12 col-md-4">
-        <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="category-card category-card--{{ forloop.counter }}">
-          <div class="category-card-media">
-            {% if cat.display_image_url %}
-              <img src="{{ cat.display_image_url }}" alt="{{ cat.name }}" loading="lazy">
-            {% else %}
-              <div class="category-fallback">
-                <i class="fas {% if 'bracelet' in cat.slug %}fa-circle-notch{% elif 'necklace' in cat.slug %}fa-gem{% else %}fa-ring{% endif %}"></i>
-              </div>
-            {% endif %}
-          </div>
-          <div class="category-card-body">
-            <div class="category-card-name">{{ cat.name }}</div>
-            <div class="category-card-count">{{ cat.products.count }} design{{ cat.products.count|pluralize }}</div>
-            <span class="category-card-cta">Shop now <i class="fas fa-arrow-right ms-1"></i></span>
+        <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="category-card category-card--{{ forloop.counter }} border-0 rounded-4 overflow-hidden shadow-sm" style="height: 300px; display: flex; flex-direction: column;">
+          {% if cat.display_image_url %}
+            <div class="category-card-media" style="flex: 1;">
+              <img src="{{ cat.display_image_url }}" alt="{{ cat.name }}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+          {% else %}
+            <div class="category-fallback-animated d-flex align-items-center justify-content-center position-relative" style="flex: 1; background: linear-gradient(135deg, var(--pink-pale) 0%, var(--pink-light) 100%); overflow: hidden;">
+              <div class="position-absolute" style="top: -50%; left: -50%; right: -50%; bottom: -50%; background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%); animation: bgShift 10s infinite alternate;"></div>
+              <h3 class="position-relative z-1 mb-0 px-3 text-center fw-bold text-uppercase" style="font-family: var(--font-display); color: var(--pink-deep); letter-spacing: 2px; font-size: 24px; text-shadow: 2px 2px 4px rgba(255,255,255,0.8); transition: transform 0.3s ease;">
+                {{ cat.name }}
+              </h3>
+            </div>
+          {% endif %}
+          <div class="category-card-body bg-white text-center py-3 position-relative z-1" style="border-top: 2px solid var(--pink);">
+            <div class="category-card-name fs-5 fw-bold text-dark">{{ cat.name }}</div>
+            <div class="category-card-count text-muted small">{{ cat.products.count }} design{{ cat.products.count|pluralize }}</div>
+            <span class="category-card-cta d-inline-block mt-2 text-pink fw-semibold" style="font-size: 14px;">Shop collection <i class="fas fa-arrow-right ms-1"></i></span>
           </div>
         </a>
+        <style>
+          .category-card:hover .category-fallback-animated h3 { transform: scale(1.1); }
+          .category-card:hover .category-card-cta { color: var(--pink-deep); text-decoration: underline; }
+          .category-card { transition: transform 0.4s ease, box-shadow 0.4s ease; }
+          .category-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(219,111,158,0.2) !important; }
+        </style>
       </div>
       {% endfor %}
     </div>
