@@ -718,15 +718,15 @@ def update_cart(request):
                 item.save()
             else:
                 item.delete()
-                return JsonResponse({
-                    'success': True, 'removed': True,
-                    'cart_count': cart.total_items,
-                    'cart_subtotal': float(cart.subtotal),
-                    'cart_total': float(cart.grand_total),
-                    'delivery_charge': float(cart.delivery_charge),
-                })
         elif action == 'remove':
             item.delete()
+            
+        if request.headers.get('HX-Request'):
+            cart = get_or_create_cart(request)
+            items = cart.items.select_related('product', 'variant').all()
+            return render(request, 'store/cart.html', {'cart': cart, 'items': items})
+
+        if action in ['decrease', 'remove'] and getattr(item, 'id', None) is None:
             return JsonResponse({
                 'success': True, 'removed': True,
                 'cart_count': cart.total_items,
@@ -735,7 +735,16 @@ def update_cart(request):
                 'delivery_charge': float(cart.delivery_charge),
             })
     except CartItem.DoesNotExist:
+        if request.headers.get('HX-Request'):
+            cart = get_or_create_cart(request)
+            items = cart.items.select_related('product', 'variant').all()
+            return render(request, 'store/cart.html', {'cart': cart, 'items': items})
         return JsonResponse({'success': False, 'message': 'Item not found'})
+
+    if request.headers.get('HX-Request'):
+        cart = get_or_create_cart(request)
+        items = cart.items.select_related('product', 'variant').all()
+        return render(request, 'store/cart.html', {'cart': cart, 'items': items})
 
     return JsonResponse({
         'success': True,
@@ -770,6 +779,11 @@ def apply_coupon(request):
             return JsonResponse({'success': False, 'message': f'Minimum order amount is ₹{coupon.minimum_order_amount}'})
         cart.coupon = coupon
         cart.save()
+        
+        if request.headers.get('HX-Request'):
+            items = cart.items.select_related('product', 'variant').all()
+            return render(request, 'store/cart.html', {'cart': cart, 'items': items, 'coupon_msg': f'Coupon applied! You save ₹{cart.discount_amount}'})
+
         return JsonResponse({
             'success': True,
             'message': f'Coupon applied! You save ₹{cart.discount_amount}',
@@ -777,6 +791,9 @@ def apply_coupon(request):
             'grand_total': float(cart.grand_total),
         })
     except Coupon.DoesNotExist:
+        if request.headers.get('HX-Request'):
+            items = cart.items.select_related('product', 'variant').all()
+            return render(request, 'store/cart.html', {'cart': cart, 'items': items, 'coupon_error': 'Invalid coupon code.'})
         return JsonResponse({'success': False, 'message': 'Invalid coupon code.'})
 
 

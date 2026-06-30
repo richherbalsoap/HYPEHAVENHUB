@@ -12,6 +12,12 @@
 <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260629-jewelry-redesign">
 <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
 {% block extra_css %}{% endblock %}
+<script src="https://unpkg.com/htmx.org@1.9.11"></script>
+<script>
+  document.body.addEventListener('htmx:configRequest', (event) => {
+    event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+  });
+</script>
 </head>
 <body>
 
