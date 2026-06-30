@@ -102,6 +102,25 @@
         {% if cart.discount_amount > 0 %}
         <div class="small mt-2" style="color: var(--secondary);"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: text-bottom;">sell</span>You're saving ₹{{ cart.discount_amount|floatformat:"0" }}</div>
         {% endif %}
+        
+        <!-- Luxury Trust Markers -->
+        <div class="trust-markers mt-4 pt-4" style="border-top: 1px solid var(--outline-variant);">
+          <div class="d-flex align-items-center mb-3">
+            <span class="material-symbols-outlined me-3" style="font-size: 24px; color: var(--secondary);">workspace_premium</span>
+            <div>
+              <div class="fw-600" style="font-size: 13px; color: var(--on-surface); font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 1px;">Authenticity Certificate</div>
+              <div class="text-muted" style="font-size: 12px;">Included with every piece</div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center mb-3">
+            <span class="material-symbols-outlined me-3" style="font-size: 24px; color: var(--secondary);">featured_seasonal_and_gifts</span>
+            <div>
+              <div class="fw-600" style="font-size: 13px; color: var(--on-surface); font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 1px;">Velvet-Lined Packaging</div>
+              <div class="text-muted" style="font-size: 12px;">Premium unboxing experience</div>
+            </div>
+          </div>
+        </div>
+
         <a href="{% url 'checkout' %}" class="btn-artisan-primary mt-4 d-block text-center text-decoration-none" style="padding: 14px; border-radius: 12px; font-size: 16px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px;">
           Proceed to Checkout <span class="material-symbols-outlined ms-2" style="font-size: 18px; vertical-align: middle;">arrow_forward</span>
         </a>
