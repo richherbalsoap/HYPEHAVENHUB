@@ -67,6 +67,12 @@
       {% endif %}
     </div>
 
+    {% if product.artisan_story or product.description %}
+    <div class="artisan-story">
+      {{ product.artisan_story|default:product.description|truncatewords:20 }}
+    </div>
+    {% endif %}
+
     {% with product.variants.filter as variants %}
       {% if product.variants.count > 0 %}
         <div class="shade-swatches mt-2">

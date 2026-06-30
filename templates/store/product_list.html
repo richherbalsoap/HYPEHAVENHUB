@@ -87,6 +87,22 @@
           </label>
           {% endfor %}
         </div>
+
+        {% if metal_purities %}
+        <div class="filter-card">
+          <div class="filter-title">Metal Purity</div>
+          <label class="filter-option">
+            <input type="radio" name="metal_purity" value="" {% if not selected_metal_purity %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+            All Metals
+          </label>
+          {% for purity in metal_purities %}
+          <label class="filter-option">
+            <input type="radio" name="metal_purity" value="{{ purity }}" {% if selected_metal_purity == purity %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
+            {{ purity }}
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
       </form>
     </div>
 
@@ -112,11 +128,19 @@
             <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
             <option value="popularity" {% if sort == 'popularity' %}selected{% endif %}>Popularity</option>
           </select>
+          <div class="btn-group ms-2" role="group" aria-label="View toggle">
+            <button type="button" class="btn btn-sm btn-outline-secondary active" id="btnGrid" onclick="toggleView('grid')" title="Grid View">
+              <span class="material-symbols-outlined fs-6">grid_view</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnList" onclick="toggleView('list')" title="List View">
+              <span class="material-symbols-outlined fs-6">view_list</span>
+            </button>
+          </div>
         </form>
       </div>
 
       {% if products %}
-      <div class="row g-4">
+      <div class="row g-4" id="catalogGrid">
         {% for product in products %}
         <div class="col-6 col-md-4 col-xl-4">
           {% include 'store/_product_card.html' with product=product %}
@@ -146,13 +170,42 @@
 
       {% else %}
       <div class="empty-state">
-        <div class="empty-state-icon"><span class="material-symbols-outlined">search</span></div>
-        <h3 class="empty-state-title">No Jewelry Found</h3>
-        <p class="empty-state-text">Try clearing the filters to see our full jhumka, necklace, and bracelet collection.</p>
-        <a href="{% url 'product_list' %}" class="btn-artisan-primary d-inline-flex">Browse Jewelry</a>
-      </div>
+        <div class="text-center py-5">
+          <span class="material-symbols-outlined text-muted mb-3" style="font-size: 48px;">search_off</span>
+          <h5>No products found</h5>
+          <p class="text-muted">Try adjusting your filters to find what you're looking for.</p>
+          <a href="{% url 'product_list' %}" class="btn btn-artisan-outline mt-3">Clear Filters</a>
+        </div>
       {% endif %}
     </div>
   </div>
 </div>
+
+<script>
+function toggleView(viewType) {
+  const grid = document.getElementById('catalogGrid');
+  const btnGrid = document.getElementById('btnGrid');
+  const btnList = document.getElementById('btnList');
+  
+  if (viewType === 'list') {
+    grid.classList.add('catalog-list-view');
+    btnList.classList.add('active');
+    btnGrid.classList.remove('active');
+    localStorage.setItem('catalogView', 'list');
+  } else {
+    grid.classList.remove('catalog-list-view');
+    btnGrid.classList.add('active');
+    btnList.classList.remove('active');
+    localStorage.setItem('catalogView', 'grid');
+  }
+}
+
+// Check saved preference
+document.addEventListener('DOMContentLoaded', () => {
+  const savedView = localStorage.getItem('catalogView');
+  if (savedView === 'list') {
+    toggleView('list');
+  }
+});
+</script>
 {% endblock %}

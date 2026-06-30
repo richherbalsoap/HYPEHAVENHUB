@@ -300,6 +300,7 @@ def product_list(request):
     finish = request.GET.get('finish', '')
     sort = request.GET.get('sort', '-created_at')
     discount = request.GET.get('discount', '')
+    metal_purity = request.GET.get('metal_purity', '')
 
     if q:
         products = products.filter(Q(name__icontains=q) | Q(brand__name__icontains=q) | Q(description__icontains=q))
@@ -330,6 +331,8 @@ def product_list(request):
         products = products.filter(finish=finish)
     if discount:
         products = products.filter(discount_percent__gte=discount)
+    if metal_purity:
+        products = products.filter(metal_purity__iexact=metal_purity)
 
     sort_options = {
         'price_low': 'base_price',
@@ -351,6 +354,8 @@ def product_list(request):
         matched_cat = next((c for c in categories if c.slug == cat_slug), None)
         if matched_cat:
             selected_category_name = matched_cat.name
+            
+    metal_purities = Product.objects.filter(is_active=True).exclude(metal_purity='').values_list('metal_purity', flat=True).distinct().order_by('metal_purity')
 
     return render(request, 'store/product_list.html', {
         'page_obj': page_obj,
@@ -363,11 +368,13 @@ def product_list(request):
         'selected_subcategory': subcat_slug,
         'selected_brand': brand_slug,
         'selected_discount': discount,
+        'selected_metal_purity': metal_purity,
         'selected_min_price': min_price_raw,
         'selected_max_price': max_price_raw,
         'sort': sort,
         'query_without_page': query_without_page.urlencode(),
         'discount_opts': ['10', '20', '30', '40', '50'],
+        'metal_purities': metal_purities,
     })
 
 
