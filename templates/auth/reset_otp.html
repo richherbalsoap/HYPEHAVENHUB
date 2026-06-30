@@ -4,7 +4,7 @@
 <div class="auth-bg">
   <div class="container">
     <div class="glamour-form-card text-center">
-      <div style="font-size: 48px; color: var(--pink); margin-bottom: 16px;"><i class="fas fa-key"></i></div>
+      <div style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"><span class="material-symbols-outlined" style="font-size: inherit;">key</span></div>
       <h2 class="glamour-form-title">Enter Reset OTP</h2>
       <p class="glamour-form-subtitle">OTP sent to <strong>{{ email }}</strong></p>
       {% if otp_preview %}
@@ -19,7 +19,7 @@
           <label class="form-label">Enter OTP</label>
           <input type="text" name="otp" class="form-control text-center otp-code-input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)" required autocomplete="one-time-code" autofocus>
         </div>
-        <button type="submit" class="btn-pink">Verify OTP</button>
+        <button type="submit" class="btn-artisan-primary">Verify OTP</button>
       </form>
     </div>
   </div>

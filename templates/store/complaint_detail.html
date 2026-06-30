@@ -6,21 +6,20 @@
 <div class="container py-5">
     <div class="row">
         <div class="col-md-10 mx-auto">
-            <a href="{% url 'user_complaints' %}" class="btn btn-outline-secondary mb-3">
-                <i class="fas fa-arrow-left"></i> Back to Complaints
+            <a href="{% url 'user_complaints' %}" class="btn-artisan-outline d-inline-flex align-items-center gap-1 mb-3" style="text-decoration: none; padding: 8px 16px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span> Back to Complaints
             </a>
 
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-body">
-                            <h4 class="mb-3">{{ complaint.complaint_id }}</h4>
+                    <div class="checkout-step mb-4">
+                            <h4 class="mb-3" style="font-family: var(--font-display); font-weight: 700;">{{ complaint.complaint_id }}</h4>
                             
                             <div class="row mb-3">
                                 <div class="col-md-4">
                                     <small class="text-muted">Complaint Type</small>
                                     <div>
-                                        <span class="badge bg-info">{{ complaint.get_complaint_type_display }}</span>
+                                        <span class="badge" style="background: var(--secondary-container); color: var(--primary);">{{ complaint.get_complaint_type_display }}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -41,20 +40,20 @@
                                 </div>
                             </div>
 
-                            <hr>
+                            <div class="luxury-line my-3"></div>
 
-                            <h5 class="mt-4 mb-3">Subject</h5>
+                            <h5 class="mt-4 mb-3" style="font-family: var(--font-display);">Subject</h5>
                             <p>{{ complaint.subject }}</p>
 
-                            <h5 class="mt-4 mb-3">Description</h5>
+                            <h5 class="mt-4 mb-3" style="font-family: var(--font-display);">Description</h5>
                             <p style="white-space: pre-wrap;">{{ complaint.description }}</p>
 
                             {% if complaint.order %}
-                            <hr>
-                            <h5 class="mt-4 mb-3">Related Order</h5>
+                            <div class="luxury-line my-3"></div>
+                            <h5 class="mt-4 mb-3" style="font-family: var(--font-display);">Related Order</h5>
                             <p>
                                 <strong>Order ID:</strong> 
-                                <a href="{% url 'order_detail' complaint.order.order_id %}">
+                                <a href="{% url 'order_detail' complaint.order.order_id %}" class="text-pink text-decoration-none">
                                     {{ complaint.order.order_id }}
                                 </a>
                                 <br>
@@ -62,18 +61,16 @@
                                 <br>
                                 <strong>Order Total:</strong> ₹{{ complaint.order.grand_total }}
                                 <br>
-                                <strong>Status:</strong> <span class="badge bg-info">{{ complaint.order.get_status_display }}</span>
+                                <strong>Status:</strong> <span class="badge" style="background: var(--secondary-container); color: var(--primary);">{{ complaint.order.get_status_display }}</span>
                             </p>
                             {% endif %}
-                        </div>
                     </div>
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h6 class="mb-3">
-                                <i class="fas fa-info-circle"></i> Complaint Info
+                    <div class="checkout-step">
+                            <h6 class="mb-3 d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined" style="font-size: 20px; color: var(--primary);">info</span> Complaint Info
                             </h6>
 
                             <div class="mb-3">
@@ -102,7 +99,7 @@
                             </div>
                             {% endif %}
 
-                            <div class="alert alert-info">
+                            <div class="p-3 rounded-3" style="background: var(--surface-container-low); border: 1px solid var(--outline-variant);">
                                 <strong>Status:</strong> 
                                 {% if complaint.status == 'open' %}
                                     Your complaint has been received and is pending review.
@@ -114,17 +111,14 @@
                                     Your complaint has been closed.
                                 {% endif %}
                             </div>
-                        </div>
                     </div>
 
                     {% if complaint.admin_response %}
-                    <div class="card shadow-sm mt-3">
-                        <div class="card-body" style="background-color: #f0f9ff; border-left: 4px solid #3B82F6;">
-                            <h6 class="mb-3">
-                                <i class="fas fa-reply"></i> Admin Response
+                    <div class="checkout-step mt-3" style="border-left: 4px solid var(--primary);">
+                            <h6 class="mb-3 d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined" style="font-size: 20px; color: var(--primary);">reply</span> Admin Response
                             </h6>
                             <p style="white-space: pre-wrap; margin-bottom: 0;">{{ complaint.admin_response }}</p>
-                        </div>
                     </div>
                     {% endif %}
                 </div>
@@ -132,12 +126,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        background: white;
-        border-radius: 10px;
-        border: none;
-    }
-</style>
 {% endblock %}

@@ -2,24 +2,24 @@
 {% block title %}Notifications - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;"><i class="fas fa-bell text-pink me-2"></i>Notifications</h2>
+  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;"><span class="material-symbols-outlined text-pink me-2" style="vertical-align: middle;">notifications</span>Notifications</h2>
   {% if notifications %}
   {% for n in notifications %}
-  <div class="d-flex gap-3 p-4 mb-3 border rounded-3 {% if not n.is_read %}shadow-sm{% endif %}" style="background: {% if not n.is_read %}var(--pink-pale){% else %}white{% endif %}; border-radius: 14px !important;">
-    <div style="font-size: 28px; color: var(--pink); flex-shrink: 0;">
-      {% if n.type == 'order' %}<i class="fas fa-box"></i>{% elif n.type == 'offer' %}<i class="fas fa-tag"></i>{% else %}<i class="fas fa-bell"></i>{% endif %}
+  <div class="d-flex gap-3 p-4 mb-3 border rounded-3 {% if not n.is_read %}shadow-sm{% endif %}" style="background: {% if not n.is_read %}var(--surface-container-low){% else %}white{% endif %}; border-radius: 14px !important;">
+    <div style="font-size: 28px; color: var(--primary); flex-shrink: 0;">
+      {% if n.type == 'order' %}<span class="material-symbols-outlined" style="font-size: 28px;">inventory_2</span>{% elif n.type == 'offer' %}<span class="material-symbols-outlined" style="font-size: 28px;">sell</span>{% else %}<span class="material-symbols-outlined" style="font-size: 28px;">notifications</span>{% endif %}
     </div>
     <div>
       <div class="fw-700">{{ n.title }}</div>
       <div class="text-muted mt-1" style="font-size: 14px;">{{ n.message }}</div>
-      {% if n.link %}<a href="{{ n.link }}" class="text-pink small mt-1 d-block text-decoration-none">View details &rarr;</a>{% endif %}
+      {% if n.link %}<a href="{{ n.link }}" class="text-pink small mt-1 d-inline-flex align-items-center gap-1 text-decoration-none">View details <span class="material-symbols-outlined" style="font-size: 14px;">arrow_forward</span></a>{% endif %}
       <div class="text-muted mt-2" style="font-size: 12px;">{{ n.created_at|date:"M d, Y h:i A" }}</div>
     </div>
   </div>
   {% endfor %}
   {% else %}
   <div class="empty-state">
-    <div class="empty-state-icon"><i class="fas fa-bell-slash"></i></div>
+    <div class="empty-state-icon"><span class="material-symbols-outlined">notifications_off</span></div>
     <h3 class="empty-state-title">No Notifications</h3>
     <p class="empty-state-text">You're all caught up! Notifications about your orders and offers will appear here.</p>
   </div>

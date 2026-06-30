@@ -5,7 +5,7 @@
   <div class="container">
     <div class="glamour-form-card">
       <div class="text-center mb-4">
-        <div style="font-size: 40px; color: var(--pink); margin-bottom: 12px;"><i class="fas fa-gem"></i></div>
+        <div style="font-size: 40px; color: var(--primary); margin-bottom: 12px;"><span class="material-symbols-outlined" style="font-size: inherit;">diamond</span></div>
         <h2 class="glamour-form-title">Welcome Back</h2>
         <p class="glamour-form-subtitle">Sign in to your HYPEHAVENHUB account</p>
       </div>
@@ -27,12 +27,12 @@
           <label class="form-label">Password</label>
           <input type="password" id="login-password" name="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" placeholder="Your password" required>
           {% for err in form.password.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
-          <div class="text-end mt-1"><a href="{% url 'forgot_password' %}" class="text-pink small text-decoration-none">Forgot password?</a></div>
+          <div class="text-end mt-1"><a href="{% url 'forgot_password' %}" class="small text-decoration-none" style="color: var(--primary);">Forgot password?</a></div>
         </div>
-        <button type="submit" class="btn-pink">Sign In</button>
+        <button type="submit" class="btn-artisan-primary">Sign In</button>
       </form>
       <div class="text-center mt-4" style="font-size: 14px;">
-        Don't have an account? <a href="{% url 'signup' %}" class="text-pink fw-600">Sign up free</a>
+        Don't have an account? <a href="{% url 'signup' %}" class="fw-600" style="color: var(--primary);">Sign up free</a>
       </div>
     </div>
   </div>

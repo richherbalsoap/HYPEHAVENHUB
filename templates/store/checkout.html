@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container py-5">
   <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
-    <i class="fas fa-lock text-pink me-2"></i>Secure Checkout
+    <span class="material-symbols-outlined me-2" style="color: var(--primary);">lock</span>Secure Checkout
   </h2>
   <form id="checkoutForm">
     {% csrf_token %}
@@ -25,12 +25,12 @@
                   <div class="flex-grow-1">
                     <div class="d-flex justify-content-between">
                       <div class="fw-700">{{ addr.full_name }}</div>
-                      <span class="badge" style="background: var(--pink-pale); color: var(--pink); font-size: 11px;">{{ addr.get_type_display }}</span>
+                      <span class="badge" style="background: var(--surface-container); color: var(--primary); font-size: 11px;">{{ addr.get_type_display }}</span>
                     </div>
                     <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">
                       {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
                       {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}<br>
-                      <i class="fas fa-phone-alt text-pink me-1"></i>{{ addr.phone }}
+                      <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle; color: var(--primary);">call</span>{{ addr.phone }}
                     </div>
                   </div>
                 </div>
@@ -38,13 +38,13 @@
             </div>
             {% endfor %}
           </div>
-          <a href="{% url 'add_address' %}" class="btn btn-sm mt-3" style="color: var(--pink); border: 1px solid var(--pink); border-radius: 8px;">
-            <i class="fas fa-plus me-1"></i> Add New Address
+          <a href="{% url 'add_address' %}" class="btn btn-sm mt-3" style="color: var(--primary); border: 1px solid var(--primary); border-radius: 8px;">
+            <span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">add</span> Add New Address
           </a>
           {% else %}
           <div class="text-center py-4">
             <p class="text-muted">No addresses saved. Add one to continue.</p>
-            <a href="{% url 'add_address' %}" class="btn-pink" style="width: auto; padding: 10px 24px; display: inline-block; text-decoration: none;">Add Address</a>
+            <a href="{% url 'add_address' %}" class="btn-artisan-primary" style="width: auto; padding: 10px 24px; display: inline-block; text-decoration: none;">Add Address</a>
           </div>
           {% endif %}
         </div>
@@ -59,22 +59,22 @@
             <div class="col-12 col-sm-6 col-md-5">
               <div class="payment-method selected" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.payment-method').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
                 <input type="radio" name="payment_method" value="cod" checked style="display:none;">
-                <div class="payment-method-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="payment-method-icon"><span class="material-symbols-outlined">payments</span></div>
                 <div><div class="fw-600" style="font-size: 14px;">Cash on Delivery</div><div class="text-muted" style="font-size: 11px;">Pay on arrival</div></div>
               </div>
             </div>
             <div class="col-12 col-sm-6 col-md-5">
               <div class="payment-method" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.payment-method').forEach(p=>p.classList.remove('selected'));this.classList.add('selected')">
                 <input type="radio" name="payment_method" value="razorpay" style="display:none;">
-                <div class="payment-method-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="payment-method-icon"><span class="material-symbols-outlined">credit_card</span></div>
                 <div><div class="fw-600" style="font-size: 14px;">Pay Online</div><div class="text-muted" style="font-size: 11px;">UPI, Cards, Netbanking</div></div>
               </div>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn-pink" style="font-size: 16px; padding: 16px;">
-          <i class="fas fa-lock me-2"></i>Place Order Securely
+        <button type="submit" class="btn-artisan-primary" style="font-size: 16px; padding: 16px; width: 100%;">
+          <span class="material-symbols-outlined me-2" style="font-size: 20px; vertical-align: middle;">lock</span>Place Order Securely
         </button>
       </div>
 
@@ -87,7 +87,7 @@
             {% if item.product.display_image_url %}
             <img src="{{ item.product.display_image_url }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" alt="{{ item.product.name }}">
             {% else %}
-            <div style="width:60px; height:60px; background:var(--pink-pale); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--pink);"><i class="fas fa-gem"></i></div>
+            <div style="width:60px; height:60px; background:var(--surface-container); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><span class="material-symbols-outlined">diamond</span></div>
             {% endif %}
             <div class="flex-grow-1">
               <div style="font-size: 14px; font-weight: 500;">{{ item.product.name }}</div>

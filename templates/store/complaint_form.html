@@ -6,12 +6,11 @@
 <div class="container py-5">
     <div class="row">
         <div class="col-md-8 mx-auto">
-            <h2 class="mb-4">
-                <i class="fas fa-envelope"></i> Submit a Complaint
+            <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
+                <span class="material-symbols-outlined text-pink me-2" style="vertical-align: middle;">mail</span> Submit a Complaint
             </h2>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
+            <div class="checkout-step">
                     <form method="POST" novalidate>
                         {% csrf_token %}
                         
@@ -56,36 +55,21 @@
                         {% endif %}
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane"></i> Submit Complaint
+                            <button type="submit" class="btn-artisan-primary" style="padding: 14px 32px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">send</span> Submit Complaint
                             </button>
-                            <a href="{% url 'user_complaints' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'user_complaints' %}" class="btn-artisan-outline" style="text-align: center; padding: 12px 24px; text-decoration: none;">
                                 View My Complaints
                             </a>
                         </div>
                     </form>
-                </div>
             </div>
 
-            <div class="alert alert-info mt-4">
-                <i class="fas fa-info-circle"></i>
-                <strong>Help:</strong> Please describe your issue in detail. Our support team will respond within 24 hours.
+            <div class="d-flex gap-3 p-3 mt-4 rounded-3" style="background: var(--surface-container-low); border: 1px solid var(--outline-variant);">
+                <span class="material-symbols-outlined" style="color: var(--secondary); flex-shrink: 0;">info</span>
+                <div><strong>Help:</strong> Please describe your issue in detail. Our support team will respond within 24 hours.</div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .form-control, .form-select {
-        border-radius: 5px;
-        border: 1px solid #ddd;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: #8B5CF6;
-        box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
-    }
-    textarea.form-control {
-        min-height: 120px;
-    }
-</style>
 {% endblock %}

@@ -6,12 +6,12 @@
 {% block content %}
 <div class="container py-5">
   <!-- Breadcrumb -->
-  <nav class="mb-4" style="font-size: 13px; color: var(--gray);">
-    <a href="{% url 'home' %}" class="text-decoration-none text-muted">Home</a> &rsaquo;
+  <nav class="mb-4" style="font-size: 13px; color: var(--on-surface-variant);">
+    <a href="{% url 'home' %}" class="text-decoration-none" style="color: var(--on-surface-variant);">Home</a> &rsaquo;
     {% if product.category %}
-    <a href="{% url 'category_products' product.category.slug %}" class="text-decoration-none text-muted">{{ product.category.name }}</a> &rsaquo;
+    <a href="{% url 'category_products' product.category.slug %}" class="text-decoration-none" style="color: var(--on-surface-variant);">{{ product.category.name }}</a> &rsaquo;
     {% endif %}
-    <span class="text-pink">{{ product.name }}</span>
+    <span style="color: var(--primary);">{{ product.name }}</span>
   </nav>
 
   <div class="row g-5">
@@ -22,8 +22,8 @@
           {% if product.display_image_url %}
             <img src="{{ product.display_image_url }}" alt="{{ product.name }}" id="mainGalleryImage">
           {% else %}
-            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--pink-pale);color:var(--pink);font-size:80px;">
-              <i class="fas fa-gem"></i>
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface-container);color:var(--primary);font-size:80px;">
+              <span class="material-symbols-outlined" style="font-size:80px;">diamond</span>
             </div>
           {% endif %}
         </div>
@@ -48,8 +48,8 @@
       {% if product.avg_rating > 0 %}
       <div class="d-flex align-items-center gap-3 mb-3">
         <div class="d-flex align-items-center gap-1">
-          <span style="background: var(--pink); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700;">
-            {{ product.avg_rating }} <i class="fas fa-star"></i>
+          <span style="background: var(--primary); color: var(--surface); padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 700;">
+            {{ product.avg_rating }} <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">star</span>
           </span>
           <span class="text-muted ms-2 small">{{ product.review_count }} Reviews</span>
         </div>
@@ -69,8 +69,8 @@
 
       {% if product.is_flash_sale %}
       <div class="mb-3">
-        <span class="badge" style="background: #ef4444; font-size: 12px; padding: 6px 14px; border-radius: 20px;">
-          <i class="fas fa-fire me-1"></i> Flash Sale
+        <span class="badge" style="background: var(--primary); color: var(--surface); font-size: 12px; padding: 6px 14px; border-radius: 20px;">
+          <span class="material-symbols-outlined me-1" style="font-size:14px;vertical-align:middle;">whatshot</span> Flash Sale
         </span>
       </div>
       {% endif %}
@@ -115,28 +115,28 @@
         <button class="btn-add-cart" data-add-cart
                 data-product-id="{{ product.id }}"
                 data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}">
-          <i class="fas fa-shopping-bag"></i> Add to Cart
+          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">shopping_bag</span> Add to Cart
         </button>
         {% if user.is_authenticated %}
         <button class="btn-wishlist-toggle {% if user_in_wishlist %}active{% endif %}"
                 data-wishlist data-product-id="{{ product.id }}"
                 title="{% if user_in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
-          <i class="{% if user_in_wishlist %}fas{% else %}far{% endif %} fa-heart"></i>
+          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">favorite</span>
         </button>
         {% endif %}
       </div>
 
       <!-- Features -->
       <div class="product-features">
-        <div class="feature-item"><i class="fas fa-truck"></i> Free delivery on orders above ₹499</div>
-        <div class="feature-item"><i class="fas fa-shield-alt"></i> Quality checked jewelry</div>
-        <div class="feature-item"><i class="fas fa-undo"></i> Easy 7-day returns</div>
-        <div class="feature-item"><i class="fas fa-lock"></i> Secure Payment</div>
+        <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">local_shipping</span> Free delivery on orders above ₹499</div>
+        <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">verified_user</span> Quality checked jewelry</div>
+        <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">undo</span> Easy 7-day returns</div>
+        <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">lock</span> Secure Payment</div>
       </div>
 
       {% if product.finish %}
       <div class="mt-3">
-        <span class="badge" style="background: var(--pink-pale); color: var(--pink); border: 1px solid var(--pink); font-size: 12px; padding: 6px 14px; border-radius: 20px;">
+        <span class="badge" style="background: var(--surface-container); color: var(--primary); border: 1px solid var(--outline-variant); font-size: 12px; padding: 6px 14px; border-radius: 20px;">
           Polish: {{ product.get_finish_display }}
         </span>
       </div>
@@ -154,18 +154,18 @@
     </ul>
     <div class="tab-content border border-top-0 rounded-bottom p-4">
       <div class="tab-pane fade show active" id="tabDesc">
-        <p style="line-height: 1.8; color: var(--gray);">{{ product.description }}</p>
+        <p style="line-height: 1.8; color: var(--on-surface-variant);">{{ product.description }}</p>
       </div>
       <div class="tab-pane fade" id="tabIngredients">
         {% if product.ingredients %}
-          <p style="line-height: 1.8; color: var(--gray);">{{ product.ingredients }}</p>
+          <p style="line-height: 1.8; color: var(--on-surface-variant);">{{ product.ingredients }}</p>
         {% else %}
           <p class="text-muted">Material and care information not available.</p>
         {% endif %}
       </div>
       <div class="tab-pane fade" id="tabHowTo">
         {% if product.how_to_use %}
-          <p style="line-height: 1.8; color: var(--gray);">{{ product.how_to_use }}</p>
+          <p style="line-height: 1.8; color: var(--on-surface-variant);">{{ product.how_to_use }}</p>
         {% else %}
           <p class="text-muted">Styling tips not available.</p>
         {% endif %}
@@ -173,18 +173,18 @@
       <div class="tab-pane fade" id="tabReviews">
         <!-- Write Review -->
         {% if user.is_authenticated and not user_review %}
-        <div class="mb-4 p-4 rounded-3" style="background: var(--pink-pale); border: 1px dashed var(--pink);">
-          <h6 class="fw-700 mb-3">Write a Review</h6>
+        <div class="mb-4 p-4 rounded-3" style="background: var(--surface-container-low); border: 1px dashed var(--outline-variant);">
+          <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif;">Write a Review</h6>
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
               <label class="form-label">Rating</label>
               <div class="star-rating-input">
-                <i class="far fa-star" data-val="1"></i>
-                <i class="far fa-star" data-val="2"></i>
-                <i class="far fa-star" data-val="3"></i>
-                <i class="far fa-star" data-val="4"></i>
-                <i class="far fa-star" data-val="5"></i>
+                <span class="material-symbols-outlined" data-val="1" style="cursor:pointer;">star</span>
+                <span class="material-symbols-outlined" data-val="2" style="cursor:pointer;">star</span>
+                <span class="material-symbols-outlined" data-val="3" style="cursor:pointer;">star</span>
+                <span class="material-symbols-outlined" data-val="4" style="cursor:pointer;">star</span>
+                <span class="material-symbols-outlined" data-val="5" style="cursor:pointer;">star</span>
               </div>
               <input type="hidden" name="rating" id="ratingInput" required>
             </div>
@@ -200,7 +200,7 @@
               <label class="form-label">Photos (optional)</label>
               <input type="file" name="review_images" class="form-control" multiple accept="image/*">
             </div>
-            <button type="submit" class="btn-pink" style="width: auto; padding: 10px 28px;">Submit Review</button>
+            <button type="submit" class="btn-artisan-primary" style="width: auto; padding: 10px 28px;">Submit Review</button>
           </form>
         </div>
         {% endif %}
@@ -213,11 +213,11 @@
               <div>
                 <div class="reviewer-name">{{ review.user.get_full_name }}</div>
                 <div class="d-flex align-items-center gap-2 mt-1">
-                  <span style="background: var(--pink); color: white; padding: 3px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">
-                    {{ review.rating }} <i class="fas fa-star"></i>
+                  <span style="background: var(--primary); color: var(--surface); padding: 3px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">
+                    {{ review.rating }} <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">star</span>
                   </span>
                   {% if review.is_verified_purchase %}
-                    <span class="review-badge"><i class="fas fa-check-circle me-1"></i>Verified Purchase</span>
+                    <span class="review-badge"><span class="material-symbols-outlined me-1" style="font-size:14px;vertical-align:middle;">check_circle</span>Verified Purchase</span>
                   {% endif %}
                 </div>
               </div>

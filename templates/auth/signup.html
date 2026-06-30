@@ -5,7 +5,7 @@
   <div class="container">
     <div class="glamour-form-card">
       <div class="text-center mb-4">
-        <div style="font-size: 40px; color: var(--pink); margin-bottom: 12px;"><i class="fas fa-gem"></i></div>
+        <div style="font-size: 40px; color: var(--primary); margin-bottom: 12px;"><span class="material-symbols-outlined" style="font-size: inherit;">diamond</span></div>
         <h2 class="glamour-form-title">Create Account</h2>
         <p class="glamour-form-subtitle">Join thousands of jewelry lovers</p>
       </div>
@@ -49,10 +49,10 @@
           <input type="password" name="confirm_password" class="form-control {% if form.confirm_password.errors %}is-invalid{% endif %}" placeholder="Repeat password">
           {% for err in form.confirm_password.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
         </div>
-        <button type="submit" class="btn-pink mt-4">Create Account</button>
+        <button type="submit" class="btn-artisan-primary mt-4">Create Account</button>
       </form>
       <div class="text-center mt-4" style="font-size: 14px;">
-        Already have an account? <a href="{% url 'login' %}" class="text-pink fw-600">Sign in</a>
+        Already have an account? <a href="{% url 'login' %}" class="fw-600" style="color: var(--primary);">Sign in</a>
       </div>
     </div>
   </div>

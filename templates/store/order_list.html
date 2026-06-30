@@ -3,14 +3,14 @@
 {% block content %}
 <div class="container py-5">
   <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
-    <i class="fas fa-box text-pink me-2"></i>My Orders
+    <span class="material-symbols-outlined me-2" style="color: var(--primary); vertical-align: middle;">inventory_2</span>My Orders
   </h2>
   {% if orders %}
   {% for order in orders %}
   <div class="card mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
-    <div class="card-header d-flex justify-content-between align-items-center py-3 px-4" style="background: var(--gray-light); border-bottom: 1px solid var(--border);">
+    <div class="card-header d-flex justify-content-between align-items-center py-3 px-4" style="background: var(--surface-container-low); border-bottom: 1px solid var(--outline-variant);">
       <div>
-        <span class="fw-700 text-pink">#{{ order.order_id }}</span>
+        <span class="fw-700" style="color: var(--primary);">#{{ order.order_id }}</span>
         <span class="text-muted small ms-3">{{ order.created_at|date:"M d, Y" }}</span>
       </div>
       <div class="d-flex align-items-center gap-3">
@@ -18,10 +18,10 @@
           {% if order.status == 'delivered' %}background: #dcfce7; color: #166534;
           {% elif order.status == 'cancelled' %}background: #fee2e2; color: #991b1b;
           {% elif order.status == 'shipped' %}background: #dbeafe; color: #1e40af;
-          {% else %}background: var(--pink-pale); color: var(--pink);{% endif %}">
+          {% else %}background: var(--surface-container); color: var(--primary);{% endif %}">
           {{ order.get_status_display }}
         </span>
-        <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm" style="color: var(--pink); border: 1px solid var(--pink); border-radius: 8px; font-size: 12px;">View Details</a>
+        <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm btn-artisan-outline" style="font-size: 12px;">View Details</a>
       </div>
     </div>
     <div class="card-body px-4 py-3">
@@ -32,12 +32,12 @@
             {% if item.product and item.product.display_image_url %}
             <img src="{{ item.product.display_image_url }}" style="width:50px; height:50px; object-fit:cover; border-radius:8px;" alt="{{ item.product_name }}">
             {% else %}
-            <div style="width:50px; height:50px; background:var(--pink-pale); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--pink);"><i class="fas fa-gem"></i></div>
+            <div style="width:50px; height:50px; background:var(--surface-container); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--primary);"><span class="material-symbols-outlined">diamond</span></div>
             {% endif %}
             <div>
               <div style="font-size: 14px; font-weight: 500;">{{ item.product_name }}</div>
-              {% if item.variant_label %}<div style="font-size: 12px; color: var(--gray);">{{ item.variant_label }}</div>{% endif %}
-              <div style="font-size: 12px; color: var(--gray);">Qty: {{ item.quantity }} &middot; ₹{{ item.unit_price|floatformat:"0" }}</div>
+              {% if item.variant_label %}<div style="font-size: 12px; color: var(--on-surface-variant);">{{ item.variant_label }}</div>{% endif %}
+              <div style="font-size: 12px; color: var(--on-surface-variant);">Qty: {{ item.quantity }} &middot; ₹{{ item.unit_price|floatformat:"0" }}</div>
             </div>
           </div>
           {% endfor %}
@@ -55,10 +55,10 @@
   {% endfor %}
   {% else %}
   <div class="empty-state">
-    <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+    <div class="empty-state-icon"><span class="material-symbols-outlined">inventory_2</span></div>
     <h3 class="empty-state-title">No Orders Yet</h3>
     <p class="empty-state-text">You haven't placed any orders yet. Start shopping to see your orders here.</p>
-    <a href="{% url 'product_list' %}" class="btn-glamour-primary d-inline-flex">Shop Jewelry</a>
+    <a href="{% url 'product_list' %}" class="btn-artisan-primary d-inline-flex">Shop Jewelry</a>
   </div>
   {% endif %}
 </div>

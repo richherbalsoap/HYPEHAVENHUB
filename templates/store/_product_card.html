@@ -7,15 +7,15 @@
           <img src="{{ product.secondary_image_url }}" alt="{{ product.name }}" class="secondary-img" loading="lazy">
         {% endif %}
       {% else %}
-        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--pink-pale);color:var(--pink);font-size:48px;">
-          <i class="fas fa-gem"></i>
+        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface-container);color:var(--primary);font-size:48px;">
+          <span class="material-symbols-outlined">diamond</span>
         </div>
       {% endif %}
     </a>
 
     <!-- Quick View Button -->
     <button class="btn-quick-view" data-quick-view data-product-id="{{ product.id }}">
-      <i class="fas fa-eye me-1"></i> Quick View
+      <span class="material-symbols-outlined me-1">visibility</span> Quick View
     </button>
 
     {% if product.discount_percent > 0 %}
@@ -25,17 +25,17 @@
     {% elif product.is_bestseller %}
       <span class="product-badge badge-bestseller">Best Seller</span>
     {% elif product.is_flash_sale %}
-      <span class="product-badge badge-flash"><i class="fas fa-fire"></i> Sale</span>
+      <span class="product-badge badge-flash"><span class="material-symbols-outlined">whatshot</span> Sale</span>
     {% endif %}
 
     {% if user.is_authenticated %}
     <button class="product-card-wishlist" data-wishlist data-product-id="{{ product.id }}" title="Add to Wishlist">
-      <i class="{% if product in user.wishlist.all %}fas{% else %}far{% endif %} fa-heart"></i>
+      <span class="material-symbols-outlined">{% if product in user.wishlist.all %}favorite{% else %}favorite_border{% endif %}</span>
     </button>
     {% endif %}
 
     <button class="product-card-quick-add" data-add-cart data-product-id="{{ product.id }}">
-      <i class="fas fa-shopping-bag me-1"></i> Add to Bag
+      <span class="material-symbols-outlined me-1">shopping_bag</span> Add to Bag
     </button>
   </div>
 
@@ -52,9 +52,9 @@
       <span class="stars">
         {% for i in "12345" %}
           {% if forloop.counter <= product.avg_rating %}
-            <i class="fas fa-star"></i>
+            <span class="material-symbols-outlined">star</span>
           {% else %}
-            <i class="far fa-star"></i>
+            <span class="material-symbols-outlined">star_border</span>
           {% endif %}
         {% endfor %}
       </span>
