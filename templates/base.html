@@ -54,47 +54,18 @@
       </ul>
     </div>
 
-    <!-- Center-Right: Search Input -->
-    <div class="search-bar-container mx-auto d-none d-lg-flex" style="max-width: 250px;">
-      <form class="search-form" action="{% url 'product_list' %}" method="GET">
-        <div class="input-group search-group">
-          <input type="text" name="q" id="searchInput" class="form-control search-input" placeholder="Search..." autocomplete="off" value="{{ request.GET.q }}">
-          <button class="btn search-btn" type="submit"><span class="material-symbols-outlined">search</span></button>
-        </div>
-        <div class="search-suggestions" id="searchSuggestions"></div>
-      </form>
-    </div>
-
-    <!-- Right: Icons cluster -->
-    <div class="nav-icons d-flex align-items-center gap-2">
-      {% if user.is_authenticated %}
-        <a href="{% url 'profile' %}" class="nav-icon-btn d-none d-lg-flex" title="Profile">
-          <span class="material-symbols-outlined">person</span>
-        </a>
-        <a href="{% url 'settings' %}" class="nav-icon-btn d-none d-lg-flex" title="Settings">
-          <span class="material-symbols-outlined">settings</span>
-        </a>
-        <a href="{% url 'notifications' %}" class="nav-icon-btn d-none d-lg-flex position-relative" title="Notifications">
-          <span class="material-symbols-outlined">notifications</span>
-          {% if user.notifications.filter.is_read == False %}
-            <span class="badge-dot"></span>
-          {% endif %}
-        </a>
-        <a href="{% url 'wishlist' %}" class="nav-icon-btn d-none d-lg-flex position-relative" title="Wishlist">
-          <span class="material-symbols-outlined">favorite</span>
-          {% if wishlist_count > 0 %}<span class="cart-badge">{{ wishlist_count }}</span>{% endif %}
-        </a>
-      {% else %}
-        <a href="{% url 'login' %}" class="nav-icon-btn d-none d-lg-flex" title="Login"><span class="material-symbols-outlined">person</span></a>
-      {% endif %}
+    <!-- Center-Right: Removed Search Input -->
+    
+    <!-- Right: Icons cluster (Cart + Hamburger Only) -->
+    <div class="nav-icons d-flex align-items-center gap-2 ms-auto">
       <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="Cart">
         <span class="material-symbols-outlined">shopping_bag</span>
         {% if cart_count > 0 %}<span class="cart-badge" id="cartBadge">{{ cart_count }}</span>{% endif %}
       </a>
       
-      <!-- Mobile hamburger toggle (triggers Offcanvas) -->
-      <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
-        <span class="material-symbols-outlined">menu</span>
+      <!-- Hamburger toggle (always visible) -->
+      <button class="navbar-toggler d-block ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" style="opacity: 1;">
+        <span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">menu</span>
       </button>
     </div>
   </div>
