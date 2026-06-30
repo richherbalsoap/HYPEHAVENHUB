@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260629-jewelry-redesign">
 <link rel="icon" type="image/jpeg" href="{% static 'images/logo.jpg' %}">
 {% block extra_css %}{% endblock %}
-<script src="https://unpkg.com/htmx.org@1.9.11"></script>
+<script src="{% static 'js/htmx.min.js' %}"></script>
 <script>
   document.addEventListener('htmx:configRequest', (event) => {
     const csrfMatch = document.cookie.match(/csrftoken=([^;]+)/);
