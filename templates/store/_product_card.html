@@ -41,9 +41,7 @@
 
 
   <div class="product-card-body">
-    {% if product.brand %}
-      <div class="product-brand">{{ product.brand.name }}</div>
-    {% endif %}
+    <!-- Brand removed to avoid confusion with multiple sub-brands -->
     <div class="product-name">
       <a href="{% url 'product_detail' product.slug %}">{{ product.name }}</a>
     </div>

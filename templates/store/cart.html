@@ -29,7 +29,7 @@
           </div>
         {% endif %}
         <div class="cart-item-details flex-grow-1">
-          <div class="cart-item-brand" style="font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--on-surface-variant);">{{ item.product.brand.name }}</div>
+          <!-- Brand removed -->
           <div class="cart-item-name" style="font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--on-surface);">
             <a href="{% url 'product_detail' item.product.slug %}" class="text-decoration-none" style="color: var(--on-surface);">{{ item.product.name }}</a>
           </div>
