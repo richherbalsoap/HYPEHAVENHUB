@@ -118,7 +118,7 @@
       {% if products %}
       <div class="row g-4">
         {% for product in products %}
-        <div class="col-12 col-sm-6 col-xl-4">
+        <div class="col-6 col-md-4 col-xl-4">
           {% include 'store/_product_card.html' with product=product %}
         </div>
         {% endfor %}
