@@ -8,7 +8,7 @@ class ShiprocketService:
     """
     Shiprocket API Service wrapper to handle authentication and shipment bookings.
     """
-    BASE_URL = "https://apiv2.shiprocket.in/v2/jwt"
+    BASE_URL = "https://apiv2.shiprocket.in/v1/external"
 
     @classmethod
     def _get_token(cls):
