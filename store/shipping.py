@@ -98,7 +98,7 @@ class ShiprocketService:
             "payment_method": "Prepaid" if order.payment.status == 'completed' else "COD",
             "sub_total": float(order.subtotal),
             "length": length,
-            "width": width,
+            "breadth": width,
             "height": height,
             "weight": weight
         }
