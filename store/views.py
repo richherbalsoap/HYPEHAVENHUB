@@ -912,54 +912,9 @@ def place_order(request):
     )
 
     if payment_method == 'cod':
-        # Decrement stock immediately for COD
-        for item in cart.items.all():
-            if item.variant:
-                item.variant.stock = max(0, item.variant.stock - item.quantity)
-                item.variant.save()
+        return JsonResponse({'success': False, 'message': 'Cash on Delivery is no longer available. Please use online payment.'})
 
-        order.status = 'confirmed'
-        order.save()
-        OrderTracking.objects.create(order=order, status='confirmed', description='Order confirmed and will be processed soon.')
-
-        if cart.coupon:
-            cart.coupon.used_count += 1
-            cart.coupon.save()
-
-        Notification.objects.create(
-            user=request.user,
-            type='order',
-            title='Order Placed!',
-            message=f'Your order #{order.order_id} has been placed successfully.',
-            link=f'/orders/{order.order_id}/'
-        )
-
-        email_sent = send_order_bill_email(order)
-        sms_sent = send_order_bill_sms(order)
-
-        # Trigger Shiprocket booking for COD orders in background/try-except
-        try:
-            from .shipping import ShiprocketService
-            shipment_id = ShiprocketService.create_shipment(order)
-            if shipment_id:
-                order.shipping_tracking_id = str(shipment_id)
-                order.save()
-        except Exception as e:
-            logger.error(f"Error booking Shiprocket for COD order {order.order_id}: {str(e)}")
-
-        cart.items.all().delete()
-        cart.coupon = None
-        cart.save()
-
-        return JsonResponse({
-            'success': True,
-            'order_id': order.order_id,
-            'redirect': f'/orders/{order.order_id}/',
-            'email_sent': email_sent,
-            'sms_sent': sms_sent,
-        })
-
-    elif payment_method == 'razorpay':
+    if payment_method == 'razorpay':
         import razorpay
         try:
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
