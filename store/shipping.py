@@ -15,6 +15,10 @@ class ShiprocketService:
         """
         Authenticate with Shiprocket and retrieve JWT token.
         """
+        api_key = getattr(settings, 'SHIPROCKET_API_KEY', '')
+        if api_key:
+            return api_key
+            
         email = getattr(settings, 'SHIPROCKET_EMAIL', '')
         password = getattr(settings, 'SHIPROCKET_PASSWORD', '')
 
