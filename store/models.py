@@ -426,6 +426,7 @@ class Order(models.Model):
         ('cancelled', 'Cancelled'), ('returned', 'Returned'),
     ]
     order_id = models.CharField(max_length=20, unique=True, blank=True)
+    shipping_tracking_id = models.CharField(max_length=100, blank=True, help_text="Shiprocket Shipment ID / AWB")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')

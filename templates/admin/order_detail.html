@@ -41,6 +41,16 @@
                     <small>{{ order.created_at|date:"h:i A" }}</small>
                 </div>
                 <div>
+                    <span>Shiprocket</span>
+                    {% if order.shipping_tracking_id %}
+                    <strong>{{ order.shipping_tracking_id }}</strong>
+                    <small><a href="https://app.shiprocket.in/seller/orders/processing" target="_blank">Dispatch Order</a></small>
+                    {% else %}
+                    <strong>Not Synced</strong>
+                    <small>Check credentials</small>
+                    {% endif %}
+                </div>
+                <div>
                     <span>Amount</span>
                     <strong>Rs. {{ order.grand_total|floatformat:0 }}</strong>
                     <small>{{ order.items.count }} item{{ order.items.count|pluralize }}</small>
