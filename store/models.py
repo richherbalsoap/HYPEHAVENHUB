@@ -452,7 +452,7 @@ class Order(models.Model):
 
     @property
     def is_cancellable(self):
-        return False
+        return self.status in ['pending', 'confirmed']
 
     @property
     def is_returnable(self):
