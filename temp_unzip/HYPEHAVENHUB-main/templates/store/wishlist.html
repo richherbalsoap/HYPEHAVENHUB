@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}My Wishlist - HYPEHAVENHUB{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
+    <span class="material-symbols-outlined text-pink me-2" style="vertical-align: middle;">favorite</span>My Wishlist
+    {% if wishlist %}<span class="text-muted" style="font-size: 18px; font-weight: 400;">({{ wishlist|length }} items)</span>{% endif %}
+  </h2>
+  {% if wishlist %}
+  <div class="row g-3">
+    {% for w in wishlist %}
+    <div class="col-6 col-md-4 col-lg-3">
+      {% include 'store/_product_card.html' with product=w.product %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon"><span class="material-symbols-outlined">favorite</span></div>
+    <h3 class="empty-state-title">Your wishlist is empty</h3>
+    <p class="empty-state-text">Save your favourite jewelry pieces here to buy them later.</p>
+    <a href="{% url 'product_list' %}" class="btn-artisan-primary d-inline-flex">Discover Jewelry</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

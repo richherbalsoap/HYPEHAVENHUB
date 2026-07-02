@@ -1,0 +1,41 @@
+[19/Jun/2026 12:00:32] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:00:32,883] - Broken pipe from ('127.0.0.1', 58144)
+[19/Jun/2026 12:00:45] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:00:45,670] - Broken pipe from ('127.0.0.1', 58155)
+[19/Jun/2026 12:01:10] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:01:11] "GET /static/css/style.css?v=20260612-jewels HTTP/1.1" 200 48657
+[19/Jun/2026 12:01:11] "GET /static/images/hero-jhumka-small.jpeg HTTP/1.1" 200 123725
+[19/Jun/2026 12:01:11] "GET /static/images/hero-jhumka-large.jpeg HTTP/1.1" 200 139174
+[19/Jun/2026 12:01:11] "GET /static/js/main.js?v=20260612-jewels HTTP/1.1" 200 13478
+Not Found: /favicon.ico
+[19/Jun/2026 12:01:12] "GET /favicon.ico HTTP/1.1" 404 15532
+[19/Jun/2026 12:01:24] "GET /products/ HTTP/1.1" 200 21640
+[19/Jun/2026 12:01:44] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:01:44] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:02:18] "GET /products/ HTTP/1.1" 200 21640
+[19/Jun/2026 12:02:23] "GET /product/16-piece-assorted-jhumka-box-antique/ HTTP/1.1" 200 16728
+[19/Jun/2026 12:02:31] "GET /products/ HTTP/1.1" 200 21640
+[19/Jun/2026 12:02:39] "GET /products/?category=12-piece-jhumka-box-set HTTP/1.1" 200 16937
+[19/Jun/2026 12:02:47] "GET /products/?discount=10 HTTP/1.1" 200 17270
+[19/Jun/2026 12:02:50] "GET /cart/ HTTP/1.1" 302 0
+[19/Jun/2026 12:02:50] "GET /auth/login/?next=/cart/ HTTP/1.1" 200 10163
+[19/Jun/2026 12:02:53] "GET /auth/login/ HTTP/1.1" 200 10163
+[19/Jun/2026 12:02:55] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:07:28] "GET /auth/signup/ HTTP/1.1" 200 9771
+[19/Jun/2026 12:07:28] "GET /static/css/style.css?v=20260612-jewels HTTP/1.1" 304 0
+[19/Jun/2026 12:07:28] "GET /static/js/main.js?v=20260612-jewels HTTP/1.1" 304 0
+[19/Jun/2026 12:07:36] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:07:36] "GET /static/images/hero-jhumka-large.jpeg HTTP/1.1" 304 0
+[19/Jun/2026 12:07:36] "GET /static/images/hero-jhumka-small.jpeg HTTP/1.1" 304 0
+[19/Jun/2026 12:12:15] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:12:15,981] - Broken pipe from ('127.0.0.1', 61186)
+[19/Jun/2026 12:12:32] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:12:32,976] - Broken pipe from ('127.0.0.1', 58641)
+[19/Jun/2026 12:12:54] "GET / HTTP/1.1" 200 17831
+[19/Jun/2026 12:12:54] "GET /static/css/style.css?v=20260612-jewels HTTP/1.1" 304 0
+[19/Jun/2026 12:12:54] "GET /static/images/hero-jhumka-large.jpeg HTTP/1.1" 304 0
+[19/Jun/2026 12:12:54] "GET /static/images/hero-jhumka-small.jpeg HTTP/1.1" 304 0
+[19/Jun/2026 12:12:54] "GET /static/js/main.js?v=20260612-jewels HTTP/1.1" 304 0
+[19/Jun/2026 12:13:10] "GET /products/?category=16-piece-jhumka-box-set HTTP/1.1" 200 17274
+[19/Jun/2026 12:13:34] "GET /product/16-piece-assorted-jhumka-box-antique/ HTTP/1.1" 200 16728
+[19/Jun/2026 12:13:51] "GET / HTTP/1.1" 200 17831

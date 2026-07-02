@@ -1,0 +1,11 @@
+.vercel
+.env
+.env.prod
+.env.production
+db.sqlite3
+
+media/
+*.pyc
+__pycache__/
+
+.env*

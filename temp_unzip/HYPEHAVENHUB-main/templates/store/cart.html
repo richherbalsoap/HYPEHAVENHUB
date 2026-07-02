@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Cart - HYPEHAVENHUB{% endblock %}
+
+{% block content %}
+<div class="container py-5" id="cart-container">
+  <p class="section-eyebrow text-center mb-1" style="color: var(--on-surface-variant); letter-spacing: 3px;">YOUR SELECTIONS</p>
+  <h2 class="section-title text-center mb-2">
+    <span class="material-symbols-outlined me-2" style="font-size: 32px; vertical-align: middle; color: var(--primary);">shopping_bag</span>My Cart
+  </h2>
+  {% if cart.total_items %}
+  <div class="text-center mb-4">
+    <span class="badge" style="background: var(--primary); color: var(--surface); font-size: 14px; border-radius: 20px; padding: 6px 16px; font-family: 'Montserrat', sans-serif;">{{ cart.total_items }} items</span>
+  </div>
+  {% endif %}
+  <div class="luxury-line mx-auto mb-5" style="max-width: 80px;"></div>
+
+  {% if items %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      {% for item in items %}
+      <div class="cart-item" id="cart-item-{{ item.id }}" data-cart-item style="border: 1px solid var(--outline-variant); border-radius: 16px; padding: 20px; margin-bottom: 16px; background: var(--surface-container-low);">
+        {% if item.product.display_image_url %}
+          <img src="{{ item.product.display_image_url }}" class="cart-item-image arch-frame" alt="{{ item.product.name }}" style="border-radius: 12px;">
+        {% else %}
+          <div class="cart-item-image" style="display:flex;align-items:center;justify-content:center;background:var(--surface-container);border-radius:12px;color:var(--primary);font-size:32px;">
+            <span class="material-symbols-outlined" style="font-size: 40px;">diamond</span>
+          </div>
+        {% endif %}
+        <div class="cart-item-details flex-grow-1">
+          <!-- Brand removed -->
+          <div class="cart-item-name" style="font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--on-surface);">
+            <a href="{% url 'product_detail' item.product.slug %}" class="text-decoration-none" style="color: var(--on-surface);">{{ item.product.name }}</a>
+          </div>
+          {% if item.variant %}
+          <div class="cart-item-variant" style="color: var(--on-surface-variant); font-size: 13px;">
+            {% if item.variant.color_code %}
+              <span class="d-inline-block rounded-circle border me-1" style="width: 14px; height: 14px; background: {{ item.variant.color_code }}; border-color: var(--outline-variant) !important;"></span>
+            {% endif %}
+            {{ item.variant.label }}
+          </div>
+          {% endif %}
+          <div class="cart-item-price" style="color: var(--primary); font-weight: 600; font-family: 'Montserrat', sans-serif;">₹{{ item.unit_price|floatformat:"0" }}</div>
+        </div>
+        <div class="d-flex flex-column align-items-end gap-3">
+          <div class="qty-selector" style="border: 1px solid var(--outline-variant); border-radius: 10px; overflow: hidden;">
+            <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "decrease"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 6px 12px; color: var(--primary); font-weight: 700;">-</button>
+            <span class="qty-num" id="qty-{{ item.id }}" style="padding: 6px 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--on-surface);">{{ item.quantity }}</span>
+            <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "increase"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 6px 12px; color: var(--primary); font-weight: 700;">+</button>
+          </div>
+          <div class="fw-700" id="total-{{ item.id }}" style="font-family: 'Playfair Display', serif; font-size: 17px; color: var(--on-surface);">₹{{ item.total_price|floatformat:"0" }}</div>
+          <button class="btn btn-sm" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "remove"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" title="Remove" style="color: var(--primary); opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+            <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Coupon -->
+      <div class="order-summary mb-3" style="border: 1px solid var(--outline-variant); border-radius: 16px; padding: 24px; background: var(--surface-container-low);">
+        <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif; color: var(--on-surface);">Have a Coupon?</h6>
+        <form id="htmxCouponForm" hx-post="{% url 'apply_coupon' %}" hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" id="couponInput" name="code" class="luxury-input form-control" placeholder="Enter coupon code" style="text-transform: uppercase; border: none; border-bottom: 2px solid var(--outline-variant); border-radius: 0; background: transparent; color: var(--on-surface);">
+            <button type="submit" class="btn-artisan-primary" style="border-radius: 0 8px 8px 0; padding: 8px 20px; font-size: 14px;">Apply</button>
+          </div>
+          <div id="couponMsg" class="mt-2 small" style="color: var(--secondary);">{% if cart.coupon %}Coupon {{ cart.coupon.code }} applied!{% endif %}</div>
+        </form>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary" style="border: 1px solid var(--outline-variant); border-radius: 16px; padding: 24px; background: var(--surface-container-low);">
+        <h5 class="order-summary-title" style="font-family: 'Playfair Display', serif; color: var(--on-surface); font-weight: 700;">Order Summary</h5>
+        <div class="luxury-line mb-3" style="max-width: 50px;"></div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+          <span style="color: var(--on-surface-variant);">Subtotal ({{ cart.total_items }} items)</span>
+          <span id="summary-subtotal" style="color: var(--on-surface); font-weight: 600;">₹{{ cart.subtotal|floatformat:"0" }}</span>
+        </div>
+        <div class="summary-row" id="discount-row" {% if not cart.discount_amount %}style="display: none;"{% else %}style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Montserrat', sans-serif; font-size: 14px;"{% endif %}>
+          <span style="color: var(--secondary);">Discount (Coupon)</span>
+          <span style="color: var(--secondary);" id="discount-amt">-₹{{ cart.discount_amount|floatformat:"0" }}</span>
+        </div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Montserrat', sans-serif; font-size: 14px;">
+          <span style="color: var(--on-surface-variant);">Delivery</span>
+          <span id="delivery-value">
+            {% if cart.delivery_charge == 0 %}
+              <span style="color: var(--secondary); font-weight: 600;">FREE</span>
+            {% else %}
+              ₹{{ cart.delivery_charge }}
+            {% endif %}
+          </span>
+        </div>
+        <div style="border-top: 1px solid var(--outline-variant); margin: 8px 0;"></div>
+        <div class="summary-row" style="display: flex; justify-content: space-between; padding: 10px 0; font-family: 'Montserrat', sans-serif;">
+          <span class="fw-700" style="font-size: 16px; color: var(--on-surface);">Total</span>
+          <span class="summary-total" id="summary-total" style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--primary);">₹{{ cart.grand_total|floatformat:"0" }}</span>
+        </div>
+        {% if cart.discount_amount > 0 %}
+        <div class="small mt-2" style="color: var(--secondary);"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: text-bottom;">sell</span>You're saving ₹{{ cart.discount_amount|floatformat:"0" }}</div>
+        {% endif %}
+        
+        <!-- Luxury Trust Markers -->
+        <div class="trust-markers mt-4 pt-4" style="border-top: 1px solid var(--outline-variant);">
+          <div class="d-flex align-items-center mb-3">
+            <span class="material-symbols-outlined me-3" style="font-size: 24px; color: var(--secondary);">workspace_premium</span>
+            <div>
+              <div class="fw-600" style="font-size: 13px; color: var(--on-surface); font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 1px;">Authenticity Certificate</div>
+              <div class="text-muted" style="font-size: 12px;">Included with every piece</div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center mb-3">
+            <span class="material-symbols-outlined me-3" style="font-size: 24px; color: var(--secondary);">featured_seasonal_and_gifts</span>
+            <div>
+              <div class="fw-600" style="font-size: 13px; color: var(--on-surface); font-family: 'Montserrat', sans-serif; text-transform: uppercase; letter-spacing: 1px;">Velvet-Lined Packaging</div>
+              <div class="text-muted" style="font-size: 12px;">Premium unboxing experience</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="{% url 'checkout' %}" class="btn-artisan-primary mt-4 d-block text-center text-decoration-none" style="padding: 14px; border-radius: 12px; font-size: 16px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px;">
+          Proceed to Checkout <span class="material-symbols-outlined ms-2" style="font-size: 18px; vertical-align: middle;">arrow_forward</span>
+        </a>
+        <a href="{% url 'product_list' %}" class="d-block text-center small mt-3 text-decoration-none" style="color: var(--on-surface-variant); font-family: 'Montserrat', sans-serif;">
+          <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: text-bottom;">arrow_back</span>Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="empty-state fade-in" style="text-align: center; padding: 60px 20px;">
+    <div class="empty-state-icon" style="font-size: 64px; color: var(--outline); margin-bottom: 24px;">
+      <span class="material-symbols-outlined" style="font-size: 72px;">shopping_bag</span>
+    </div>
+    <h3 class="empty-state-title" style="font-family: 'Playfair Display', serif; color: var(--on-surface); font-weight: 700; margin-bottom: 12px;">Your cart is empty</h3>
+    <p class="empty-state-text" style="color: var(--on-surface-variant); font-family: 'Montserrat', sans-serif; max-width: 400px; margin: 0 auto 24px;">Looks like you haven't added any jewelry pieces yet. Start shopping!</p>
+    <a href="{% url 'product_list' %}" class="btn-artisan-primary d-inline-flex" style="padding: 12px 32px; border-radius: 10px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px;">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

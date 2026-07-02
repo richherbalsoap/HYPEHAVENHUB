@@ -1,0 +1,178 @@
+{% extends 'admin/custom_base.html' %}
+
+{% block page_title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<div class="mb-20">
+    <h5><i class="fas fa-chart-bar"></i> Sales Analytics & Reports</h5>
+</div>
+
+<!-- Date Range Filter -->
+<div class="card mb-20">
+    <div class="card-body">
+        <form method="GET" class="row">
+            <div class="col-md-6">
+                <label class="form-label">Show data for last:</label>
+                <select name="days" class="form-select" onchange="this.form.submit()">
+                    <option value="7" {% if days == 7 %}selected{% endif %}>7 Days</option>
+                    <option value="30" {% if days == 30 %}selected{% endif %}>30 Days</option>
+                    <option value="90" {% if days == 90 %}selected{% endif %}>90 Days</option>
+                    <option value="365" {% if days == 365 %}selected{% endif %}>1 Year</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row mb-30">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">₹{{ total_sales|floatformat:0 }}</div>
+            <div class="stat-label">Total Sales</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="border-left-color: #10B981;">
+            <div class="stat-number" style="color: #10B981;">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="border-left-color: #F59E0B;">
+            <div class="stat-number" style="color: #F59E0B;">₹{{ avg_order_value|floatformat:0 }}</div>
+            <div class="stat-label">Avg Order Value</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="border-left-color: #EF4444;">
+            <div class="stat-number" style="color: #EF4444;">{{ return_rate|floatformat:1 }}%</div>
+            <div class="stat-label">Return Rate</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Top Products -->
+    <div class="col-lg-6">
+        <div class="card mb-20">
+            <div class="card-body">
+                <h6 class="mb-20"><i class="fas fa-cube"></i> Top Selling Products</h6>
+                <table class="table table-sm mb-0">
+                    <thead style="background-color: #f8f9fa;">
+                        <tr>
+                            <th>Product</th>
+                            <th>Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in product_sales %}
+                        <tr>
+                            <td>{{ product.product__name|truncatewords:4 }}</td>
+                            <td>{{ product.total_sold }}</td>
+                            <td>₹{{ product.total_revenue|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Categories -->
+    <div class="col-lg-6">
+        <div class="card mb-20">
+            <div class="card-body">
+                <h6 class="mb-20"><i class="fas fa-tags"></i> Top Categories</h6>
+                <table class="table table-sm mb-0">
+                    <thead style="background-color: #f8f9fa;">
+                        <tr>
+                            <th>Category</th>
+                            <th>Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in category_sales %}
+                        <tr>
+                            <td>{{ category.product__category__name }}</td>
+                            <td>{{ category.total_sold }}</td>
+                            <td>₹{{ category.total_revenue|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Daily Sales Trend -->
+<div class="card">
+    <div class="card-body">
+        <h6 class="mb-20"><i class="fas fa-chart-line"></i> Daily Sales Trend</h6>
+        <table class="table table-sm mb-0">
+            <thead style="background-color: #f8f9fa;">
+                <tr>
+                    <th>Date</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                    <th>Avg Order Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in daily_sales %}
+                <tr>
+                    <td><strong>{{ day.date }}</strong></td>
+                    <td>{{ day.order_count }}</td>
+                    <td>₹{{ day.revenue|floatformat:0 }}</td>
+                    <td>₹{{ day.revenue|add:0|add:day.order_count|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">No data available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .card { 
+        background: white; 
+        border-radius: 10px; 
+        border: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .mb-30 { margin-bottom: 30px; }
+    .mb-20 { margin-bottom: 20px; }
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        border-left: 4px solid var(--primary);
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stat-number {
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--primary);
+    }
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
