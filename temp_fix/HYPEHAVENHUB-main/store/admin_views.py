@@ -649,4 +649,3 @@ def admin_country_delete(request, pk):
         country.delete()
         messages.success(request, 'Country removed.')
     return redirect('admin_countries')
-
