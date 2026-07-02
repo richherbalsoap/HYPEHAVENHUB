@@ -760,4 +760,3 @@ class ProductPrice(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.country.code} ({self.price})"
-
