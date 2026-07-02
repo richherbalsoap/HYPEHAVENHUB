@@ -244,3 +244,30 @@ SHIPROCKET_EMAIL = config('SHIPROCKET_EMAIL', default='')
 SHIPROCKET_PASSWORD = config('SHIPROCKET_PASSWORD', default='')
 SHIPROCKET_API_KEY = config('SHIPROCKET_API_KEY', default='')
 SHIPROCKET_PICKUP_LOCATION = config('SHIPROCKET_PICKUP_LOCATION', default='Primary')
+
+# Cloudflare R2 Storage Configuration
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='')
+AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='')
+AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='')
+
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
+    # Use STORAGES for Django 4.2+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = False # Public URLs
+    AWS_S3_REGION_NAME = 'auto' # Required for Cloudflare R2
+    if AWS_S3_CUSTOM_DOMAIN:
+        AWS_S3_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN.replace('https://', '').replace('http://', '').strip('/')
+
