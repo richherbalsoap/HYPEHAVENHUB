@@ -193,27 +193,28 @@ class MultipleFileField(forms.FileField):
 
 
 class ProductForm(forms.ModelForm):
-    multiple_images = MultipleFileField(
-        label="Product Images",
-        required=False
+    multiple_images = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control', 'accept': 'image/*'}),
+        required=False,
+        help_text="Select one or more images from gallery"
     )
     video_upload = forms.FileField(
-        label="Product Video",
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'video/*'}),
         required=False,
-        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'video/*'})
+        help_text="Upload product video"
     )
 
     class Meta:
         model = Product
         fields = [
-            'name', 'brand', 'category', 'subcategory', 'description', 'short_description',
-            'ingredients', 'how_to_use', 'weight', 'material', 'warranty',
-            'base_price', 'discount_percent', 'finish', 'is_active', 'is_featured',
-            'is_new_arrival', 'is_bestseller', 'is_flash_sale'
+            'name', 'category', 'subcategory',
+            'description', 'short_description', 'ingredients', 'how_to_use',
+            'weight', 'material', 'metal_purity', 'warranty', 'artisan_story',
+            'base_price', 'discount_percent', 'is_flash_sale', 'finish',
+            'is_active', 'is_featured', 'is_new_arrival', 'is_bestseller'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'brand': forms.Select(attrs={'class': 'form-select'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
             'subcategory': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),

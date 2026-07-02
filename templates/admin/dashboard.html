@@ -23,7 +23,7 @@
     <div class="col-sm-6 col-xl-3">
         <div class="stat-card" style="border-left-color: var(--admin-blue);">
             <div class="stat-number">{{ total_orders }}</div>
-            <div class="stat-label">Total Orders</div>
+            <div class="stat-label">Total Orders (via Shiprocket)</div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
@@ -64,6 +64,14 @@
             <div class="stat-number">{{ stats.open_complaints }}</div>
             <div class="stat-label">Open Complaints</div>
         </div>
+    </div>
+</div>
+
+<div class="alert alert-info d-flex align-items-center mb-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #93c5fd;">
+    <i class="fas fa-truck-fast fa-2x me-3"></i>
+    <div>
+        <strong>Shiprocket Integration Active</strong><br>
+        All orders are automatically pushed to Shiprocket. Manage your shipments and generate manifests directly from your Shiprocket dashboard.
     </div>
 </div>
 

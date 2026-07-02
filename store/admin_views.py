@@ -124,7 +124,10 @@ def admin_product_create(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save()
+            product = form.save(commit=False)
+            hype_brand, _ = Brand.objects.get_or_create(name='HypeHavenHub')
+            product.brand = hype_brand
+            product.save()
 
             if 'video_upload' in request.FILES:
                 from .storage import upload_file
@@ -134,8 +137,12 @@ def admin_product_create(request):
                 except Exception as e:
                     messages.error(request, f"Video upload failed: {e}")
 
-            # Save uploaded images directly to Vercel Blob
+            # Save uploaded images directly to Vercel/R2 Blob
             images = request.FILES.getlist('multiple_images')
+            for key in request.FILES:
+                if key.startswith('dynamic_image_'):
+                    images.extend(request.FILES.getlist(key))
+            
             for i, img in enumerate(images):
                 from .storage import upload_file
                 try:
@@ -165,7 +172,10 @@ def admin_product_edit(request, pk):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            product = form.save()
+            product = form.save(commit=False)
+            hype_brand, _ = Brand.objects.get_or_create(name='HypeHavenHub')
+            product.brand = hype_brand
+            product.save()
 
             if 'video_upload' in request.FILES:
                 from .storage import upload_file
@@ -175,8 +185,12 @@ def admin_product_edit(request, pk):
                 except Exception as e:
                     messages.error(request, f"Video upload failed: {e}")
 
-            # Save newly uploaded images directly to Vercel Blob
+            # Save newly uploaded images directly to Vercel/R2 Blob
             images = request.FILES.getlist('multiple_images')
+            for key in request.FILES:
+                if key.startswith('dynamic_image_'):
+                    images.extend(request.FILES.getlist(key))
+            
             for img in images:
                 from .storage import upload_file
                 try:

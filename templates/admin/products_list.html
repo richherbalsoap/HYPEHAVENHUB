@@ -3,74 +3,71 @@
 {% block page_title %}Products{% endblock %}
 
 {% block content %}
-<div class="mb-20" style="display: flex; justify-content: space-between; align-items: center;">
-    <h5><i class="fas fa-cube"></i> Manage Products</h5>
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Inventory</div>
+        <h5>Manage Products</h5>
+    </div>
     <a href="{% url 'admin_product_create' %}" class="btn btn-primary">
         <i class="fas fa-plus"></i> Add New Product
     </a>
 </div>
 
 <!-- Search Form -->
-<div class="card mb-20">
-    <div class="card-body">
-        <form method="GET" class="row">
-            <div class="col-md-9">
-                <input type="text" name="search" class="form-control" 
-                       placeholder="Search by name or description..."
-                       value="{{ search_query }}">
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary w-100">Search</button>
-            </div>
-        </form>
-    </div>
+<div class="admin-card mb-4">
+    <form method="GET" class="row">
+        <div class="col-md-9">
+            <input type="text" name="search" class="form-control" 
+                   placeholder="Search by name or description..."
+                   value="{{ search_query }}">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </form>
 </div>
 
 <!-- Products Table -->
-<div class="card">
+<div class="admin-card">
     <div class="table-responsive">
-        <table class="table table-hover mb-0">
-            <thead style="background-color: #f8f9fa;">
+        <table class="table admin-table mb-0">
+            <thead>
                 <tr>
                     <th>Product Name</th>
-                    <th>Brand</th>
                     <th>Category</th>
                     <th>Price</th>
                     <th>Discount</th>
-                    <th>Stock</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for product in products %}
                 <tr>
                     <td><strong>{{ product.name }}</strong></td>
-                    <td>{{ product.brand.name|default:"—" }}</td>
                     <td>{{ product.category.name|default:"—" }}</td>
-                    <td>₹{{ product.base_price }}</td>
+                    <td><strong>₹{{ product.base_price }}</strong></td>
                     <td>{{ product.discount_percent }}%</td>
-                    <td>{{ product.total_stock }}</td>
                     <td>
-                        <span class="badge {% if product.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                        <span class="status-pill {% if product.is_active %}status-delivered{% else %}status-cancelled{% endif %}">
                             {% if product.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
                     </td>
-                    <td>
-                        <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-info">
-                            <i class="fas fa-edit"></i> Edit
+                    <td class="text-end">
+                        <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-outline-primary" style="margin-right:4px;">
+                            <i class="fas fa-edit"></i>
                         </a>
-                        <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-globe"></i> Prices
+                        <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-outline-info" style="margin-right:4px;">
+                            <i class="fas fa-globe"></i>
                         </a>
-                        <a href="{% url 'admin_product_delete' product.id %}" class="btn btn-sm btn-danger">
-                            <i class="fas fa-trash"></i> Delete
+                        <a href="{% url 'admin_product_delete' product.id %}" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash"></i>
                         </a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="text-center text-muted">No products found</td>
+                    <td colspan="6" class="text-center text-muted py-4">No products found</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -80,7 +77,7 @@
 
 <!-- Pagination -->
 {% if products.has_other_pages %}
-<nav class="mt-20">
+<nav class="mt-4">
     <ul class="pagination">
         {% if products.has_previous %}
             <li class="page-item">
@@ -114,16 +111,4 @@
     </ul>
 </nav>
 {% endif %}
-
-<style>
-    .mb-20 { margin-bottom: 20px; }
-    .mt-20 { margin-top: 20px; }
-    .card { 
-        background: white; 
-        border-radius: 10px; 
-        border: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .table { margin: 0; }
-</style>
 {% endblock %}
