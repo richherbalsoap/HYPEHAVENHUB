@@ -465,66 +465,75 @@ def search_suggestions(request):
 
 
 def signup_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    form = SignupForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        user = form.save(commit=False)
-        user.username = form.cleaned_data['email']
-        user.set_password(form.cleaned_data['password'])
-        user.is_email_verified = False
-        user.is_active = False
-        otp = generate_otp()
-        user.otp = otp
-        user.otp_created_at = timezone.now()
-        user.save()
-        
-        session_country_id = request.session.get('selected_country_id')
-        session_lang = request.session.get('django_language', 'en')
-        UserProfile.objects.create(
-            user=user,
-            country_id=session_country_id,
-            preferred_language=session_lang
-        )
-        
-        send_otp_email(user.email, otp, purpose='verification')
-        request.session['verify_email'] = user.email
-        
-        if is_console_email_backend():
-            request.session['reset_otp_preview'] = otp
-        
-        return redirect('verify_otp')
-    return render(request, 'auth/signup.html', {'form': form})
+    try:
+        if request.user.is_authenticated:
+            return redirect('home')
+        form = SignupForm(request.POST or None)
+        if request.method == 'POST' and form.is_valid():
+            user = form.save(commit=False)
+            user.username = form.cleaned_data['email']
+            user.set_password(form.cleaned_data['password'])
+            user.is_email_verified = False
+            user.is_active = False
+            otp = generate_otp()
+            user.otp = otp
+            user.otp_created_at = timezone.now()
+            user.save()
+            
+            session_country_id = request.session.get('selected_country_id')
+            session_lang = request.session.get('django_language', 'en')
+            UserProfile.objects.create(
+                user=user,
+                country_id=session_country_id,
+                preferred_language=session_lang
+            )
+            
+            send_otp_email(user.email, otp, purpose='verification')
+            request.session['verify_email'] = user.email
+            
+            if is_console_email_backend():
+                request.session['reset_otp_preview'] = otp
+            
+            return redirect('verify_otp')
+        return render(request, 'auth/signup.html', {'form': form})
+    except Exception as e:
+        import traceback
+        return django.http.HttpResponseServerError(f"SIGNUP ERROR: {str(e)}\n\n{traceback.format_exc()}")
 
 
 def verify_otp_view(request):
-    email = request.session.get('verify_email')
-    if not email:
-        return redirect('signup')
-        
-    if request.user.is_authenticated:
-        return redirect('home')
-        
-    otp_preview = request.session.get('reset_otp_preview')
-    
-    if request.method == 'POST':
-        otp = ''.join(ch for ch in request.POST.get('otp', '') if ch.isdigit())
-        user = get_object_or_404(User, email=email)
-        if otp == user.otp:
-            user.is_email_verified = True
-            user.is_active = True
-            user.otp = ''
-            user.save()
-            request.session.pop('verify_email', None)
-            request.session.pop('reset_otp_preview', None)
+    try:
+        email = request.session.get('verify_email')
+        if not email:
+            return redirect('signup')
             
-            login(request, user)
-            merge_anonymous_cart(request, user)
-            messages.success(request, 'Email verified successfully. You are now logged in.')
+        if request.user.is_authenticated:
             return redirect('home')
-        messages.error(request, 'Invalid OTP.')
+            
+        otp_preview = request.session.get('reset_otp_preview')
         
-    return render(request, 'auth/verify_otp.html', {'email': email, 'otp_preview': otp_preview})
+        if request.method == 'POST':
+            otp = ''.join(ch for ch in request.POST.get('otp', '') if ch.isdigit())
+            user = get_object_or_404(User, email=email)
+            if otp == user.otp:
+                user.is_email_verified = True
+                user.is_active = True
+                user.otp = ''
+                user.save()
+                request.session.pop('verify_email', None)
+                request.session.pop('reset_otp_preview', None)
+                
+                login(request, user)
+                merge_anonymous_cart(request, user)
+                messages.success(request, 'Email verified successfully. You are now logged in.')
+                return redirect('home')
+            messages.error(request, 'Invalid OTP.')
+            
+        return render(request, 'auth/verify_otp.html', {'email': email, 'otp_preview': otp_preview})
+    except Exception as e:
+        import traceback
+        import django.http
+        return django.http.HttpResponseServerError(f"VERIFY_OTP ERROR: {str(e)}\n\n{traceback.format_exc()}")
 
 
 def login_view(request):
