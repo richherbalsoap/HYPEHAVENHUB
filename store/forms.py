@@ -193,11 +193,6 @@ class MultipleFileField(forms.FileField):
 
 
 class ProductForm(forms.ModelForm):
-    multiple_images = forms.FileField(
-        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control', 'accept': 'image/*'}),
-        required=False,
-        help_text="Select one or more images from gallery"
-    )
     video_upload = forms.FileField(
         widget=forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'video/*'}),
         required=False,
