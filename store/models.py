@@ -41,6 +41,27 @@ class User(AbstractUser):
         return f"{self.first_name} {self.last_name}".strip() or self.email
 
 
+class CountrySetting(models.Model):
+    name = models.CharField(max_length=100) # e.g., "United States"
+    code = models.CharField(max_length=2, unique=True) # e.g., "US"
+    currency_code = models.CharField(max_length=3, default='USD') # e.g., "USD"
+    currency_symbol = models.CharField(max_length=5, default='$')
+    default_language = models.CharField(max_length=5, default='en') # Default language for this country
+    shipping_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return self.name
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    country = models.ForeignKey(CountrySetting, on_delete=models.SET_NULL, null=True, blank=True)
+    preferred_language = models.CharField(max_length=5, default='en')
+
+    def __str__(self):
+        return f"{self.user.username} Profile"
+
+
 class Address(models.Model):
     ADDRESS_TYPES = [('home', 'Home'), ('work', 'Work'), ('other', 'Other')]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
@@ -260,6 +281,12 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_price_for_country(self, country_id):
+        country_price = self.country_prices.filter(country_id=country_id).first()
+        if country_price:
+            return country_price.price
+        return self.base_price
 
 
 class ProductImage(models.Model):
@@ -684,15 +711,14 @@ class AdminDashboardStats(models.Model):
     def __str__(self):
         return f"Stats - {self.date}"
 
-class ProductCountryPrice(models.Model):
+class ProductPrice(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='country_prices')
-    country_code = models.CharField(max_length=10, help_text="e.g. IN, US, GB")
-    currency = models.CharField(max_length=10, help_text="e.g. INR, USD, GBP")
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    country = models.ForeignKey(CountrySetting, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2) # e.g., India ke liye 999, US ke liye 30
 
     class Meta:
-        unique_together = ('product', 'country_code')
-        verbose_name_plural = 'Product Country Prices'
+        unique_together = ('product', 'country')
 
     def __str__(self):
-        return f"{self.product.name} - {self.country_code} ({self.currency} {self.price})"
+        return f"{self.product.name} - {self.country.code} ({self.price})"
+

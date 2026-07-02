@@ -1,4 +1,5 @@
-from .models import Category, Cart, Wishlist
+import requests
+from .models import Category, Cart, Wishlist, CountrySetting
 
 
 def cart_count(request):
@@ -44,15 +45,30 @@ def company_dashboard_access(request):
         )
     return {'can_access_company_dashboard': can_access}
 
-def localization_data(request):
-    country = request.session.get('user_country', '')
-    language = request.session.get('user_language', '')
-    
-    if not country and request.user.is_authenticated:
-        country = getattr(request.user, 'country', '')
-        language = getattr(request.user, 'language', '')
-        
+def global_country_context(request):
+    if 'selected_country_id' not in request.session:
+        try:
+            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
+            response = requests.get(f'http://ip-api.com/json/{ip}', timeout=2).json()
+            country_code = response.get('countryCode', 'IN')
+            
+            country = CountrySetting.objects.filter(code=country_code).first()
+            if country:
+                request.session['selected_country_id'] = country.id
+                request.session['django_language'] = country.default_language
+            else:
+                request.session['selected_country_id'] = 1 # Fallback to 1
+        except:
+            request.session['selected_country_id'] = 1 # Fallback
+            
+    # Session se data templates me bhejna
+    try:
+        current_country = CountrySetting.objects.get(id=request.session.get('selected_country_id', 1))
+    except CountrySetting.DoesNotExist:
+        current_country = CountrySetting.objects.first()
+
     return {
-        'active_country': country,
-        'active_language': language,
+        'current_country': current_country,
+        'all_countries': CountrySetting.objects.all(),
+        'active_country': current_country.name if current_country else 'GLOBAL'
     }

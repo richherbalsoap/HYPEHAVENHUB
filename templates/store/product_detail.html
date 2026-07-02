@@ -67,6 +67,10 @@
         <span class="detail-discount">{{ product.discount_percent|floatformat:"0" }}% OFF</span>
         {% endif %}
       </div>
+      <div class="mb-3 text-muted small">
+        <i class="material-symbols-outlined fs-6 align-middle me-1">local_shipping</i> 
+        Shipping: {% if current_country %}{{ current_country.currency_symbol }}{{ current_country.shipping_charge }}{% else %}₹0.00{% endif %}
+      </div>
 
       {% if product.is_flash_sale %}
       <div class="mb-3">

@@ -41,6 +41,7 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://hypehavenhub.vercel.app']
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -90,7 +91,7 @@ TEMPLATES = [
                 'store.context_processors.wishlist_count',
                 'store.context_processors.categories_list',
                 'store.context_processors.company_dashboard_access',
-                'store.context_processors.localization_data',
+                'store.context_processors.global_country_context',
             ],
         },
     },

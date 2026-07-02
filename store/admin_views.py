@@ -13,7 +13,7 @@ from datetime import timedelta
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductCountryPrice
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting
 )
 from .forms import (
     ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm
@@ -231,20 +231,23 @@ def admin_product_prices(request, pk):
     
     if request.method == 'POST':
         country_code = request.POST.get('country_code')
-        currency = request.POST.get('currency')
         price = request.POST.get('price')
         
-        if country_code and currency and price:
-            ProductCountryPrice.objects.update_or_create(
+        if country_code and price:
+            country, created = CountrySetting.objects.get_or_create(
+                code=country_code.upper(),
+                defaults={'name': country_code.upper(), 'currency_code': 'USD', 'currency_symbol': '$'}
+            )
+            ProductPrice.objects.update_or_create(
                 product=product,
-                country_code=country_code.upper(),
-                defaults={'currency': currency.upper(), 'price': price}
+                country=country,
+                defaults={'price': price}
             )
             messages.success(request, f'Price for {country_code.upper()} updated.')
         
         delete_id = request.POST.get('delete_price_id')
         if delete_id:
-            ProductCountryPrice.objects.filter(id=delete_id, product=product).delete()
+            ProductPrice.objects.filter(id=delete_id, product=product).delete()
             messages.success(request, 'Price removed.')
             
         return redirect('admin_product_prices', pk=pk)

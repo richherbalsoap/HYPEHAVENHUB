@@ -254,29 +254,37 @@
       </div>
       <div class="modal-body pb-4">
         <p class="text-muted small mb-4">Please select your country to see regional pricing and shipping options.</p>
-        <form id="localizationForm">
-          <div class="mb-3">
-            <label class="form-label fw-500">Country / Region</label>
-            <select id="locCountry" class="form-select form-select-lg" required>
-              <option value="" disabled {% if not active_country %}selected{% endif %}>Select your country</option>
-              <option value="IN" {% if active_country == 'IN' %}selected{% endif %}>India</option>
-              <option value="US" {% if active_country == 'US' %}selected{% endif %}>United States</option>
-              <option value="GB" {% if active_country == 'GB' %}selected{% endif %}>United Kingdom</option>
-              <option value="CA" {% if active_country == 'CA' %}selected{% endif %}>Canada</option>
-              <option value="AU" {% if active_country == 'AU' %}selected{% endif %}>Australia</option>
-              <option value="AE" {% if active_country == 'AE' %}selected{% endif %}>United Arab Emirates</option>
-              <option value="GLOBAL" {% if active_country == 'GLOBAL' %}selected{% endif %}>Rest of World</option>
-            </select>
-          </div>
-          <div class="mb-4">
-            <label class="form-label fw-500">Language</label>
-            <select id="locLanguage" class="form-select form-select-lg" required>
-              <option value="en" {% if active_language == 'en' %}selected{% endif %}>English</option>
-              <option value="hi" {% if active_language == 'hi' %}selected{% endif %}>Hindi</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary w-100 py-2">Save Preferences</button>
+        
+        <form action="{% url 'set_country_session' %}" method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-500">Country / Region</label>
+                <select name="country_id" class="form-select form-select-lg" onchange="this.form.submit()">
+                    <option value="" disabled>Select your country</option>
+                    {% for country in all_countries %}
+                        <option value="{{ country.id }}" {% if country.id == request.session.selected_country_id %}selected{% endif %}>
+                            {{ country.name }} ({{ country.currency_code }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
         </form>
+
+        <form action="{% url 'set_language' %}" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-500">Language</label>
+                <select name="language" class="form-select form-select-lg" onchange="this.form.submit()">
+                    <option value="en" {% if request.session.django_language == 'en' %}selected{% endif %}>English (Global)</option>
+                    {% if current_country and current_country.default_language != 'en' %}
+                        <option value="{{ current_country.default_language }}" {% if request.session.django_language == current_country.default_language %}selected{% endif %}>
+                            {{ current_country.default_language|title }}
+                        </option>
+                    {% endif %}
+                </select>
+            </div>
+        </form>
+
       </div>
     </div>
   </div>
@@ -296,54 +304,6 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!hasCountry) {
         locModal.show();
     }
-    
-    const locCountry = document.getElementById('locCountry');
-    const locLanguage = document.getElementById('locLanguage');
-    locCountry.addEventListener('change', function() {
-        if(this.value === 'IN') {
-            locLanguage.innerHTML = '<option value="en">English</option><option value="hi">Hindi</option>';
-        } else if(this.value === 'AE') {
-            locLanguage.innerHTML = '<option value="en">English</option><option value="ar">Arabic</option>';
-        } else {
-            locLanguage.innerHTML = '<option value="en">English</option>';
-        }
-    });
-
-    document.getElementById('localizationForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const btn = this.querySelector('button[type="submit"]');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-        btn.disabled = true;
-        
-        const data = {
-            country: locCountry.value,
-            language: locLanguage.value
-        };
-        
-        fetch("{% url 'set_localization' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
-            },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(res => {
-            if(res.success) {
-                window.location.reload();
-            } else {
-                alert("Error saving preferences. Please try again.");
-                btn.innerHTML = 'Save Preferences';
-                btn.disabled = false;
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            btn.innerHTML = 'Save Preferences';
-            btn.disabled = false;
-        });
-    });
 });
 </script>
 

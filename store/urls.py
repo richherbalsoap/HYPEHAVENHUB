@@ -53,7 +53,8 @@ urlpatterns = [
     # API / Utils
     path('api/variant-info/<int:variant_id>/', views.get_variant_info, name='get_variant_info'),
     path('api/quick-view/<int:product_id>/', views.quick_view, name='quick_view'),
-    path('api/set-localization/', views.set_localization, name='set_localization'),
+    path('api/set-country/', views.set_country_session, name='set_country_session'),
+    path('api/set-language/', views.set_language, name='set_language'),
     path('run-migrations/', views.run_migrations_view, name='run_migrations'),
 
     # Admin Panel

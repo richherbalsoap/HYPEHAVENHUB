@@ -23,7 +23,8 @@ from .models import (
     User, Category, SubCategory, Brand, Product,
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
-    Address, ReturnRequest, Notification, UserPreference, FlashSale,
+    Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
+    UserProfile, CountrySetting,
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -475,6 +476,15 @@ def signup_view(request):
         user.otp = ''
         user.otp_created_at = None
         user.save()
+        
+        session_country_id = request.session.get('selected_country_id')
+        session_lang = request.session.get('django_language', 'en')
+        UserProfile.objects.create(
+            user=user,
+            country_id=session_country_id,
+            preferred_language=session_lang
+        )
+        
         login(request, user)
         merge_anonymous_cart(request, user)
         messages.success(request, 'Account created successfully. You are now logged in.')
@@ -1200,27 +1210,33 @@ def run_migrations_view(request):
     return HttpResponse(result, content_type="text/plain")
 
 
-@require_POST
-def set_localization(request):
-    """Save user country and language preferences"""
-    try:
-        data = json.loads(request.body)
-        country = data.get('country')
-        language = data.get('language')
-        
-        if not country:
-            return JsonResponse({'success': False, 'error': 'Country is required'}, status=400)
+def set_country_session(request):
+    if request.method == 'POST':
+        country_id = request.POST.get('country_id')
+        if country_id:
+            request.session['selected_country_id'] = int(country_id)
+            country = CountrySetting.objects.filter(id=country_id).first()
+            if country:
+                request.session['django_language'] = country.default_language
             
-        request.session['user_country'] = country
+            # If user is logged in, also update their profile
+            if request.user.is_authenticated:
+                profile, created = UserProfile.objects.get_or_create(user=request.user)
+                profile.country_id = int(country_id)
+                if country:
+                    profile.preferred_language = country.default_language
+                profile.save()
+                
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+def set_language(request):
+    if request.method == 'POST':
+        language = request.POST.get('language')
         if language:
-            request.session['user_language'] = language
-            
-        if request.user.is_authenticated:
-            request.user.country = country
-            if language:
-                request.user.language = language
-            request.user.save()
-            
-        return JsonResponse({'success': True})
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+            request.session['django_language'] = language
+            # Update profile if logged in
+            if request.user.is_authenticated:
+                profile, created = UserProfile.objects.get_or_create(user=request.user)
+                profile.preferred_language = language
+                profile.save()
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
