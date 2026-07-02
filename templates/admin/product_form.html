@@ -9,7 +9,7 @@
 
 <div class="card">
     <div class="card-body">
-        <form method="POST" enctype="multipart/form-data">
+        <form id="product-form" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             
             <div class="row">
@@ -178,10 +178,12 @@
             {% endif %}
 
             <div class="mt-20">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Save Product
+                <button type="submit" id="submit-btn" class="btn btn-primary d-inline-flex align-items-center">
+                    <i class="fas fa-save me-2" id="submit-icon"></i> 
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="submit-spinner" role="status"></span>
+                    <span id="submit-text">Save Product</span>
                 </button>
-                <a href="{% url 'admin_products' %}" class="btn btn-secondary">
+                <a href="{% url 'admin_products' %}" class="btn btn-secondary ms-2">
                     <i class="fas fa-times"></i> Cancel
                 </a>
             </div>
@@ -268,7 +270,6 @@ function addPhotoBox() {
         <img id="preview-${photoCount}" class="image-preview" src="" style="display:none;">
     `;
     
-    // Insert the new box before the Add button
     container.insertBefore(newBox, addBtn);
 }
 
@@ -294,7 +295,91 @@ function previewVideo(input) {
     }
 }
 
+async function uploadToR2(file, folder) {
+    // 1. Get presigned URL
+    const urlRes = await fetch(`/admin/get-presigned-url/?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type)}&folder=${folder}`);
+    const urlData = await urlRes.json();
+    
+    if (!urlData.success) {
+        throw new Error(urlData.error || "Failed to get upload URL");
+    }
+
+    // 2. Upload file directly to R2
+    const uploadRes = await fetch(urlData.presigned_url, {
+        method: 'PUT',
+        body: file,
+        headers: {
+            'Content-Type': file.type
+        }
+    });
+
+    if (!uploadRes.ok) {
+        throw new Error(`Upload failed with status ${uploadRes.status}`);
+    }
+
+    return urlData.public_url;
+}
+
 document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("product-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const submitIcon = document.getElementById("submit-icon");
+    const submitSpinner = document.getElementById("submit-spinner");
+    const submitText = document.getElementById("submit-text");
+
+    if (form) {
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            // UI Loading state
+            submitBtn.disabled = true;
+            submitIcon.classList.add("d-none");
+            submitSpinner.classList.remove("d-none");
+            submitText.textContent = "Uploading Media... Please wait.";
+
+            try {
+                // Find all file inputs
+                const fileInputs = form.querySelectorAll("input[type='file']");
+                
+                for (let i = 0; i < fileInputs.length; i++) {
+                    const input = fileInputs[i];
+                    if (input.files && input.files.length > 0) {
+                        const file = input.files[0];
+                        const isVideo = input.accept && input.accept.includes('video');
+                        const folder = isVideo ? 'videos' : 'products';
+                        
+                        // Upload directly to R2
+                        const publicUrl = await uploadToR2(file, folder);
+                        
+                        // Add hidden input with the final URL
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = isVideo ? 'uploaded_video_url' : 'uploaded_image_url_' + i;
+                        hiddenInput.value = publicUrl;
+                        form.appendChild(hiddenInput);
+                        
+                        // Remove name from file input so it's NOT sent to Vercel
+                        input.removeAttribute('name');
+                    }
+                }
+                
+                submitText.textContent = "Saving Product...";
+                // Submit the form normally now that files are bypassed
+                form.submit();
+            } catch (err) {
+                console.error("Upload error:", err);
+                alert("Media upload failed: " + err.message);
+                
+                // Reset UI
+                submitBtn.disabled = false;
+                submitIcon.classList.remove("d-none");
+                submitSpinner.classList.add("d-none");
+                submitText.textContent = "Save Product";
+            }
+        });
+    }
+
+    // Existing Delete image logic
     const deleteButtons = document.querySelectorAll(".delete-img-btn");
     
     deleteButtons.forEach(button => {

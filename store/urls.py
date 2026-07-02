@@ -75,6 +75,7 @@ urlpatterns = [
     path('admin/countries/create/', admin_views.admin_country_create, name='admin_country_create'),
     path('admin/countries/<int:pk>/edit/', admin_views.admin_country_edit, name='admin_country_edit'),
     path('admin/countries/<int:pk>/delete/', admin_views.admin_country_delete, name='admin_country_delete'),
+    path('admin/get-presigned-url/', admin_views.get_presigned_url, name='admin_get_presigned_url'),
     
     # User Complaints
     path('complaints/submit/', admin_views.submit_complaint, name='submit_complaint'),

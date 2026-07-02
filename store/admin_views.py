@@ -8,8 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q, Sum, Count, F
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
@@ -137,21 +139,41 @@ def admin_product_create(request):
                 except Exception as e:
                     messages.error(request, f"Video upload failed: {e}")
 
-            # Save uploaded images directly to Vercel/R2 Blob
+            # Handle direct-to-S3 video URL
+            video_url = request.POST.get('uploaded_video_url')
+            if video_url:
+                product.video_url = video_url
+                product.save()
+
+            # Handle direct-to-S3 image URLs
+            is_first = True
+            for key in request.POST:
+                if key.startswith('uploaded_image_url_'):
+                    url = request.POST[key]
+                    if url:
+                        ProductImage.objects.create(
+                            product=product,
+                            image_url=url,
+                            is_primary=is_first
+                        )
+                        is_first = False
+
+            # Fallback for old file uploads just in case JS fails
             images = request.FILES.getlist('multiple_images')
             for key in request.FILES:
                 if key.startswith('dynamic_image_'):
                     images.extend(request.FILES.getlist(key))
             
-            for i, img in enumerate(images):
+            for img in images:
                 from .storage import upload_file
                 try:
                     url = upload_file(img, folder="products")
                     ProductImage.objects.create(
                         product=product,
                         image_url=url,
-                        is_primary=(i == 0)
+                        is_primary=is_first
                     )
+                    is_first = False
                 except Exception as e:
                     messages.error(request, f"Image upload failed: {e}")
 
@@ -185,7 +207,26 @@ def admin_product_edit(request, pk):
                 except Exception as e:
                     messages.error(request, f"Video upload failed: {e}")
 
-            # Save newly uploaded images directly to Vercel/R2 Blob
+            # Handle direct-to-S3 video URL
+            video_url = request.POST.get('uploaded_video_url')
+            if video_url:
+                product.video_url = video_url
+                product.save()
+
+            # Handle direct-to-S3 image URLs
+            has_primary = product.images.filter(is_primary=True).exists()
+            for key in request.POST:
+                if key.startswith('uploaded_image_url_'):
+                    url = request.POST[key]
+                    if url:
+                        ProductImage.objects.create(
+                            product=product,
+                            image_url=url,
+                            is_primary=not has_primary
+                        )
+                        has_primary = True
+
+            # Fallback for old file uploads just in case JS fails
             images = request.FILES.getlist('multiple_images')
             for key in request.FILES:
                 if key.startswith('dynamic_image_'):
@@ -315,6 +356,67 @@ def admin_orders(request):
         'search_query': search_query,
     }
     return render(request, 'admin/orders_list.html', context)
+
+
+from django.http import JsonResponse
+import boto3
+import uuid
+import os
+
+@login_required
+@admin_required
+def get_presigned_url(request):
+    """
+    Returns a presigned PUT URL for uploading directly to Cloudflare R2
+    Bypasses the Vercel 4.5MB payload limit.
+    """
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    filename = request.GET.get('filename', 'file')
+    content_type = request.GET.get('content_type', 'application/octet-stream')
+    folder = request.GET.get('folder', 'uploads')
+    
+    # Secure the filename
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    safe_ext = ext if ext and len(ext) <= 5 else 'bin'
+    key = f"{folder}/{uuid.uuid4().hex}.{safe_ext}"
+    
+    try:
+        s3_client = boto3.client(
+            's3',
+            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name='auto'
+        )
+        
+        presigned_url = s3_client.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'Key': key,
+                'ContentType': content_type
+            },
+            ExpiresIn=3600,
+            HttpMethod='PUT'
+        )
+        
+        # Calculate the final public URL for this file
+        domain = settings.AWS_S3_CUSTOM_DOMAIN
+        if domain:
+            public_url = f"https://{domain}/{key}"
+        else:
+            public_url = f"{settings.AWS_S3_ENDPOINT_URL}/{settings.AWS_STORAGE_BUCKET_NAME}/{key}"
+            
+        return JsonResponse({
+            'success': True,
+            'presigned_url': presigned_url,
+            'public_url': public_url,
+            'key': key
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
 @login_required
