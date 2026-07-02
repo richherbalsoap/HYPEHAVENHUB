@@ -472,9 +472,11 @@ def signup_view(request):
         user = form.save(commit=False)
         user.username = form.cleaned_data['email']
         user.set_password(form.cleaned_data['password'])
-        user.is_email_verified = True
-        user.otp = ''
-        user.otp_created_at = None
+        user.is_email_verified = False
+        user.is_active = False
+        otp = generate_otp()
+        user.otp = otp
+        user.otp_created_at = timezone.now()
         user.save()
         
         session_country_id = request.session.get('selected_country_id')
@@ -485,19 +487,44 @@ def signup_view(request):
             preferred_language=session_lang
         )
         
-        login(request, user)
-        merge_anonymous_cart(request, user)
-        messages.success(request, 'Account created successfully. You are now logged in.')
-        return redirect('home')
+        send_otp_email(user.email, otp, purpose='verification')
+        request.session['verify_email'] = user.email
+        
+        if is_console_email_backend():
+            request.session['reset_otp_preview'] = otp
+        
+        return redirect('verify_otp')
     return render(request, 'auth/signup.html', {'form': form})
 
 
 def verify_otp_view(request):
-    request.session.pop('verify_email', None)
+    email = request.session.get('verify_email')
+    if not email:
+        return redirect('signup')
+        
     if request.user.is_authenticated:
         return redirect('home')
-    messages.info(request, 'Email verification is disabled. Please sign in.')
-    return redirect('login')
+        
+    otp_preview = request.session.get('reset_otp_preview')
+    
+    if request.method == 'POST':
+        otp = ''.join(ch for ch in request.POST.get('otp', '') if ch.isdigit())
+        user = get_object_or_404(User, email=email)
+        if otp == user.otp:
+            user.is_email_verified = True
+            user.is_active = True
+            user.otp = ''
+            user.save()
+            request.session.pop('verify_email', None)
+            request.session.pop('reset_otp_preview', None)
+            
+            login(request, user)
+            merge_anonymous_cart(request, user)
+            messages.success(request, 'Email verified successfully. You are now logged in.')
+            return redirect('home')
+        messages.error(request, 'Invalid OTP.')
+        
+    return render(request, 'auth/verify_otp.html', {'email': email, 'otp_preview': otp_preview})
 
 
 def login_view(request):

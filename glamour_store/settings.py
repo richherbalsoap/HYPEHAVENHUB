@@ -219,7 +219,7 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=20, cast=int)
 DEFAULT_FROM_EMAIL = config(
     'DEFAULT_FROM_EMAIL',
-    default='onboarding@resend.dev'
+    default='noreply@hypehavenhub.in'
 )
 
 TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')

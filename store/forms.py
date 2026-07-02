@@ -40,6 +40,13 @@ class LoginForm(forms.Form):
         email = cleaned.get('email')
         password = cleaned.get('password')
         if email and password:
+            try:
+                u = User.objects.get(email=email)
+                if not u.is_active and not u.is_email_verified:
+                    raise forms.ValidationError("Your email is not verified. Please verify your email first.")
+            except User.DoesNotExist:
+                pass
+                
             user = authenticate(username=email, password=password)
             if not user:
                 raise forms.ValidationError("Invalid email or password.")
