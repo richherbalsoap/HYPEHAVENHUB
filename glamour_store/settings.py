@@ -202,10 +202,10 @@ if HAS_SIMPLE_JWT:
         'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     }
 
-EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.resend.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='resend')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='re_RPhraYhb_ER8RYYQUVB46AcVQafEjASxF')
 EMAIL_BACKEND = config(
     'EMAIL_BACKEND',
     default=(
@@ -219,7 +219,7 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
 EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=20, cast=int)
 DEFAULT_FROM_EMAIL = config(
     'DEFAULT_FROM_EMAIL',
-    default=EMAIL_HOST_USER or 'HYPEHAVENHUB <noreply@hypehavenhub.com>'
+    default='onboarding@resend.dev'
 )
 
 TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
