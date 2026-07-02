@@ -167,31 +167,7 @@ if (couponForm) {
   });
 }
 
-/* ====== GALLERY ====== */
-document.querySelectorAll('.gallery-thumb').forEach(thumb => {
-  thumb.addEventListener('click', () => {
-    const mainImg = document.getElementById('mainGalleryImage');
-    const mainVideo = document.getElementById('mainGalleryVideo');
-    
-    document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-    thumb.classList.add('active');
-
-    const type = thumb.dataset.type || 'image';
-    if (type === 'video' && mainVideo) {
-      if (mainImg) mainImg.style.display = 'none';
-      mainVideo.src = thumb.dataset.src;
-      mainVideo.style.display = 'block';
-      mainVideo.play();
-    } else if (mainImg) {
-      if (mainVideo) {
-        mainVideo.style.display = 'none';
-        mainVideo.pause();
-      }
-      mainImg.style.display = 'block';
-      mainImg.src = thumb.dataset.src;
-    }
-  });
-});
+/* ====== GALLERY MOVED TO PRODUCT_DETAIL.HTML ====== */
 
 /* ====== VARIANT SELECTOR ====== */
 document.querySelectorAll('.variant-btn').forEach(btn => {
