@@ -1,0 +1,120 @@
+{% extends 'admin/custom_base.html' %}
+
+{% block page_title %}Complaints{% endblock %}
+
+{% block content %}
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Support</div>
+        <h5>Customer Complaints</h5>
+    </div>
+</div>
+
+<div class="admin-card mb-4">
+    <form method="GET" class="row g-3 align-items-end">
+        <div class="col-lg-4">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                {% for status_id, status_name in status_list %}
+                <option value="{{ status_id }}" {% if selected_status == status_id %}selected{% endif %}>
+                    {{ status_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <label class="form-label">Priority</label>
+            <select name="priority" class="form-select">
+                <option value="">All priorities</option>
+                {% for priority_id, priority_name in priority_list %}
+                <option value="{{ priority_id }}" {% if selected_priority == priority_id %}selected{% endif %}>
+                    {{ priority_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="table admin-table mb-0">
+            <thead>
+                <tr>
+                    <th>Complaint</th>
+                    <th>Customer</th>
+                    <th>Type</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Submitted</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for complaint in complaints %}
+                <tr>
+                    <td>
+                        <strong>{{ complaint.complaint_id }}</strong>
+                        {% if complaint.order %}
+                        <small class="d-block text-muted">Order {{ complaint.order.order_id }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ complaint.user.get_full_name|default:complaint.user.email }}</strong>
+                        <small class="d-block text-muted">{{ complaint.user.email }}</small>
+                    </td>
+                    <td>{{ complaint.get_complaint_type_display }}</td>
+                    <td>{{ complaint.subject|truncatewords:7 }}</td>
+                    <td><span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span></td>
+                    <td>{{ complaint.get_priority_display }}</td>
+                    <td>
+                        {{ complaint.created_at|date:"d M Y" }}
+                        <small class="d-block text-muted">{{ complaint.created_at|date:"h:i A" }}</small>
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'admin_complaint_detail' complaint.complaint_id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-folder-open"></i> Open
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">No complaints found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if complaints.has_other_pages %}
+<nav class="mt-4">
+    <ul class="pagination">
+        {% if complaints.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">First</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ complaints.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Previous</a></li>
+        {% endif %}
+
+        {% for num in complaints.paginator.page_range %}
+            {% if complaints.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if complaints.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ complaints.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Next</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ complaints.paginator.num_pages }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Last</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

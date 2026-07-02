@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.order_id }} - HYPEHAVENHUB{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+    <div>
+      <h2 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 4px;">Order #{{ order.order_id }}</h2>
+      <div class="text-muted small">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</div>
+    </div>
+    <div class="d-flex gap-2">
+      {% if order.is_cancellable %}
+      <button class="btn btn-sm btn-outline-danger" data-cancel-order="{{ order.order_id }}">
+        <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">close</span> Cancel Order
+      </button>
+      {% endif %}
+      {% if order.is_returnable %}
+      <a href="{% url 'return_request' order.order_id %}" class="btn btn-sm btn-artisan-outline">
+        <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">undo</span> Return/Refund
+      </a>
+      {% endif %}
+      <a href="{% url 'order_list' %}" class="btn btn-sm btn-outline-secondary">
+        <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">arrow_back</span> Back
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Order Status -->
+      <div class="checkout-step mb-4">
+        <h5 class="fw-700 mb-4">Order Status</h5>
+        <div class="tracking-timeline">
+          {% for step in order_steps %}
+          <div class="timeline-item {% if step.active %}active{% endif %}">
+            <div class="timeline-icon"><span class="material-symbols-outlined">check_circle</span></div>
+            <div class="timeline-content">
+              <div class="timeline-status">{{ step.label }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Tracking Events -->
+        {% if tracking %}
+        <div class="mt-4">
+          <h6 class="fw-700 mb-3">Tracking History</h6>
+          {% for event in tracking %}
+          <div class="d-flex gap-3 mb-3">
+            <div style="width: 10px; height: 10px; background: var(--primary); border-radius: 50%; margin-top: 5px; flex-shrink: 0;"></div>
+            <div>
+              <div class="fw-600 small">{{ event.status|title }}</div>
+              <div class="text-muted" style="font-size: 13px;">{{ event.description }}</div>
+              <div class="text-muted" style="font-size: 12px;">{{ event.created_at|date:"d M Y, h:i A" }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Items -->
+      <div class="checkout-step">
+        <h5 class="fw-700 mb-4">Items Ordered</h5>
+        {% for item in order.items.all %}
+        <div class="d-flex gap-3 {% if not forloop.last %}mb-4 pb-4 border-bottom{% endif %}">
+          {% if item.product and item.product.display_image_url %}
+          <img src="{{ item.product.display_image_url }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px;" alt="{{ item.product_name }}">
+          {% else %}
+          <div style="width: 80px; height: 80px; background: var(--surface-container); border-radius: 10px; display:flex; align-items:center; justify-content:center; color:var(--primary); font-size: 28px;">
+            <span class="material-symbols-outlined">diamond</span>
+          </div>
+          {% endif %}
+          <div class="flex-grow-1">
+            <div class="fw-600" style="font-size: 15px;">{{ item.product_name }}</div>
+            {% if item.variant_label %}<div class="text-muted small">{{ item.variant_label }}</div>{% endif %}
+            <div class="text-muted small mt-1">Qty: {{ item.quantity }} &times; ₹{{ item.unit_price|floatformat:"0" }}</div>
+          </div>
+          <div class="fw-700" style="font-size: 16px;">₹{{ item.total_price|floatformat:"0" }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Price Summary -->
+      <div class="order-summary mb-4">
+        <h5 class="order-summary-title">Price Details</h5>
+        <div class="summary-row"><span class="text-muted">Subtotal</span><span>₹{{ order.subtotal|floatformat:"0" }}</span></div>
+        {% if order.discount_amount > 0 %}<div class="summary-row"><span class="text-success">Discount</span><span class="text-success">-₹{{ order.discount_amount|floatformat:"0" }}</span></div>{% endif %}
+        <div class="summary-row"><span class="text-muted">Delivery</span><span>{% if order.delivery_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹{{ order.delivery_charge|floatformat:"0" }}{% endif %}</span></div>
+        <div class="summary-row"><span class="fw-700">Total Paid</span><span class="summary-total">₹{{ order.grand_total|floatformat:"0" }}</span></div>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="checkout-step mb-4">
+        <h6 class="fw-700 mb-3"><span class="material-symbols-outlined me-2" style="color: var(--primary); font-size: 18px; vertical-align: middle;">location_on</span>Delivery Address</h6>
+        {% if order.address %}
+        <div style="font-size: 14px; line-height: 1.7;">
+          <div class="fw-600">{{ order.address.full_name }}</div>
+          <div class="text-muted">{{ order.address.address_line1 }}{% if order.address.address_line2 %}, {{ order.address.address_line2 }}{% endif %}</div>
+          <div class="text-muted">{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</div>
+          <div class="text-muted"><span class="material-symbols-outlined me-1" style="color: var(--primary); font-size: 16px; vertical-align: middle;">call</span>{{ order.address.phone }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Payment -->
+      <div class="checkout-step">
+        <h6 class="fw-700 mb-3"><span class="material-symbols-outlined me-2" style="color: var(--primary); font-size: 18px; vertical-align: middle;">credit_card</span>Payment Info</h6>
+        {% if order.payment %}
+        <div style="font-size: 14px;">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Method</span>
+            <span class="fw-600">{{ order.payment.get_method_display }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Status</span>
+            <span class="badge" style="{% if order.payment.status == 'success' %}background: #dcfce7; color: #166534;{% elif order.payment.status == 'failed' %}background: #fee2e2; color: #991b1b;{% else %}background: var(--surface-container); color: var(--primary);{% endif %} font-size: 12px; padding: 4px 12px; border-radius: 12px;">
+              {{ order.payment.get_status_display }}
+            </span>
+          </div>
+        </div>
+        {% else %}
+        <div class="text-muted small">Payment information not available.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
