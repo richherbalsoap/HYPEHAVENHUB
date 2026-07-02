@@ -724,36 +724,6 @@ def update_cart(request):
     action = data.get('action')
     cart = get_or_create_cart(request)
 
-    country_id = request.session.get('selected_country_id', 1)
-    try:
-        from .models import CountrySetting
-        country = CountrySetting.objects.get(id=country_id)
-    except:
-        country = None
-
-    def get_item_price(it):
-        p = it.product.get_price_for_country(country_id)
-        if it.product.discount_percent > 0:
-            p = round(p * (1 - it.product.discount_percent / 100), 2)
-        if it.variant:
-            p += it.variant.additional_price
-        return p
-
-    subtotal = sum(get_item_price(it) * it.quantity for it in cart.items.all())
-    
-    discount_amount = 0
-    if cart.coupon and cart.coupon.is_valid():
-        if cart.coupon.discount_type == 'percent':
-            disc = subtotal * cart.coupon.discount_value / 100
-            if cart.coupon.max_discount_amount:
-                disc = min(disc, cart.coupon.max_discount_amount)
-            discount_amount = round(disc, 2)
-        else:
-            discount_amount = min(cart.coupon.discount_value, subtotal)
-    
-    delivery_charge = float(country.shipping_charge) if country else 0.0
-    grand_total = float(subtotal - discount_amount + delivery_charge)
-
     try:
         item = CartItem.objects.get(id=item_id, cart=cart)
         if action == 'increase':
@@ -774,14 +744,12 @@ def update_cart(request):
             return render(request, 'store/cart.html', {'cart': cart, 'items': items})
 
         if action in ['decrease', 'remove'] and getattr(item, 'id', None) is None:
-            subtotal = sum(get_item_price(it) * it.quantity for it in cart.items.all())
-            grand_total = float(subtotal - discount_amount + delivery_charge)
             return JsonResponse({
                 'success': True, 'removed': True,
                 'cart_count': cart.total_items,
-                'cart_subtotal': float(subtotal),
-                'cart_total': grand_total,
-                'delivery_charge': delivery_charge,
+                'cart_subtotal': float(cart.subtotal),
+                'cart_total': float(cart.grand_total),
+                'delivery_charge': float(cart.delivery_charge),
             })
     except CartItem.DoesNotExist:
         if request.headers.get('HX-Request'):
@@ -795,17 +763,14 @@ def update_cart(request):
         items = cart.items.select_related('product', 'variant').all()
         return render(request, 'store/cart.html', {'cart': cart, 'items': items})
 
-    subtotal = sum(get_item_price(it) * it.quantity for it in cart.items.all())
-    grand_total = float(subtotal - discount_amount + delivery_charge)
-
     return JsonResponse({
         'success': True,
         'quantity': item.quantity,
-        'item_total': float(get_item_price(item) * item.quantity),
-        'cart_subtotal': float(subtotal),
-        'cart_total': grand_total,
+        'item_total': float(item.total_price),
+        'cart_subtotal': float(cart.subtotal),
+        'cart_total': float(cart.grand_total),
         'cart_count': cart.total_items,
-        'delivery_charge': delivery_charge,
+        'delivery_charge': float(cart.delivery_charge),
     })
 
 
@@ -923,56 +888,20 @@ def place_order(request):
     if not cart.items.exists():
         return JsonResponse({'success': False, 'message': 'Cart is empty.'})
 
-    country_id = request.session.get('selected_country_id', 1)
-    try:
-        from .models import CountrySetting
-        country = CountrySetting.objects.get(id=country_id)
-    except:
-        country = None
-
-    # Dynamically calculate totals for the selected country
-    subtotal = 0
-    for item in cart.items.all():
-        unit_price = item.product.get_price_for_country(country_id)
-        if item.product.discount_percent > 0:
-            unit_price = round(unit_price * (1 - item.product.discount_percent / 100), 2)
-        if item.variant:
-            unit_price += item.variant.additional_price
-        subtotal += unit_price * item.quantity
-
-    discount_amount = 0
-    if cart.coupon and cart.coupon.is_valid():
-        if cart.coupon.discount_type == 'percent':
-            disc = subtotal * cart.coupon.discount_value / 100
-            if cart.coupon.max_discount_amount:
-                disc = min(disc, cart.coupon.max_discount_amount)
-            discount_amount = round(disc, 2)
-        else:
-            discount_amount = min(cart.coupon.discount_value, subtotal)
-    
-    delivery_charge = country.shipping_charge if country else 0
-    grand_total = subtotal - discount_amount + delivery_charge
-
     # Create order in pending status
     order = Order.objects.create(
         user=request.user,
         address=address,
-        subtotal=subtotal,
-        discount_amount=discount_amount,
-        delivery_charge=delivery_charge,
-        grand_total=grand_total,
+        subtotal=cart.subtotal,
+        discount_amount=cart.discount_amount,
+        delivery_charge=cart.delivery_charge,
+        grand_total=cart.grand_total,
         coupon=cart.coupon,
         status='pending',
     )
 
     # Create OrderItems
     for item in cart.items.all():
-        unit_price = item.product.get_price_for_country(country_id)
-        if item.product.discount_percent > 0:
-            unit_price = round(unit_price * (1 - item.product.discount_percent / 100), 2)
-        if item.variant:
-            unit_price += item.variant.additional_price
-            
         OrderItem.objects.create(
             order=order,
             product=item.product,
@@ -980,8 +909,8 @@ def place_order(request):
             product_name=item.product.name,
             variant_label=item.variant.label if item.variant else '',
             quantity=item.quantity,
-            unit_price=unit_price,
-            total_price=unit_price * item.quantity,
+            unit_price=item.unit_price,
+            total_price=item.total_price,
         )
 
     # Create Payment log
