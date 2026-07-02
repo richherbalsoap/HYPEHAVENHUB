@@ -202,25 +202,25 @@ if HAS_SIMPLE_JWT:
         'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     }
 
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.resend.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='resend')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='re_RPhraYhb_ER8RYYQUVB46AcVQafEjASxF')
-EMAIL_BACKEND = config(
-    'EMAIL_BACKEND',
-    default=(
-        'django.core.mail.backends.smtp.EmailBackend'
-        if EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
-        else 'django.core.mail.backends.console.EmailBackend'
-    )
+import os
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.resend.com')
+_email_port_str = os.environ.get('EMAIL_PORT', '587')
+EMAIL_PORT = int(_email_port_str) if _email_port_str and _email_port_str.isdigit() else 587
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'resend')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 're_RPhraYhb_ER8RYYQUVB46AcVQafEjASxF')
+EMAIL_USE_TLS = True
+
+EMAIL_BACKEND = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if EMAIL_HOST and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
+    else 'django.core.mail.backends.console.EmailBackend'
 )
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool)
-EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=20, cast=int)
-DEFAULT_FROM_EMAIL = config(
-    'DEFAULT_FROM_EMAIL',
-    default='noreply@hypehavenhub.in'
-)
+_email_use_ssl_str = os.environ.get('EMAIL_USE_SSL', '')
+EMAIL_USE_SSL = _email_use_ssl_str.lower() in ('true', '1', 't', 'y', 'yes')
+_email_timeout_str = os.environ.get('EMAIL_TIMEOUT', '20')
+EMAIL_TIMEOUT = int(_email_timeout_str) if _email_timeout_str and _email_timeout_str.isdigit() else 20
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@hypehavenhub.in')
 
 TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
