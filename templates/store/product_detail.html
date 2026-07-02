@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load localization_tags %}
 
 {% block title %}{{ product.name }} - HYPEHAVENHUB{% endblock %}
 
@@ -60,9 +61,9 @@
 
       <!-- Price -->
       <div class="product-detail-price">
-        <span class="detail-price" id="detailPrice">₹{{ product.selling_price|floatformat:"0" }}</span>
+        <span class="detail-price" id="detailPrice">{% get_localized_price product request %}</span>
         {% if product.discount_percent > 0 %}
-        <span class="detail-mrp">MRP ₹{{ product.base_price|floatformat:"0" }}</span>
+        <span class="detail-mrp">MRP {% get_localized_base_price product request %}</span>
         <span class="detail-discount">{{ product.discount_percent|floatformat:"0" }}% OFF</span>
         {% endif %}
       </div>

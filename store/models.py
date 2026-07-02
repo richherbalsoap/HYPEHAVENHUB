@@ -26,6 +26,8 @@ class User(AbstractUser):
     is_email_verified = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, blank=True)
     otp_created_at = models.DateTimeField(null=True, blank=True)
+    country = models.CharField(max_length=50, blank=True, help_text="Saved country preference")
+    language = models.CharField(max_length=20, blank=True, help_text="Saved language preference")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -681,3 +683,16 @@ class AdminDashboardStats(models.Model):
 
     def __str__(self):
         return f"Stats - {self.date}"
+
+class ProductCountryPrice(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='country_prices')
+    country_code = models.CharField(max_length=10, help_text="e.g. IN, US, GB")
+    currency = models.CharField(max_length=10, help_text="e.g. INR, USD, GBP")
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        unique_together = ('product', 'country_code')
+        verbose_name_plural = 'Product Country Prices'
+
+    def __str__(self):
+        return f"{self.product.name} - {self.country_code} ({self.currency} {self.price})"

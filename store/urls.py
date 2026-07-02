@@ -53,6 +53,7 @@ urlpatterns = [
     # API / Utils
     path('api/variant-info/<int:variant_id>/', views.get_variant_info, name='get_variant_info'),
     path('api/quick-view/<int:product_id>/', views.quick_view, name='quick_view'),
+    path('api/set-localization/', views.set_localization, name='set_localization'),
     path('run-migrations/', views.run_migrations_view, name='run_migrations'),
 
     # Admin Panel
@@ -61,6 +62,7 @@ urlpatterns = [
     path('admin/products/', admin_views.admin_products, name='admin_products'),
     path('admin/products/create/', admin_views.admin_product_create, name='admin_product_create'),
     path('admin/products/<int:pk>/edit/', admin_views.admin_product_edit, name='admin_product_edit'),
+    path('admin/products/<int:pk>/prices/', admin_views.admin_product_prices, name='admin_product_prices'),
     path('admin/products/images/<int:pk>/delete/', admin_views.admin_product_image_delete, name='admin_product_image_delete'),
     path('admin/products/<int:pk>/delete/', admin_views.admin_product_delete, name='admin_product_delete'),
     path('admin/orders/', admin_views.admin_orders, name='admin_orders'),

@@ -1200,3 +1200,27 @@ def run_migrations_view(request):
     return HttpResponse(result, content_type="text/plain")
 
 
+@require_POST
+def set_localization(request):
+    """Save user country and language preferences"""
+    try:
+        data = json.loads(request.body)
+        country = data.get('country')
+        language = data.get('language')
+        
+        if not country:
+            return JsonResponse({'success': False, 'error': 'Country is required'}, status=400)
+            
+        request.session['user_country'] = country
+        if language:
+            request.session['user_language'] = language
+            
+        if request.user.is_authenticated:
+            request.user.country = country
+            if language:
+                request.user.language = language
+            request.user.save()
+            
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

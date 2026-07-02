@@ -60,6 +60,9 @@
                         <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-info">
                             <i class="fas fa-edit"></i> Edit
                         </a>
+                        <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-globe"></i> Prices
+                        </a>
                         <a href="{% url 'admin_product_delete' product.id %}" class="btn btn-sm btn-danger">
                             <i class="fas fa-trash"></i> Delete
                         </a>

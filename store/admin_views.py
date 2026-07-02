@@ -13,7 +13,7 @@ from datetime import timedelta
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductCountryPrice
 )
 from .forms import (
     ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm
@@ -221,6 +221,37 @@ def admin_product_image_delete(request, pk):
     product_pk = image.product.pk
     image.delete()
     return JsonResponse({'success': True, 'message': 'Image deleted successfully'})
+
+
+@login_required
+@admin_required
+def admin_product_prices(request, pk):
+    """Manage country specific prices for a product"""
+    product = get_object_or_404(Product, pk=pk)
+    
+    if request.method == 'POST':
+        country_code = request.POST.get('country_code')
+        currency = request.POST.get('currency')
+        price = request.POST.get('price')
+        
+        if country_code and currency and price:
+            ProductCountryPrice.objects.update_or_create(
+                product=product,
+                country_code=country_code.upper(),
+                defaults={'currency': currency.upper(), 'price': price}
+            )
+            messages.success(request, f'Price for {country_code.upper()} updated.')
+        
+        delete_id = request.POST.get('delete_price_id')
+        if delete_id:
+            ProductCountryPrice.objects.filter(id=delete_id, product=product).delete()
+            messages.success(request, 'Price removed.')
+            
+        return redirect('admin_product_prices', pk=pk)
+        
+    prices = product.country_prices.all()
+    context = {'product': product, 'prices': prices, 'title': f'Manage Prices: {product.name}'}
+    return render(request, 'admin/product_prices.html', context)
 
 
 @login_required

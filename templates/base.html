@@ -58,6 +58,15 @@
     
     <!-- Right: Icons cluster (Cart + Hamburger Only) -->
     <div class="nav-icons d-flex align-items-center gap-2 ms-auto">
+      
+      <!-- Localization Trigger -->
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-2" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Change Country/Language">
+        <span class="material-symbols-outlined">language</span>
+        <span class="ms-1 d-none d-md-inline" style="font-size: 13px; font-weight: 500;">
+          {{ active_country|default:"GLOBAL" }}
+        </span>
+      </button>
+
       <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="Cart">
         <span class="material-symbols-outlined">shopping_bag</span>
         {% if cart_count > 0 %}<span class="cart-badge" id="cartBadge">{{ cart_count }}</span>{% endif %}
@@ -232,6 +241,111 @@
     </div>
   </div>
 </div>
+
+<!-- Localization Modal -->
+<div class="modal fade" id="localizationModal" tabindex="-1" aria-labelledby="localizationModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title" id="localizationModalLabel">Choose your location</h5>
+        {% if active_country %}
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        {% endif %}
+      </div>
+      <div class="modal-body pb-4">
+        <p class="text-muted small mb-4">Please select your country to see regional pricing and shipping options.</p>
+        <form id="localizationForm">
+          <div class="mb-3">
+            <label class="form-label fw-500">Country / Region</label>
+            <select id="locCountry" class="form-select form-select-lg" required>
+              <option value="" disabled {% if not active_country %}selected{% endif %}>Select your country</option>
+              <option value="IN" {% if active_country == 'IN' %}selected{% endif %}>India</option>
+              <option value="US" {% if active_country == 'US' %}selected{% endif %}>United States</option>
+              <option value="GB" {% if active_country == 'GB' %}selected{% endif %}>United Kingdom</option>
+              <option value="CA" {% if active_country == 'CA' %}selected{% endif %}>Canada</option>
+              <option value="AU" {% if active_country == 'AU' %}selected{% endif %}>Australia</option>
+              <option value="AE" {% if active_country == 'AE' %}selected{% endif %}>United Arab Emirates</option>
+              <option value="GLOBAL" {% if active_country == 'GLOBAL' %}selected{% endif %}>Rest of World</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-500">Language</label>
+            <select id="locLanguage" class="form-select form-select-lg" required>
+              <option value="en" {% if active_language == 'en' %}selected{% endif %}>English</option>
+              <option value="hi" {% if active_language == 'hi' %}selected{% endif %}>Hindi</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2">Save Preferences</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const hasCountry = "{{ active_country }}" !== "";
+    const locModalEl = document.getElementById('localizationModal');
+    if (!locModalEl) return;
+    
+    const locModal = new bootstrap.Modal(locModalEl, {
+        backdrop: hasCountry ? true : 'static',
+        keyboard: hasCountry
+    });
+    
+    if (!hasCountry) {
+        locModal.show();
+    }
+    
+    const locCountry = document.getElementById('locCountry');
+    const locLanguage = document.getElementById('locLanguage');
+    locCountry.addEventListener('change', function() {
+        if(this.value === 'IN') {
+            locLanguage.innerHTML = '<option value="en">English</option><option value="hi">Hindi</option>';
+        } else if(this.value === 'AE') {
+            locLanguage.innerHTML = '<option value="en">English</option><option value="ar">Arabic</option>';
+        } else {
+            locLanguage.innerHTML = '<option value="en">English</option>';
+        }
+    });
+
+    document.getElementById('localizationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+        btn.disabled = true;
+        
+        const data = {
+            country: locCountry.value,
+            language: locLanguage.value
+        };
+        
+        fetch("{% url 'set_localization' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.success) {
+                window.location.reload();
+            } else {
+                alert("Error saving preferences. Please try again.");
+                btn.innerHTML = 'Save Preferences';
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            btn.innerHTML = 'Save Preferences';
+            btn.disabled = false;
+        });
+    });
+});
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% load static %}

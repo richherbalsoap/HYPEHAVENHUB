@@ -1,3 +1,4 @@
+{% load localization_tags %}
 <div class="product-card">
   <div class="product-card-image-wrapper">
     <a href="{% url 'product_detail' product.slug %}" class="product-card-image-link">
@@ -60,10 +61,9 @@
     </div>
     {% endif %}
     <div class="product-price">
-      <span class="price-current">₹{{ product.selling_price|floatformat:"0" }}</span>
+      <span class="price-current">{% get_localized_price product request %}</span>
       {% if product.discount_percent > 0 %}
-        <span class="price-original">₹{{ product.base_price|floatformat:"0" }}</span>
-        <span class="price-discount">Save ₹{{ product.discount_amount|floatformat:"0" }}</span>
+        <span class="price-original">{% get_localized_base_price product request %}</span>
       {% endif %}
     </div>
 

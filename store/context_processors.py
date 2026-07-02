@@ -44,3 +44,15 @@ def company_dashboard_access(request):
         )
     return {'can_access_company_dashboard': can_access}
 
+def localization_data(request):
+    country = request.session.get('user_country', '')
+    language = request.session.get('user_language', '')
+    
+    if not country and request.user.is_authenticated:
+        country = getattr(request.user, 'country', '')
+        language = getattr(request.user, 'language', '')
+        
+    return {
+        'active_country': country,
+        'active_language': language,
+    }
