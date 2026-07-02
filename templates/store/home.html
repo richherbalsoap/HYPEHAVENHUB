@@ -71,10 +71,10 @@
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <span class="section-eyebrow">Customer Favorites</span>
-        <h2 class="section-title mb-0">Best Sellers</h2>
+        <span class="section-eyebrow">{% t "customer_favorites" %}</span>
+        <h2 class="section-title mb-0">{% t "best_sellers" %}</h2>
       </div>
-      <a href="{% url 'product_list' %}?sort=popularity" class="text-decoration-none fw-600 text-gold hover-underline">View All <span class="material-symbols-outlined ms-1" style="font-size: inherit; vertical-align: middle;">arrow_forward</span></a>
+      <a href="{% url 'product_list' %}?sort=popularity" class="text-decoration-none fw-600 text-gold hover-underline">{% t "view_all" %} <span class="material-symbols-outlined ms-1" style="font-size: inherit; vertical-align: middle;">arrow_forward</span></a>
     </div>
 
     <div class="row g-4">

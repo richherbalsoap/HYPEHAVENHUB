@@ -16,7 +16,7 @@
 
     <!-- Quick View Button -->
     <button class="btn-quick-view" data-quick-view data-product-id="{{ product.id }}">
-      <span class="material-symbols-outlined me-1">visibility</span> Quick View
+      <span class="material-symbols-outlined me-1">visibility</span> {% t "quick_view" %}
     </button>
 
     {% if product.discount_percent > 0 %}
@@ -36,7 +36,7 @@
     {% endif %}
 
     <button class="product-card-quick-add" data-add-cart data-product-id="{{ product.id }}">
-      <span class="material-symbols-outlined me-1">shopping_bag</span> Add to Bag
+      <span class="material-symbols-outlined me-1">shopping_bag</span> {% t "add_to_cart" %}
     </button>
   </div>
 

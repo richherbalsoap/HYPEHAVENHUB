@@ -69,7 +69,7 @@
       </div>
       <div class="mb-3 text-muted small">
         <i class="material-symbols-outlined fs-6 align-middle me-1">local_shipping</i> 
-        Shipping: {% if current_country %}{{ current_country.currency_symbol }}{{ current_country.shipping_charge }}{% else %}₹0.00{% endif %}
+        {% t "shipping" %}: {% if current_country and current_country.shipping_charge > 0 %}{% format_price current_country.shipping_charge %}{% elif current_country and current_country.shipping_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹0.00{% endif %}
       </div>
 
       {% if product.is_flash_sale %}
@@ -152,10 +152,10 @@
   <!-- Product Tabs -->
   <div class="mt-5">
     <ul class="nav nav-tabs" id="productTabs">
-      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabDesc">Description</button></li>
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabDesc">{% t "description" %}</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabIngredients">Material & Care</button></li>
       <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabHowTo">Styling Tips</button></li>
-      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReviews">Reviews ({{ product.review_count }})</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReviews">{% t "reviews" %} ({{ product.review_count }})</button></li>
     </ul>
     <div class="tab-content border border-top-0 rounded-bottom p-4">
       <div class="tab-pane fade show active" id="tabDesc">
@@ -179,7 +179,7 @@
         <!-- Write Review -->
         {% if user.is_authenticated and not user_review %}
         <div class="mb-4 p-4 rounded-3" style="background: var(--surface-container-low); border: 1px dashed var(--outline-variant);">
-          <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif;">Write a Review</h6>
+          <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif;">{% t "write_review" %}</h6>
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="mb-3">
@@ -250,7 +250,7 @@
   {% if similar %}
   <div class="mt-5">
     <div class="section-header text-start mb-4">
-      <h3 class="section-title" style="font-size: 1.5rem;">Similar Jewelry</h3>
+      <h3 class="section-title" style="font-size: 1.5rem;">{% t "similar_products" %}</h3>
     </div>
     <div class="row g-3">
       {% for p in similar %}

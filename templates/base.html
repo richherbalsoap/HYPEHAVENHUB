@@ -30,7 +30,7 @@
 {% block header %}
 <div class="announcement-bar">
   <div class="container text-center">
-    <span class="announcement-text"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">local_shipping</span> Free delivery on orders above ₹499 &nbsp;|&nbsp; <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">sell</span> Use code <strong>JHUMKA10</strong> for 10% off</span>
+    <span class="announcement-text"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">local_shipping</span> {% t "free_delivery_above" %} {% format_price 499 %} &nbsp;|&nbsp; <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">sell</span> {% t "use_code_jhumka" %}</span>
   </div>
 </div>
 
@@ -47,11 +47,11 @@
     <div class="d-none d-lg-flex ms-4">
       <ul class="navbar-nav gap-3">
         <li class="nav-item"><a class="nav-link cat-link" href="{% url 'home' %}">{% t "home" %}</a></li>
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">All Jewelry</a></li>
+        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">{% t "all_jewelry" %}</a></li>
         {% for cat in all_categories %}
         <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
         {% endfor %}
-        <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=10"><span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">whatshot</span>Offers</a></li>
+        <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=10"><span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">whatshot</span>{% t "offers" %}</a></li>
       </ul>
     </div>
 
@@ -92,7 +92,7 @@
       <!-- Mobile Search Bar -->
       <form class="mb-4" action="{% url 'product_list' %}" method="GET">
         <div class="input-group search-group">
-          <input type="text" name="q" class="form-control search-input" placeholder="Search..." autocomplete="off">
+          <input type="text" name="q" class="form-control search-input" placeholder="{% t 'search_placeholder' %}" autocomplete="off">
           <button class="btn search-btn" type="submit"><span class="material-symbols-outlined">search</span></button>
         </div>
       </form>
@@ -100,15 +100,15 @@
       <!-- Navigation Links -->
       <ul class="nav flex-column gap-3 fs-5">
         <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'home' %}">{% t "home" %}</a></li>
-        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}">All Jewelry</a></li>
+        <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}">{% t "all_jewelry" %}</a></li>
         {% for cat in all_categories %}
         <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
         {% endfor %}
-        <li class="nav-item"><a class="nav-link text-danger fw-600" href="{% url 'product_list' %}?discount=10"><span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">whatshot</span>Offers</a></li>
+        <li class="nav-item"><a class="nav-link text-danger fw-600" href="{% url 'product_list' %}?discount=10"><span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">whatshot</span>{% t "offers" %}</a></li>
         {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'wishlist' %}"><span class="material-symbols-outlined me-2" style="font-size: 18px; vertical-align: middle;">favorite</span>{% t "wishlist" %}</a></li>
-          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'notifications' %}"><span class="material-symbols-outlined me-2" style="font-size: 18px; vertical-align: middle;">notifications</span>Notifications</a></li>
-          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'settings' %}"><span class="material-symbols-outlined me-2" style="font-size: 18px; vertical-align: middle;">settings</span>Settings</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'notifications' %}"><span class="material-symbols-outlined me-2" style="font-size: 18px; vertical-align: middle;">notifications</span>{% t "notifications" %}</a></li>
+          <li class="nav-item"><a class="nav-link text-dark fw-500" href="{% url 'settings' %}"><span class="material-symbols-outlined me-2" style="font-size: 18px; vertical-align: middle;">settings</span>{% t "settings" %}</a></li>
         {% endif %}
       </ul>
     </div>
@@ -118,14 +118,14 @@
       {% if user.is_authenticated %}
         <div class="d-flex align-items-center gap-2 mb-3">
           <span class="material-symbols-outlined text-muted">person</span>
-          <span class="fw-500">Hi, {{ user.first_name|default:user.email }}</span>
+          <span class="fw-500">{% t "hi_user" %} {{ user.first_name|default:user.email }}</span>
         </div>
-        <a href="{% url 'profile' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">My Profile</a>
-        <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100">Logout</a>
+        <a href="{% url 'profile' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">{% t "my_profile" %}</a>
+        <a href="{% url 'logout' %}" class="btn btn-dark btn-sm w-100">{% t "logout" %}</a>
       {% else %}
         <div class="d-flex gap-2">
           <a href="{% url 'login' %}" class="btn btn-outline-dark btn-sm w-50">{% t "login" %}</a>
-          <a href="{% url 'signup' %}" class="btn btn-dark btn-sm w-50">Sign Up</a>
+          <a href="{% url 'signup' %}" class="btn btn-dark btn-sm w-50">{% t "sign_up" %}</a>
         </div>
       {% endif %}
       
@@ -178,41 +178,41 @@
       <div class="col-lg-2 col-md-6">
         <h6 class="footer-title">{% t "shop" %}</h6>
         <ul class="footer-links">
-          <li><a href="{% url 'product_list' %}">All Jewelry</a></li>
+          <li><a href="{% url 'product_list' %}">{% t "all_jewelry" %}</a></li>
           {% for cat in all_categories %}
           <li><a href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
           {% endfor %}
-          <li><a href="{% url 'product_list' %}?discount=10">Offers</a></li>
+          <li><a href="{% url 'product_list' %}?discount=10">{% t "offers" %}</a></li>
         </ul>
       </div>
       <div class="col-lg-2 col-md-6">
-        <h6 class="footer-title">My Account</h6>
+        <h6 class="footer-title">{% t "my_account" %}</h6>
         <ul class="footer-links">
-          <li><a href="{% url 'profile' %}">Profile</a></li>
-          <li><a href="{% url 'settings' %}">Settings</a></li>
+          <li><a href="{% url 'profile' %}">{% t "my_profile" %}</a></li>
+          <li><a href="{% url 'settings' %}">{% t "settings" %}</a></li>
           <li><a href="{% url 'order_list' %}">{% t "my_orders" %}</a></li>
           <li><a href="{% url 'wishlist' %}">{% t "wishlist" %}</a></li>
-          <li><a href="{% url 'address_list' %}">Addresses</a></li>
+          <li><a href="{% url 'address_list' %}">{% t "addresses" %}</a></li>
         </ul>
       </div>
       <div class="col-lg-4 col-md-6">
-        <h6 class="footer-title">Stay in the Loop</h6>
-        <p class="footer-desc">Get jhumka box restock updates and simple festive offers straight to your inbox.</p>
+        <h6 class="footer-title">{% t "stay_in_the_loop" %}</h6>
+        <p class="footer-desc">{% t "newsletter_desc" %}</p>
         <div class="input-group newsletter-input">
-          <input type="email" class="form-control" placeholder="Enter your email">
-          <button class="btn btn-pink">Subscribe</button>
+          <input type="email" class="form-control" placeholder="{% t 'enter_email' %}">
+          <button class="btn btn-pink">{% t "subscribe" %}</button>
         </div>
         <div class="payment-icons mt-3">
-          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">credit_card</span> Card</span>
-          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">smartphone</span> UPI</span>
-          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">account_balance_wallet</span> Wallet</span>
-          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">paid</span> COD</span>
+          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">credit_card</span> {% t "card" %}</span>
+          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">smartphone</span> {% t "upi" %}</span>
+          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">account_balance_wallet</span> {% t "wallet" %}</span>
+          <span class="pay-icon"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle;">paid</span> {% t "cod" %}</span>
         </div>
       </div>
     </div>
     <hr class="footer-hr">
     <div class="text-center footer-bottom">
-      <p>Copyright 2026 HYPEHAVENHUB. All Rights Reserved. Made with <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: var(--primary);">favorite</span> for jhumka lovers.</p>
+      <p>{% t "copyright_text" %}</p>
     </div>
   </div>
 </footer>

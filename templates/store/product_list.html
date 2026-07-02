@@ -44,18 +44,18 @@
     <div class="col-lg-3 d-none d-lg-block">
       <form method="GET" id="filterForm">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h6 class="fw-700 mb-0" style="font-size: 16px;">Filters</h6>
-          <a href="{% url 'product_list' %}" class="small" style="color: var(--primary);">Clear All</a>
+          <h6 class="fw-700 mb-0" style="font-size: 16px;">{% t "filters" %}</h6>
+          <a href="{% url 'product_list' %}" class="small" style="color: var(--primary);">{% t "clear_all" %}</a>
         </div>
 
         {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
         {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
 
         <div class="filter-card">
-          <div class="filter-title">Category</div>
+          <div class="filter-title">{% t "category" %}</div>
           <label class="filter-option">
             <input type="radio" name="category" value="" {% if not selected_category %}checked{% endif %} onchange="document.getElementById('filterForm').submit()">
-            All Jewelry
+            {% t "all_jewelry" %}
           </label>
           {% for cat in categories %}
           <label class="filter-option">
@@ -71,7 +71,7 @@
             <input type="number" name="min_price" class="form-control form-control-sm" placeholder="Min" value="{{ selected_min_price }}">
             <input type="number" name="max_price" class="form-control form-control-sm" placeholder="Max" value="{{ selected_max_price }}">
           </div>
-          <button type="submit" class="btn btn-artisan-primary btn-sm mt-2 w-100">Apply</button>
+          <button type="submit" class="btn btn-artisan-primary btn-sm mt-2 w-100">{% t "apply_filters" %}</button>
         </div>
 
         <div class="filter-card">
@@ -121,7 +121,7 @@
           {% if selected_min_price %}<input type="hidden" name="min_price" value="{{ selected_min_price }}">{% endif %}
           {% if selected_max_price %}<input type="hidden" name="max_price" value="{{ selected_max_price }}">{% endif %}
           {% if selected_discount %}<input type="hidden" name="discount" value="{{ selected_discount }}">{% endif %}
-          <label class="text-muted small me-1">Sort:</label>
+          <label class="text-muted small me-1">{% t "sort_by" %}:</label>
           <select name="sort" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
             <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Newest First</option>
             <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
@@ -172,9 +172,9 @@
       <div class="empty-state">
         <div class="text-center py-5">
           <span class="material-symbols-outlined text-muted mb-3" style="font-size: 48px;">search_off</span>
-          <h5>No products found</h5>
+          <h5>{% t "no_products" %}</h5>
           <p class="text-muted">Try adjusting your filters to find what you're looking for.</p>
-          <a href="{% url 'product_list' %}" class="btn btn-artisan-outline mt-3">Clear Filters</a>
+          <a href="{% url 'product_list' %}" class="btn btn-artisan-outline mt-3">{% t "clear_all" %}</a>
         </div>
       {% endif %}
     </div>

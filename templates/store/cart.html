@@ -41,7 +41,7 @@
             {{ item.variant.label }}
           </div>
           {% endif %}
-          <div class="cart-item-price" style="color: var(--primary); font-weight: 600; font-family: 'Montserrat', sans-serif;">₹{{ item.unit_price|floatformat:"0" }}</div>
+          <div class="cart-item-price" style="color: var(--primary); font-weight: 600; font-family: 'Montserrat', sans-serif;">{% get_cart_item_price item as it_price %}{% format_price it_price|floatformat:"0" %}</div>
         </div>
         <div class="d-flex flex-column align-items-end gap-3">
           <div class="qty-selector" style="border: 1px solid var(--outline-variant); border-radius: 10px; overflow: hidden;">
@@ -49,7 +49,7 @@
             <span class="qty-num" id="qty-{{ item.id }}" style="padding: 6px 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--on-surface);">{{ item.quantity }}</span>
             <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "increase"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 6px 12px; color: var(--primary); font-weight: 700;">+</button>
           </div>
-          <div class="fw-700" id="total-{{ item.id }}" style="font-family: 'Playfair Display', serif; font-size: 17px; color: var(--on-surface);">₹{{ item.total_price|floatformat:"0" }}</div>
+          <div class="fw-700" id="total-{{ item.id }}" style="font-family: 'Playfair Display', serif; font-size: 17px; color: var(--on-surface);">{% get_cart_item_total item as it_total %}{% format_price it_total|floatformat:"0" %}</div>
           <button class="btn btn-sm" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "remove"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" title="Remove" style="color: var(--primary); opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
             <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
           </button>
@@ -78,29 +78,35 @@
         <div class="luxury-line mb-3" style="max-width: 50px;"></div>
         <div class="summary-row" style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Montserrat', sans-serif; font-size: 14px;">
           <span style="color: var(--on-surface-variant);">Subtotal ({{ cart.total_items }} items)</span>
-          <span id="summary-subtotal" style="color: var(--on-surface); font-weight: 600;">₹{{ cart.subtotal|floatformat:"0" }}</span>
+          {% get_cart_subtotal cart as c_sub %}
+          <span id="summary-subtotal" style="color: var(--on-surface); font-weight: 600;">{% format_price c_sub|floatformat:"0" %}</span>
         </div>
         <div class="summary-row" id="discount-row" {% if not cart.discount_amount %}style="display: none;"{% else %}style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Montserrat', sans-serif; font-size: 14px;"{% endif %}>
           <span style="color: var(--secondary);">Discount (Coupon)</span>
-          <span style="color: var(--secondary);" id="discount-amt">-₹{{ cart.discount_amount|floatformat:"0" }}</span>
+          <span style="color: var(--secondary);" id="discount-amt">-{% format_price cart.discount_amount|floatformat:"0" %}</span>
         </div>
         <div class="summary-row" style="display: flex; justify-content: space-between; padding: 8px 0; font-family: 'Montserrat', sans-serif; font-size: 14px;">
           <span style="color: var(--on-surface-variant);">Delivery</span>
           <span id="delivery-value">
-            {% if cart.delivery_charge == 0 %}
+            {% if current_country and current_country.shipping_charge > 0 %}
+              {% format_price current_country.shipping_charge %}
+            {% elif current_country and current_country.shipping_charge == 0 %}
+              <span style="color: var(--secondary); font-weight: 600;">FREE</span>
+            {% elif cart.delivery_charge == 0 %}
               <span style="color: var(--secondary); font-weight: 600;">FREE</span>
             {% else %}
-              ₹{{ cart.delivery_charge }}
+              {% format_price cart.delivery_charge %}
             {% endif %}
           </span>
         </div>
         <div style="border-top: 1px solid var(--outline-variant); margin: 8px 0;"></div>
         <div class="summary-row" style="display: flex; justify-content: space-between; padding: 10px 0; font-family: 'Montserrat', sans-serif;">
           <span class="fw-700" style="font-size: 16px; color: var(--on-surface);">Total</span>
-          <span class="summary-total" id="summary-total" style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--primary);">₹{{ cart.grand_total|floatformat:"0" }}</span>
+          {% get_cart_total cart c_sub as c_total %}
+          <span class="summary-total" id="summary-total" style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--primary);">{% format_price c_total|floatformat:"0" %}</span>
         </div>
         {% if cart.discount_amount > 0 %}
-        <div class="small mt-2" style="color: var(--secondary);"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: text-bottom;">sell</span>You're saving ₹{{ cart.discount_amount|floatformat:"0" }}</div>
+        <div class="small mt-2" style="color: var(--secondary);"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: text-bottom;">sell</span>You're saving {% format_price cart.discount_amount|floatformat:"0" %}</div>
         {% endif %}
         
         <!-- Luxury Trust Markers -->
@@ -122,7 +128,7 @@
         </div>
 
         <a href="{% url 'checkout' %}" class="btn-artisan-primary mt-4 d-block text-center text-decoration-none" style="padding: 14px; border-radius: 12px; font-size: 16px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px;">
-          Proceed to Checkout <span class="material-symbols-outlined ms-2" style="font-size: 18px; vertical-align: middle;">arrow_forward</span>
+          {% t "proceed_to_checkout" %} <span class="material-symbols-outlined ms-2" style="font-size: 18px; vertical-align: middle;">arrow_forward</span>
         </a>
         <a href="{% url 'product_list' %}" class="d-block text-center small mt-3 text-decoration-none" style="color: var(--on-surface-variant); font-family: 'Montserrat', sans-serif;">
           <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: text-bottom;">arrow_back</span>Continue Shopping
