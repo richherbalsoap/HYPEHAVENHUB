@@ -230,20 +230,17 @@ def admin_product_prices(request, pk):
     product = get_object_or_404(Product, pk=pk)
     
     if request.method == 'POST':
-        country_code = request.POST.get('country_code')
+        country_id = request.POST.get('country_id')
         price = request.POST.get('price')
         
-        if country_code and price:
-            country, created = CountrySetting.objects.get_or_create(
-                code=country_code.upper(),
-                defaults={'name': country_code.upper(), 'currency_code': 'USD', 'currency_symbol': '$'}
-            )
+        if country_id and price:
+            country = get_object_or_404(CountrySetting, pk=country_id)
             ProductPrice.objects.update_or_create(
                 product=product,
                 country=country,
                 defaults={'price': price}
             )
-            messages.success(request, f'Price for {country_code.upper()} updated.')
+            messages.success(request, f'Price for {country.name} updated.')
         
         delete_id = request.POST.get('delete_price_id')
         if delete_id:
@@ -253,7 +250,13 @@ def admin_product_prices(request, pk):
         return redirect('admin_product_prices', pk=pk)
         
     prices = product.country_prices.all()
-    context = {'product': product, 'prices': prices, 'title': f'Manage Prices: {product.name}'}
+    all_countries = CountrySetting.objects.all().order_by('name')
+    context = {
+        'product': product, 
+        'prices': prices, 
+        'all_countries': all_countries,
+        'title': f'Manage Prices: {product.name}'
+    }
     return render(request, 'admin/product_prices.html', context)
 
 
@@ -541,3 +544,89 @@ def user_complaints(request):
     
     context = {'complaints': complaints}
     return render(request, 'store/complaints_list.html', context)
+
+@login_required
+def admin_countries(request):
+    "\""List all country settings"\""
+    if not request.user.is_staff:
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+        
+    countries = CountrySetting.objects.all().order_by('name')
+    return render(request, 'admin/countries_list.html', {
+        'countries': countries,
+        'title': 'Country Settings'
+    })
+
+@login_required
+def admin_country_create(request):
+    "\""Create new country setting"\""
+    if not request.user.is_staff:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        code = request.POST.get('code')
+        currency_code = request.POST.get('currency_code')
+        currency_symbol = request.POST.get('currency_symbol')
+        default_language = request.POST.get('default_language')
+        shipping_charge = request.POST.get('shipping_charge')
+        
+        try:
+            CountrySetting.objects.create(
+                name=name,
+                code=code,
+                currency_code=currency_code,
+                currency_symbol=currency_symbol,
+                default_language=default_language,
+                shipping_charge=shipping_charge
+            )
+            messages.success(request, 'Country added successfully!')
+            return redirect('admin_countries')
+        except Exception as e:
+            messages.error(request, f'Error adding country: {str(e)}')
+            
+    return render(request, 'admin/country_form.html', {
+        'title': 'Add Country Setting'
+    })
+
+@login_required
+def admin_country_edit(request, pk):
+    "\""Edit country setting"\""
+    if not request.user.is_staff:
+        return redirect('home')
+        
+    country = get_object_or_404(CountrySetting, pk=pk)
+    
+    if request.method == 'POST':
+        country.name = request.POST.get('name')
+        country.code = request.POST.get('code')
+        country.currency_code = request.POST.get('currency_code')
+        country.currency_symbol = request.POST.get('currency_symbol')
+        country.default_language = request.POST.get('default_language')
+        country.shipping_charge = request.POST.get('shipping_charge')
+        
+        try:
+            country.save()
+            messages.success(request, 'Country updated successfully!')
+            return redirect('admin_countries')
+        except Exception as e:
+            messages.error(request, f'Error updating country: {str(e)}')
+            
+    return render(request, 'admin/country_form.html', {
+        'country': country,
+        'title': f'Edit {country.name}'
+    })
+
+@login_required
+def admin_country_delete(request, pk):
+    "\""Delete country setting"\""
+    if not request.user.is_staff:
+        return redirect('home')
+        
+    country = get_object_or_404(CountrySetting, pk=pk)
+    if request.method == 'POST':
+        country.delete()
+        messages.success(request, 'Country removed.')
+    return redirect('admin_countries')
+

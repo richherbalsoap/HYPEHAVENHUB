@@ -477,6 +477,10 @@
                    href="{% url 'admin_products' %}">
                     <i class="fas fa-box-open nav-icon"></i> Products
                 </a>
+                <a class="nav-link {% if 'admin_countr' in request.resolver_match.url_name %}active{% endif %}"
+                   href="{% url 'admin_countries' %}">
+                    <i class="fas fa-globe nav-icon"></i> Countries
+                </a>
                 <a class="nav-link {% if 'admin_order' in request.resolver_match.url_name %}active{% endif %}"
                    href="{% url 'admin_orders' %}">
                     <i class="fas fa-receipt nav-icon"></i> Orders

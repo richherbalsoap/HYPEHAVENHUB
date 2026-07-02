@@ -1,4 +1,4 @@
-{% extends 'admin/base.html' %}
+{% extends 'admin/custom_base.html' %}
 
 {% block page_title %}{{ title }}{% endblock %}
 
@@ -21,23 +21,19 @@
                 <form method="POST">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Country Code</label>
-                        <select name="country_code" class="form-select" required>
+                        <label class="form-label">Country</label>
+                        <select name="country_id" class="form-select bg-secondary text-white border-0" required>
                             <option value="">Select Country...</option>
-                            <option value="US">United States (US)</option>
-                            <option value="IN">India (IN)</option>
-                            <option value="GB">United Kingdom (GB)</option>
-                            <option value="CA">Canada (CA)</option>
-                            <option value="AU">Australia (AU)</option>
-                            <option value="AE">UAE (AE)</option>
-                            <option value="GLOBAL">Global / Rest of World</option>
+                            {% for c in all_countries %}
+                                <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+                            {% endfor %}
                         </select>
-                        <small class="text-muted">Use GLOBAL for default international pricing.</small>
+                        <small class="text-muted">You must add countries in the 'Countries' tab first.</small>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Price</label>
-                        <input type="number" step="0.01" name="price" class="form-control" placeholder="e.g. 29.99" required>
+                        <input type="number" step="0.01" name="price" class="form-control bg-secondary text-white border-0" placeholder="e.g. 29.99" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-save"></i> Save Price
