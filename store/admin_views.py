@@ -547,7 +547,7 @@ def user_complaints(request):
 
 @login_required
 def admin_countries(request):
-    "\""List all country settings"\""
+    """List all country settings"""
     if not request.user.is_staff:
         messages.error(request, 'Access denied.')
         return redirect('home')
@@ -560,7 +560,7 @@ def admin_countries(request):
 
 @login_required
 def admin_country_create(request):
-    "\""Create new country setting"\""
+    """Create new country setting"""
     if not request.user.is_staff:
         return redirect('home')
         
@@ -592,7 +592,7 @@ def admin_country_create(request):
 
 @login_required
 def admin_country_edit(request, pk):
-    "\""Edit country setting"\""
+    """Edit country setting"""
     if not request.user.is_staff:
         return redirect('home')
         
@@ -620,7 +620,7 @@ def admin_country_edit(request, pk):
 
 @login_required
 def admin_country_delete(request, pk):
-    "\""Delete country setting"\""
+    """Delete country setting"""
     if not request.user.is_staff:
         return redirect('home')
         
