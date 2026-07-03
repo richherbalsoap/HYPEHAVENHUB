@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
@@ -491,14 +491,14 @@ def signup_view(request):
             send_otp_email(user.email, otp, purpose='verification')
             request.session['verify_email'] = user.email
             
-            if is_console_email_backend():
+            if is_console_email_backend() or getattr(settings, 'DEBUG', False):
                 request.session['reset_otp_preview'] = otp
             
             return redirect('verify_otp')
         return render(request, 'auth/signup.html', {'form': form})
     except Exception as e:
         import traceback
-        return django.http.HttpResponseServerError(f"SIGNUP ERROR: {str(e)}\n\n{traceback.format_exc()}")
+        return HttpResponseServerError(f"SIGNUP ERROR: {str(e)}\n\n{traceback.format_exc()}")
 
 
 def verify_otp_view(request):
@@ -523,6 +523,7 @@ def verify_otp_view(request):
                 request.session.pop('verify_email', None)
                 request.session.pop('reset_otp_preview', None)
                 
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
                 login(request, user)
                 merge_anonymous_cart(request, user)
                 messages.success(request, 'Email verified successfully. You are now logged in.')
@@ -532,8 +533,7 @@ def verify_otp_view(request):
         return render(request, 'auth/verify_otp.html', {'email': email, 'otp_preview': otp_preview})
     except Exception as e:
         import traceback
-        import django.http
-        return django.http.HttpResponseServerError(f"VERIFY_OTP ERROR: {str(e)}\n\n{traceback.format_exc()}")
+        return HttpResponseServerError(f"VERIFY_OTP ERROR: {str(e)}\n\n{traceback.format_exc()}")
 
 
 def login_view(request):
