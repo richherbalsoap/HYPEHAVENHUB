@@ -81,7 +81,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100%; }
 
 body {
   font-family: var(--font-body);
@@ -969,7 +969,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
   overflow: hidden;
   background: var(--surface-container);
   aspect-ratio: 1;
-  cursor: zoom-in;
+  cursor: default;
 }
 .gallery-main img {
   width: 100%;
@@ -977,7 +977,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
   object-fit: cover;
   transition: transform 0.3s;
 }
-.gallery-main:hover img { transform: scale(1.08); }
+.gallery-main:hover img { transform: scale(1); }
 .gallery-thumbs { display: flex; gap: 8px; margin-top: 12px; overflow-x: auto; }
 .gallery-thumb {
   width: 72px;
