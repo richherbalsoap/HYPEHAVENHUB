@@ -14,10 +14,6 @@
       {% endif %}
     </a>
 
-    <!-- Quick View Button -->
-    <button class="btn-quick-view" data-quick-view data-product-id="{{ product.id }}">
-      <span class="material-symbols-outlined me-1">visibility</span> {% t "quick_view" %}
-    </button>
 
     {% if product.discount_percent > 0 %}
       <span class="product-badge badge-sale">{{ product.discount_percent|floatformat:"0" }}% OFF</span>

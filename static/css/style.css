@@ -651,7 +651,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
   transition: transform 0.7s ease;
   display: block;
 }
-.category-card:hover .category-card-media img { transform: scale(1.1); }
+.category-card:hover .category-card-media img { transform: scale(1); }
 .category-fallback {
   width: 100%;
   height: 100%;
