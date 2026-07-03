@@ -481,6 +481,14 @@ def signup_view(request):
             user.save()
             
             session_country_id = request.session.get('selected_country_id')
+            if session_country_id:
+                if not CountrySetting.objects.filter(id=session_country_id).exists():
+                    first_country = CountrySetting.objects.first()
+                    session_country_id = first_country.id if first_country else None
+            else:
+                first_country = CountrySetting.objects.first()
+                session_country_id = first_country.id if first_country else None
+
             session_lang = request.session.get('django_language', 'en')
             UserProfile.objects.create(
                 user=user,
