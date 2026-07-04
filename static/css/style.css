@@ -335,6 +335,100 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 30px rgba(42, 0, 2, 0.08);
 }
+.whatsapp-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+}
+
+/* ====== PREMIUM PRODUCT SPECIFICATION TABS ====== */
+.product-spec-section {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.custom-spec-tabs {
+  border-bottom: 2px solid var(--outline-variant);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  background: var(--surface-container-lowest);
+}
+.custom-spec-tabs .nav-item {
+  margin-bottom: -2px;
+}
+.custom-spec-tabs .nav-link {
+  border: none !important;
+  background: transparent !important;
+  color: #718096 !important;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 20px 28px !important;
+  border-bottom: 3px solid transparent !important;
+  border-radius: 0 !important;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.custom-spec-tabs .nav-link:hover {
+  color: var(--primary) !important;
+}
+.custom-spec-tabs .nav-link.active {
+  color: var(--primary) !important;
+  border-bottom: 3px solid var(--primary) !important;
+  font-weight: 700;
+}
+.custom-spec-tab-content {
+  border: 1px solid var(--outline-variant);
+  border-top: none;
+  background: var(--surface-container-lowest);
+  border-radius: 0 0 12px 12px;
+}
+.spec-section-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+.spec-section-text {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--on-surface-variant);
+  margin-bottom: 20px;
+}
+.spec-sub-title {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #4a5568;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+.feature-check-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+.feature-check-item {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  margin-bottom: 12px;
+}
+.feature-check-item:last-child {
+  margin-bottom: 0;
+}
+.feature-check-item .check-icon {
+  color: #795c00;
+  font-size: 20px;
+  margin-right: 10px;
+}
 
 .navbar-toggler { border: none; padding: 0; opacity: 1; }
 .navbar-toggler:focus { box-shadow: none; outline: none; }
