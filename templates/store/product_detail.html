@@ -171,148 +171,88 @@
     </div>
   </div>
 
-  <!-- Product Tabs -->
-  <div class="mt-5 product-spec-section">
-    <ul class="nav nav-tabs custom-spec-tabs" id="productTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#tabDesc" type="button" role="tab" aria-controls="tabDesc" aria-selected="true">PRODUCT DETAILS</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="ingredients-tab" data-bs-toggle="tab" data-bs-target="#tabIngredients" type="button" role="tab" aria-controls="tabIngredients" aria-selected="false">SPECIFICATIONS</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="howto-tab" data-bs-toggle="tab" data-bs-target="#tabHowTo" type="button" role="tab" aria-controls="tabHowTo" aria-selected="false">STYLING TIPS</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#tabReviews" type="button" role="tab" aria-controls="tabReviews" aria-selected="false">REVIEWS ({{ product.review_count }})</button>
-      </li>
-    </ul>
-    <div class="tab-content custom-spec-tab-content p-4 p-md-5">
-      <div class="tab-pane fade show active" id="tabDesc" role="tabpanel" aria-labelledby="desc-tab">
-        <h4 class="spec-section-title">The Artisan's Touch</h4>
-        <p class="spec-section-text">{{ product.description }}</p>
-        
-        <h5 class="spec-sub-title mt-4">KEY FEATURES</h5>
-        <ul class="feature-check-list">
-          <li class="feature-check-item">
-            <span class="material-symbols-outlined check-icon">check_circle</span>
-            Authentic craftsmanship and design premium layout
-          </li>
-          <li class="feature-check-item">
-            <span class="material-symbols-outlined check-icon">check_circle</span>
-            Handcrafted details with premium finish matching ethnic styles
-          </li>
-          <li class="feature-check-item">
-            <span class="material-symbols-outlined check-icon">check_circle</span>
-            Lightweight design for absolute all-day comfort
-          </li>
-        </ul>
-      </div>
-      <div class="tab-pane fade" id="tabIngredients" role="tabpanel" aria-labelledby="ingredients-tab">
-        <h4 class="spec-section-title">Material & Care Instructions</h4>
-        {% if product.ingredients %}
-          <p class="spec-section-text">{{ product.ingredients }}</p>
-        {% else %}
-          <p class="spec-section-text text-muted">Material and care information not available.</p>
-        {% endif %}
-        
-        <h5 class="spec-sub-title mt-4">CARE INSTRUCTIONS</h5>
-        <ul class="feature-check-list">
-          <li class="feature-check-item">
-            <span class="material-symbols-outlined check-icon">check_circle</span>
-            Keep away from direct moisture, perfumes, and direct water contact.
-          </li>
-          <li class="feature-check-item">
-            <span class="material-symbols-outlined check-icon">check_circle</span>
-            Store inside air-tight plastic covers or original boxes when not in use.
-          </li>
-        </ul>
-      </div>
-      <div class="tab-pane fade" id="tabHowTo" role="tabpanel" aria-labelledby="howto-tab">
-        <h4 class="spec-section-title">Artisan Styling Tips</h4>
-        {% if product.how_to_use %}
-          <p class="spec-section-text">{{ product.how_to_use }}</p>
-        {% else %}
-          <p class="spec-section-text text-muted">Styling tips not available.</p>
-        {% endif %}
-      </div>
-      <div class="tab-pane fade" id="tabReviews" role="tabpanel" aria-labelledby="reviews-tab">
-        <!-- Write Review -->
-        {% if user.is_authenticated and not user_review %}
-        <div class="mb-4 p-4 rounded-3" style="background: var(--surface-container-low); border: 1px dashed var(--outline-variant);">
-          <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif;">{% t "write_review" %}</h6>
-          <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label class="form-label">Rating</label>
-              <div class="star-rating-input">
-                <span class="material-symbols-outlined" data-val="1" style="cursor:pointer;">star</span>
-                <span class="material-symbols-outlined" data-val="2" style="cursor:pointer;">star</span>
-                <span class="material-symbols-outlined" data-val="3" style="cursor:pointer;">star</span>
-                <span class="material-symbols-outlined" data-val="4" style="cursor:pointer;">star</span>
-                <span class="material-symbols-outlined" data-val="5" style="cursor:pointer;">star</span>
-              </div>
-              <input type="hidden" name="rating" id="ratingInput" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Title</label>
-              <input type="text" name="title" class="form-control" placeholder="Summarize your review" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Review</label>
-              <textarea name="body" class="form-control" rows="3" placeholder="Share your experience..." required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Photos (optional)</label>
-              <input type="file" name="review_images" class="form-control" multiple accept="image/*">
-            </div>
-            <button type="submit" class="btn-artisan-primary" style="width: auto; padding: 10px 28px;">Submit Review</button>
-          </form>
-        </div>
-        {% endif %}
-
-        <!-- Review List -->
-        {% if reviews %}
-          {% for review in reviews %}
-          <div class="review-card">
-            <div class="review-header">
-              <div>
-                <div class="reviewer-name">{{ review.user.get_full_name }}</div>
-                <div class="d-flex align-items-center gap-2 mt-1">
-                  <span style="background: var(--primary); color: var(--surface); padding: 3px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">
-                    {{ review.rating }} <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">star</span>
-                  </span>
-                  {% if review.is_verified_purchase %}
-                    <span class="review-badge"><span class="material-symbols-outlined me-1" style="font-size:14px;vertical-align:middle;">check_circle</span>Verified Purchase</span>
-                  {% endif %}
-                </div>
-              </div>
-              <div class="text-muted small">{{ review.created_at|date:"M d, Y" }}</div>
-            </div>
-            <div class="review-title">{{ review.title }}</div>
-            <div class="review-body">{{ review.body }}</div>
-            {% if review.images.exists %}
-            <div class="d-flex gap-2 mt-3">
-              {% for img in review.images.all %}
-              <img src="{{ img.image.url }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" alt="Review image">
-              {% endfor %}
-            </div>
-            {% endif %}
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="text-muted text-center py-4">No reviews yet. Be the first to review!</div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
   {% if product.aplus_image_url %}
   <!-- A+ Enhanced Brand Content -->
   <div class="aplus-content-section mt-5 mb-4 text-center">
     <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" class="img-fluid rounded shadow-sm w-100" loading="lazy" style="max-width: 1000px; margin: 0 auto; display: block;">
   </div>
   {% endif %}
+
+  <!-- Product Reviews -->
+  <div class="mt-5">
+    <div class="section-header text-start mb-4">
+      <h3 class="section-title" style="font-size: 1.5rem;">Product Reviews ({{ product.review_count }})</h3>
+    </div>
+    
+    <!-- Write Review -->
+    {% if user.is_authenticated and not user_review %}
+    <div class="mb-4 p-4 rounded-3" style="background: var(--surface-container-low); border: 1px dashed var(--outline-variant);">
+      <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif;">{% t "write_review" %}</h6>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">Rating</label>
+          <div class="star-rating-input">
+            <span class="material-symbols-outlined" data-val="1" style="cursor:pointer;">star</span>
+            <span class="material-symbols-outlined" data-val="2" style="cursor:pointer;">star</span>
+            <span class="material-symbols-outlined" data-val="3" style="cursor:pointer;">star</span>
+            <span class="material-symbols-outlined" data-val="4" style="cursor:pointer;">star</span>
+            <span class="material-symbols-outlined" data-val="5" style="cursor:pointer;">star</span>
+          </div>
+          <input type="hidden" name="rating" id="ratingInput" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" name="title" class="form-control" placeholder="Summarize your review" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Review</label>
+          <textarea name="body" class="form-control" rows="3" placeholder="Share your experience..." required></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Photos (optional)</label>
+          <input type="file" name="review_images" class="form-control" multiple accept="image/*">
+        </div>
+        <button type="submit" class="btn-artisan-primary" style="width: auto; padding: 10px 28px;">Submit Review</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- Review List -->
+    {% if reviews %}
+      <div class="review-list-container">
+      {% for review in reviews %}
+      <div class="review-card mb-3 p-3 rounded" style="border: 1px solid var(--outline-variant);">
+        <div class="review-header d-flex justify-content-between align-items-start">
+          <div>
+            <div class="reviewer-name fw-bold">{{ review.user.get_full_name }}</div>
+            <div class="d-flex align-items-center gap-2 mt-1">
+              <span style="background: var(--primary); color: var(--surface); padding: 3px 10px; border-radius: 12px; font-size: 13px; font-weight: 600;">
+                {{ review.rating }} <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">star</span>
+              </span>
+              {% if review.is_verified_purchase %}
+                <span class="review-badge text-success" style="font-size:12px;"><span class="material-symbols-outlined me-1" style="font-size:14px;vertical-align:middle;">check_circle</span>Verified Purchase</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="text-muted small">{{ review.created_at|date:"M d, Y" }}</div>
+        </div>
+        <div class="review-title fw-bold mt-2">{{ review.title }}</div>
+        <div class="review-body mt-1">{{ review.body }}</div>
+        {% if review.images.exists %}
+        <div class="d-flex gap-2 mt-3">
+          {% for img in review.images.all %}
+          <img src="{{ img.image.url }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" alt="Review image">
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-muted text-center py-4 p-3 rounded" style="border: 1px dashed var(--outline-variant);">No reviews yet. Be the first to review!</div>
+    {% endif %}
+  </div>
 
   <!-- Similar Products -->
   {% if similar %}
