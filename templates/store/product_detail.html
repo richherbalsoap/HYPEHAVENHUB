@@ -173,8 +173,31 @@
 
 {% if product.aplus_image_url %}
 <!-- A+ Enhanced Brand Content -->
-<div class="aplus-content-section mt-5 mb-4 w-100 text-center" style="background: #000;">
-  <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" class="img-fluid w-100" loading="lazy" style="max-width: 1000px; margin: 0 auto; display: block;">
+<style>
+.full-bleed-aplus {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background: transparent;
+  padding: 0;
+}
+.full-bleed-aplus img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+@media (min-width: 992px) {
+  .full-bleed-aplus img {
+    max-width: 1200px; /* Made bigger on laptop as requested */
+  }
+}
+</style>
+<div class="full-bleed-aplus mt-4 mb-5 text-center">
+  <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" loading="lazy">
 </div>
 {% endif %}
 
