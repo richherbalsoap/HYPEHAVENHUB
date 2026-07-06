@@ -330,7 +330,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
 }
 .navbar-glamour.scrolled {
   padding: 8px 0;
-  background: rgba(255, 248, 245, 0.95) !important;
+  background: var(--surface) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 30px rgba(42, 0, 2, 0.08);
@@ -2213,4 +2213,90 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
   .aplus-comparison { padding: 2rem 1rem; }
   .aplus-gallery-item { width: 170px; }
   .aplus-gallery-item img { height: 140px; }
+}
+
+/* ====== MIDNIGHT OPULENCE – Dark Mode Variable Overrides ====== */
+html.dark {
+  --primary: #ffdad7;
+  --primary-container: #3d1d20;
+  --on-primary: #3d0506;
+  --on-primary-container: #ffe0de;
+  --inverse-primary: #ffdad7;
+  --primary-fixed: #ffdad7;
+  --primary-fixed-dim: #ffb3ad;
+
+  --secondary: #e9c349;
+  --secondary-container: #3a2e00;
+  --secondary-fixed: #574500;
+  --secondary-fixed-dim: #e9c349;
+  --on-secondary: #3d3000;
+  --on-secondary-container: #ffe088;
+
+  --tertiary: #c9c6c1;
+  --tertiary-container: #3e3d3a;
+  --on-tertiary-container: #e6e2dd;
+  --tertiary-fixed: #e6e2dd;
+  --tertiary-fixed-dim: #c9c6c1;
+
+  --surface: #190a0a;
+  --surface-bright: #261314;
+  --surface-dim: #130607;
+  --surface-container: #261314;
+  --surface-container-low: #200f10;
+  --surface-container-high: #31181a;
+  --surface-container-highest: #3d1d20;
+  --surface-container-lowest: #190a0a;
+  --surface-variant: #3d1d20;
+  --on-surface: #f7e0de;
+  --on-surface-variant: #dac1bf;
+  --on-background: #f7e0de;
+  --inverse-surface: #f7e0de;
+  --inverse-on-surface: #1e1b18;
+  --background: #190a0a;
+
+  --outline: #a08886;
+  --outline-variant: #5c3e40;
+}
+
+/* Dark theme specific element adjustments */
+html.dark .text-dark {
+  color: var(--on-surface) !important;
+}
+html.dark .btn-outline-dark {
+  border-color: var(--outline);
+  color: var(--on-surface);
+}
+html.dark .btn-outline-dark:hover {
+  background-color: var(--primary);
+  color: var(--on-primary);
+}
+html.dark .modal-content {
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  border-color: var(--outline-variant);
+}
+html.dark .modal-header, html.dark .modal-footer {
+  border-color: var(--outline-variant);
+}
+html.dark .btn-close {
+  filter: invert(1) grayscale(1) brightness(2);
+}
+html.dark .offcanvas {
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+}
+html.dark .card {
+  background-color: var(--surface-container);
+  border-color: var(--outline-variant);
+  color: var(--on-surface);
+}
+html.dark .list-group-item {
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  border-color: var(--outline-variant);
+}
+html.dark input, html.dark select, html.dark textarea {
+  background-color: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
 }

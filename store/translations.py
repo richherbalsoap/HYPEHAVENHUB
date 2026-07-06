@@ -176,7 +176,7 @@ TRANSLATIONS = {
     "wallet": {"en": "Wallet", "hi": "वॉलेट"},
     "cod": {"en": "COD", "hi": "कैश ऑन डिलीवरी"},
     "best_sellers": {"en": "Best Sellers", "hi": "सबसे ज़्यादा बिकने वाले"},
-    "view_all": {"en": "View All", "hi": "सभी देखें"},
+    "view_all": {"en": "View All Collection", "hi": "सभी संग्रह देखें"},
     "new_arrivals": {"en": "New Arrivals", "hi": "नये उत्पाद"},
     "flash_sale": {"en": "Flash Sale", "hi": "फ्लैश सेल"},
     "atelier_title": {"en": "The Soul of the Atelier", "hi": "कार्यशाला की आत्मा"},

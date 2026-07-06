@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  (function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}HYPEHAVENHUB - Handcrafted Indian Jewelry{% endblock %}</title>
@@ -67,6 +75,11 @@
         <span class="ms-1 d-none d-md-inline" style="font-size: 13px; font-weight: 500;">
           {% if current_country %}{{ current_country.currency_code }} ({{ current_country.currency_symbol }}){% else %}INR (₹){% endif %}
         </span>
+      </button>
+
+      <!-- Theme Switcher Trigger -->
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-2" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme Mode" style="border: none; background: transparent; outline: none; box-shadow: none;">
+        <span class="material-symbols-outlined" id="themeToggleIcon" style="font-size: 24px; color: var(--primary); vertical-align: middle;">dark_mode</span>
       </button>
 
       <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="{% t 'cart' %}" aria-label="View Shopping Cart">
@@ -313,6 +326,32 @@ document.addEventListener("DOMContentLoaded", function() {
       navbar.classList.remove('scrolled');
     }
   });
+
+  // Dark/Light Theme Switching
+  const themeToggleIcon = document.getElementById('themeToggleIcon');
+  
+  function updateThemeUI() {
+    if (!themeToggleIcon) return;
+    if (document.documentElement.classList.contains('dark')) {
+      themeToggleIcon.textContent = 'light_mode';
+    } else {
+      themeToggleIcon.textContent = 'dark_mode';
+    }
+  }
+
+  // Initial UI check on page load
+  document.addEventListener('DOMContentLoaded', updateThemeUI);
+
+  function toggleTheme() {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+    updateThemeUI();
+  }
 </script>
 <!-- Shiprocket Headless Checkout -->
 <input type="hidden" value="{{ request.get_host }}" id="sellerDomain"/>
