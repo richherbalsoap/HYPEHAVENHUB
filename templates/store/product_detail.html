@@ -168,46 +168,30 @@
         </span>
       </div>
       {% endif %}
+    </div> <!-- End col-lg-7 -->
   </div> <!-- End row -->
 </div> <!-- End container -->
 
 {% if product.aplus_image_url %}
 <!-- A+ Enhanced Brand Content -->
 <style>
-.aplus-mobile-fullscreen {
+.aplus-fullscreen-container {
   width: 100%;
-  max-width: 100%;
   margin: 0;
   padding: 0;
-  background: transparent;
   display: block;
-  overflow: hidden;
+  background: transparent;
 }
-.aplus-mobile-fullscreen img {
+.aplus-fullscreen-container img {
   width: 100%;
+  max-width: 100%; /* No max-width restriction on laptop either */
   height: auto;
   display: block;
-  margin: 0 auto;
-  object-fit: cover;
-}
-@media (min-width: 992px) {
-  .aplus-mobile-fullscreen img {
-    max-width: 1200px;
-  }
-}
-@media (max-width: 768px) {
-  .aplus-mobile-fullscreen {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .aplus-mobile-fullscreen img {
-    /* Make the image width exactly the viewport width, no padding at all */
-    width: 100vw;
-    min-width: 100vw;
-  }
+  margin: 0;
+  padding: 0;
 }
 </style>
-<div class="aplus-mobile-fullscreen mt-4 mb-5">
+<div class="aplus-fullscreen-container mb-5">
   <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" loading="lazy">
 </div>
 {% endif %}
