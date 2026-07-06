@@ -1295,6 +1295,7 @@ def get_variant_info(request, variant_id):
 
 
 def quick_view(request, product_id):
+    from store.templatetags.localization_tags import get_localized_price, get_localized_base_price
     product = get_object_or_404(Product, id=product_id)
     variants = [{
         'id': v.id,
@@ -1304,16 +1305,24 @@ def quick_view(request, product_id):
         'price': float(product.selling_price) + float(v.additional_price)
     } for v in product.variants.all()]
     
+    localized_selling_price = get_localized_price(product, request)
+    localized_base_price = get_localized_base_price(product, request) if product.discount_percent > 0 else None
+    
     return JsonResponse({
         'id': product.id,
         'name': product.name,
         'selling_price': float(product.selling_price),
         'base_price': float(product.base_price) if product.discount_percent > 0 else None,
         'discount_percent': float(product.discount_percent) if product.discount_percent > 0 else 0,
+        'localized_selling_price': localized_selling_price,
+        'localized_base_price': localized_base_price,
         'description': product.description,
         'image': product.display_image_url,
         'variants': variants,
         'slug': product.slug,
+        'material': product.material or '',
+        'metal_purity': product.metal_purity or '',
+        'artisan_story': product.artisan_story or '',
     })
 
 

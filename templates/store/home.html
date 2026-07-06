@@ -66,50 +66,72 @@
 </section>
 {% endif %}
 
-<!-- Best Selling Row (Horizontal Scroll) -->
-{% if bestsellers %}
-<section class="py-5 bg-light-green position-relative overflow-hidden">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <span class="section-eyebrow">{% t "customer_favorites" %}</span>
-        <h2 class="section-title mb-0">{% t "best_sellers" %}</h2>
-      </div>
-      <a href="{% url 'product_list' %}?sort=popularity" class="text-decoration-none fw-600 hover-underline d-inline-flex align-items-center" style="color: #795c00; font-size: 1.1rem; letter-spacing: 0.5px; font-family: 'Montserrat', sans-serif;">{% t "view_all" %} <span class="material-symbols-outlined ms-2" style="font-size: 20px;">arrow_forward</span></a>
-    </div>
-
-    <div class="row g-4">
-      {% for product in bestsellers %}
-      <div class="col-6 col-md-4 col-lg-3">
-        {% include 'store/_product_card.html' with product=product %}
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- New Arrivals Row -->
+<!-- New Arrivals Product Carousel -->
 {% if new_arrivals %}
-<section class="py-5 position-relative overflow-hidden">
+<section class="py-5 position-relative overflow-hidden product-scroll-row" id="new-arrivals">
   <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-end mb-4">
       <div>
-        <span class="section-eyebrow">Just Added</span>
+        <span class="section-eyebrow">Seasonal Curation</span>
         <h2 class="section-title mb-0">New Arrivals</h2>
       </div>
-      <a href="{% url 'product_list' %}?sort=-created_at" class="text-decoration-none fw-600 hover-underline d-inline-flex align-items-center" style="color: #795c00; font-size: 1.1rem; letter-spacing: 0.5px; font-family: 'Montserrat', sans-serif;">{% t "view_all" %} <span class="material-symbols-outlined ms-2" style="font-size: 20px;">arrow_forward</span></a>
+      
+      <!-- Navigation Buttons & Hint -->
+      <div class="d-flex align-items-center gap-3">
+        <span class="d-none d-sm-inline font-body text-uppercase font-semibold text-muted" style="font-size: 10px; letter-spacing: 1.5px; font-family: 'Montserrat', sans-serif;">Swipe or Slide &bull;</span>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center scroll-prev" aria-label="Previous Slide" style="width: 44px; height: 44px; border-color: var(--outline-variant); color: var(--primary);">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center scroll-next" aria-label="Next Slide" style="width: 44px; height: 44px; border-color: var(--outline-variant); color: var(--primary);">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="row g-4">
-      {% for product in new_arrivals %}
-      <div class="col-6 col-md-4 col-lg-3">
-        {% include 'store/_product_card.html' with product=product %}
+    <!-- Horizontal Product Carousel Wrapper -->
+    <div class="relative w-full">
+      <div class="d-flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-4 pb-4 scrollbar-none product-scroll-wrapper" id="productCarousel" onscroll="updateScrollIndicator()" style="-webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none;">
+        {% for product in new_arrivals %}
+        <div class="snap-start flex-shrink-0" style="width: 280px; scroll-snap-align: start;">
+          {% include 'store/_product_card.html' with product=product %}
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
+    </div>
+
+    <!-- Custom scrollbar progress indicator track -->
+    <div class="w-full max-w-md mx-auto mt-4 px-3">
+      <div class="relative w-full h-[2px] rounded-full overflow-hidden" style="background: rgba(135, 114, 112, 0.2);">
+        <div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-300 w-[15%]" id="carouselScrollProgress" style="background-color: var(--primary);"></div>
+      </div>
+    </div>
+
+    <!-- View All Collections Action Call -->
+    <div class="d-flex justify-content-center mt-5">
+      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: var(--primary-fixed) !important; color: var(--primary) !important; border: none; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 6px rgba(42,0,2,0.05); text-decoration: none;">
+        View Full Collection
+      </a>
     </div>
   </div>
 </section>
+
+<script>
+  function updateScrollIndicator() {
+    const carousel = document.getElementById('productCarousel');
+    const bar = document.getElementById('carouselScrollProgress');
+    if (!carousel || !bar) return;
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+    if (maxScroll <= 0) {
+      bar.style.width = '100%';
+      return;
+    }
+    const percentage = (carousel.scrollLeft / maxScroll) * 100;
+    bar.style.width = Math.max(15, percentage) + '%';
+  }
+  document.addEventListener('DOMContentLoaded', updateScrollIndicator);
+</script>
 {% endif %}
 
 <!-- Artisan Narrative Section -->

@@ -644,36 +644,53 @@ const setupQuickView = () => {
           variantsHtml += `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stock}" ${disabledAttr}>${v.label} - ₹${v.price}${disabledStr}</option>`;
         });
         variantsHtml += '</select></div>';
-      }
-      
-      const isDiscounted = data.discount_percent > 0;
+       const isDiscounted = data.discount_percent > 0;
       const priceHtml = isDiscounted 
-        ? `<span class="fs-4 fw-700 me-2" id="qvPrice" style="color: var(--pink);">₹${data.selling_price}</span>
-           <span class="text-decoration-line-through text-muted me-2" id="qvPriceOriginal">₹${data.base_price}</span>
-           <span class="badge text-gold" style="background: var(--pink-pale); border: 1.5px solid var(--pink-light);">${data.discount_percent}% OFF</span>`
-        : `<span class="fs-4 fw-700" id="qvPrice" style="color: var(--pink);">₹${data.selling_price}</span>`;
+        ? `<span class="fs-3 fw-bold me-3" id="qvPrice" style="color: var(--primary);">${data.localized_selling_price}</span>
+           <span class="text-decoration-line-through text-muted me-3" id="qvPriceOriginal" style="font-size: 14px;">${data.localized_base_price}</span>
+           <span class="badge" style="background: var(--primary-fixed); color: var(--primary); border: 1px solid var(--outline-variant); font-size: 11px;">${data.discount_percent}% OFF</span>`
+        : `<span class="fs-3 fw-bold" id="qvPrice" style="color: var(--primary);">${data.localized_selling_price}</span>`;
         
       contentContainer.innerHTML = `
         <div class="row g-4 align-items-center">
-          <div class="col-md-6 text-center">
-            <img src="${data.image}" alt="${data.name}" class="img-fluid rounded" style="max-height: 350px; object-fit: cover;">
+          <div class="col-md-6 text-center position-relative">
+            <div class="position-relative overflow-hidden rounded shadow-sm">
+              <img src="${data.image}" alt="${data.name}" class="img-fluid w-100 object-fit-cover" style="max-height: 400px; min-height: 300px;">
+              <span class="position-absolute px-3 py-1 text-[9px] uppercase tracking-widest font-semibold" style="background: var(--primary-fixed); color: var(--primary); font-size: 10px; border-radius: 2px; top: 12px; left: 12px;">Atelier Original</span>
+            </div>
           </div>
           <div class="col-md-6">
-            <h3 style="font-family: var(--font-display); font-weight: 700; color: var(--pink);" class="mb-2">${data.name}</h3>
+            <span class="text-uppercase fw-600 text-muted d-block mb-1" style="font-size: 10px; letter-spacing: 2px;">Heritage Series</span>
+            <h3 style="font-family: var(--font-display); font-weight: 700; color: var(--primary);" class="mb-2 fs-2">${data.name}</h3>
             <div class="mb-3 d-flex align-items-center">
               ${priceHtml}
             </div>
             <p class="text-muted mb-4" style="font-size: 14px; line-height: 1.6;">${data.description}</p>
             
+            <hr class="my-3" style="border-top: 1px solid var(--outline-variant); opacity: 0.25;">
+            
+            <div class="row g-2 mb-3" style="font-size: 13px;">
+              <div class="col-6">
+                <span class="text-uppercase fw-600 text-muted d-block mb-1" style="font-size: 9px; letter-spacing: 1px;">Material</span>
+                <span class="fw-500" style="color: var(--on-surface);">${data.material || 'Oxidized Silver'}</span>
+              </div>
+              <div class="col-6">
+                <span class="text-uppercase fw-600 text-muted d-block mb-1" style="font-size: 9px; letter-spacing: 1px;">Metal Purity</span>
+                <span class="fw-500" style="color: var(--on-surface);">${data.metal_purity || '925 Sterling Silver'}</span>
+              </div>
+            </div>
+            
+            <hr class="my-3" style="border-top: 1px solid var(--outline-variant); opacity: 0.25;">
+            
             ${variantsHtml}
             
-            <div class="d-flex gap-3">
-              <button class="btn btn-emerald px-4 py-2 flex-grow-1" id="qvAddToCartBtn">
-                <i class="fas fa-shopping-bag me-1"></i> Add to Bag
+            <div class="d-flex flex-column gap-2 mt-3">
+              <button class="btn w-100 py-3" id="qvAddToCartBtn" style="background-color: var(--primary-fixed) !important; color: var(--primary) !important; border: none; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 4px;">
+                Add to Bag
               </button>
-              <a href="/product/${data.slug}/" class="btn btn-outline-dark px-3 py-2" title="View Details">
-                <i class="fas fa-arrow-up-right-from-square"></i>
-              </a>
+              <button class="btn w-100 py-3" id="qvBuyDirectlyBtn" style="background-color: var(--primary) !important; color: var(--on-primary) !important; border: 1px solid var(--outline-variant); font-size: 11px; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 4px;">
+                Buy Directly
+              </button>
             </div>
           </div>
         </div>
@@ -690,14 +707,17 @@ const setupQuickView = () => {
           const newPrice = selectedOption.dataset.price;
           const newStock = selectedOption.dataset.stock;
           
-          if (qvPriceEl) qvPriceEl.textContent = `₹${parseFloat(newPrice).toFixed(0)}`;
+          if (qvPriceEl) {
+            const currencySymbol = data.localized_selling_price.replace(/[0-9.,]/g, '').trim();
+            qvPriceEl.textContent = `${currencySymbol}${parseFloat(newPrice).toFixed(0)}`;
+          }
           if (addToCartBtn) {
             if (parseInt(newStock) <= 0) {
               addToCartBtn.disabled = true;
               addToCartBtn.textContent = 'Out of Stock';
             } else {
               addToCartBtn.disabled = false;
-              addToCartBtn.innerHTML = '<i class="fas fa-shopping-bag me-1"></i> Add to Bag';
+              addToCartBtn.textContent = 'Add to Bag';
             }
           }
         });
@@ -710,7 +730,7 @@ const setupQuickView = () => {
           const selectedVariantId = variantSelect ? variantSelect.value : null;
           
           addToCartBtn.disabled = true;
-          const originalHtml = addToCartBtn.innerHTML;
+          const originalText = addToCartBtn.textContent;
           addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding...';
           
           const cartRes = await api('/cart/add/', { 
@@ -720,7 +740,7 @@ const setupQuickView = () => {
           });
           
           addToCartBtn.disabled = false;
-          addToCartBtn.innerHTML = originalHtml;
+          addToCartBtn.textContent = originalText;
           
           if (cartRes.requires_login) {
             modalInstance.hide();
@@ -731,6 +751,42 @@ const setupQuickView = () => {
             updateCartBadge(cartRes.cart_count);
             showToast(cartRes.message || 'Added to cart!');
             modalInstance.hide();
+          } else {
+            showToast(cartRes.message || 'Something went wrong', 'error');
+          }
+        });
+      }
+
+      // Event listener for Buy Directly
+      const buyDirectlyBtn = document.getElementById('qvBuyDirectlyBtn');
+      if (buyDirectlyBtn) {
+        buyDirectlyBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const selectedVariantId = variantSelect ? variantSelect.value : null;
+          
+          buyDirectlyBtn.disabled = true;
+          const originalText = buyDirectlyBtn.textContent;
+          buyDirectlyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+          
+          const cartRes = await api('/cart/add/', { 
+            product_id: data.id, 
+            variant_id: selectedVariantId, 
+            quantity: 1 
+          });
+          
+          buyDirectlyBtn.disabled = false;
+          buyDirectlyBtn.textContent = originalText;
+          
+          if (cartRes.requires_login) {
+            modalInstance.hide();
+            window.location.href = '/checkout/';
+            return;
+          }
+          
+          if (cartRes.success) {
+            updateCartBadge(cartRes.cart_count);
+            modalInstance.hide();
+            window.location.href = '/checkout/';
           } else {
             showToast(cartRes.message || 'Something went wrong', 'error');
           }

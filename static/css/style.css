@@ -858,27 +858,57 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
   background: var(--primary);
   color: var(--on-primary);
 }
-.product-card-quick-add {
+.product-card-actions-wrapper {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--surface);
-  color: var(--primary);
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: transparent;
+  transform: translateY(120%);
+  transition: var(--transition);
+  z-index: 10;
+}
+.product-card:hover .product-card-actions-wrapper {
+  transform: translateY(0);
+}
+.product-card-quick-add {
+  flex: 1;
+  background: var(--primary-fixed) !important;
+  color: var(--primary) !important;
   border: none;
   padding: 12px;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  font-weight: bold;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   cursor: pointer;
   transition: var(--transition);
-  transform: translateY(100%);
+  border-radius: 4px;
 }
-.product-card:hover .product-card-quick-add { transform: translateY(0); }
 .product-card-quick-add:hover {
-  background: var(--primary);
-  color: var(--surface);
+  background: var(--primary) !important;
+  color: var(--on-primary) !important;
+}
+.product-card-quick-view {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: var(--surface) !important;
+  color: var(--primary) !important;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(42, 0, 2, 0.08);
+}
+.product-card-quick-view:hover {
+  background: var(--surface-container-high) !important;
 }
 
 .product-card-body { padding: 16px 4px; }
@@ -2338,4 +2368,13 @@ html.dark .alert {
   background-color: var(--surface-container) !important;
   color: var(--on-surface) !important;
   border-color: var(--outline-variant) !important;
+}
+
+/* Scrollbar Hiding & Carousel Styles */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
