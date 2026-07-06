@@ -167,15 +167,7 @@ if (couponForm) {
   });
 }
 
-/* ====== PRODUCT GALLERY ====== */
-document.querySelectorAll('.gallery-thumb').forEach(thumb => {
-  thumb.addEventListener('click', () => {
-    const mainImg = document.querySelector('.gallery-main img');
-    if (mainImg) mainImg.src = thumb.dataset.src;
-    document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-    thumb.classList.add('active');
-  });
-});
+/* ====== GALLERY MOVED TO PRODUCT_DETAIL.HTML ====== */
 
 /* ====== VARIANT SELECTOR ====== */
 document.querySelectorAll('.variant-btn').forEach(btn => {
