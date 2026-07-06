@@ -174,29 +174,40 @@
 {% if product.aplus_image_url %}
 <!-- A+ Enhanced Brand Content -->
 <style>
-.full-bleed-aplus {
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  background: transparent;
+.aplus-mobile-fullscreen {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 0;
+  background: transparent;
+  display: block;
+  overflow: hidden;
 }
-.full-bleed-aplus img {
+.aplus-mobile-fullscreen img {
   width: 100%;
   height: auto;
   display: block;
   margin: 0 auto;
+  object-fit: cover;
 }
 @media (min-width: 992px) {
-  .full-bleed-aplus img {
-    max-width: 1200px; /* Made bigger on laptop as requested */
+  .aplus-mobile-fullscreen img {
+    max-width: 1200px;
+  }
+}
+@media (max-width: 768px) {
+  .aplus-mobile-fullscreen {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .aplus-mobile-fullscreen img {
+    /* Make the image width exactly the viewport width, no padding at all */
+    width: 100vw;
+    min-width: 100vw;
   }
 }
 </style>
-<div class="full-bleed-aplus mt-4 mb-5 text-center">
+<div class="aplus-mobile-fullscreen mt-4 mb-5">
   <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" loading="lazy">
 </div>
 {% endif %}
