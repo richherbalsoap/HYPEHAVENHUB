@@ -2262,6 +2262,16 @@ html.dark {
 html.dark .text-dark {
   color: var(--on-surface) !important;
 }
+html.dark .text-muted {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .bg-white {
+  background-color: var(--surface) !important;
+  color: var(--on-surface) !important;
+}
+html.dark .bg-light {
+  background-color: var(--surface-container-low) !important;
+}
 html.dark .btn-outline-dark {
   border-color: var(--outline);
   color: var(--on-surface);
@@ -2282,21 +2292,50 @@ html.dark .btn-close {
   filter: invert(1) grayscale(1) brightness(2);
 }
 html.dark .offcanvas {
-  background-color: var(--surface-container);
-  color: var(--on-surface);
+  background-color: var(--surface-container) !important;
+  color: var(--on-surface) !important;
 }
 html.dark .card {
-  background-color: var(--surface-container);
-  border-color: var(--outline-variant);
-  color: var(--on-surface);
+  background-color: var(--surface-container) !important;
+  border-color: var(--outline-variant) !important;
+  color: var(--on-surface) !important;
 }
 html.dark .list-group-item {
-  background-color: var(--surface-container);
-  color: var(--on-surface);
-  border-color: var(--outline-variant);
+  background-color: var(--surface-container) !important;
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
 }
 html.dark input, html.dark select, html.dark textarea {
   background-color: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .dropdown-menu {
+  background-color: var(--surface-container-high) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .dropdown-item {
+  color: var(--on-surface) !important;
+}
+html.dark .dropdown-item:hover {
+  background-color: var(--surface-container-highest) !important;
+}
+html.dark .table {
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .table td, html.dark .table th {
+  background-color: var(--surface) !important;
+  color: var(--on-surface) !important;
+}
+html.dark .navbar {
+  background-color: var(--surface) !important;
+}
+html.dark .breadcrumb-item, html.dark .breadcrumb-item a {
+  color: var(--on-surface) !important;
+}
+html.dark .alert {
+  background-color: var(--surface-container) !important;
   color: var(--on-surface) !important;
   border-color: var(--outline-variant) !important;
 }
