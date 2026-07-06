@@ -31,7 +31,7 @@ def wishlist_count(request):
 def categories_list(request):
     categories = Category.objects.filter(
         is_active=True,
-    ).order_by('name').prefetch_related('subcategories')
+    ).order_by('name')
     return {'all_categories': categories}
 
 
