@@ -190,7 +190,7 @@
 </div> <!-- End container -->
 
 <!-- Bottom "Page" Section for A+ Content and Reviews -->
-<section class="product-bottom-page" style="background-color: #ffffff; width: 100%; box-shadow: 0 -12px 40px rgba(0,0,0,0.04); padding-top: 0; padding-bottom: 4rem; margin-top: 3rem;">
+<section class="product-bottom-page" style="background-color: #ffffff; width: 100%; box-shadow: 0 -12px 40px rgba(0,0,0,0.04); padding-top: 0; padding-bottom: 4rem; margin-top: -1rem; position: relative; z-index: 10;">
 
 {% if product.aplus_image_url %}
 <!-- A+ Enhanced Brand Content -->
@@ -204,11 +204,22 @@
 }
 .aplus-fullscreen-container img {
   width: 100%;
-  max-width: 100%; /* No max-width restriction on laptop either */
+  max-width: 100%;
   height: auto;
   display: block;
   margin: 0;
   padding: 0;
+}
+/* Rebuilt for mobile: Auto-zoomed and horizontally scrollable */
+@media (max-width: 768px) {
+  .aplus-fullscreen-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .aplus-fullscreen-container img {
+    width: 250%; /* Force image to be 2.5x screen width for full readability */
+    max-width: none;
+  }
 }
 </style>
 <div class="aplus-fullscreen-container mb-5">
