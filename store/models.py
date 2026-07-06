@@ -156,40 +156,6 @@ class Category(models.Model):
         return ""
 
 
-class SubCategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
-    name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=255)
-    image = models.ImageField(upload_to='subcategories/', null=True, blank=True)
-    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
-
-    @property
-    def display_image_url(self):
-        if self.image_url:
-            return self.image_url
-        if self.image:
-            try:
-                return self.image.url
-            except ValueError:
-                pass
-        return ''
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name_plural = 'Sub Categories'
-        unique_together = ('category', 'slug')
-        ordering = ['name']
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.category.name} > {self.name}"
-
-
 class Brand(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, max_length=255)
@@ -231,7 +197,6 @@ class Product(models.Model):
     slug = models.SlugField(unique=True, blank=True, max_length=255)
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='products')
     description = models.TextField()
     short_description = models.CharField(max_length=300, blank=True)
     ingredients = models.TextField(blank=True)

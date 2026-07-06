@@ -8,7 +8,7 @@
         <div class="eyebrow">Inventory</div>
         <h5>Manage Products</h5>
     </div>
-    <a href="{% url 'admin_product_create' %}" class="btn btn-primary">
+    <a href="{% url 'admin_product_create' %}" class="btn btn-custom">
         <i class="fas fa-plus"></i> Add New Product
     </a>
 </div>
@@ -22,7 +22,7 @@
                    value="{{ search_query }}">
         </div>
         <div class="col-md-3">
-            <button type="submit" class="btn btn-primary w-100">Search</button>
+            <button type="submit" class="btn btn-custom w-100">Search</button>
         </div>
     </form>
 </div>
@@ -54,10 +54,10 @@
                         </span>
                     </td>
                     <td class="text-end">
-                        <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-outline-primary" style="margin-right:4px;">
+                        <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-outline-custom" style="margin-right:4px;">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-outline-info" style="margin-right:4px;">
+                        <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-outline-custom" style="margin-right:4px;">
                             <i class="fas fa-globe"></i>
                         </a>
                         <a href="{% url 'admin_product_delete' product.id %}" class="btn btn-sm btn-outline-danger">

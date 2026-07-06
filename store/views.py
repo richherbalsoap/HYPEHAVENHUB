@@ -20,7 +20,7 @@ from django.views.decorators.http import require_POST
 import json
 
 from .models import (
-    User, Category, SubCategory, Brand, Product,
+    User, Category, Brand, Product,
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
@@ -292,7 +292,6 @@ def product_list(request):
 
     q = request.GET.get('q', '')
     cat_slug = request.GET.get('category', '')
-    subcat_slug = request.GET.get('subcategory', '')
     brand_slug = request.GET.get('brand', '')
     min_price_raw = request.GET.get('min_price', '').strip()
     max_price_raw = request.GET.get('max_price', '').strip()
@@ -307,8 +306,6 @@ def product_list(request):
         products = products.filter(Q(name__icontains=q) | Q(brand__name__icontains=q) | Q(description__icontains=q))
     if cat_slug:
         products = products.filter(category__slug=cat_slug)
-    if subcat_slug:
-        products = products.filter(subcategory__slug=subcat_slug)
     if brand_slug:
         products = products.filter(brand__slug=brand_slug)
     def _to_decimal(value):
@@ -366,7 +363,6 @@ def product_list(request):
         'q': q,
         'selected_category': cat_slug,
         'selected_category_name': selected_category_name,
-        'selected_subcategory': subcat_slug,
         'selected_brand': brand_slug,
         'selected_discount': discount,
         'selected_metal_purity': metal_purity,

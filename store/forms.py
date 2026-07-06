@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import SetPasswordForm
-from .models import User, Address, Review, UserPreference, Complaint, Product, Category, Brand, SubCategory, Order, Payment
+from .models import User, Address, Review, UserPreference, Complaint, Product, Category, Brand, Order, Payment
 
 
 class SignupForm(forms.ModelForm):
@@ -209,7 +209,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'category', 'subcategory',
+            'name', 'category', 'brand',
             'description', 'short_description', 'ingredients', 'how_to_use',
             'weight', 'material', 'metal_purity', 'warranty', 'artisan_story',
             'base_price', 'discount_percent', 'is_flash_sale', 'finish',
@@ -218,7 +218,7 @@ class ProductForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
-            'subcategory': forms.Select(attrs={'class': 'form-select'}),
+            'brand': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'short_description': forms.TextInput(attrs={'class': 'form-control'}),
             'ingredients': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),

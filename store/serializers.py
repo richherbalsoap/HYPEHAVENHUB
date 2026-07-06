@@ -138,7 +138,7 @@ class ProductSerializer(serializers.ModelSerializer):
         return obj.updated_at.isoformat()
 
     def get_tags(self, obj):
-        return obj.subcategory.name if obj.subcategory else ""
+        return obj.category.name if obj.category else ""
 
     def get_status(self, obj):
         return "active" if obj.is_active else "archived"
