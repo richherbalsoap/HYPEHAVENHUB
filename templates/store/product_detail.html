@@ -168,18 +168,19 @@
         </span>
       </div>
       {% endif %}
-    </div>
-  </div>
+  </div> <!-- End row -->
+</div> <!-- End container -->
 
-  {% if product.aplus_image_url %}
-  <!-- A+ Enhanced Brand Content -->
-  <div class="aplus-content-section mt-5 mb-4 text-center">
-    <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" class="img-fluid rounded shadow-sm w-100" loading="lazy" style="max-width: 1000px; margin: 0 auto; display: block;">
-  </div>
-  {% endif %}
+{% if product.aplus_image_url %}
+<!-- A+ Enhanced Brand Content -->
+<div class="aplus-content-section mt-5 mb-4 w-100 text-center" style="background: #000;">
+  <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" class="img-fluid w-100" loading="lazy" style="max-width: 1000px; margin: 0 auto; display: block;">
+</div>
+{% endif %}
 
+<div class="container pb-5">
   <!-- Product Reviews -->
-  <div class="mt-5">
+  <div class="mt-4">
     <div class="section-header text-start mb-4">
       <h3 class="section-title" style="font-size: 1.5rem;">Product Reviews ({{ product.review_count }})</h3>
     </div>
