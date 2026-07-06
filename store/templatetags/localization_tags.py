@@ -10,15 +10,19 @@ def get_localized_price(product, request):
     if country_id:
         try:
             country = CountrySetting.objects.get(id=country_id)
-            country_price = product.country_prices.get(country=country)
+            try:
+                country_price = product.country_prices.get(country=country)
+                price = country_price.price
+            except ProductPrice.DoesNotExist:
+                price = product.base_price
             
             # Check for discount
             if product.discount_percent > 0:
-                discounted = country_price.price * (1 - product.discount_percent / 100)
+                discounted = price * (1 - product.discount_percent / 100)
                 return f"{country.currency_symbol}{discounted:.2f}"
                 
-            return f"{country.currency_symbol}{country_price.price}"
-        except (CountrySetting.DoesNotExist, ProductPrice.DoesNotExist):
+            return f"{country.currency_symbol}{price}"
+        except CountrySetting.DoesNotExist:
             pass
             
     # Default fallback
@@ -33,9 +37,12 @@ def get_localized_base_price(product, request):
     if country_id:
         try:
             country = CountrySetting.objects.get(id=country_id)
-            country_price = product.country_prices.get(country=country)
-            return f"{country.currency_symbol}{country_price.price}"
-        except (CountrySetting.DoesNotExist, ProductPrice.DoesNotExist):
+            try:
+                price = product.country_prices.get(country=country).price
+            except ProductPrice.DoesNotExist:
+                price = product.base_price
+            return f"{country.currency_symbol}{price}"
+        except CountrySetting.DoesNotExist:
             pass
             
     return f"₹{product.base_price}"

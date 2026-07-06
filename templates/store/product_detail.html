@@ -83,7 +83,7 @@
       </div>
       <div class="mb-3 text-muted small">
         <i class="material-symbols-outlined fs-6 align-middle me-1">local_shipping</i> 
-        {% t "shipping" %}: {% if current_country and current_country.shipping_charge > 0 %}{% format_price current_country.shipping_charge %}{% elif current_country and current_country.shipping_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹0.00{% endif %}
+        {% t "shipping" %}: {% if current_country and current_country.shipping_charge > 0 %}{% format_price current_country.shipping_charge %}{% elif current_country and current_country.shipping_charge == 0 %}<span class="text-success">FREE</span>{% else %}{% format_price 0.00 %}{% endif %}
       </div>
 
       {% if product.is_flash_sale %}
@@ -130,16 +130,24 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="d-flex gap-3 mb-4">
-        <button class="btn-add-cart" data-add-cart
+      <div class="d-flex gap-3 mb-4 flex-wrap">
+        <button class="btn-add-cart flex-grow-1" data-add-cart
                 data-product-id="{{ product.id }}"
-                data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}">
+                data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}"
+                style="padding: 12px 24px; border-radius: 12px; font-family: 'Montserrat', sans-serif;">
           <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">shopping_bag</span> Add to Cart
+        </button>
+        <button class="btn-buy-now flex-grow-1" id="buyNowBtn"
+                data-product-id="{{ product.id }}"
+                data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}"
+                style="background: var(--primary); color: var(--surface); border: none; border-radius: 12px; padding: 12px 24px; font-weight: 600; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">bolt</span> Buy Now
         </button>
         {% if user.is_authenticated %}
         <button class="btn-wishlist-toggle {% if user_in_wishlist %}active{% endif %}"
                 data-wishlist data-product-id="{{ product.id }}"
-                title="{% if user_in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}">
+                title="{% if user_in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
+                style="border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--outline-variant); background: transparent; color: var(--on-surface);">
           <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">favorite</span>
         </button>
         {% endif %}
@@ -147,7 +155,7 @@
 
       <!-- Features -->
       <div class="product-features">
-        <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">local_shipping</span> Free delivery on orders above ₹499</div>
+        <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">local_shipping</span> Free delivery on orders above {% format_price 499 %}</div>
         <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">verified_user</span> Quality checked jewelry</div>
         <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">undo</span> Easy 7-day returns</div>
         <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">lock</span> Secure Payment</div>
@@ -299,6 +307,13 @@
     </div>
   </div>
 
+  {% if product.aplus_image_url %}
+  <!-- A+ Enhanced Brand Content -->
+  <div class="aplus-content-section mt-5 mb-4 text-center">
+    <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" class="img-fluid rounded shadow-sm w-100" loading="lazy" style="max-width: 1000px; margin: 0 auto; display: block;">
+  </div>
+  {% endif %}
+
   <!-- Similar Products -->
   {% if similar %}
   <div class="mt-5">
@@ -342,6 +357,52 @@ document.addEventListener('DOMContentLoaded', () => {
         mainImg.src = thumb.dataset.src;
       }
     });
+  });
+
+  // Buy Now Shiprocket Checkout Flow
+  document.getElementById('buyNowBtn')?.addEventListener('click', async function(event) {
+    event.preventDefault();
+    const btn = this;
+    const productId = btn.dataset.productId;
+    const selectedVariantBtn = document.querySelector('.variant-btn.selected');
+    const variantId = selectedVariantBtn ? selectedVariantBtn.dataset.variantId : btn.dataset.variantId;
+    const quantity = parseInt(document.getElementById('qtyInput')?.value || 1);
+
+    btn.style.pointerEvents = 'none';
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+    try {
+      const response = await fetch("{% url 'sr_initiate_checkout' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          variant_id: variantId,
+          quantity: quantity
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.token) {
+        HeadlessCheckout.addToCart(event, data.token, {
+          fallbackUrl: "{% url 'checkout' %}"
+        });
+      } else {
+        console.error("Failed to generate checkout token:", data.message);
+        window.location.href = "{% url 'checkout' %}";
+      }
+    } catch (err) {
+      console.error("Error initiating checkout:", err);
+      window.location.href = "{% url 'checkout' %}";
+    } finally {
+      setTimeout(() => {
+        btn.style.pointerEvents = 'auto';
+        btn.innerHTML = originalHtml;
+      }, 3000);
+    }
   });
 });
 </script>

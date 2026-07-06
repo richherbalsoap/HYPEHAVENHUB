@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n_store %}
 
 {% block title %}Complaint #{{ complaint.complaint_id }} - HYPEHAVENHUB{% endblock %}
 
@@ -59,7 +60,7 @@
                                 <br>
                                 <strong>Order Date:</strong> {{ complaint.order.created_at|date:"d M Y" }}
                                 <br>
-                                <strong>Order Total:</strong> ₹{{ complaint.order.grand_total }}
+                                <strong>Order Total:</strong> {% format_price complaint.order.grand_total %}
                                 <br>
                                 <strong>Status:</strong> <span class="badge" style="background: var(--secondary-container); color: var(--primary);">{{ complaint.order.get_status_display }}</span>
                             </p>

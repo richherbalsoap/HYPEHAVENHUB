@@ -4,9 +4,14 @@
 {% block title %}Checkout - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
-    <span class="material-symbols-outlined me-2" style="color: var(--primary);">lock</span>Secure Checkout
-  </h2>
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'cart' %}" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
+      <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>Back
+    </a>
+    <h2 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 0;">
+      <span class="material-symbols-outlined me-2" style="color: var(--primary); vertical-align: middle;">lock</span>Secure Checkout
+    </h2>
+  </div>
   <form id="checkoutForm">
     {% csrf_token %}
     <div class="row g-4">
@@ -30,7 +35,7 @@
                       <span class="badge" style="background: var(--surface-container); color: var(--primary); font-size: 11px;">{{ addr.get_type_display }}</span>
                     </div>
                     <div class="text-muted mt-1" style="font-size: 14px; line-height: 1.5;">
-                      {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}<br>
+                      {{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}{% if addr.town %}, {{ addr.town }}{% endif %}<br>
                       {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}<br>
                       <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle; color: var(--primary);">call</span>{{ addr.phone }}
                     </div>
@@ -40,13 +45,13 @@
             </div>
             {% endfor %}
           </div>
-          <a href="{% url 'add_address' %}" class="btn btn-sm mt-3" style="color: var(--primary); border: 1px solid var(--primary); border-radius: 8px;">
+          <a href="{% url 'add_address' %}?next={% url 'checkout' %}" class="btn btn-sm mt-3" style="color: var(--primary); border: 1px solid var(--primary); border-radius: 8px;">
             <span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">add</span> Add New Address
           </a>
           {% else %}
           <div class="text-center py-4">
             <p class="text-muted">No addresses saved. Add one to continue.</p>
-            <a href="{% url 'add_address' %}" class="btn-artisan-primary" style="width: auto; padding: 10px 24px; display: inline-block; text-decoration: none;">Add Address</a>
+            <a href="{% url 'add_address' %}?next={% url 'checkout' %}" class="btn-artisan-primary" style="width: auto; padding: 10px 24px; display: inline-block; text-decoration: none;">Add Address</a>
           </div>
           {% endif %}
         </div>

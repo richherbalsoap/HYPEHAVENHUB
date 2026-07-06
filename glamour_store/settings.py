@@ -62,17 +62,20 @@ if HAS_CRISPY_FORMS and HAS_CRISPY_BOOTSTRAP5:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'store.middleware.SecurityHeadersMiddleware',
+    'store.middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'store.middleware.ExceptionHandlingMiddleware',
 ]
 if HAS_WHITENOISE:
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 if HAS_CORSHEADERS:
-    MIDDLEWARE.insert(3 if HAS_WHITENOISE else 2, 'corsheaders.middleware.CorsMiddleware')
+    MIDDLEWARE.insert(4 if HAS_WHITENOISE else 3, 'corsheaders.middleware.CorsMiddleware')
 
 ROOT_URLCONF = 'glamour_store.urls'
 
@@ -241,6 +244,8 @@ SHIPROCKET_EMAIL = config('SHIPROCKET_EMAIL', default='')
 SHIPROCKET_PASSWORD = config('SHIPROCKET_PASSWORD', default='')
 SHIPROCKET_API_KEY = config('SHIPROCKET_API_KEY', default='')
 SHIPROCKET_PICKUP_LOCATION = config('SHIPROCKET_PICKUP_LOCATION', default='Primary')
+SHIPROCKET_CHECKOUT_API_KEY = config('SHIPROCKET_CHECKOUT_API_KEY', default='')
+SHIPROCKET_CHECKOUT_SECRET_KEY = config('SHIPROCKET_CHECKOUT_SECRET_KEY', default='')
 
 # Cloudflare R2 Storage Configuration
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
@@ -250,15 +255,6 @@ AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='')
 AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='')
 
 if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
-    # Use STORAGES for Django 4.2+
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
@@ -267,4 +263,113 @@ if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
     AWS_S3_REGION_NAME = 'auto' # Required for Cloudflare R2
     if AWS_S3_CUSTOM_DOMAIN:
         AWS_S3_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN.replace('https://', '').replace('http://', '').strip('/')
+
+# Production Storage settings with WhiteNoise and S3 uploads combined
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage" if (AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME) else "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# Production Security Headers & HSTS Settings
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# Redis Caching Config (Graceful LocMem fallback for local development)
+REDIS_URL = config('REDIS_URL', default='')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_URL,
+            'KEY_PREFIX': 'hypehaven',
+            'TIMEOUT': 3600,
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'hypehaven-local-cache',
+        }
+    }
+
+# Celery Configurations
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default=REDIS_URL or 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default=CELERY_BROKER_URL)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Production Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': config('DJANGO_LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+        'store': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
+# Only write to file handler when NOT on Vercel's read-only serverless platform
+ON_VERCEL = config('VERCEL', default='') or config('VERCEL_ENV', default='')
+if not ON_VERCEL:
+    try:
+        import os
+        os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+        
+        LOGGING['handlers']['file'] = {
+            'level': 'WARNING',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs/django_error.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        }
+        LOGGING['root']['handlers'].append('file')
+        LOGGING['loggers']['django']['handlers'].append('file')
+        LOGGING['loggers']['store']['handlers'].append('file')
+    except Exception:
+        pass
+
 

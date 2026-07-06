@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n_store %}
 {% block title %}My Profile - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
@@ -80,7 +81,7 @@
                 <div class="text-muted small">{{ order.created_at|date:"M d, Y" }} &middot; {{ order.items.count }} item(s)</div>
               </div>
               <div class="text-end">
-                <div class="fw-700">₹{{ order.grand_total|floatformat:"0" }}</div>
+                <div class="fw-700">{% format_price order.grand_total|floatformat:"0" %}</div>
                 <span class="badge" style="font-size: 11px; background: var(--surface-container); color: var(--primary);">{{ order.get_status_display }}</span>
               </div>
               <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm btn-artisan-outline" style="margin-left: 12px;">Details</a>

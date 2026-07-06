@@ -109,6 +109,7 @@ class Address(models.Model):
     phone = models.CharField(max_length=15)
     address_line1 = models.CharField(max_length=255)
     address_line2 = models.CharField(max_length=255, blank=True)
+    town = models.CharField(max_length=100, blank=True, default='')
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     pincode = models.CharField(max_length=10)
@@ -243,14 +244,15 @@ class Product(models.Model):
     artisan_story = models.TextField(blank=True, help_text="Details about the craftsmanship and origin")
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     discount_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    is_flash_sale = models.BooleanField(default=False)
+    is_flash_sale = models.BooleanField(default=False, db_index=True)
     finish = models.CharField(max_length=20, choices=FINISH_CHOICES, blank=True)
-    is_active = models.BooleanField(default=True)
-    is_featured = models.BooleanField(default=False)
-    is_new_arrival = models.BooleanField(default=False)
-    is_bestseller = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True, db_index=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
+    is_new_arrival = models.BooleanField(default=False, db_index=True)
+    is_bestseller = models.BooleanField(default=False, db_index=True)
+    aplus_image_url = models.URLField(max_length=600, blank=True, help_text="Upload a single long image for A+ Amazon-style content")
     view_count = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -279,26 +281,30 @@ class Product(models.Model):
 
     @property
     def avg_rating(self):
-        reviews = self.reviews.filter(is_approved=True)
-        if reviews.exists():
-            avg = reviews.aggregate(models.Avg('rating'))['rating__avg']
+        reviews = list(self.reviews.all())
+        approved_reviews = [r for r in reviews if r.is_approved]
+        if approved_reviews:
+            avg = sum(r.rating for r in approved_reviews) / len(approved_reviews)
             return round(avg, 1)
         return 0
 
     @property
     def review_count(self):
-        return self.reviews.filter(is_approved=True).count()
+        reviews = list(self.reviews.all())
+        return sum(1 for r in reviews if r.is_approved)
 
     @property
     def total_stock(self):
-        return sum(v.stock for v in self.variants.all())
+        variants = list(self.variants.all())
+        return sum(v.stock for v in variants)
 
     @property
     def primary_image(self):
-        img = self.images.filter(is_primary=True).first()
-        if not img:
-            img = self.images.first()
-        return img
+        images = list(self.images.all())
+        if not images:
+            return None
+        primary = next((img for img in images if img.is_primary), None)
+        return primary or images[0]
 
     @property
     def display_image_url(self):
@@ -497,14 +503,14 @@ class Order(models.Model):
     shipping_tracking_id = models.CharField(max_length=100, blank=True, help_text="Shiprocket Shipment ID / AWB")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     delivery_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     grand_total = models.DecimalField(max_digits=10, decimal_places=2)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

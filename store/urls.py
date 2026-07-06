@@ -55,6 +55,7 @@ urlpatterns = [
     path('api/quick-view/<int:product_id>/', views.quick_view, name='quick_view'),
     path('api/set-country/', views.set_country_session, name='set_country_session'),
     path('api/set-language/', views.set_language, name='set_language'),
+    path('api/pincode-lookup/', views.pincode_lookup, name='pincode_lookup'),
     path('run-migrations/', views.run_migrations_view, name='run_migrations'),
 
     # Admin Panel
@@ -76,9 +77,19 @@ urlpatterns = [
     path('admin/countries/<int:pk>/edit/', admin_views.admin_country_edit, name='admin_country_edit'),
     path('admin/countries/<int:pk>/delete/', admin_views.admin_country_delete, name='admin_country_delete'),
     path('admin/get-presigned-url/', admin_views.get_presigned_url, name='admin_get_presigned_url'),
+
     
     # User Complaints
     path('complaints/submit/', admin_views.submit_complaint, name='submit_complaint'),
     path('complaints/<str:complaint_id>/', admin_views.complaint_detail, name='complaint_detail'),
     path('complaints/', admin_views.user_complaints, name='user_complaints'),
+
+    # Shiprocket Catalog Sync
+    path('shiprocket/products/', views.shiprocket_fetch_products, name='sr_fetch_products'),
+    path('shiprocket/collections/', views.shiprocket_fetch_collections, name='sr_fetch_collections'),
+    path('shiprocket/collection-products/', views.shiprocket_fetch_collection_products, name='sr_fetch_collection_products'),
+
+    # Shiprocket Checkout & Webhooks
+    path('shiprocket/checkout/initiate/', views.shiprocket_initiate_checkout, name='sr_initiate_checkout'),
+    path('shiprocket/webhook/order/', views.shiprocket_order_webhook, name='sr_order_webhook'),
 ]

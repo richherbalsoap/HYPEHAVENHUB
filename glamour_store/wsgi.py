@@ -30,6 +30,13 @@ if os.environ.get('VERCEL') or os.environ.get('POSTGRES_URL') or os.environ.get(
         # haven't been applied yet, it never deletes or reseeds data.
         call_command('migrate', verbosity=0, interactive=False)
 
+        # Seed countries and currencies so they exist on production DB
+        try:
+            call_command('seed_countries', verbosity=0)
+        except Exception as seed_err:
+            import sys
+            print(f"[WSGI startup] Error seeding countries: {seed_err}", file=sys.stderr)
+
         # Create a superuser ONLY if explicit admin credentials are
         # provided via environment variables AND no superuser exists
         # yet. No hardcoded fallback password — if ADMIN_EMAIL/

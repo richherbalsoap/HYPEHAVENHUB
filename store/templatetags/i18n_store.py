@@ -56,23 +56,24 @@ def get_cart_subtotal(context, cart):
         if item.variant:
             p += item.variant.additional_price
         subtotal += p * item.quantity
-    return subtotal
+    return float(subtotal)
 
 @register.simple_tag(takes_context=True)
 def get_cart_total(context, cart, subtotal):
     country = context.get('current_country')
-    discount_amount = 0
+    discount_amount = 0.0
     if cart.coupon and cart.coupon.is_valid():
+        discount_val = float(cart.coupon.discount_value)
         if cart.coupon.discount_type == 'percent':
-            disc = subtotal * cart.coupon.discount_value / 100
+            disc = float(subtotal) * discount_val / 100
             if cart.coupon.max_discount_amount:
-                disc = min(disc, cart.coupon.max_discount_amount)
+                disc = min(disc, float(cart.coupon.max_discount_amount))
             discount_amount = round(disc, 2)
         else:
-            discount_amount = min(cart.coupon.discount_value, subtotal)
+            discount_amount = min(discount_val, float(subtotal))
     
     delivery = float(country.shipping_charge) if country else 0.0
-    return float(subtotal - discount_amount + delivery)
+    return float(float(subtotal) - discount_amount + delivery)
 
 @register.simple_tag(takes_context=True)
 def get_cart_item_total(context, item):

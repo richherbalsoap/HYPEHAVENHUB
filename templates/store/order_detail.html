@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load i18n_store %}
 {% block title %}Order #{{ order.order_id }} - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
@@ -73,9 +74,9 @@
           <div class="flex-grow-1">
             <div class="fw-600" style="font-size: 15px;">{{ item.product_name }}</div>
             {% if item.variant_label %}<div class="text-muted small">{{ item.variant_label }}</div>{% endif %}
-            <div class="text-muted small mt-1">Qty: {{ item.quantity }} &times; ₹{{ item.unit_price|floatformat:"0" }}</div>
+            <div class="text-muted small mt-1">Qty: {{ item.quantity }} &times; {% format_price item.unit_price|floatformat:"0" %}</div>
           </div>
-          <div class="fw-700" style="font-size: 16px;">₹{{ item.total_price|floatformat:"0" }}</div>
+          <div class="fw-700" style="font-size: 16px;">{% format_price item.total_price|floatformat:"0" %}</div>
         </div>
         {% endfor %}
       </div>
@@ -85,10 +86,10 @@
       <!-- Price Summary -->
       <div class="order-summary mb-4">
         <h5 class="order-summary-title">Price Details</h5>
-        <div class="summary-row"><span class="text-muted">Subtotal</span><span>₹{{ order.subtotal|floatformat:"0" }}</span></div>
-        {% if order.discount_amount > 0 %}<div class="summary-row"><span class="text-success">Discount</span><span class="text-success">-₹{{ order.discount_amount|floatformat:"0" }}</span></div>{% endif %}
-        <div class="summary-row"><span class="text-muted">Delivery</span><span>{% if order.delivery_charge == 0 %}<span class="text-success">FREE</span>{% else %}₹{{ order.delivery_charge|floatformat:"0" }}{% endif %}</span></div>
-        <div class="summary-row"><span class="fw-700">Total Paid</span><span class="summary-total">₹{{ order.grand_total|floatformat:"0" }}</span></div>
+        <div class="summary-row"><span class="text-muted">Subtotal</span><span>{% format_price order.subtotal|floatformat:"0" %}</span></div>
+        {% if order.discount_amount > 0 %}<div class="summary-row"><span class="text-success">Discount</span><span class="text-success">-{% format_price order.discount_amount|floatformat:"0" %}</span></div>{% endif %}
+        <div class="summary-row"><span class="text-muted">Delivery</span><span>{% if order.delivery_charge == 0 %}<span class="text-success">FREE</span>{% else %}{% format_price order.delivery_charge|floatformat:"0" %}{% endif %}</span></div>
+        <div class="summary-row"><span class="fw-700">Total Paid</span><span class="summary-total">{% format_price order.grand_total|floatformat:"0" %}</span></div>
       </div>
 
       <!-- Delivery Address -->
@@ -97,7 +98,7 @@
         {% if order.address %}
         <div style="font-size: 14px; line-height: 1.7;">
           <div class="fw-600">{{ order.address.full_name }}</div>
-          <div class="text-muted">{{ order.address.address_line1 }}{% if order.address.address_line2 %}, {{ order.address.address_line2 }}{% endif %}</div>
+          <div class="text-muted">{{ order.address.address_line1 }}{% if order.address.address_line2 %}, {{ order.address.address_line2 }}{% endif %}{% if order.address.town %}, {{ order.address.town }}{% endif %}</div>
           <div class="text-muted">{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</div>
           <div class="text-muted"><span class="material-symbols-outlined me-1" style="color: var(--primary); font-size: 16px; vertical-align: middle;">call</span>{{ order.address.phone }}</div>
         </div>

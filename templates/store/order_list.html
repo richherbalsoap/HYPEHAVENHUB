@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
+{% load i18n_store %}
 {% block title %}My Orders - HYPEHAVENHUB{% endblock %}
 {% block content %}
 <div class="container py-5">
-  <h2 class="mb-4" style="font-family: var(--font-display); font-weight: 700;">
-    <span class="material-symbols-outlined me-2" style="color: var(--primary); vertical-align: middle;">inventory_2</span>My Orders
-  </h2>
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <a href="{% url 'profile' %}" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 6px 12px; display: inline-flex; align-items: center; gap: 4px;">
+      <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>Back
+    </a>
+    <h2 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 0;">
+      <span class="material-symbols-outlined me-2" style="color: var(--primary); vertical-align: middle;">inventory_2</span>My Orders
+    </h2>
+  </div>
   {% if orders %}
   {% for order in orders %}
   <div class="card mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
@@ -37,7 +43,7 @@
             <div>
               <div style="font-size: 14px; font-weight: 500;">{{ item.product_name }}</div>
               {% if item.variant_label %}<div style="font-size: 12px; color: var(--on-surface-variant);">{{ item.variant_label }}</div>{% endif %}
-              <div style="font-size: 12px; color: var(--on-surface-variant);">Qty: {{ item.quantity }} &middot; ₹{{ item.unit_price|floatformat:"0" }}</div>
+              <div style="font-size: 12px; color: var(--on-surface-variant);">Qty: {{ item.quantity }} &middot; {% format_price item.unit_price|floatformat:"0" %}</div>
             </div>
           </div>
           {% endfor %}
@@ -46,7 +52,7 @@
           {% endif %}
         </div>
         <div class="col-md-4 text-md-end">
-          <div class="fw-700" style="font-size: 18px;">₹{{ order.grand_total|floatformat:"0" }}</div>
+          <div class="fw-700" style="font-size: 18px;">{% format_price order.grand_total|floatformat:"0" %}</div>
           <div class="text-muted small">{{ order.items.count }} item(s)</div>
         </div>
       </div>

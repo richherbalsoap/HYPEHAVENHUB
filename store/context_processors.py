@@ -45,7 +45,50 @@ def company_dashboard_access(request):
         )
     return {'can_access_company_dashboard': can_access}
 
+CURRENCY_NAMES = {
+    'AED': 'United Arab Emirates Dirham',
+    'ARS': 'Argentine Peso',
+    'AUD': 'Australian Dollar',
+    'BDT': 'Bangladeshi Taka',
+    'BRL': 'Brazilian Real',
+    'CAD': 'Canadian Dollar',
+    'CHF': 'Swiss Franc',
+    'CLP': 'Chilean Peso',
+    'CNY': 'Chinese Yuan',
+    'COP': 'Colombian Peso',
+    'CZK': 'Czech Koruna',
+    'DKK': 'Danish Krone',
+    'EGP': 'Egyptian Pound',
+    'EUR': 'Euro',
+    'GBP': 'British Pound',
+    'HKD': 'Hong Kong Dollar',
+    'IDR': 'Indonesian Rupiah',
+    'ILS': 'Israeli Shekel',
+    'INR': 'Indian Rupee',
+    'JPY': 'Japanese Yen',
+    'KRW': 'South Korean Won',
+    'MXN': 'Mexican Peso',
+    'MYR': 'Malaysian Ringgit',
+    'NOK': 'Norwegian Krone',
+    'NZD': 'New Zealand Dollar',
+    'PHP': 'Philippine Peso',
+    'PKR': 'Pakistani Rupee',
+    'PLN': 'Polish Zloty',
+    'RUB': 'Russian Ruble',
+    'SAR': 'Saudi Riyal',
+    'SGD': 'Singapore Dollar',
+    'THB': 'Thai Baht',
+    'TRY': 'Turkish Lira',
+    'TWD': 'Taiwan Dollar',
+    'USD': 'United States Dollar',
+    'VND': 'Vietnamese Dong',
+    'ZAR': 'South African Rand'
+}
+
 def global_country_context(request):
+    # Force language to English always
+    request.session['django_language'] = 'en'
+    
     if 'selected_country_id' not in request.session:
         try:
             ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
@@ -55,7 +98,6 @@ def global_country_context(request):
             country = CountrySetting.objects.filter(code=country_code).first()
             if country:
                 request.session['selected_country_id'] = country.id
-                request.session['django_language'] = country.default_language
             else:
                 request.session['selected_country_id'] = 1 # Fallback to 1
         except:
@@ -67,9 +109,18 @@ def global_country_context(request):
     except CountrySetting.DoesNotExist:
         current_country = CountrySetting.objects.first()
 
+    # Collect unique currencies
+    unique_currencies = []
+    seen_currencies = set()
+    for country in CountrySetting.objects.all().order_by('name'):
+        if country.currency_code not in seen_currencies:
+            seen_currencies.add(country.currency_code)
+            country.currency_name = CURRENCY_NAMES.get(country.currency_code, '')
+            unique_currencies.append(country)
+    unique_currencies.sort(key=lambda x: x.currency_code)
+
     return {
         'current_country': current_country,
-        'all_countries': CountrySetting.objects.all().order_by('name'),
+        'unique_currencies': unique_currencies,
         'active_country': current_country.name if current_country else 'GLOBAL',
-        'all_languages': LANGUAGE_CHOICES,
     }

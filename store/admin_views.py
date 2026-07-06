@@ -15,7 +15,7 @@ from django.conf import settings
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES,
 )
 from .forms import (
     ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm
@@ -145,6 +145,12 @@ def admin_product_create(request):
                 product.video_url = video_url
                 product.save()
 
+            # Handle A+ Image URL
+            aplus_url = request.POST.get('aplus_image_url')
+            if aplus_url:
+                product.aplus_image_url = aplus_url
+                product.save()
+
             # Handle direct-to-S3 image URLs
             is_first = True
             for key in request.POST:
@@ -211,6 +217,12 @@ def admin_product_edit(request, pk):
             video_url = request.POST.get('uploaded_video_url')
             if video_url:
                 product.video_url = video_url
+                product.save()
+                
+            # Handle A+ Image URL
+            aplus_url = request.POST.get('aplus_image_url')
+            if aplus_url:
+                product.aplus_image_url = aplus_url
                 product.save()
 
             # Handle direct-to-S3 image URLs
@@ -671,7 +683,7 @@ def admin_countries(request):
     countries = CountrySetting.objects.all().order_by('name')
     return render(request, 'admin/countries_list.html', {
         'countries': countries,
-        'title': 'Country Settings'
+        'title': 'Currency Settings'
     })
 
 @login_required
@@ -685,16 +697,8 @@ def admin_country_create(request):
         code = request.POST.get('code')
         currency_code = request.POST.get('currency_code')
         currency_symbol = request.POST.get('currency_symbol')
-        default_language = request.POST.get('default_language')
+        default_language = 'en'
         shipping_charge = request.POST.get('shipping_charge')
-
-        valid_lang_codes = {code for code, _ in LANGUAGE_CHOICES}
-        if default_language not in valid_lang_codes:
-            messages.error(request, 'Please select a valid language from the dropdown.')
-            return render(request, 'admin/country_form.html', {
-                'title': 'Add Country Setting',
-                'language_choices': LANGUAGE_CHOICES,
-            })
 
         try:
             CountrySetting.objects.create(
@@ -705,13 +709,13 @@ def admin_country_create(request):
                 default_language=default_language,
                 shipping_charge=shipping_charge
             )
-            messages.success(request, 'Country added successfully!')
+            messages.success(request, 'Currency added successfully!')
             return redirect('admin_countries')
         except Exception as e:
-            messages.error(request, f'Error adding country: {str(e)}')
+            messages.error(request, f'Error adding currency: {str(e)}')
             
     return render(request, 'admin/country_form.html', {
-        'title': 'Add Country Setting',
+        'title': 'Add Currency Setting',
         'language_choices': LANGUAGE_CHOICES,
     })
 
@@ -724,33 +728,23 @@ def admin_country_edit(request, pk):
     country = get_object_or_404(CountrySetting, pk=pk)
     
     if request.method == 'POST':
-        default_language = request.POST.get('default_language')
-        valid_lang_codes = {code for code, _ in LANGUAGE_CHOICES}
-        if default_language not in valid_lang_codes:
-            messages.error(request, 'Please select a valid language from the dropdown.')
-            return render(request, 'admin/country_form.html', {
-                'country': country,
-                'title': f'Edit {country.name}',
-                'language_choices': LANGUAGE_CHOICES,
-            })
-
         country.name = request.POST.get('name')
         country.code = request.POST.get('code')
         country.currency_code = request.POST.get('currency_code')
         country.currency_symbol = request.POST.get('currency_symbol')
-        country.default_language = default_language
+        country.default_language = 'en'
         country.shipping_charge = request.POST.get('shipping_charge')
         
         try:
             country.save()
-            messages.success(request, 'Country updated successfully!')
+            messages.success(request, 'Currency updated successfully!')
             return redirect('admin_countries')
         except Exception as e:
-            messages.error(request, f'Error updating country: {str(e)}')
+            messages.error(request, f'Error updating currency: {str(e)}')
             
     return render(request, 'admin/country_form.html', {
         'country': country,
-        'title': f'Edit {country.name}',
+        'title': f'Edit {country.currency_code}',
         'language_choices': LANGUAGE_CHOICES,
     })
 

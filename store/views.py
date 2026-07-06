@@ -255,13 +255,13 @@ def get_or_create_cart(request):
 
 def home(request):
     storefront_products = Product.objects.filter(is_active=True).select_related('brand', 'category')
-    featured = storefront_products.filter(is_featured=True).prefetch_related('images', 'variants')[:8]
-    new_arrivals = storefront_products.filter(is_new_arrival=True).prefetch_related('images')[:8]
-    bestsellers = storefront_products.filter(is_bestseller=True).prefetch_related('images')[:8]
-    flash_sale = storefront_products.filter(is_flash_sale=True).prefetch_related('images')[:6]
+    featured = storefront_products.filter(is_featured=True).prefetch_related('images', 'variants', 'reviews')[:8]
+    new_arrivals = storefront_products.filter(is_new_arrival=True).prefetch_related('images', 'variants', 'reviews')[:8]
+    bestsellers = storefront_products.filter(is_bestseller=True).prefetch_related('images', 'variants', 'reviews')[:8]
+    flash_sale = storefront_products.filter(is_flash_sale=True).prefetch_related('images', 'variants', 'reviews')[:6]
     categories = active_categories()[:3]
     hero_products = [
-        storefront_products.filter(category=cat).prefetch_related('images').first()
+        storefront_products.filter(category=cat).prefetch_related('images', 'variants', 'reviews').first()
         for cat in categories
     ]
     hero_products = [product for product in hero_products if product]
@@ -283,7 +283,7 @@ def home(request):
 
 
 def product_list(request):
-    products = Product.objects.filter(is_active=True).select_related('brand', 'category').prefetch_related('images', 'variants')
+    products = Product.objects.filter(is_active=True).select_related('brand', 'category').prefetch_related('images', 'variants', 'reviews')
     categories = active_categories()
     brands = Brand.objects.filter(
         is_active=True,
@@ -396,7 +396,7 @@ def product_detail(request, slug):
     reviews = product.reviews.filter(is_approved=True).select_related('user')
     similar = Product.objects.filter(
         is_active=True, category=product.category
-    ).exclude(id=product.id).prefetch_related('images')[:6]
+    ).exclude(id=product.id).prefetch_related('images', 'variants', 'reviews')[:6]
 
     user_review = None
     user_in_wishlist = False
@@ -523,20 +523,25 @@ def verify_otp_view(request):
         if request.method == 'POST':
             otp = ''.join(ch for ch in request.POST.get('otp', '') if ch.isdigit())
             user = get_object_or_404(User, email=email)
-            if otp == user.otp:
-                user.is_email_verified = True
-                user.is_active = True
-                user.otp = ''
-                user.save()
-                request.session.pop('verify_email', None)
-                request.session.pop('reset_otp_preview', None)
-                
-                user.backend = 'django.contrib.auth.backends.ModelBackend'
-                login(request, user)
-                merge_anonymous_cart(request, user)
-                messages.success(request, 'Email verified successfully. You are now logged in.')
-                return redirect('home')
-            messages.error(request, 'Invalid OTP.')
+            if user.otp and otp == user.otp:
+                # Check if OTP has expired (10 minutes = 600 seconds)
+                if user.otp_created_at and (timezone.now() - user.otp_created_at).total_seconds() > 600:
+                    messages.error(request, 'OTP has expired. Please sign up again to request a new OTP.')
+                else:
+                    user.is_email_verified = True
+                    user.is_active = True
+                    user.otp = ''
+                    user.save()
+                    request.session.pop('verify_email', None)
+                    request.session.pop('reset_otp_preview', None)
+                    
+                    user.backend = 'django.contrib.auth.backends.ModelBackend'
+                    login(request, user)
+                    merge_anonymous_cart(request, user)
+                    messages.success(request, 'Email verified successfully. You are now logged in.')
+                    return redirect('home')
+            else:
+                messages.error(request, 'Invalid OTP.')
             
         return render(request, 'auth/verify_otp.html', {'email': email, 'otp_preview': otp_preview})
     except Exception as e:
@@ -618,11 +623,16 @@ def reset_otp_view(request):
     otp_preview = request.session.get('reset_otp_preview')
     if request.method == 'POST':
         otp = ''.join(ch for ch in request.POST.get('otp', '') if ch.isdigit())
-        if otp == user.otp:
-            request.session['reset_verified'] = True
-            request.session.pop('reset_otp_preview', None)
-            return redirect('reset_password')
-        messages.error(request, 'Invalid OTP.')
+        if user.otp and otp == user.otp:
+            # Check if OTP has expired (10 minutes = 600 seconds)
+            if user.otp_created_at and (timezone.now() - user.otp_created_at).total_seconds() > 600:
+                messages.error(request, 'OTP has expired. Please request another password reset.')
+            else:
+                request.session['reset_verified'] = True
+                request.session.pop('reset_otp_preview', None)
+                return redirect('reset_password')
+        else:
+            messages.error(request, 'Invalid OTP.')
     return render(request, 'auth/reset_otp.html', {'email': email, 'otp_preview': otp_preview})
 
 
@@ -681,6 +691,7 @@ def address_list(request):
 @login_required
 def add_address(request):
     form = AddressForm(request.POST or None)
+    next_url = request.GET.get('next') or request.POST.get('next')
     if request.method == 'POST' and form.is_valid():
         addr = form.save(commit=False)
         addr.user = request.user
@@ -688,22 +699,27 @@ def add_address(request):
             Address.objects.filter(user=request.user).update(is_default=False)
         addr.save()
         messages.success(request, 'Address added!')
+        if next_url:
+            return redirect(next_url)
         return redirect('address_list')
-    return render(request, 'store/address_form.html', {'form': form, 'title': 'Add Address'})
+    return render(request, 'store/address_form.html', {'form': form, 'title': 'Add Address', 'next': next_url})
 
 
 @login_required
 def edit_address(request, pk):
     addr = get_object_or_404(Address, pk=pk, user=request.user)
     form = AddressForm(request.POST or None, instance=addr)
+    next_url = request.GET.get('next') or request.POST.get('next')
     if request.method == 'POST' and form.is_valid():
         updated = form.save(commit=False)
         if updated.is_default:
             Address.objects.filter(user=request.user).exclude(pk=pk).update(is_default=False)
         updated.save()
         messages.success(request, 'Address updated!')
+        if next_url:
+            return redirect(next_url)
         return redirect('address_list')
-    return render(request, 'store/address_form.html', {'form': form, 'title': 'Edit Address'})
+    return render(request, 'store/address_form.html', {'form': form, 'title': 'Edit Address', 'next': next_url})
 
 
 @login_required
@@ -893,6 +909,9 @@ def toggle_wishlist(request):
     return JsonResponse({'success': True, 'in_wishlist': True, 'message': 'Added to wishlist'})
 
 
+from django.views.decorators.cache import never_cache
+
+@never_cache
 def checkout_view(request):
     if not request.user.is_authenticated:
         return redirect(build_login_redirect_url(request, fallback='/checkout/', notice='order_required'))
@@ -901,7 +920,7 @@ def checkout_view(request):
     if not cart.items.exists():
         messages.warning(request, 'Your cart is empty.')
         return redirect('cart')
-    addresses = Address.objects.filter(user=request.user)
+    addresses = Address.objects.filter(user=request.user).order_by('-is_default', '-id')
     return render(request, 'store/checkout.html', {
         'cart': cart,
         'addresses': addresses,
@@ -981,7 +1000,11 @@ def place_order(request):
                 'receipt': str(order.order_id),
             })
             
-            payment.transaction_id = razorpay_order['id']
+            payment.gateway_response = {
+                'razorpay_order_id': razorpay_order['id'],
+                'amount': amount_in_paise,
+                'currency': 'INR'
+            }
             payment.save()
             
             customer_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
@@ -1013,6 +1036,9 @@ def verify_payment(request):
     if not request.user.is_authenticated:
         return JsonResponse({'success': False, 'message': 'Authentication required.'}, status=401)
 
+    from django.db import transaction
+    from store.exceptions import InventoryConflictError
+
     try:
         data = json.loads(request.body)
         razorpay_payment_id = data.get('razorpay_payment_id')
@@ -1023,67 +1049,72 @@ def verify_payment(request):
         if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, local_order_id]):
             return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
 
-        order = get_object_or_404(Order, order_id=local_order_id, user=request.user)
-        payment = order.payment
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(order_id=local_order_id, user=request.user)
+            payment = order.payment
 
-        # Verify signature
-        import razorpay
-        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-        
-        params_dict = {
-            'razorpay_order_id': razorpay_order_id,
-            'razorpay_payment_id': razorpay_payment_id,
-            'razorpay_signature': razorpay_signature
-        }
+            # Verify signature
+            import razorpay
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
 
-        try:
-            client.utility.verify_payment_signature(params_dict)
-        except Exception as e:
-            logger.error(f"Razorpay signature verification failed: {str(e)}")
-            payment.status = 'failed'
+            try:
+                client.utility.verify_payment_signature(params_dict)
+            except Exception as e:
+                logger.error(f"Razorpay signature verification failed: {str(e)}")
+                payment.status = 'failed'
+                payment.save()
+                return JsonResponse({'success': False, 'message': 'Payment verification signature mismatch.'})
+
+            # Payment successful - complete transaction
+            payment.status = 'success'
+            payment.payment_id = razorpay_payment_id
+            payment.gateway_response = params_dict
             payment.save()
-            return JsonResponse({'success': False, 'message': 'Payment verification signature mismatch.'})
 
-        # Payment successful - complete transaction
-        payment.status = 'completed'
-        payment.transaction_id = razorpay_payment_id
-        payment.save()
+            # Update order status
+            order.status = 'confirmed'
+            order.save()
 
-        # Update order status
-        order.status = 'confirmed'
-        order.save()
+            # Decrement stock with row locking (select_for_update)
+            for item in order.items.all():
+                if item.variant:
+                    variant = ProductVariant.objects.select_for_update().get(id=item.variant.id)
+                    if variant.stock < item.quantity:
+                        raise InventoryConflictError(f"Insufficient stock for {item.product.name} ({variant.label}).")
+                    variant.stock -= item.quantity
+                    variant.save()
 
-        # Decrement stock
-        for item in order.items.all():
-            if item.variant:
-                item.variant.stock = max(0, item.variant.stock - item.quantity)
-                item.variant.save()
+            # Create tracking entry
+            OrderTracking.objects.create(
+                order=order,
+                status='confirmed',
+                description='Payment verified successfully. Order confirmed.'
+            )
 
-        # Create tracking entry
-        OrderTracking.objects.create(
-            order=order,
-            status='confirmed',
-            description='Payment verified successfully. Order confirmed.'
-        )
+            cart = get_or_create_cart(request)
+            if cart.coupon:
+                cart.coupon.used_count += 1
+                cart.coupon.save()
 
-        cart = get_or_create_cart(request)
-        if cart.coupon:
-            cart.coupon.used_count += 1
-            cart.coupon.save()
+            # Clear cart
+            cart.items.all().delete()
+            cart.coupon = None
+            cart.save()
 
-        # Clear cart
-        cart.items.all().delete()
-        cart.coupon = None
-        cart.save()
-
-        # Create notification
-        Notification.objects.create(
-            user=request.user,
-            type='order',
-            title='Order Paid & Placed!',
-            message=f'Your payment for order #{order.order_id} has been verified successfully.',
-            link=f'/orders/{order.order_id}/'
-        )
+            # Create notification
+            Notification.objects.create(
+                user=request.user,
+                type='order',
+                title='Order Paid & Placed!',
+                message=f'Your payment for order #{order.order_id} has been verified successfully.',
+                link=f'/orders/{order.order_id}/'
+            )
 
         # Send billing notifications
         email_sent = send_order_bill_email(order)
@@ -1111,7 +1142,10 @@ def verify_payment(request):
 
     except Exception as e:
         logger.error(f"Error during payment verification: {str(e)}")
-        return JsonResponse({'success': False, 'message': 'An internal error occurred.'})
+        from store.exceptions import InventoryConflictError
+        if isinstance(e, InventoryConflictError):
+            return JsonResponse({'success': False, 'message': str(e)})
+        return JsonResponse({'success': False, 'message': f'An internal error occurred: {str(e)}'})
 
 
 @login_required
@@ -1144,17 +1178,83 @@ def order_detail(request, order_id):
 @login_required
 @require_POST
 def cancel_order(request, order_id):
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    if not order.is_cancellable:
-        return JsonResponse({'success': False, 'message': 'Order cannot be cancelled.'})
-    order.status = 'cancelled'
-    order.save()
-    OrderTracking.objects.create(order=order, status='cancelled', description='Order cancelled by customer.')
-    Notification.objects.create(
-        user=request.user, type='order', title='Order Cancelled',
-        message=f'Your order #{order.order_id} has been cancelled.',
-    )
-    return JsonResponse({'success': True, 'message': 'Order cancelled successfully.'})
+    from django.db import transaction
+    from datetime import datetime, timezone as datetime_timezone
+    
+    try:
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(order_id=order_id, user=request.user)
+            if not order.is_cancellable:
+                return JsonResponse({'success': False, 'message': 'Order cannot be cancelled.'})
+                
+            # Restore stock with locking
+            for item in order.items.all():
+                if item.variant:
+                    variant = ProductVariant.objects.select_for_update().get(id=item.variant.id)
+                    variant.stock += item.quantity
+                    variant.save()
+                    
+            # Process automatic Razorpay refund if prepaid
+            payment = getattr(order, 'payment', None)
+            refund_status = "none"
+            if payment and payment.status in ['success', 'completed'] and payment.method == 'razorpay' and payment.payment_id:
+                import razorpay
+                try:
+                    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                    amount_in_paise = int(payment.amount * 100)
+                    
+                    # Create refund request in Razorpay
+                    refund = client.payment.refund(payment.payment_id, {
+                        "amount": amount_in_paise,
+                        "notes": {
+                            "order_id": order.order_id,
+                            "reason": "Customer cancelled order"
+                        }
+                    })
+                    
+                    payment.status = 'refunded'
+                    resp_dict = payment.gateway_response or {}
+                    resp_dict['refund_id'] = refund.get('id')
+                    resp_dict['refunded_at'] = datetime.now(datetime_timezone.utc).isoformat()
+                    payment.gateway_response = resp_dict
+                    payment.save()
+                    refund_status = "processed"
+                except Exception as refund_err:
+                    logger.error(f"Razorpay automatic refund failed for order {order.order_id}: {str(refund_err)}")
+                    refund_status = "failed"
+            
+            # Cancel order and tracking log
+            order.status = 'cancelled'
+            order.save()
+            OrderTracking.objects.create(order=order, status='cancelled', description='Order cancelled by customer.')
+            
+            # Construct notification message
+            notif_message = f'Your order #{order.order_id} has been cancelled.'
+            if refund_status == "processed":
+                notif_message += f' A refund of INR {payment.amount:.2f} has been initiated to your payment account.'
+            elif refund_status == "failed":
+                notif_message += ' We encountered an issue initiating your automatic refund. Our support team will process it manually.'
+                
+            Notification.objects.create(
+                user=request.user, 
+                type='order', 
+                title='Order Cancelled',
+                message=notif_message,
+            )
+            
+            success_message = 'Order cancelled successfully.'
+            if refund_status == "processed":
+                success_message += f' Refund of INR {payment.amount:.2f} initiated.'
+            elif refund_status == "failed":
+                success_message += ' Automatic refund failed; support will process it manually.'
+                
+            return JsonResponse({'success': True, 'message': success_message})
+            
+    except Order.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Order not found.'}, status=404)
+    except Exception as e:
+        logger.error(f"Error during order cancellation: {str(e)}")
+        return JsonResponse({'success': False, 'message': f'Failed to cancel order: {str(e)}'}, status=500)
 
 
 @login_required
@@ -1222,6 +1322,16 @@ def quick_view(request, product_id):
 
 
 def run_migrations_view(request):
+    from django.http import HttpResponseForbidden
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    
+    if not settings.DEBUG and not request.user.is_superuser:
+        return HttpResponseForbidden("Forbidden: This endpoint is only available to superusers in production.")
+    
+    if settings.DEBUG and User.objects.filter(is_superuser=True).exists() and not request.user.is_superuser:
+        return HttpResponseForbidden("Forbidden: A superuser already exists. Please log in first.")
+
     import io
     from django.core.management import call_command
     from django.http import HttpResponse
@@ -1237,8 +1347,6 @@ def run_migrations_view(request):
         call_command('loaddata', 'store/fixtures/initial_data.json', stdout=out, stderr=err)
         
         # Create default superuser
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
         if not User.objects.filter(is_superuser=True).exists():
             User.objects.create_superuser(
                 username='admin',
@@ -1259,16 +1367,13 @@ def set_country_session(request):
         country_id = request.POST.get('country_id')
         if country_id:
             request.session['selected_country_id'] = int(country_id)
-            country = CountrySetting.objects.filter(id=country_id).first()
-            if country:
-                request.session['django_language'] = country.default_language
+            request.session['django_language'] = 'en'
             
             # If user is logged in, also update their profile
             if request.user.is_authenticated:
                 profile, created = UserProfile.objects.get_or_create(user=request.user)
                 profile.country_id = int(country_id)
-                if country:
-                    profile.preferred_language = country.default_language
+                profile.preferred_language = 'en'
                 profile.save()
                 
     return redirect(request.META.get('HTTP_REFERER', 'home'))
@@ -1285,3 +1390,310 @@ def set_language(request):
                 profile.preferred_language = language
                 profile.save()
     return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+
+import urllib3
+import requests
+
+def pincode_lookup(request):
+    pincode = request.GET.get('pincode', '').strip()
+    if not pincode or len(pincode) < 6:
+        return JsonResponse({'success': False, 'message': 'Invalid pincode.'})
+    
+    try:
+        url = f"https://api.postalpincode.in/pincode/{pincode}"
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        
+        # Disable SSL warnings
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
+        response = requests.get(url, headers=headers, verify=False, timeout=8)
+        if response.status_code == 200:
+            data = response.json()
+            if data and data[0].get('Status') == 'Success':
+                post_offices = data[0].get('PostOffice', [])
+                locations = []
+                seen = set()
+                for po in post_offices:
+                    city = po.get('District', '')
+                    state = po.get('State', '')
+                    if city and state and (city, state) not in seen:
+                        seen.add((city, state))
+                        locations.append({'city': city, 'state': state})
+                return JsonResponse({'success': True, 'locations': locations})
+            else:
+                return JsonResponse({'success': False, 'message': 'Pincode not found.'})
+        else:
+            return JsonResponse({'success': False, 'message': f'API Error: {response.status_code}'})
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Pincode lookup error: {str(e)}")
+        return JsonResponse({'success': False, 'message': f'Error fetching details: {str(e)}'})
+
+
+# ==========================================
+# Shiprocket Checkout (Fastrr) Integration
+# ==========================================
+
+from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
+import decimal
+import json
+import logging
+import uuid
+from datetime import datetime, timezone as datetime_timezone
+from store.shiprocket_checkout import generate_checkout_token, verify_webhook_signature
+
+logger = logging.getLogger(__name__)
+
+def shiprocket_auth_required(view_func):
+    from store.shiprocket_checkout import get_checkout_credentials
+    def wrapped_view(request, *args, **kwargs):
+        api_key, _ = get_checkout_credentials()
+        request_api_key = request.headers.get('X-Api-Key') or request.META.get('HTTP_X_API_KEY')
+        if not request_api_key or request_api_key != api_key:
+            return JsonResponse({"error": "Unauthorized"}, status=401)
+        return view_func(request, *args, **kwargs)
+    return wrapped_view
+
+def get_paginated_response(request, queryset, serializer_class, key_name):
+    page_num = request.GET.get('page', 1)
+    limit_num = request.GET.get('limit', 100)
+    
+    try:
+        page_num = int(page_num)
+    except ValueError:
+        page_num = 1
+        
+    try:
+        limit_num = int(limit_num)
+    except ValueError:
+        limit_num = 100
+        
+    paginator = Paginator(queryset, limit_num)
+    try:
+        page_obj = paginator.page(page_num)
+    except:
+        page_obj = paginator.page(paginator.num_pages)
+        
+    host_uri = f"{request.scheme}://{request.get_host()}"
+    serialized_items = serializer_class(page_obj.object_list, many=True, context={'host_uri': host_uri}).data
+    
+    return JsonResponse({
+        "data": {
+            "total": paginator.count,
+            key_name: serialized_items
+        }
+    })
+
+@csrf_exempt
+@shiprocket_auth_required
+def shiprocket_fetch_products(request):
+    from .serializers import ProductSerializer
+    queryset = Product.objects.filter(is_active=True).prefetch_related('images', 'variants', 'reviews').order_by('id')
+    return get_paginated_response(request, queryset, ProductSerializer, "products")
+
+@csrf_exempt
+@shiprocket_auth_required
+def shiprocket_fetch_collections(request):
+    from .serializers import CategorySerializer
+    queryset = Category.objects.filter(is_active=True).order_by('id')
+    return get_paginated_response(request, queryset, CategorySerializer, "collections")
+
+@csrf_exempt
+@shiprocket_auth_required
+def shiprocket_fetch_collection_products(request):
+    collection_id = request.GET.get('collection_id')
+    if not collection_id:
+        return JsonResponse({"error": "Missing collection_id"}, status=400)
+    from .serializers import ProductSerializer
+    queryset = Product.objects.filter(category_id=collection_id, is_active=True).prefetch_related('images', 'variants', 'reviews').order_by('id')
+    return get_paginated_response(request, queryset, ProductSerializer, "products")
+
+@csrf_exempt
+def shiprocket_initiate_checkout(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+        
+    try:
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+    except Exception:
+        data = {}
+        
+    items = []
+    
+    product_id = data.get('product_id')
+    variant_id = data.get('variant_id')
+    quantity = int(data.get('quantity', 1))
+    
+    if product_id:
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        variant = None
+        if variant_id:
+            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        v_id = str(variant.id) if variant else f"prod-{product.id}"
+        items.append({
+            "variant_id": v_id,
+            "quantity": quantity
+        })
+    else:
+        cart = get_or_create_cart(request)
+        cart_items = cart.items.select_related('product', 'variant').all()
+        if not cart_items.exists():
+            return JsonResponse({"success": False, "message": "Your cart is empty"}, status=400)
+            
+        for item in cart_items:
+            v_id = str(item.variant.id) if item.variant else f"prod-{item.product.id}"
+            items.append({
+                "variant_id": v_id,
+                "quantity": item.quantity
+            })
+            
+    redirect_url = f"{request.scheme}://{request.get_host()}/orders/?status=SUCCESS"
+    timestamp_str = datetime.now(datetime_timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    
+    res = generate_checkout_token(items, redirect_url, timestamp_str)
+    return JsonResponse(res)
+
+@csrf_exempt
+def shiprocket_order_webhook(request):
+    if request.method != 'POST':
+        return JsonResponse({"error": "Only POST allowed"}, status=405)
+        
+    signature = request.headers.get('X-Api-HMAC-SHA256')
+    if not verify_webhook_signature(request.body, signature):
+        logger.warning("Shiprocket webhook signature verification failed.")
+        return JsonResponse({"ok": False, "errorCode": "INVALID_SIGNATURE", "result": False}, status=401)
+        
+    try:
+        payload = json.loads(request.body)
+    except Exception:
+        return JsonResponse({"ok": False, "errorCode": "INVALID_JSON", "result": False}, status=400)
+        
+    # Process order creation
+    email = payload.get('email')
+    phone = payload.get('phone') or "9999999999"
+    status = payload.get('status')
+    
+    if status != 'SUCCESS':
+        return JsonResponse({"ok": True, "errorCode": None, "result": True})
+        
+    shipping_address_data = payload.get('shipping_address') or {}
+    
+    # 1. Resolve User
+    user = None
+    if email:
+        user = User.objects.filter(email=email).first()
+    if not user and phone:
+        user = User.objects.filter(phone=phone).first()
+        
+    if not user:
+        # Create a guest user
+        username = (email.split('@')[0] if email else "guest") + "_" + uuid.uuid4().hex[:4]
+        user = User.objects.create(
+            email=email or f"{username}@hypehavenhub.in",
+            username=username,
+            phone=phone,
+            first_name=shipping_address_data.get('first_name', 'Guest'),
+            last_name=shipping_address_data.get('last_name', '')
+        )
+        
+    # 2. Resolve Shipping Address
+    addr = Address.objects.create(
+        user=user,
+        type='other',
+        full_name=f"{shipping_address_data.get('first_name', '')} {shipping_address_data.get('last_name', '')}".strip() or "Guest Customer",
+        phone=phone,
+        address_line1=shipping_address_data.get('line1', ''),
+        address_line2=shipping_address_data.get('line2', '') or '',
+        city=shipping_address_data.get('city', ''),
+        state=shipping_address_data.get('state', ''),
+        pincode=shipping_address_data.get('pincode', ''),
+    )
+    
+    # 3. Resolve Order totals
+    subtotal = decimal.Decimal(payload.get('subtotal_price') or payload.get('total_amount_payable') or 0)
+    grand_total = decimal.Decimal(payload.get('total_amount_payable') or 0)
+    discount = decimal.Decimal(payload.get('total_discount') or payload.get('coupon_discount') or 0)
+    shipping_charges = decimal.Decimal(payload.get('shipping_charges') or 0)
+    
+    # Create Order
+    order = Order.objects.create(
+        user=user,
+        address=addr,
+        status='confirmed',
+        subtotal=subtotal,
+        discount_amount=discount,
+        delivery_charge=shipping_charges,
+        grand_total=grand_total,
+        notes=f"Shiprocket Order ID: {payload.get('order_id')}"
+    )
+    
+    # 4. Resolve Order Items
+    cart_items = payload.get('cart_data', {}).get('items', [])
+    for item in cart_items:
+        variant_id = item.get('variant_id')
+        quantity = int(item.get('quantity', 1))
+        
+        product = None
+        variant = None
+        
+        # Check if the variant_id is encoded as "prod-<product_id>"
+        if isinstance(variant_id, str) and variant_id.startswith('prod-'):
+            try:
+                prod_id = int(variant_id.split('-')[1])
+                product = Product.objects.filter(id=prod_id).first()
+            except (IndexError, ValueError):
+                pass
+        else:
+            try:
+                variant = ProductVariant.objects.filter(id=variant_id).first()
+                if variant:
+                    product = variant.product
+            except (ValueError, TypeError):
+                pass
+                
+        if not product and not variant:
+            product = Product.objects.filter(is_active=True).first()
+            
+        unit_price = float(product.selling_price) if product else 0.0
+        if variant:
+            unit_price += float(variant.additional_price)
+            
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            variant=variant,
+            product_name=product.name if product else "Product",
+            variant_label=variant.label if variant else "",
+            quantity=quantity,
+            unit_price=unit_price,
+            total_price=unit_price * quantity
+        )
+        
+    # 5. Create Payment record
+    payment_type = payload.get('payment_type', 'PREPAID')
+    payment_method = 'cod' if payment_type in ['CASH_ON_DELIVERY', 'COD'] else 'upi'
+    payment_status = 'pending' if payment_method == 'cod' else 'success'
+    
+    Payment.objects.create(
+        order=order,
+        method=payment_method,
+        status=payment_status,
+        amount=grand_total,
+        gateway_response=payload
+    )
+    
+    # 6. Clear user's cart
+    cart = Cart.objects.filter(user=user).first()
+    if cart:
+        cart.items.all().delete()
+        
+    return JsonResponse({"ok": True, "result": True})
+
+
+

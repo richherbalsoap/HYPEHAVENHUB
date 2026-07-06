@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h3 text-white mb-0">{{ title }}</h2>
     <a href="{% url 'admin_countries' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Countries
+        <i class="fas fa-arrow-left"></i> Back to Currencies
     </a>
 </div>
 
@@ -19,14 +19,14 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Country Name</label>
+                            <label class="form-label">Currency Name</label>
                             <input type="text" name="name" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.name }}" placeholder="e.g. United Kingdom" required>
+                                   value="{{ country.name }}" placeholder="e.g. US Dollar" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Country Code (2 letters)</label>
+                            <label class="form-label">Region/Country Code (2 letters)</label>
                             <input type="text" name="code" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.code }}" placeholder="e.g. GB" maxlength="2" required>
+                                   value="{{ country.code }}" placeholder="e.g. US" maxlength="2" required>
                         </div>
                     </div>
                     
@@ -34,30 +34,17 @@
                         <div class="col-md-6">
                             <label class="form-label">Currency Code</label>
                             <input type="text" name="currency_code" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.currency_code|default:'USD' }}" placeholder="e.g. GBP" maxlength="3" required>
+                                   value="{{ country.currency_code|default:'USD' }}" placeholder="e.g. USD" maxlength="3" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Currency Symbol</label>
                             <input type="text" name="currency_symbol" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.currency_symbol|default:'$' }}" placeholder="e.g. £" maxlength="5" required>
+                                   value="{{ country.currency_symbol|default:'$' }}" placeholder="e.g. $" maxlength="5" required>
                         </div>
                     </div>
 
                     <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Default Language</label>
-                            <select name="default_language" class="form-select bg-secondary text-white border-0" required>
-                                {% for code, label in language_choices %}
-                                    {% if country %}
-                                        <option value="{{ code }}" {% if country.default_language == code %}selected{% endif %}>{{ label }}</option>
-                                    {% else %}
-                                        <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ label }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                            </select>
-                            <small class="text-muted">Language dropdown se hi choose hoga — koi bhi text nahi likh sakte, isliye galat/invalid language save nahi hogi.</small>
-                        </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="form-label">Base Shipping Charge</label>
                             <input type="number" step="0.01" name="shipping_charge" class="form-control bg-secondary text-white border-0" 
                                    value="{{ country.shipping_charge|default:'0.00' }}" placeholder="e.g. 15.00" required>
@@ -66,7 +53,7 @@
 
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary py-2">
-                            <i class="fas fa-save"></i> Save Country Setting
+                            <i class="fas fa-save"></i> Save Currency Setting
                         </button>
                     </div>
                 </form>

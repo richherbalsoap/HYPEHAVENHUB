@@ -5,9 +5,15 @@
   <div class="row justify-content-center">
     <div class="col-lg-6">
       <div class="checkout-step">
-        <h4 class="fw-700 mb-4"><span class="material-symbols-outlined text-pink me-2" style="vertical-align: middle;">location_on</span>{{ title }}</h4>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="fw-700 mb-0"><span class="material-symbols-outlined text-pink me-2" style="vertical-align: middle;">location_on</span>{{ title }}</h4>
+          <span id="country-badge" class="badge" style="background: var(--primary); color: var(--surface); font-size: 12px; font-family: 'Montserrat', sans-serif; padding: 6px 14px; border-radius: 20px;">{{ active_country|default:"India" }}</span>
+        </div>
         <form method="POST">
           {% csrf_token %}
+          {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
           <div class="mb-3">
             <label class="form-label">Address Type</label>
             {{ form.type }}
@@ -30,18 +36,84 @@
             <label class="form-label">Address Line 2 <span class="text-muted">(optional)</span></label>
             <input type="text" name="address_line2" class="form-control" value="{{ form.address_line2.value|default:'' }}" placeholder="Landmark, Area">
           </div>
-          <div class="row g-3 mb-3">
-            <div class="col-md-4">
-              <label class="form-label">City</label>
-              <input type="text" name="city" class="form-control" value="{{ form.city.value|default:'' }}" required>
+          <div class="row g-3 mb-3 position-relative">
+            <!-- Hidden inputs to submit state, city, and town values to Django form -->
+            <input type="hidden" id="id_state" name="state" value="{{ form.state.value|default:'' }}">
+            <input type="hidden" id="id_city" name="city" value="{{ form.city.value|default:'' }}">
+            <input type="hidden" id="id_town" name="town" value="{{ form.town.value|default:'' }}">
+
+            <!-- Pincode & State Row -->
+            <div class="row g-3 mb-3" style="margin-left: 0; margin-right: 0;">
+              <!-- Pincode -->
+              <div class="col-md-6">
+                <label class="form-label d-flex justify-content-between">
+                  <span>Pincode / ZIP</span>
+                  <span id="pincode-status" class="small text-muted" style="font-size: 11px; font-family: 'Montserrat', sans-serif;"></span>
+                </label>
+                <div class="position-relative">
+                  <input type="text" id="id_pincode" name="pincode" class="form-control" value="{{ form.pincode.value|default:'' }}" placeholder="Postal/ZIP code" required autocomplete="off" style="border-color: var(--outline-variant); border-radius: 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif; padding-right: 40px;">
+                  <span id="pincode-spinner" style="display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); z-index: 5;">
+                    <span class="spinner-border spinner-border-sm text-pink" role="status" aria-hidden="true" style="width: 1rem; height: 1rem;"></span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- State -->
+              <div class="col-md-6">
+                <label class="form-label">State</label>
+                <div id="state-select-container">
+                  <select id="id_state_select" class="form-select" style="border-color: var(--outline-variant); border-radius: 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;">
+                    <!-- Dynamically populated -->
+                  </select>
+                </div>
+                <div id="state-manual-container" style="display:none;">
+                  <div class="input-group">
+                    <input type="text" id="id_state_manual" class="form-control" placeholder="Enter state name" style="border-color: var(--outline-variant); border-radius: 8px 0 0 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;">
+                    <button type="button" id="btn-state-list" class="btn btn-outline-secondary" style="border-color: var(--outline-variant); border-radius: 0 8px 8px 0; display: inline-flex; align-items: center;" title="Choose from list">
+                      <span class="material-symbols-outlined" style="font-size: 18px;">list</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="col-md-4">
-              <label class="form-label">State</label>
-              <input type="text" name="state" class="form-control" value="{{ form.state.value|default:'' }}" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Pincode</label>
-              <input type="text" name="pincode" class="form-control" value="{{ form.pincode.value|default:'' }}" required>
+
+            <!-- City & Town Row -->
+            <div class="row g-3 mb-3" style="margin-left: 0; margin-right: 0;">
+              <!-- City -->
+              <div class="col-md-6">
+                <label class="form-label">City</label>
+                <div id="city-select-container">
+                  <select id="id_city_select" class="form-select" style="border-color: var(--outline-variant); border-radius: 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;">
+                    <!-- Dynamically populated -->
+                  </select>
+                </div>
+                <div id="city-manual-container" style="display:none;">
+                  <div class="input-group">
+                    <input type="text" id="id_city_manual" class="form-control" placeholder="Enter city name" style="border-color: var(--outline-variant); border-radius: 8px 0 0 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;">
+                    <button type="button" id="btn-city-list" class="btn btn-outline-secondary" style="border-color: var(--outline-variant); border-radius: 0 8px 8px 0; display: inline-flex; align-items: center;" title="Choose from list">
+                      <span class="material-symbols-outlined" style="font-size: 18px;">list</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Town / Locality -->
+              <div class="col-md-6">
+                <label class="form-label">Town / Locality</label>
+                <div id="town-select-container">
+                  <select id="id_town_select" class="form-select" style="border-color: var(--outline-variant); border-radius: 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;">
+                    <!-- Dynamically populated -->
+                  </select>
+                </div>
+                <div id="town-manual-container" style="display:none;">
+                  <div class="input-group">
+                    <input type="text" id="id_town_manual" class="form-control" placeholder="Enter town name" style="border-color: var(--outline-variant); border-radius: 8px 0 0 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;">
+                    <button type="button" id="btn-town-list" class="btn btn-outline-secondary" style="border-color: var(--outline-variant); border-radius: 0 8px 8px 0; display: inline-flex; align-items: center;" title="Choose from list">
+                      <span class="material-symbols-outlined" style="font-size: 18px;">list</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="form-check mb-4">
@@ -50,11 +122,611 @@
           </div>
           <div class="d-flex gap-3">
             <button type="submit" class="btn-artisan-primary" style="width: auto; padding: 12px 32px;"><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">save</span>Save Address</button>
-            <a href="{% url 'address_list' %}" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 12px 24px;"><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">arrow_back</span>Cancel</a>
+            <a href="{% if next %}{{ next }}{% else %}{% url 'address_list' %}{% endif %}" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 12px 24px;"><span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle; margin-right: 4px;">arrow_back</span>Cancel</a>
           </div>
         </form>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const countryIsoMapping = {
+        "india": "IN",
+        "united states": "US",
+        "united kingdom": "GB",
+        "canada": "CA",
+        "australia": "AU",
+        "germany": "DE",
+        "france": "FR",
+        "italy": "IT",
+        "spain": "ES",
+        "netherlands": "NL",
+        "portugal": "PT",
+        "greece": "GR",
+        "poland": "PL",
+        "switzerland": "CH",
+        "sweden": "SE",
+        "norway": "NO",
+        "denmark": "DK",
+        "ireland": "IE",
+        "belgium": "BE",
+        "austria": "AT",
+        "turkey": "TR",
+        "russia": "RU",
+        "united arab emirates": "AE",
+        "saudi arabia": "SA",
+        "qatar": "QA",
+        "kuwait": "KW",
+        "israel": "IL",
+        "egypt": "EG",
+        "south africa": "ZA",
+        "new zealand": "NZ",
+        "brazil": "BR",
+        "mexico": "MX",
+        "japan": "JP",
+        "south korea": "KR",
+        "singapore": "SG",
+        "malaysia": "MY",
+        "indonesia": "ID",
+        "thailand": "TH",
+        "vietnam": "VN",
+        "philippines": "PH"
+    };
+
+    // Database of major countries and their states/cities (including ALL states/UTs of India and ALL their official districts)
+    const locationDatabase = {
+        "india": {
+            "Andhra Pradesh": ["Anantapur", "Chittoor", "East Godavari", "Guntur", "Krishna", "Kurnool", "Nellore", "Prakasam", "Srikakulam", "Visakhapatnam", "Vizianagaram", "West Godavari", "YSR Kadapa"],
+            "Arunachal Pradesh": ["Changlang", "Dibang Valley", "East Kameng", "East Siang", "Kurung Kumey", "Lohit", "Longding", "Lower Dibang Valley", "Lower Subansiri", "Namsai", "Papum Pare", "Tawang", "Tirap", "Upper Siang", "Upper Subansiri", "West Kameng", "West Siang"],
+            "Assam": ["Baksa", "Barpeta", "Biswanath", "Bongaigaon", "Cachar", "Charaideo", "Chirang", "Darrang", "Dhemaji", "Dhubri", "Dibrugarh", "Dima Hasao", "Goalpara", "Golaghat", "Hailakandi", "Hojai", "Jorhat", "Kamrup", "Kamrup Metropolitan", "Karbi Anglong", "Karimganj", "Kokrajhar", "Lakhimpur", "Majuli", "Morigaon", "Nagaon", "Nalbari", "Sivasagar", "Sonitpur", "Tinsukia", "Udalguri", "West Karbi Anglong"],
+            "Bihar": ["Araria", "Arwal", "Aurangabad", "Banka", "Begusarai", "Bhagalpur", "Bhojpur", "Buxar", "Darbhanga", "East Champaran", "Gaya", "Gopalganj", "Jamui", "Jehanabad", "Kaimur", "Katihar", "Khagaria", "Kishanganj", "Lakhisarai", "Madhepura", "Madhubani", "Munger", "Muzaffarpur", "Nalanda", "Nawada", "Patna", "Purnia", "Rohtas", "Saharsa", "Samastipur", "Saran", "Sheikhpura", "Sheohar", "Sitamarhi", "Siwan", "Supaul", "Vaishali", "West Champaran"],
+            "Chhattisgarh": ["Balod", "Baloda Bazar", "Balrampur", "Bastar", "Bemetara", "Bijapur", "Bilaspur", "Dantewada", "Dhamtari", "Durg", "Gariaband", "Janjgir-Champa", "Jashpur", "Kabirdham", "Kanker", "Kondagaon", "Korba", "Koriya", "Mahasamund", "Mungeli", "Narayanpur", "Raigarh", "Raipur", "Rajnandgaon", "Sukma", "Surajpur", "Surguja"],
+            "Goa": ["North Goa", "South Goa"],
+            "Gujarat": ["Ahmedabad", "Amreli", "Anand", "Aravalli", "Banaskantha", "Bharuch", "Bhavnagar", "Botad", "Chhota Udepur", "Dahod", "Dang", "Devbhoomi Dwarka", "Gandhinagar", "Gir Somnath", "Jamnagar", "Junagadh", "Kheda", "Kutch", "Mahisagar", "Mehsana", "Morbi", "Narmada", "Navsari", "Panchmahal", "Patan", "Porbandar", "Rajkot", "Sabarkantha", "Surat", "Surendranagar", "Tapi", "Vadodara", "Valsad"],
+            "Haryana": ["Ambala", "Bhiwani", "Charkhi Dadri", "Faridabad", "Fatehabad", "Gurugram", "Hisar", "Jhajjar", "Jind", "Kaithal", "Karnal", "Kurukshetra", "Mahendragarh", "Nuh", "Palwal", "Panchkula", "Panipat", "Rohtak", "Sirsa", "Sonipat", "Yamunanagar"],
+            "Himachal Pradesh": ["Bilaspur", "Chamba", "Hamirpur", "Kangra", "Kinnaur", "Kullu", "Lahaul and Spiti", "Mandi", "Shimla", "Sirmaur", "Solan", "Una"],
+            "Jammu and Kashmir": ["Anantnag", "Bandipora", "Baramulla", "Budgam", "Doda", "Ganderbal", "Jammu", "Kathua", "Kishtwar", "Kulgam", "Kupwara", "Poonch", "Pulwama", "Ramban", "Reasi", "Samba", "Shopian", "Srinagar", "Udhampur"],
+            "Jharkhand": ["Bokaro", "Chatra", "Deoghar", "Dhanbad", "Dumka", "East Singhbhum", "Garhwa", "Giridih", "Godda", "Gumla", "Hazaribagh", "Jamtara", "Khunti", "Koderma", "Latehar", "Lohardaga", "Pakur", "Palamu", "Ramgarh", "Ranchi", "Sahibganj", "Seraikela Kharsawan", "Simdega", "West Singhbhum"],
+            "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikkaballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+            "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+            "Madhya Pradesh": ["Anuppur", "Alirajpur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal", "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior", "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur", "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna", "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain", "Umaria", "Vidisha"],
+            "Maharashtra": ["Ahmednagar", "Akola", "Amravati", "Aurangabad", "Beed", "Bhandara", "Buldhana", "Chandrapur", "Dhule", "Gadchiroli", "Gondia", "Hingoli", "Jalgaon", "Jalna", "Kolhapur", "Latur", "Mumbai City", "Mumbai Suburban", "Nagpur", "Nanded", "Nandurbar", "Nashik", "Osmanabad", "Palghar", "Parbhani", "Pune", "Raigad", "Ratnagiri", "Sangli", "Satara", "Sindhudurg", "Solapur", "Thane", "Wardha", "Washim", "Yavatmal"],
+            "Manipur": ["Bishnupur", "Chandel", "Churachandpur", "Imphal East", "Imphal West", "Jiribam", "Kakching", "Kamjong", "Kangpokpi", "Noney", "Pherzawl", "Senapati", "Tamenglong", "Tengnoupal", "Thoubal", "Ukhrul"],
+            "Meghalaya": ["East Garo Hills", "East Jaintia Hills", "East Khasi Hills", "North Garo Hills", "Ri Bhoi", "South Garo Hills", "South West Garo Hills", "South West Khasi Hills", "West Garo Hills", "West Jaintia Hills", "West Khasi Hills"],
+            "Mizoram": ["Aizawl", "Champhai", "Kolasib", "Lawngtlai", "Lunglei", "Mamit", "Saiha", "Serchhip"],
+            "Nagaland": ["Dimapur", "Kiphire", "Kohima", "Longleng", "Mokokchung", "Mon", "Peren", "Phek", "Tuensang", "Wokha", "Zunheboto"],
+            "Odisha": ["Angul", "Balangir", "Balasore", "Bargarh", "Bhadrak", "Boudh", "Cuttack", "Deogarh", "Dhenkanal", "Gajapati", "Ganjam", "Jagatsinghpur", "Jajpur", "Jharsuguda", "Kalahandi", "Kandhamal", "Kendrapara", "Kendujhar", "Khordha", "Koraput", "Malkangiri", "Mayurbhanj", "Nabarangpur", "Nayagarh", "Nuapada", "Puri", "Rayagada", "Sambalpur", "Subarnapur", "Sundargarh"],
+            "Punjab": ["Amritsar", "Barnala", "Bathinda", "Faridkot", "Fatehgarh Sahib", "Fazilka", "Ferozepur", "Gurdaspur", "Hoshiarpur", "Jalandhar", "Kapurthala", "Ludhiana", "Mansa", "Moga", "Muktsar", "Pathankot", "Patiala", "Rupnagar", "Sahibzada Ajit Singh Nagar (Mohali)", "Sangrur", "Shahid Bhagat Singh Nagar", "Tarn Taran"],
+            "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bikaner", "Bundi", "Chittorgarh", "Churu", "Dausa", "Dholpur", "Dungarpur", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalore", "Jhalawar", "Jhunjhunu", "Jodhpur", "Karauli", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Sri Ganganagar", "Tonk", "Udaipur"],
+            "Sikkim": ["East Sikkim", "North Sikkim", "South Sikkim", "West Sikkim"],
+            "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+            "Telangana": ["Adilabad", "Bhadradri Kothagudem", "Hyderabad", "Jagtial", "Jangaon", "Jayashankar Bhupalpally", "Jogulamba Gadwal", "Kamareddy", "Karimnagar", "Khammam", "Kumuram Bheem", "Mahabubabad", "Mahabubnagar", "Mancherial", "Medak", "Medchal-Malkajgiri", "Mulugu", "Nagarkurnool", "Nalgonda", "Narayanpet", "Nirmal", "Nizamabad", "Peddapalli", "Rajanna Sircilla", "Rangareddy", "Sangareddy", "Siddipet", "Suryapet", "Vikarabad", "Wanaparthy", "Warangal Rural", "Warangal Urban", "Yadadri Bhuvanagiri"],
+            "Tripura": ["Dhalai", "Gomati", "Khowai", "North Tripura", "Sepahijala", "South Tripura", "Unakoti", "West Tripura"],
+            "Uttar Pradesh": ["Agra", "Aligarh", "Allahabad", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh", "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly", "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot", "Deoria", "Etah", "Etawah", "Faizabad", "Farrukhabad", "Fatehpur", "Firozabad", "Gautam Buddha Nagar (Noida)", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur", "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj", "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kheri", "Kushinagar", "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau", "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar", "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra", "Sultanpur", "Unnao", "Varanasi"],
+            "Uttarakhand": ["Almora", "Bageshwar", "Chamoli", "Champawat", "Dehradun", "Haridwar", "Nainital", "Pauri Garhwal", "Pithoragarh", "Rudraprayag", "Tehri Garhwal", "Udham Singh Nagar", "Uttarkashi"],
+            "West Bengal": ["Alipurduar", "Bankura", "Birbhum", "Cooch Behar", "Darjeeling", "East Burdwan", "Hooghly", "Howrah", "Jalpaiguri", "Jhargram", "Kalimpong", "Kolkata", "Malda", "Murshidabad", "Nadia", "North 24 Parganas", "North Dinajpur", "Purulia", "South 24 Parganas", "South Dinajpur", "West Burdwan", "West Midnapore"],
+            "Delhi": ["New Delhi", "Central Delhi", "East Delhi", "North Delhi", "North East Delhi", "North West Delhi", "Shahdara", "South Delhi", "South East Delhi", "South West Delhi", "West Delhi"],
+            "Andaman and Nicobar Islands": ["Nicobar", "North and Middle Andaman", "South Andaman"],
+            "Chandigarh": ["Chandigarh"],
+            "Dadra and Nagar Haveli and Daman and Diu": ["Dadra and Nagar Haveli", "Daman", "Diu"],
+            "Lakshadweep": ["Lakshadweep"],
+            "Puducherry": ["Karaikal", "Mahe", "Puducherry", "Yanam"],
+            "Ladakh": ["Kargil", "Leh"]
+        },
+        "united states": {
+            "California": ["Los Angeles", "San Francisco", "San Diego", "San Jose", "Sacramento", "Oakland", "Fresno"],
+            "New York": ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse", "Albany"],
+            "Texas": ["Houston", "Austin", "Dallas", "San Antonio", "Fort Worth", "El Paso", "Arlington"],
+            "Florida": ["Miami", "Orlando", "Tampa", "Jacksonville", "Tallahassee", "St. Petersburg"],
+            "Illinois": ["Chicago", "Aurora", "Rockford", "Naperville", "Springfield"],
+            "Massachusetts": ["Boston", "Worcester", "Springfield", "Cambridge", "Lowell"],
+            "Washington": ["Seattle", "Spokane", "Tacoma", "Bellevue", "Olympia"],
+            "Georgia": ["Atlanta", "Augusta", "Columbus", "Savannah", "Athens"]
+        },
+        "united kingdom": {
+            "England": ["London", "Birmingham", "Manchester", "Liverpool", "Leeds", "Newcastle", "Bristol", "Sheffield", "Nottingham", "Leicester"],
+            "Scotland": ["Edinburgh", "Glasgow", "Aberdeen", "Dundee", "Inverness"],
+            "Wales": ["Cardiff", "Swansea", "Newport", "St Davids"],
+            "Northern Ireland": ["Belfast", "Derry", "Lisburn", "Newry"]
+        },
+        "canada": {
+            "Ontario": ["Toronto", "Ottawa", "Mississauga", "Hamilton", "Brampton", "London", "Windsor"],
+            "Quebec": ["Montreal", "Quebec City", "Laval", "Gatineau", "Sherbrooke"],
+            "British Columbia": ["Vancouver", "Victoria", "Surrey", "Burnaby", "Richmond", "Kelowna"],
+            "Alberta": ["Calgary", "Edmonton", "Red Deer", "Lethbridge", "St. Albert"]
+        },
+        "australia": {
+            "New South Wales": ["Sydney", "Newcastle", "Wollongong", "Central Coast"],
+            "Victoria": ["Melbourne", "Geelong", "Ballarat", "Bendigo"],
+            "Queensland": ["Brisbane", "Gold Coast", "Cairns", "Townsville"],
+            "Western Australia": ["Perth", "Fremantle", "Bunbury"],
+            "South Australia": ["Adelaide"]
+        }
+    };
+
+    // Elements
+    const hiddenState = document.getElementById("id_state");
+    const hiddenCity = document.getElementById("id_city");
+    const hiddenTown = document.getElementById("id_town");
+
+    const stateSelect = document.getElementById("id_state_select");
+    const stateManualContainer = document.getElementById("state-manual-container");
+    const stateSelectContainer = document.getElementById("state-select-container");
+    const stateManualInput = document.getElementById("id_state_manual");
+    const btnStateList = document.getElementById("btn-state-list");
+
+    const citySelect = document.getElementById("id_city_select");
+    const cityManualContainer = document.getElementById("city-manual-container");
+    const citySelectContainer = document.getElementById("city-select-container");
+    const cityManualInput = document.getElementById("id_city_manual");
+    const btnCityList = document.getElementById("btn-city-list");
+
+    const townSelect = document.getElementById("id_town_select");
+    const townManualContainer = document.getElementById("town-manual-container");
+    const townSelectContainer = document.getElementById("town-select-container");
+    const townManualInput = document.getElementById("id_town_manual");
+    const btnTownList = document.getElementById("btn-town-list");
+
+    const pincodeInput = document.getElementById("id_pincode");
+    const spinner = document.getElementById("pincode-spinner");
+    const statusText = document.getElementById("pincode-status");
+    const countryBadge = document.getElementById("country-badge");
+
+    const countryName = countryBadge ? countryBadge.textContent.trim().toLowerCase() : "india";
+
+    const initialState = hiddenState ? hiddenState.value.trim() : "";
+    const initialCity = hiddenCity ? hiddenCity.value.trim() : "";
+    const initialTown = hiddenTown ? hiddenTown.value.trim() : "";
+
+    // 1. Initialize State List
+    initLocationFlow();
+
+    function initLocationFlow() {
+        if (locationDatabase[countryName]) {
+            populateStates(countryName);
+            
+            // Set initial state
+            if (initialState) {
+                if (locationDatabase[countryName][initialState]) {
+                    stateSelect.value = initialState;
+                    populateCities(countryName, initialState);
+                    
+                    // Set initial city
+                    if (initialCity) {
+                        if (locationDatabase[countryName][initialState].includes(initialCity)) {
+                            citySelect.value = initialCity;
+                            populateTowns([]);
+                            
+                            // Set initial town
+                            if (initialTown) {
+                                switchToManualTown(initialTown);
+                            }
+                        } else {
+                            switchToManualCity(initialCity);
+                            switchToManualTown(initialTown);
+                        }
+                    }
+                } else {
+                    switchToManualState(initialState, initialCity, initialTown);
+                }
+            } else {
+                handleStateChange();
+            }
+        } else {
+            switchToManualState(initialState, initialCity, initialTown);
+            if (btnStateList) btnStateList.style.display = "none";
+            if (btnCityList) btnCityList.style.display = "none";
+            if (btnTownList) btnTownList.style.display = "none";
+        }
+    }
+
+    function populateStates(country) {
+        stateSelect.innerHTML = "";
+        
+        const defOpt = document.createElement("option");
+        defOpt.value = "";
+        defOpt.textContent = "Select State...";
+        stateSelect.appendChild(defOpt);
+
+        const states = Object.keys(locationDatabase[country]).sort();
+        states.forEach(state => {
+            const opt = document.createElement("option");
+            opt.value = state;
+            opt.textContent = state;
+            stateSelect.appendChild(opt);
+        });
+
+        const manualOpt = document.createElement("option");
+        manualOpt.value = "__manual__";
+        manualOpt.textContent = "✍ Write Manually...";
+        stateSelect.appendChild(manualOpt);
+    }
+
+    function populateCities(country, state) {
+        citySelect.innerHTML = "";
+        
+        const defOpt = document.createElement("option");
+        defOpt.value = "";
+        defOpt.textContent = "Select City...";
+        citySelect.appendChild(defOpt);
+
+        const cities = (locationDatabase[country][state] || []).sort();
+        cities.forEach(city => {
+            const opt = document.createElement("option");
+            opt.value = city;
+            opt.textContent = city;
+            citySelect.appendChild(opt);
+        });
+
+        const manualOpt = document.createElement("option");
+        manualOpt.value = "__manual__";
+        manualOpt.textContent = "✍ Write Manually...";
+        citySelect.appendChild(manualOpt);
+    }
+
+    function populateTowns(townsList) {
+        townSelect.innerHTML = "";
+        
+        const defOpt = document.createElement("option");
+        defOpt.value = "";
+        defOpt.textContent = "Select Town...";
+        townSelect.appendChild(defOpt);
+
+        if (townsList && townsList.length > 0) {
+            townsList.sort().forEach(town => {
+                const opt = document.createElement("option");
+                opt.value = town;
+                opt.textContent = town;
+                townSelect.appendChild(opt);
+            });
+        }
+
+        const manualOpt = document.createElement("option");
+        manualOpt.value = "__manual__";
+        manualOpt.textContent = "✍ Write Manually...";
+        townSelect.appendChild(manualOpt);
+    }
+
+    function handleStateChange() {
+        const selectedState = stateSelect.value;
+        
+        if (selectedState === "__manual__") {
+            switchToManualState("", "", "");
+        } else if (selectedState === "") {
+            hiddenState.value = "";
+            citySelect.innerHTML = '<option value="">Select State First...</option>';
+            citySelect.value = "";
+            hiddenCity.value = "";
+            populateTowns([]);
+            hiddenTown.value = "";
+        } else {
+            hiddenState.value = selectedState;
+            populateCities(countryName, selectedState);
+            citySelectContainer.style.display = "block";
+            cityManualContainer.style.display = "none";
+            citySelect.value = "";
+            hiddenCity.value = "";
+            populateTowns([]);
+            hiddenTown.value = "";
+        }
+    }
+
+    function handleCityChange() {
+        const selectedCity = citySelect.value;
+        if (selectedCity === "__manual__") {
+            switchToManualCity("");
+            switchToManualTown("");
+        } else {
+            hiddenCity.value = selectedCity;
+            populateTowns([]);
+        }
+    }
+
+    function handleTownChange() {
+        const selectedTown = townSelect.value;
+        if (selectedTown === "__manual__") {
+            switchToManualTown("");
+        } else {
+            hiddenTown.value = selectedTown;
+        }
+    }
+
+    function switchToManualState(stateVal, cityVal, townVal) {
+        stateSelectContainer.style.display = "none";
+        stateManualContainer.style.display = "block";
+        stateManualInput.value = stateVal;
+        hiddenState.value = stateVal;
+
+        switchToManualCity(cityVal);
+        switchToManualTown(townVal);
+    }
+
+    function switchToManualCity(cityVal) {
+        citySelectContainer.style.display = "none";
+        cityManualContainer.style.display = "block";
+        cityManualInput.value = cityVal;
+        hiddenCity.value = cityVal;
+    }
+
+    function switchToManualTown(townVal) {
+        townSelectContainer.style.display = "none";
+        townManualContainer.style.display = "block";
+        townManualInput.value = townVal;
+        hiddenTown.value = townVal;
+    }
+
+    // Event Listeners for State
+    stateSelect.addEventListener("change", handleStateChange);
+    stateManualInput.addEventListener("input", function() {
+        hiddenState.value = stateManualInput.value.trim();
+    });
+    if (btnStateList) {
+        btnStateList.addEventListener("click", function() {
+            stateManualContainer.style.display = "none";
+            stateSelectContainer.style.display = "block";
+            stateSelect.value = "";
+            handleStateChange();
+        });
+    }
+
+    // Event Listeners for City
+    citySelect.addEventListener("change", handleCityChange);
+    cityManualInput.addEventListener("input", function() {
+        hiddenCity.value = cityManualInput.value.trim();
+    });
+    if (btnCityList) {
+        btnCityList.addEventListener("click", function() {
+            cityManualContainer.style.display = "none";
+            citySelectContainer.style.display = "block";
+            citySelect.value = "";
+            hiddenCity.value = "";
+            populateTowns([]);
+            hiddenTown.value = "";
+        });
+    }
+
+    // Event Listeners for Town
+    townSelect.addEventListener("change", handleTownChange);
+    townManualInput.addEventListener("input", function() {
+        hiddenTown.value = townManualInput.value.trim();
+    });
+    if (btnTownList) {
+        btnTownList.addEventListener("click", function() {
+            townManualContainer.style.display = "none";
+            townSelectContainer.style.display = "block";
+            townSelect.value = "";
+            hiddenTown.value = "";
+        });
+    }
+
+    // Pincode Lookup / Serviceability Search
+    let internationalZipTimeout;
+    if (pincodeInput) {
+        pincodeInput.addEventListener("input", function() {
+            let val = pincodeInput.value.trim();
+            if (countryName === "india") {
+                val = val.replace(/\D/g, '').slice(0, 6);
+                pincodeInput.value = val;
+                
+                if (val.length === 6) {
+                    checkPincodeServiceability(val);
+                } else {
+                    statusText.textContent = "";
+                    statusText.className = "small text-muted";
+                }
+            } else {
+                if (val.length >= 3) {
+                    statusText.textContent = "✓ Serviceable via Shiprocket X";
+                    statusText.className = "small text-success fw-bold animate-in fade-in";
+                    
+                    clearTimeout(internationalZipTimeout);
+                    internationalZipTimeout = setTimeout(() => {
+                        checkInternationalZipServiceability(val);
+                    }, 500);
+                } else {
+                    statusText.textContent = "";
+                    clearTimeout(internationalZipTimeout);
+                }
+            }
+        });
+        
+        // Trigger check on load if pincode exists
+        if (pincodeInput.value.trim().length >= (countryName === "india" ? 6 : 3)) {
+            pincodeInput.dispatchEvent(new Event("input"));
+        }
+    }
+
+    async function checkPincodeServiceability(pincode) {
+        spinner.style.display = "flex";
+        statusText.textContent = "Searching...";
+        statusText.className = "small text-muted";
+
+        try {
+            const response = await fetch(`/api/pincode-lookup/?pincode=${pincode}`);
+            const data = await response.json();
+            
+            // Shiprocket delivers everywhere in India
+            statusText.textContent = "✓ Serviceable by Shiprocket";
+            statusText.className = "small text-success fw-bold animate-in fade-in";
+
+            if (data.success && data.locations.length > 0) {
+                const firstLoc = data.locations[0];
+                
+                // Match State
+                let matchedState = "";
+                const stateOptions = Array.from(stateSelect.options).map(o => o.value);
+                for (let state of stateOptions) {
+                    if (state && state.toLowerCase() === firstLoc.state.toLowerCase()) {
+                        matchedState = state;
+                        break;
+                    }
+                }
+
+                // Let's fetch the raw API from frontend to get the list of post offices (towns/localities)
+                let townsList = [];
+                try {
+                    const rawRes = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+                    const rawData = await rawRes.json();
+                    if (rawData && rawData[0].Status === "Success") {
+                        const poList = rawData[0].PostOffice || [];
+                        townsList = poList.map(po => po.Name);
+                    }
+                } catch(e) {
+                    console.error("Failed to fetch towns list from postal API:", e);
+                }
+
+                if (matchedState) {
+                    stateManualContainer.style.display = "none";
+                    stateSelectContainer.style.display = "block";
+                    stateSelect.value = matchedState;
+                    hiddenState.value = matchedState;
+                    
+                    populateCities(countryName, matchedState);
+                    
+                    // Match City
+                    let matchedCity = "";
+                    const cityOptions = Array.from(citySelect.options).map(o => o.value);
+                    for (let city of cityOptions) {
+                        if (city && city.toLowerCase() === firstLoc.city.toLowerCase()) {
+                            matchedCity = city;
+                            break;
+                        }
+                    }
+
+                    if (matchedCity) {
+                        cityManualContainer.style.display = "none";
+                        citySelectContainer.style.display = "block";
+                        citySelect.value = matchedCity;
+                        hiddenCity.value = matchedCity;
+                        
+                        // Populate and select Town
+                        townSelectContainer.style.display = "block";
+                        townManualContainer.style.display = "none";
+                        populateTowns(townsList);
+                        if (townsList.length > 0) {
+                            townSelect.value = townsList[0];
+                            hiddenTown.value = townsList[0];
+                            flashGreen(townSelect);
+                        }
+                        
+                        flashGreen(citySelect);
+                    } else {
+                        switchToManualCity(firstLoc.city);
+                        switchToManualTown(townsList.length > 0 ? townsList[0] : "");
+                        flashGreen(cityManualInput);
+                    }
+                    flashGreen(stateSelect);
+                } else {
+                    switchToManualState(firstLoc.state, firstLoc.city, townsList.length > 0 ? townsList[0] : "");
+                    flashGreen(stateManualInput);
+                    flashGreen(cityManualInput);
+                    flashGreen(townManualInput);
+                }
+            }
+        } catch (error) {
+            console.error("Error checking serviceability:", error);
+            statusText.textContent = "✓ Serviceable by Shiprocket";
+            statusText.className = "small text-success fw-bold";
+        } finally {
+            spinner.style.display = "none";
+        }
+    }
+
+    async function checkInternationalZipServiceability(zip) {
+        const isoCode = countryIsoMapping[countryName];
+        if (!isoCode) return;
+
+        spinner.style.display = "flex";
+        statusText.textContent = "Searching...";
+        statusText.className = "small text-muted";
+
+        try {
+            const response = await fetch(`https://api.zippopotam.us/${isoCode.toLowerCase()}/${zip}`);
+            if (response.ok) {
+                const data = await response.json();
+                statusText.textContent = "✓ Serviceable via Shiprocket X";
+                statusText.className = "small text-success fw-bold animate-in fade-in";
+
+                if (data.places && data.places.length > 0) {
+                    const place = data.places[0];
+                    const rawState = place.state;
+                    const rawCity = place["place name"];
+                    
+                    // Match State
+                    let matchedState = "";
+                    const stateOptions = Array.from(stateSelect.options).map(o => o.value);
+                    for (let state of stateOptions) {
+                        if (state && state.toLowerCase() === rawState.toLowerCase()) {
+                            matchedState = state;
+                            break;
+                        }
+                    }
+
+                    if (matchedState) {
+                        stateManualContainer.style.display = "none";
+                        stateSelectContainer.style.display = "block";
+                        stateSelect.value = matchedState;
+                        hiddenState.value = matchedState;
+                        
+                        populateCities(countryName, matchedState);
+                        
+                        // Match City
+                        let matchedCity = "";
+                        const cityOptions = Array.from(citySelect.options).map(o => o.value);
+                        for (let city of cityOptions) {
+                            if (city && city.toLowerCase() === rawCity.toLowerCase()) {
+                                matchedCity = city;
+                                break;
+                            }
+                        }
+
+                        if (matchedCity) {
+                            cityManualContainer.style.display = "none";
+                            citySelectContainer.style.display = "block";
+                            citySelect.value = matchedCity;
+                            hiddenCity.value = matchedCity;
+                            
+                            switchToManualTown(rawCity);
+                            flashGreen(citySelect);
+                        } else {
+                            switchToManualCity(rawCity);
+                            switchToManualTown(rawCity);
+                            flashGreen(cityManualInput);
+                        }
+                        flashGreen(stateSelect);
+                    } else {
+                        // Switch to manual mode for State, City, and Town
+                        switchToManualState(rawState, rawCity, rawCity);
+                        flashGreen(stateManualInput);
+                        flashGreen(cityManualInput);
+                        flashGreen(townManualInput);
+                    }
+                }
+            } else {
+                statusText.textContent = "✓ Serviceable via Shiprocket X";
+                statusText.className = "small text-success fw-bold";
+            }
+        } catch (error) {
+            console.error("Error looking up international zip code:", error);
+            statusText.textContent = "✓ Serviceable via Shiprocket X";
+            statusText.className = "small text-success fw-bold";
+        } finally {
+            spinner.style.display = "none";
+        }
+    }
+
+    function flashGreen(element) {
+        const originalBg = element.style.background;
+        element.style.transition = "background 0.3s ease";
+        element.style.background = "#dcfce7";
+        setTimeout(() => {
+            element.style.background = originalBg;
+        }, 1000);
+    }
+});
+</script>
 {% endblock %}

@@ -128,7 +128,7 @@
           </div>
         </div>
 
-        <a href="{% url 'checkout' %}" class="btn-artisan-primary mt-4 d-block text-center text-decoration-none" style="padding: 14px; border-radius: 12px; font-size: 16px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px;">
+        <a href="{% url 'checkout' %}" id="proceedToCheckoutBtn" class="btn-artisan-primary mt-4 d-block text-center text-decoration-none" style="padding: 14px; border-radius: 12px; font-size: 16px; font-family: 'Montserrat', sans-serif; letter-spacing: 1px;">
           {% t "proceed_to_checkout" %} <span class="material-symbols-outlined ms-2" style="font-size: 18px; vertical-align: middle;">arrow_forward</span>
         </a>
         <a href="{% url 'product_list' %}" class="d-block text-center small mt-3 text-decoration-none" style="color: var(--on-surface-variant); font-family: 'Montserrat', sans-serif;">
@@ -137,6 +137,53 @@
       </div>
     </div>
   </div>
+
+  {% block extra_js %}
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const proceedBtn = document.getElementById("proceedToCheckoutBtn");
+    if (!proceedBtn) return;
+    
+    proceedBtn.addEventListener("click", async function(event) {
+      event.preventDefault();
+      
+      // Disable button and show spinner
+      proceedBtn.style.pointerEvents = "none";
+      const originalHtml = proceedBtn.innerHTML;
+      proceedBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+      
+      try {
+        const response = await fetch("{% url 'sr_initiate_checkout' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          }
+        });
+        const data = await response.json();
+        
+        if (data.success && data.token) {
+          // Trigger Headless Checkout iframe
+          HeadlessCheckout.addToCart(event, data.token, {
+            fallbackUrl: "{% url 'checkout' %}"
+          });
+        } else {
+          console.error("Failed to generate checkout token:", data.message);
+          window.location.href = "{% url 'checkout' %}";
+        }
+      } catch (err) {
+        console.error("Error initiating checkout:", err);
+        window.location.href = "{% url 'checkout' %}";
+      } finally {
+        setTimeout(() => {
+          proceedBtn.style.pointerEvents = "auto";
+          proceedBtn.innerHTML = originalHtml;
+        }, 3000);
+      }
+    });
+  });
+  </script>
+  {% endblock %}
 
   {% else %}
   <div class="empty-state fade-in" style="text-align: center; padding: 60px 20px;">

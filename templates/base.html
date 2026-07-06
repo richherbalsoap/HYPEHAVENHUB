@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>{% block title %}HYPEHAVENHUB - Handcrafted Indian Jewelry{% endblock %}</title>
+<meta name="description" content="{% block meta_description %}Explore HYPEHAVENHUB - Premium handcrafted Indian jewelry box sets. Discover our curated collections of 12-piece and 16-piece jhumka sets, oxidized silver, and gold earrings.{% endblock %}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -61,20 +62,20 @@
     <div class="nav-icons d-flex align-items-center gap-2 ms-auto">
       
       <!-- Localization Trigger -->
-      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-2" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Change Country/Language">
-        <span class="material-symbols-outlined">language</span>
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-2" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Change Currency" aria-label="Change Currency Settings">
+        <span class="material-symbols-outlined">payments</span>
         <span class="ms-1 d-none d-md-inline" style="font-size: 13px; font-weight: 500;">
-          {{ active_country|default:"GLOBAL" }}
+          {% if current_country %}{{ current_country.currency_code }} ({{ current_country.currency_symbol }}){% else %}INR (₹){% endif %}
         </span>
       </button>
 
-      <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="{% t 'cart' %}">
+      <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon" title="{% t 'cart' %}" aria-label="View Shopping Cart">
         <span class="material-symbols-outlined">shopping_bag</span>
         {% if cart_count > 0 %}<span class="cart-badge" id="cartBadge">{{ cart_count }}</span>{% endif %}
       </a>
       
       <!-- Hamburger toggle (always visible) -->
-      <button class="navbar-toggler d-block ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" style="opacity: 1;">
+      <button class="navbar-toggler d-block ms-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" style="opacity: 1;" aria-label="Toggle Navigation Menu">
         <span class="material-symbols-outlined" style="font-size: 28px; color: var(--primary);">menu</span>
       </button>
     </div>
@@ -248,41 +249,28 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
       <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title" id="localizationModalLabel">{% t "select_your_country" %}</h5>
-        {% if active_country %}
+        <h5 class="modal-title" id="localizationModalLabel">Select Currency</h5>
+        {% if current_country %}
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         {% endif %}
       </div>
       <div class="modal-body pb-4">
-        <p class="text-muted small mb-4">Please select your country to see regional pricing and shipping options.</p>
+        <p class="text-muted small mb-4">Please select your preferred currency for regional pricing.</p>
         
-        <form action="{% url 'set_country_session' %}" method="post" class="mb-4">
+        <form action="{% url 'set_country_session' %}" method="post" class="mb-0">
             {% csrf_token %}
             <div class="mb-3">
-                <label class="form-label fw-500">Country / Region</label>
+                <label class="form-label fw-500">Currency</label>
                 <select name="country_id" class="form-select form-select-lg" onchange="this.form.submit()">
-                    <option value="" disabled>Select your country</option>
-                    {% for country in all_countries %}
-                        <option value="{{ country.id }}" {% if country.id == request.session.selected_country_id %}selected{% endif %}>
-                            {{ country.name }} ({{ country.currency_code }})
+                    <option value="" disabled>Select currency</option>
+                    {% for country in unique_currencies %}
+                        <option value="{{ country.id }}" {% if country.currency_code == current_country.currency_code %}selected{% endif %}>
+                            {{ country.currency_code }} ({{ country.currency_symbol }}){% if country.currency_name %} - {{ country.currency_name }}{% endif %}
                         </option>
                     {% endfor %}
                 </select>
             </div>
         </form>
-
-        <form action="{% url 'set_language' %}" method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label fw-500">Language</label>
-                <select name="language" class="form-select form-select-lg" onchange="this.form.submit()">
-                    {% for code, label in all_languages %}
-                        <option value="{{ code }}" {% if request.session.django_language == code %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </form>
-
       </div>
     </div>
   </div>
@@ -326,6 +314,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 </script>
+<!-- Shiprocket Headless Checkout -->
+<input type="hidden" value="{{ request.get_host }}" id="sellerDomain"/>
+<script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js"></script>
 </body>
 </html>
 
