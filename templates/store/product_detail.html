@@ -154,7 +154,27 @@
       </div>
 
       <!-- Features -->
-      <div class="product-features">
+      <style>
+        @media (max-width: 768px) {
+          .mobile-full-bleed-features {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            padding: 1rem !important; /* Add some padding so text doesn't touch the very edge */
+            border-radius: 0 !important;
+          }
+          .mobile-full-bleed-features .feature-item {
+            font-size: 15px !important;
+          }
+          .mobile-full-bleed-features .feature-item .material-symbols-outlined {
+            font-size: 22px !important;
+          }
+        }
+      </style>
+      <div class="product-features mobile-full-bleed-features">
         <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">local_shipping</span> Free delivery on orders above {% format_price 499 %}</div>
         <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">verified_user</span> Quality checked jewelry</div>
         <div class="feature-item"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">undo</span> Easy 7-day returns</div>
