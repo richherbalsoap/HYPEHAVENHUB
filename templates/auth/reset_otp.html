@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}Reset OTP - HYPEHAVENHUB{% endblock %}
 {% block content %}
-<div class="auth-bg" style="background: linear-gradient(135deg, #faf6f0 0%, #eae1d4 100%); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 15px;">
+<div class="auth-bg" style="background: linear-gradient(135deg, var(--surface) 0%, var(--surface-container) 100%); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 15px;">
   <div class="container d-flex justify-content-center">
-    <div class="glamour-form-card text-center" style="background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 16px; box-shadow: 0 15px 35px rgba(42, 0, 2, 0.05); padding: 45px 35px; width: 100%; max-width: 460px; transition: all 0.3s ease; animation: fadeInUp 0.6s ease-out;">
+    <div class="glamour-form-card text-center" style="background: var(--surface-container-lowest); backdrop-filter: blur(10px); border: 1px solid var(--outline-variant); border-radius: 16px; box-shadow: 0 15px 35px rgba(42, 0, 2, 0.05); padding: 45px 35px; width: 100%; max-width: 460px; transition: all 0.3s ease; animation: fadeInUp 0.6s ease-out;">
       
-      <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: var(--primary-container); border-radius: 50%; color: #fff; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(74, 14, 14, 0.15);">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: var(--primary-container); border-radius: 50%; color: var(--on-primary); margin-bottom: 16px; box-shadow: 0 8px 20px rgba(74, 14, 14, 0.15);">
         <span class="material-symbols-outlined" style="font-size: 32px;">key</span>
       </div>
       <h2 class="glamour-form-title" style="font-family: 'Playfair Display', serif; font-weight: 700; color: var(--primary); font-size: 2.2rem; margin-bottom: 6px;">Enter Reset OTP</h2>
-      <p class="glamour-form-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: #6c757d; margin-bottom: 30px;">We have sent a reset OTP to <strong style="color: var(--primary);">{{ email }}</strong></p>
+      <p class="glamour-form-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 30px;">We have sent a reset OTP to <strong style="color: var(--primary);">{{ email }}</strong></p>
       
       {% if otp_preview %}
       <div class="alert alert-warning text-start mb-4 p-3 d-flex align-items-start" style="border-radius: 12px; font-size: 13.5px; background-color: #fffaf0; border: 1px solid #feebc8; color: #c05621; font-family: 'Montserrat', sans-serif;">
@@ -24,10 +24,10 @@
       <form method="POST" class="text-start" style="font-family: 'Montserrat', sans-serif;">
         {% csrf_token %}
         <div class="mb-4">
-          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #4a5568; display: block; text-align: center; margin-bottom: 15px;">Enter Reset OTP</label>
-          <input type="text" name="otp" class="form-control text-center otp-code-input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)" required autocomplete="one-time-code" autofocus style="font-size: 26px; letter-spacing: 8px; font-weight: 700; height: 60px; border-radius: 8px; border: 1px solid var(--outline-variant); background: #fff; color: var(--primary);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--outline-variant)'">
+          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant); display: block; text-align: center; margin-bottom: 15px;">Enter Reset OTP</label>
+          <input type="text" name="otp" class="form-control text-center otp-code-input" placeholder="Enter 6-digit OTP" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6)" required autocomplete="one-time-code" autofocus style="font-size: 26px; letter-spacing: 8px; font-weight: 700; height: 60px; border-radius: 8px; border: 1px solid var(--outline-variant); background: var(--surface-container-lowest); color: var(--primary);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--outline-variant)'">
         </div>
-        <button type="submit" class="btn-artisan-primary" style="width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 13px; background: var(--primary); border: none; color: #fff; box-shadow: 0 4px 12px rgba(42, 0, 2, 0.2); transition: all 0.2s;">Verify OTP</button>
+        <button type="submit" class="btn-artisan-primary" style="width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 13px; background: var(--primary); border: none; color: var(--on-primary); box-shadow: 0 4px 12px rgba(42, 0, 2, 0.2); transition: all 0.2s;">Verify OTP</button>
       </form>
     </div>
   </div>
