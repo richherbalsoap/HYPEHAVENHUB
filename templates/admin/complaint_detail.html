@@ -12,68 +12,80 @@
 
 <div class="row g-4">
     <div class="col-xl-8">
+        <!-- Complaint Header -->
         <div class="admin-card mb-4">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Customer Issue</div>
-                    <h6>{{ complaint.subject }}</h6>
+                    <div class="eyebrow"><i class="fas fa-headset" style="margin-right: 4px;"></i> Customer Issue</div>
+                    <h6 style="font-size: 18px;">{{ complaint.subject }}</h6>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
-                    <span class="status-pill">{{ complaint.get_priority_display }}</span>
+                    <span class="status-pill priority-{{ complaint.priority }}">
+                        {% if complaint.priority == 'high' %}<i class="fas fa-arrow-up" style="font-size: 9px;"></i>{% endif %}
+                        {% if complaint.priority == 'medium' %}<i class="fas fa-minus" style="font-size: 9px;"></i>{% endif %}
+                        {% if complaint.priority == 'low' %}<i class="fas fa-arrow-down" style="font-size: 9px;"></i>{% endif %}
+                        {{ complaint.get_priority_display }}
+                    </span>
                 </div>
             </div>
+
+            <!-- Info Grid -->
             <div class="admin-detail-grid mb-4">
                 <div>
-                    <span>Complaint ID</span>
+                    <span><i class="fas fa-fingerprint" style="margin-right: 4px; font-size: 10px;"></i> Complaint ID</span>
                     <strong>{{ complaint.complaint_id }}</strong>
                 </div>
                 <div>
-                    <span>Type</span>
+                    <span><i class="fas fa-tag" style="margin-right: 4px; font-size: 10px;"></i> Type</span>
                     <strong>{{ complaint.get_complaint_type_display }}</strong>
                 </div>
                 <div>
-                    <span>Submitted</span>
+                    <span><i class="fas fa-calendar-plus" style="margin-right: 4px; font-size: 10px;"></i> Submitted</span>
                     <strong>{{ complaint.created_at|date:"d M Y" }}</strong>
                     <small>{{ complaint.created_at|date:"h:i A" }}</small>
                 </div>
                 <div>
-                    <span>Updated</span>
+                    <span><i class="fas fa-clock-rotate-left" style="margin-right: 4px; font-size: 10px;"></i> Updated</span>
                     <strong>{{ complaint.updated_at|date:"d M Y" }}</strong>
                     <small>{{ complaint.updated_at|date:"h:i A" }}</small>
                 </div>
             </div>
 
+            <!-- Description -->
             <div class="mb-4">
-                <div class="eyebrow">Description</div>
-                <p style="white-space: pre-wrap; margin-bottom: 0;">{{ complaint.description }}</p>
+                <div class="eyebrow" style="margin-bottom: 10px;"><i class="fas fa-align-left" style="margin-right: 4px;"></i> Description</div>
+                <div style="background: var(--admin-surface-hover); padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--admin-border-light); line-height: 1.7;">
+                    <p style="white-space: pre-wrap; margin-bottom: 0; color: var(--admin-ink-secondary);">{{ complaint.description }}</p>
+                </div>
             </div>
 
+            <!-- Related Order -->
             {% if complaint.order %}
-            <div class="admin-card" style="box-shadow: none;">
-                <div class="admin-card-header mb-2">
+            <div style="background: var(--admin-surface-hover); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--admin-border-light);">
+                <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                     <div>
-                        <div class="eyebrow">Related Order</div>
-                        <h6>{{ complaint.order.order_id }}</h6>
+                        <div class="eyebrow"><i class="fas fa-link" style="margin-right: 4px;"></i> Related Order</div>
+                        <h6 style="margin-top: 4px;">{{ complaint.order.order_id }}</h6>
                     </div>
                     <a href="{% url 'admin_order_detail' complaint.order.order_id %}" class="btn btn-sm btn-outline-primary">
-                        Open Order
+                        <i class="fas fa-external-link-alt"></i> Open Order
                     </a>
                 </div>
                 <div class="admin-detail-grid">
-                    <div>
+                    <div style="background: white;">
                         <span>Total</span>
-                        <strong>Rs. {{ complaint.order.grand_total|floatformat:0 }}</strong>
+                        <strong>₹{{ complaint.order.grand_total|floatformat:0 }}</strong>
                     </div>
-                    <div>
+                    <div style="background: white;">
                         <span>Order Status</span>
                         <strong>{{ complaint.order.get_status_display }}</strong>
                     </div>
-                    <div>
+                    <div style="background: white;">
                         <span>Placed</span>
                         <strong>{{ complaint.order.created_at|date:"d M Y" }}</strong>
                     </div>
-                    <div>
+                    <div style="background: white;">
                         <span>Items</span>
                         <strong>{{ complaint.order.items.count }}</strong>
                     </div>
@@ -82,63 +94,69 @@
             {% endif %}
         </div>
 
+        <!-- Admin Response (if exists) -->
         {% if complaint.admin_response %}
         <div class="admin-card">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Response Sent</div>
+                    <div class="eyebrow"><i class="fas fa-reply" style="margin-right: 4px;"></i> Response Sent</div>
                     <h6>Admin Response</h6>
                 </div>
                 {% if complaint.resolved_at %}
-                <span class="text-muted small">{{ complaint.resolved_at|date:"d M Y, h:i A" }}</span>
+                <span class="text-muted small"><i class="fas fa-check-circle" style="margin-right: 4px; color: var(--admin-green);"></i>{{ complaint.resolved_at|date:"d M Y, h:i A" }}</span>
                 {% endif %}
             </div>
-            <p style="white-space: pre-wrap; margin-bottom: 0;">{{ complaint.admin_response }}</p>
+            <div style="background: var(--admin-green-bg); padding: 16px 20px; border-radius: var(--radius-sm); border: 1px solid var(--admin-green-border);">
+                <p style="white-space: pre-wrap; margin-bottom: 0; color: var(--admin-ink-secondary);">{{ complaint.admin_response }}</p>
+            </div>
         </div>
         {% endif %}
     </div>
 
+    <!-- Right Sidebar -->
     <div class="col-xl-4">
+        <!-- Customer Info -->
         <div class="admin-card mb-4">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Customer</div>
+                    <div class="eyebrow"><i class="fas fa-user" style="margin-right: 4px;"></i> Customer</div>
                     <h6>{{ complaint.user.get_full_name|default:complaint.user.email }}</h6>
                 </div>
             </div>
             <div class="address-block">
-                <span>{{ complaint.user.email }}</span>
-                {% if complaint.user.phone %}<span>{{ complaint.user.phone }}</span>{% endif %}
-                <span>{{ complaint.user.orders.count }} orders placed</span>
+                <span><i class="fas fa-envelope" style="margin-right: 6px; font-size: 12px; color: var(--admin-primary);"></i> {{ complaint.user.email }}</span>
+                {% if complaint.user.phone %}<span><i class="fas fa-phone" style="margin-right: 6px; font-size: 12px; color: var(--admin-primary);"></i> {{ complaint.user.phone }}</span>{% endif %}
+                <span><i class="fas fa-bag-shopping" style="margin-right: 6px; font-size: 12px; color: var(--admin-primary);"></i> {{ complaint.user.orders.count }} orders placed</span>
             </div>
         </div>
 
+        <!-- Admin Actions Form -->
         <div class="admin-card sticky-panel">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Admin Action</div>
-                    <h6>Update complaint</h6>
+                    <div class="eyebrow"><i class="fas fa-sliders" style="margin-right: 4px;"></i> Admin Action</div>
+                    <h6>Update Complaint</h6>
                 </div>
             </div>
             <form method="POST">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label class="form-label">Status</label>
+                    <label class="form-label"><i class="fas fa-circle-dot" style="margin-right: 4px;"></i> Status</label>
                     {{ form.status }}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Priority</label>
+                    <label class="form-label"><i class="fas fa-flag" style="margin-right: 4px;"></i> Priority</label>
                     {{ form.priority }}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Assign To</label>
+                    <label class="form-label"><i class="fas fa-user-check" style="margin-right: 4px;"></i> Assign To</label>
                     {{ form.assigned_to }}
                 </div>
                 <div class="mb-4">
-                    <label class="form-label">Admin Response</label>
+                    <label class="form-label"><i class="fas fa-reply" style="margin-right: 4px;"></i> Admin Response</label>
                     {{ form.admin_response }}
                 </div>
-                <button type="submit" class="btn btn-primary w-100">
+                <button type="submit" class="btn btn-primary w-100" style="padding: 12px;">
                     <i class="fas fa-save"></i> Save Complaint
                 </button>
             </form>

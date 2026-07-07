@@ -3,61 +3,69 @@
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="h3 text-white mb-0">{{ title }}</h2>
-    <a href="{% url 'admin_countries' %}" class="btn btn-secondary">
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Settings</div>
+        <h5>{{ title }}</h5>
+    </div>
+    <a href="{% url 'admin_countries' %}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left"></i> Back to Currencies
     </a>
 </div>
 
 <div class="row">
     <div class="col-md-8 mx-auto">
-        <div class="card shadow-sm border-0 bg-dark text-white">
-            <div class="card-body p-4">
-                <form method="POST">
-                    {% csrf_token %}
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Currency Name</label>
-                            <input type="text" name="name" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.name }}" placeholder="e.g. US Dollar" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Region/Country Code (2 letters)</label>
-                            <input type="text" name="code" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.code }}" placeholder="e.g. US" maxlength="2" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Currency Code</label>
-                            <input type="text" name="currency_code" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.currency_code|default:'USD' }}" placeholder="e.g. USD" maxlength="3" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Currency Symbol</label>
-                            <input type="text" name="currency_symbol" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.currency_symbol|default:'$' }}" placeholder="e.g. $" maxlength="5" required>
-                        </div>
-                    </div>
-
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <label class="form-label">Base Shipping Charge</label>
-                            <input type="number" step="0.01" name="shipping_charge" class="form-control bg-secondary text-white border-0" 
-                                   value="{{ country.shipping_charge|default:'0.00' }}" placeholder="e.g. 15.00" required>
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary py-2">
-                            <i class="fas fa-save"></i> Save Currency Setting
-                        </button>
-                    </div>
-                </form>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Currency Details</div>
+                    <h6>Configure regional currency</h6>
+                </div>
             </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-globe" style="margin-right: 4px;"></i> Currency Name</label>
+                        <input type="text" name="name" class="form-control" 
+                               value="{{ country.name }}" placeholder="e.g. US Dollar" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-flag" style="margin-right: 4px;"></i> Region Code (2 letters)</label>
+                        <input type="text" name="code" class="form-control" 
+                               value="{{ country.code }}" placeholder="e.g. US" maxlength="2" required>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-money-bill" style="margin-right: 4px;"></i> Currency Code</label>
+                        <input type="text" name="currency_code" class="form-control" 
+                               value="{{ country.currency_code|default:'USD' }}" placeholder="e.g. USD" maxlength="3" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-coins" style="margin-right: 4px;"></i> Currency Symbol</label>
+                        <input type="text" name="currency_symbol" class="form-control" 
+                               value="{{ country.currency_symbol|default:'$' }}" placeholder="e.g. $" maxlength="5" required>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label"><i class="fas fa-truck-fast" style="margin-right: 4px;"></i> Base Shipping Charge</label>
+                        <input type="number" step="0.01" name="shipping_charge" class="form-control" 
+                               value="{{ country.shipping_charge|default:'0.00' }}" placeholder="e.g. 15.00" required>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary" style="padding: 12px;">
+                        <i class="fas fa-save"></i> Save Currency
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

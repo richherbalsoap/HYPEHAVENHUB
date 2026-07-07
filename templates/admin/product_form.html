@@ -3,226 +3,277 @@
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="mb-20">
-    <h5><i class="fas fa-cube"></i> {{ title }}</h5>
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Inventory</div>
+        <h5>{{ title }}</h5>
+    </div>
+    <a href="{% url 'admin_products' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <form id="product-form" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Product Name *</label>
-                    {{ form.name }}
+<form id="product-form" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div class="row g-4">
+        <!-- Main Info -->
+        <div class="col-xl-8">
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="eyebrow">Basic Info</div>
+                        <h6>Product Details</h6>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Category *</label>
-                    {{ form.category }}
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Brand</label>
-                    {{ form.brand }}
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Description *</label>
-                {{ form.description }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Short Description</label>
-                {{ form.short_description }}
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Base Price *</label>
-                    {{ form.base_price }}
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Discount % </label>
-                    {{ form.discount_percent }}
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Finish</label>
-                    {{ form.finish }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Weight</label>
-                    {{ form.weight }}
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Material</label>
-                    {{ form.material }}
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Warranty</label>
-                {{ form.warranty }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Ingredients</label>
-                {{ form.ingredients }}
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">How to Use</label>
-                {{ form.how_to_use }}
-            </div>
-
-            <!-- Modern Dynamic Photo Uploader -->
-            <div class="mb-4">
-                <label class="form-label d-block">Upload Product Images</label>
-                <div class="form-text text-muted mb-3">Add multiple photos. Click the '+' button below to add another photo.</div>
                 
-                <div id="dynamic-image-container" class="d-flex flex-wrap gap-3">
-                    <div class="image-upload-box" id="upload-box-0">
-                        <input type="file" name="dynamic_image_0" class="file-input" accept="image/*" onchange="previewImage(this, 0)">
-                        <div class="upload-content text-center" id="upload-content-0">
-                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-primary"></i>
-                            <div class="small">Choose Photo</div>
-                        </div>
-                        <img id="preview-0" class="image-preview" src="" style="display:none;">
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Product Name <span class="text-danger">*</span></label>
+                        {{ form.name }}
                     </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Category <span class="text-danger">*</span></label>
+                        {{ form.category }}
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Short Description</label>
+                        {{ form.short_description }}
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Full Description <span class="text-danger">*</span></label>
+                        {{ form.description }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing & Specs -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="eyebrow">Details</div>
+                        <h6>Pricing & Specifications</h6>
+                    </div>
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Base Price (₹) <span class="text-danger">*</span></label>
+                        {{ form.base_price }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Discount %</label>
+                        {{ form.discount_percent }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Brand</label>
+                        {{ form.brand }}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Weight</label>
+                        {{ form.weight }}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Material</label>
+                        {{ form.material }}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Finish</label>
+                        {{ form.finish }}
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Warranty</label>
+                        {{ form.warranty }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ingredients</label>
+                        {{ form.ingredients }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">How to Use</label>
+                        {{ form.how_to_use }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Uploads -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="eyebrow">Media</div>
+                        <h6>Images & Video</h6>
+                    </div>
+                </div>
+
+                <!-- Product Images -->
+                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--admin-border-light);">
+                    <label class="form-label d-block">Upload Product Images</label>
+                    <div class="form-text text-muted mb-3"><i class="fas fa-info-circle" style="margin-right: 4px;"></i>Add multiple photos. Click the '+' button to add another photo.</div>
                     
-                    <button type="button" class="btn btn-outline-primary image-add-btn" id="add-more-photos" onclick="addPhotoBox()">
-                        <i class="fas fa-plus fa-2x"></i>
-                        <div class="small mt-2">Add Photo</div>
-                    </button>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label d-block">Upload Product Video</label>
-                <div class="video-upload-box">
-                    <input type="file" name="video_upload" class="file-input" accept="video/*" onchange="previewVideo(this)">
-                    <div class="upload-content text-center" id="video-content">
-                        <i class="fas fa-video fa-2x mb-2 text-danger"></i>
-                        <div class="small">Choose Video</div>
-                    </div>
-                    <video id="video-preview" class="image-preview" src="" style="display:none;" controls></video>
-                </div>
-            </div>
-
-            {% if product and product.video_url %}
-            <div class="mb-4">
-                <label class="form-label">Currently Uploaded Video</label>
-                <div class="card bg-dark text-white p-2" style="width: max-content;">
-                    <video src="{{ product.video_url }}" controls style="max-height: 250px; border-radius: 8px;"></video>
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="mb-4">
-                <label class="form-label d-block text-warning fw-bold"><i class="fas fa-star me-1"></i> A+ Content Image (Long Photo)</label>
-                <div class="video-upload-box" style="border-color: #ffc107;">
-                    <input type="file" id="aplus_image" class="file-input" accept="image/*" onchange="previewAPlusImage(this)">
-                    <div class="upload-content text-center" id="aplus-content">
-                        <i class="fas fa-file-image fa-2x mb-2 text-warning"></i>
-                        <div class="small">Choose Long Image</div>
-                    </div>
-                    <img id="aplus-preview" class="image-preview" src="" style="display:none; object-position: top;">
-                </div>
-            </div>
-
-            {% if product and product.aplus_image_url %}
-            <div class="mb-4">
-                <label class="form-label text-warning">Currently Uploaded A+ Image</label>
-                <div class="card bg-dark text-white p-2">
-                    <img src="{{ product.aplus_image_url }}" class="img-fluid rounded" style="max-height: 300px; object-fit: contain; object-position: left;">
-                </div>
-            </div>
-            {% endif %}
-
-            {% if product and product.images.all %}
-            <div class="mb-3">
-                <label class="form-label">Currently Uploaded Images</label>
-                <div class="row g-2">
-                    {% for img in product.images.all %}
-                    <div class="col-6 col-md-3 col-lg-2 position-relative img-thumb-container" id="img-thumb-{{ img.id }}">
-                        <img src="{{ img.url }}" class="img-thumbnail w-100 h-100 object-fit-cover" style="aspect-ratio: 1; min-height: 100px;">
-                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 delete-img-btn" data-id="{{ img.id }}" style="padding: 2px 6px; font-size: 11px;">
-                            <i class="fas fa-trash"></i>
+                    <div id="dynamic-image-container" class="d-flex flex-wrap gap-3">
+                        <div class="image-upload-box" id="upload-box-0">
+                            <input type="file" name="dynamic_image_0" class="file-input" accept="image/*" onchange="previewImage(this, 0)">
+                            <div class="upload-content text-center" id="upload-content-0">
+                                <i class="fas fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
+                                <div class="small fw-semibold">Choose Photo</div>
+                            </div>
+                            <img id="preview-0" class="image-preview" src="" style="display:none;">
+                        </div>
+                        
+                        <button type="button" class="btn image-add-btn" id="add-more-photos" onclick="addPhotoBox()">
+                            <i class="fas fa-plus fa-2x"></i>
+                            <div class="small fw-semibold mt-2">Add Photo</div>
                         </button>
                     </div>
-                    {% endfor %}
+
+                    {% if product and product.images.all %}
+                    <div class="mt-4 p-4 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        <label class="form-label text-primary"><i class="fas fa-images" style="margin-right: 4px;"></i>Currently Uploaded Images</label>
+                        <div class="row g-3 mt-1">
+                            {% for img in product.images.all %}
+                            <div class="col-6 col-md-3 col-lg-2 position-relative img-thumb-container" id="img-thumb-{{ img.id }}">
+                                <img src="{{ img.url }}" class="img-thumbnail w-100 h-100 object-fit-cover shadow-sm border-0" style="aspect-ratio: 1; border-radius: 10px;">
+                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 delete-img-btn shadow" data-id="{{ img.id }}" style="padding: 4px 8px; border-radius: 6px;">
+                                    <i class="fas fa-trash-can"></i>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- A+ Content Image -->
+                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--admin-border-light);">
+                    <label class="form-label d-block text-warning fw-bold"><i class="fas fa-star me-2"></i>A+ Content Image (Long Photo)</label>
+                    <div class="form-text text-muted mb-3">Upload a long vertical image used for Amazon-style A+ content.</div>
+                    <div class="d-flex flex-wrap gap-4 align-items-start">
+                        <div class="video-upload-box" style="border-color: #ffc107; background: rgba(255, 193, 7, 0.05);">
+                            <input type="file" id="aplus_image" class="file-input" accept="image/*" onchange="previewAPlusImage(this)">
+                            <div class="upload-content text-center" id="aplus-content">
+                                <i class="fas fa-file-image fa-2x mb-2 text-warning"></i>
+                                <div class="small fw-semibold text-warning">Choose Long Image</div>
+                            </div>
+                            <img id="aplus-preview" class="image-preview" src="" style="display:none; object-position: top;">
+                        </div>
+
+                        {% if product and product.aplus_image_url %}
+                        <div class="p-3 rounded flex-grow-1" style="background: var(--admin-surface-hover); border: 1px dashed var(--admin-border);">
+                            <label class="form-label text-warning small mb-2"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Currently Uploaded A+ Image</label>
+                            <img src="{{ product.aplus_image_url }}" class="img-fluid rounded shadow-sm" style="max-height: 200px; object-fit: contain; object-position: left; display: block; border: 1px solid var(--admin-border);">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Product Video -->
+                <div>
+                    <label class="form-label d-block text-danger fw-bold"><i class="fas fa-video me-2"></i>Product Video</label>
+                    <div class="form-text text-muted mb-3">Upload a promotional or instructional video.</div>
+                    <div class="d-flex flex-wrap gap-4 align-items-start">
+                        <div class="video-upload-box" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
+                            <input type="file" name="video_upload" class="file-input" accept="video/*" onchange="previewVideo(this)">
+                            <div class="upload-content text-center" id="video-content">
+                                <i class="fas fa-film fa-2x mb-2 text-danger"></i>
+                                <div class="small fw-semibold text-danger">Choose Video</div>
+                            </div>
+                            <video id="video-preview" class="image-preview" src="" style="display:none; border-radius: 10px;" controls></video>
+                        </div>
+
+                        {% if product and product.video_url %}
+                        <div class="p-3 rounded flex-grow-1" style="background: var(--admin-surface-hover); border: 1px dashed var(--admin-border);">
+                            <label class="form-label text-danger small mb-2"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Currently Uploaded Video</label>
+                            <video src="{{ product.video_url }}" controls class="shadow-sm w-100" style="max-height: 200px; max-width: 400px; border-radius: 10px; border: 1px solid var(--admin-border); background: black;"></video>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            {% endif %}
+        </div>
 
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">
-                        {{ form.is_active }} Is Active
-                    </label>
+        <!-- Right Sidebar (Status & Flags) -->
+        <div class="col-xl-4">
+            <div class="admin-card sticky-panel">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="eyebrow">Status</div>
+                        <h6>Product Flags</h6>
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">
-                        {{ form.is_featured }} Is Featured
-                    </label>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">
-                        {{ form.is_new_arrival }} Is New Arrival
-                    </label>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">
-                        {{ form.is_bestseller }} Is Bestseller
-                    </label>
-                </div>
-            </div>
+                <div class="d-flex flex-column gap-3 mb-4">
+                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        {{ form.is_active }}
+                        <label class="form-check-label ms-2 fw-semibold" for="{{ form.is_active.id_for_label }}">
+                            Is Active
+                            <span class="d-block text-muted small fw-normal">Show this product on the storefront</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        {{ form.is_featured }}
+                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-purple);" for="{{ form.is_featured.id_for_label }}">
+                            <i class="fas fa-star" style="margin-right: 4px;"></i> Featured Product
+                            <span class="d-block text-muted small fw-normal">Highlight in special sections</span>
+                        </label>
+                    </div>
 
-            {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {{ form.non_field_errors }}
-            </div>
-            {% endif %}
+                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        {{ form.is_new_arrival }}
+                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-blue);" for="{{ form.is_new_arrival.id_for_label }}">
+                            <i class="fas fa-certificate" style="margin-right: 4px;"></i> New Arrival
+                            <span class="d-block text-muted small fw-normal">Mark as newly added</span>
+                        </label>
+                    </div>
 
-            <div class="mt-20">
-                <button type="submit" id="submit-btn" class="btn btn-primary d-inline-flex align-items-center">
+                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        {{ form.is_bestseller }}
+                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-amber);" for="{{ form.is_bestseller.id_for_label }}">
+                            <i class="fas fa-fire" style="margin-right: 4px;"></i> Bestseller
+                            <span class="d-block text-muted small fw-normal">Mark as popular product</span>
+                        </label>
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger shadow-sm border-0 mb-4">
+                    <i class="fas fa-triangle-exclamation me-2"></i>{{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <button type="submit" id="submit-btn" class="btn btn-primary w-100 py-3 d-inline-flex align-items-center justify-content-center" style="font-size: 15px;">
                     <i class="fas fa-save me-2" id="submit-icon"></i> 
                     <span class="spinner-border spinner-border-sm me-2 d-none" id="submit-spinner" role="status"></span>
                     <span id="submit-text">Save Product</span>
                 </button>
-                <a href="{% url 'admin_products' %}" class="btn btn-secondary ms-2">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
             </div>
-        </form>
+        </div>
     </div>
-</div>
+</form>
+{% endblock %}
 
+{% block extra_css %}
 <style>
-    .card { 
-        background: var(--admin-surface); 
-        border-radius: 12px; 
-        border: 1px solid var(--admin-border);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    /* Styling for form elements to match new design */
+    #product-form .form-check-input {
+        width: 40px;
+        height: 20px;
+        margin-top: 0.1em;
+        cursor: pointer;
     }
-    .mb-20 { margin-bottom: 20px; }
-    .mt-20 { margin-top: 20px; }
-    textarea { min-height: 100px; }
-    
+    #product-form .form-check-input:checked {
+        background-color: var(--admin-primary);
+        border-color: var(--admin-primary);
+    }
+    #product-form .form-check-label { cursor: pointer; }
+
     /* Dynamic Uploader CSS */
     .image-upload-box, .video-upload-box, .image-add-btn {
-        width: 140px;
-        height: 140px;
+        width: 150px;
+        height: 150px;
         border-radius: 12px;
         border: 2px dashed var(--admin-primary);
-        background: rgba(255,255,255,0.05);
+        background: var(--admin-surface-hover);
         position: relative;
         overflow: hidden;
         cursor: pointer;
@@ -230,12 +281,28 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s ease;
+        transition: all var(--transition-base);
+        color: var(--admin-primary);
     }
     .image-upload-box:hover, .video-upload-box:hover, .image-add-btn:hover {
-        background: rgba(var(--admin-primary-rgb), 0.1);
-        border-color: var(--admin-primary-hover);
+        background: var(--admin-primary-light);
         transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+    .video-upload-box {
+        width: 200px;
+        border-color: var(--admin-red);
+        color: var(--admin-red);
+    }
+    .image-add-btn {
+        border-style: dotted;
+        color: var(--admin-muted);
+        border-color: var(--admin-muted);
+        background: transparent;
+    }
+    .image-add-btn:hover {
+        color: var(--admin-primary);
+        border-color: var(--admin-primary);
     }
     .file-input {
         position: absolute;
@@ -253,17 +320,16 @@
         height: 100%;
         object-fit: cover;
         z-index: 1;
+        border-radius: 10px;
     }
     .upload-content {
         z-index: 0;
-    }
-    .video-upload-box {
-        width: 200px;
-        height: 140px;
-        border-color: var(--admin-red);
+        pointer-events: none;
     }
 </style>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 let photoCount = 0;
 
@@ -278,8 +344,8 @@ function addPhotoBox() {
     newBox.innerHTML = `
         <input type="file" name="dynamic_image_${photoCount}" class="file-input" accept="image/*" onchange="previewImage(this, ${photoCount})">
         <div class="upload-content text-center" id="upload-content-${photoCount}">
-            <i class="fas fa-cloud-upload-alt fa-2x mb-2 text-primary"></i>
-            <div class="small">Choose Photo</div>
+            <i class="fas fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
+            <div class="small fw-semibold">Choose Photo</div>
         </div>
         <img id="preview-${photoCount}" class="image-preview" src="" style="display:none;">
     `;

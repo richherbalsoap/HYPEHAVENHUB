@@ -7,28 +7,31 @@
     .aplus-block-card {
         background: var(--admin-surface);
         border: 1px solid var(--admin-border);
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 20px;
         margin-bottom: 16px;
         display: flex;
         align-items: center;
         gap: 16px;
-        transition: all 0.2s ease;
+        transition: all var(--transition-base);
     }
     .aplus-block-card:hover {
-        border-color: rgba(236, 72, 153, 0.3);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        border-color: rgba(99, 102, 241, 0.4);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
     }
     .aplus-block-card.inactive {
-        opacity: 0.45;
+        opacity: 0.6;
+        background: var(--admin-surface-hover);
     }
     .aplus-block-thumb {
         width: 64px;
         height: 64px;
-        border-radius: 10px;
+        border-radius: 8px;
         object-fit: cover;
         background: var(--admin-surface-hover);
         flex-shrink: 0;
+        border: 1px solid var(--admin-border);
     }
     .aplus-block-info {
         flex: 1;
@@ -41,6 +44,7 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: var(--admin-ink);
     }
     .aplus-block-info small {
         color: var(--admin-muted);
@@ -50,80 +54,86 @@
         display: inline-block;
         padding: 3px 10px;
         border-radius: 6px;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        background: rgba(236, 72, 153, 0.15);
+        background: var(--admin-primary-light);
         color: var(--admin-primary);
         margin-right: 8px;
+        vertical-align: middle;
     }
     .aplus-order-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
         background: var(--admin-surface-hover);
-        color: var(--admin-muted);
-        font-size: 12px;
+        color: var(--admin-ink-secondary);
+        font-size: 13px;
         font-weight: 700;
         flex-shrink: 0;
+        border: 1px solid var(--admin-border);
     }
     .aplus-actions {
         display: flex;
         gap: 6px;
         flex-shrink: 0;
     }
-    .aplus-actions .btn {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
 
     /* Form sections */
     .block-type-section { display: none; }
-    .block-type-section.active { display: block; }
+    .block-type-section.active { display: block; animation: fadeInUp 0.3s ease-out; }
 
     .form-section-card {
         background: var(--admin-surface);
         border: 1px solid var(--admin-border);
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 24px;
         margin-bottom: 16px;
+        box-shadow: var(--shadow-sm);
     }
 
     .repeatable-item {
         background: var(--admin-surface-hover);
         border: 1px solid var(--admin-border);
         border-radius: 10px;
-        padding: 16px;
+        padding: 20px;
         margin-bottom: 12px;
         position: relative;
     }
     .repeatable-item .remove-item {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        background: none;
-        border: none;
+        top: 10px;
+        right: 10px;
+        background: var(--admin-red-bg);
+        border: 1px solid var(--admin-red-border);
         color: var(--admin-red);
         cursor: pointer;
         font-size: 14px;
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-base);
+    }
+    .repeatable-item .remove-item:hover {
+        background: var(--admin-red);
+        color: white;
     }
 
     .upload-group {
         display: flex;
         gap: 8px;
-        align-items: start;
+        align-items: stretch;
     }
     .upload-group input[type="text"],
     .upload-group input[type="url"] {
         flex: 1;
-    }
-    .upload-group .btn-upload {
-        flex-shrink: 0;
-        white-space: nowrap;
     }
 
     .color-row {
@@ -132,9 +142,9 @@
         align-items: center;
     }
     .color-row input[type="color"] {
-        width: 50px;
-        height: 38px;
-        padding: 2px;
+        width: 44px;
+        height: 44px;
+        padding: 4px;
         border: 1px solid var(--admin-border);
         border-radius: 8px;
         background: var(--admin-surface-hover);
@@ -142,21 +152,6 @@
     }
     .color-row input[type="text"] {
         flex: 1;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 48px 24px;
-        color: var(--admin-muted);
-    }
-    .empty-state i {
-        font-size: 48px;
-        margin-bottom: 16px;
-        opacity: 0.3;
-    }
-    .empty-state p {
-        font-size: 15px;
-        margin: 0;
     }
 
     /* Comparison table builder */
@@ -176,368 +171,404 @@
     .comp-table-builder th {
         background: var(--admin-surface-hover);
     }
+    .comp-table-builder th:first-child, .comp-table-builder td:first-child { border-left: 1px solid var(--admin-border); }
+    .comp-table-builder th:last-child, .comp-table-builder td:last-child { border-right: 1px solid var(--admin-border); }
+    .comp-table-builder tr:first-child th { border-top: 1px solid var(--admin-border); }
+    .comp-table-builder tr:last-child td { border-bottom: 1px solid var(--admin-border); }
+    
     .comp-table-builder input {
         width: 100%;
-        background: transparent;
+        background: var(--admin-surface);
         border: 1px solid var(--admin-border);
         border-radius: 6px;
-        padding: 6px 8px;
+        padding: 8px 12px;
         color: var(--admin-ink);
+    }
+    .comp-table-builder input:focus {
+        border-color: var(--admin-primary);
+        outline: none;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Header -->
 <div class="admin-section-title">
     <div>
-        <div class="eyebrow">A+ Content</div>
-        <h5>{{ product.name }}</h5>
+        <div class="eyebrow">Marketing</div>
+        <h5>A+ Content: {{ product.name|truncatechars:30 }}</h5>
     </div>
     <a href="{% url 'admin_products' %}" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left"></i> Back to Products
     </a>
 </div>
 
-<!-- Existing Blocks -->
-<div class="admin-card mb-4">
-    <div class="admin-card-header">
-        <h6><i class="fas fa-layer-group" style="color: var(--admin-primary); margin-right: 8px;"></i>Content Blocks</h6>
-        <small class="text-muted">{{ blocks|length }} block{{ blocks|length|pluralize }}</small>
-    </div>
+<div class="row g-4">
+    <div class="col-xl-6">
+        <!-- Existing Blocks -->
+        <div class="admin-card h-100">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Overview</div>
+                    <h6><i class="fas fa-layer-group text-primary me-2"></i>Content Blocks</h6>
+                </div>
+                <span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 4px 12px;">{{ blocks|length }} block{{ blocks|length|pluralize }}</span>
+            </div>
 
-    {% if blocks %}
-        <div id="blocks-list">
-        {% for block in blocks %}
-            <div class="aplus-block-card {% if not block.is_active %}inactive{% endif %}" id="block-{{ block.id }}">
-                <span class="aplus-order-badge">{{ block.order }}</span>
+            {% if blocks %}
+                <div id="blocks-list">
+                {% for block in blocks %}
+                    <div class="aplus-block-card {% if not block.is_active %}inactive{% endif %}" id="block-{{ block.id }}">
+                        <span class="aplus-order-badge">{{ block.order }}</span>
 
-                {% if block.image_url %}
-                    <img src="{{ block.image_url }}" alt="{{ block.image_alt }}" class="aplus-block-thumb">
-                {% else %}
-                    <div class="aplus-block-thumb d-flex align-items-center justify-content-center">
-                        <i class="fas fa-cube" style="color: var(--admin-muted); font-size: 22px;"></i>
-                    </div>
-                {% endif %}
-
-                <div class="aplus-block-info">
-                    <h6>
-                        <span class="aplus-type-badge">{{ block.get_block_type_display }}</span>
-                        {{ block.title|default:"(untitled)" }}
-                    </h6>
-                    <small>
-                        {% if block.is_active %}
-                            <span style="color: var(--admin-green);"><i class="fas fa-circle" style="font-size: 8px;"></i> Active</span>
+                        {% if block.image_url %}
+                            <img src="{{ block.image_url }}" alt="{{ block.image_alt }}" class="aplus-block-thumb">
                         {% else %}
-                            <span style="color: var(--admin-red);"><i class="fas fa-circle" style="font-size: 8px;"></i> Inactive</span>
+                            <div class="aplus-block-thumb d-flex align-items-center justify-content-center">
+                                <i class="fas fa-cube text-muted fs-4"></i>
+                            </div>
                         {% endif %}
-                        &nbsp;·&nbsp; Created {{ block.created_at|date:"M d, Y" }}
-                    </small>
-                </div>
 
-                <div class="aplus-actions">
-                    <button class="btn btn-sm btn-outline-secondary" title="Move Up"
-                            onclick="reorderBlock({{ block.id }}, 'up')">
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" title="Move Down"
-                            onclick="reorderBlock({{ block.id }}, 'down')">
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-info" title="Toggle Active"
-                            onclick="toggleBlock({{ block.id }})">
-                        <i class="fas fa-power-off"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" title="Delete"
-                            onclick="deleteBlock({{ block.id }}, '{{ block.title|escapejs }}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        {% endfor %}
-        </div>
-    {% else %}
-        <div class="empty-state">
-            <i class="fas fa-wand-magic-sparkles d-block"></i>
-            <p>No A+ Content blocks yet. Add one below to enhance this product page.</p>
-        </div>
-    {% endif %}
-</div>
+                        <div class="aplus-block-info">
+                            <h6>
+                                <span class="aplus-type-badge">{{ block.get_block_type_display }}</span>
+                                {{ block.title|default:"(untitled)" }}
+                            </h6>
+                            <small>
+                                {% if block.is_active %}
+                                    <span class="text-success fw-semibold"><i class="fas fa-circle me-1" style="font-size: 8px;"></i> Active</span>
+                                {% else %}
+                                    <span class="text-danger fw-semibold"><i class="fas fa-circle me-1" style="font-size: 8px;"></i> Inactive</span>
+                                {% endif %}
+                                <span class="mx-2">·</span>
+                                Created {{ block.created_at|date:"M d, Y" }}
+                            </small>
+                        </div>
 
-<!-- Add New Block Form -->
-<div class="admin-card">
-    <div class="admin-card-header">
-        <h6><i class="fas fa-plus-circle" style="color: var(--admin-primary); margin-right: 8px;"></i>Add New Block</h6>
+                        <div class="aplus-actions">
+                            <button class="btn btn-sm btn-outline-secondary" title="Move Up"
+                                    onclick="reorderBlock({{ block.id }}, 'up')">
+                                <i class="fas fa-chevron-up"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" title="Move Down"
+                                    onclick="reorderBlock({{ block.id }}, 'down')">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" title="Toggle Active"
+                                    onclick="toggleBlock({{ block.id }})">
+                                <i class="fas fa-power-off"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Delete"
+                                    onclick="deleteBlock({{ block.id }}, '{{ block.title|escapejs }}')">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-wand-magic-sparkles d-block text-primary"></i>
+                    <h6 class="mt-3 text-dark">No Content Blocks</h6>
+                    <p>Add rich content blocks to enhance your product page and improve conversion rates.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
-    <form method="POST" id="aplus-form">
-        {% csrf_token %}
-
-        <!-- Block Type Selector -->
-        <div class="mb-4">
-            <label class="form-label">Block Type</label>
-            <select name="block_type" id="block_type" class="form-select" required>
-                <option value="">— Select block type —</option>
-                {% for val, label in block_types %}
-                    <option value="{{ val }}">{{ label }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- ===== HERO BANNER ===== -->
-        <div class="block-type-section" data-block-type="hero_banner">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Hero Banner Settings</h6>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Title</label>
-                        <input type="text" name="title" class="form-control field-title" placeholder="Banner headline">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Subtitle</label>
-                        <input type="text" name="subtitle" class="form-control" placeholder="Supporting text">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Image URL</label>
-                        <div class="upload-group">
-                            <input type="url" name="image_url" class="form-control field-image-url" placeholder="https://...">
-                            <button type="button" class="btn btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload
-                            </button>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Image Alt Text</label>
-                        <input type="text" name="image_alt" class="form-control" placeholder="Describe the image">
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">BG Color</label>
-                        <div class="color-row">
-                            <input type="color" value="#000000" onchange="this.nextElementSibling.value=this.value">
-                            <input type="text" name="bg_color" class="form-control" placeholder="#000000">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Text Color</label>
-                        <div class="color-row">
-                            <input type="color" value="#FFFFFF" onchange="this.nextElementSibling.value=this.value">
-                            <input type="text" name="text_color" class="form-control" placeholder="#FFFFFF">
-                        </div>
-                    </div>
+    <div class="col-xl-6">
+        <!-- Add New Block Form -->
+        <div class="admin-card sticky-panel">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Builder</div>
+                    <h6><i class="fas fa-plus-circle text-primary me-2"></i>Add New Block</h6>
                 </div>
             </div>
-        </div>
 
-        <!-- ===== FEATURE GRID ===== -->
-        <div class="block-type-section" data-block-type="feature_grid">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Feature Grid Settings</h6>
-                <div class="mb-3">
-                    <label class="form-label">Section Title</label>
-                    <input type="text" name="title" class="form-control field-title" placeholder="e.g. Why Choose This Product">
+            <form method="POST" id="aplus-form">
+                {% csrf_token %}
+
+                <!-- Block Type Selector -->
+                <div class="mb-4 p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border-light);">
+                    <label class="form-label fw-bold"><i class="fas fa-shapes me-2 text-primary"></i>Block Type</label>
+                    <select name="block_type" id="block_type" class="form-select form-select-lg" style="font-size: 14px;" required>
+                        <option value="">— Select block type —</option>
+                        {% for val, label in block_types %}
+                            <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-                <label class="form-label">Feature Items</label>
-                <div id="feature-items-container">
-                    <div class="repeatable-item" data-index="0">
-                        <button type="button" class="remove-item" onclick="removeRepeatable(this)" style="display:none;">&times;</button>
-                        <div class="row g-2">
-                            <div class="col-md-3">
-                                <input type="text" name="feature_icon_0" class="form-control" placeholder="Icon (e.g. verified)">
+
+                <!-- ===== HERO BANNER ===== -->
+                <div class="block-type-section" data-block-type="hero_banner">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-image me-2 text-primary"></i>Hero Banner Settings</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Headline Title</label>
+                                <input type="text" name="title" class="form-control field-title" placeholder="Banner headline">
                             </div>
-                            <div class="col-md-3">
-                                <input type="text" name="feature_title_0" class="form-control" placeholder="Feature title">
+                            <div class="col-md-6">
+                                <label class="form-label">Subtitle</label>
+                                <input type="text" name="subtitle" class="form-control" placeholder="Supporting text">
                             </div>
-                            <div class="col-md-3">
-                                <input type="text" name="feature_desc_0" class="form-control" placeholder="Short description">
-                            </div>
-                            <div class="col-md-3">
+                            <div class="col-12">
+                                <label class="form-label">Image URL</label>
                                 <div class="upload-group">
-                                    <input type="url" name="feature_image_0" class="form-control field-image-url" placeholder="Image URL">
-                                    <button type="button" class="btn btn-sm btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
-                                        <i class="fas fa-upload"></i>
+                                    <input type="url" name="image_url" class="form-control field-image-url" placeholder="https://...">
+                                    <button type="button" class="btn btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
+                                        <i class="fas fa-cloud-arrow-up"></i> Upload
                                     </button>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Image Alt Text</label>
+                                <input type="text" name="image_alt" class="form-control" placeholder="Describe the image for SEO">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Background Color</label>
+                                <div class="color-row">
+                                    <input type="color" value="#000000" onchange="this.nextElementSibling.value=this.value">
+                                    <input type="text" name="bg_color" class="form-control" placeholder="#000000">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Text Color</label>
+                                <div class="color-row">
+                                    <input type="color" value="#FFFFFF" onchange="this.nextElementSibling.value=this.value">
+                                    <input type="text" name="text_color" class="form-control" placeholder="#FFFFFF">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addFeatureItem()">
-                    <i class="fas fa-plus"></i> Add Feature
-                </button>
-            </div>
-        </div>
 
-        <!-- ===== TEXT BLOCK ===== -->
-        <div class="block-type-section" data-block-type="text_block">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Rich Text Block</h6>
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label">Title</label>
-                        <input type="text" name="title" class="form-control field-title" placeholder="Section heading">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Body Text</label>
-                        <textarea name="body_text" class="form-control" rows="6" placeholder="Write your content here... HTML is supported."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">BG Color</label>
-                        <div class="color-row">
-                            <input type="color" value="#18181b" onchange="this.nextElementSibling.value=this.value">
-                            <input type="text" name="bg_color" class="form-control" placeholder="#18181b">
+                <!-- ===== FEATURE GRID ===== -->
+                <div class="block-type-section" data-block-type="feature_grid">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-grip me-2 text-primary"></i>Feature Grid Settings</h6>
+                        <div class="mb-4">
+                            <label class="form-label">Section Title</label>
+                            <input type="text" name="title" class="form-control field-title" placeholder="e.g. Why Choose This Product">
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Text Color</label>
-                        <div class="color-row">
-                            <input type="color" value="#fafafa" onchange="this.nextElementSibling.value=this.value">
-                            <input type="text" name="text_color" class="form-control" placeholder="#fafafa">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== IMAGE + TEXT LEFT ===== -->
-        <div class="block-type-section" data-block-type="image_text_left">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Image Left + Text Right</h6>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Title</label>
-                        <input type="text" name="title" class="form-control field-title" placeholder="Section heading">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Image Alt</label>
-                        <input type="text" name="image_alt" class="form-control" placeholder="Image description">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Image URL</label>
-                        <div class="upload-group">
-                            <input type="url" name="image_url" class="form-control field-image-url" placeholder="https://...">
-                            <button type="button" class="btn btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label mb-0">Feature Items</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addFeatureItem()">
+                                <i class="fas fa-plus"></i> Add Item
                             </button>
                         </div>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Body Text</label>
-                        <textarea name="body_text" class="form-control" rows="4" placeholder="Description text..."></textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== IMAGE + TEXT RIGHT ===== -->
-        <div class="block-type-section" data-block-type="image_text_right">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Text Left + Image Right</h6>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Title</label>
-                        <input type="text" name="title" class="form-control field-title" placeholder="Section heading">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Image Alt</label>
-                        <input type="text" name="image_alt" class="form-control" placeholder="Image description">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Image URL</label>
-                        <div class="upload-group">
-                            <input type="url" name="image_url" class="form-control field-image-url" placeholder="https://...">
-                            <button type="button" class="btn btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
-                                <i class="fas fa-cloud-upload-alt"></i> Upload
-                            </button>
+                        
+                        <div id="feature-items-container">
+                            <div class="repeatable-item" data-index="0">
+                                <button type="button" class="remove-item" onclick="removeRepeatable(this)" style="display:none;"><i class="fas fa-times"></i></button>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label" style="font-size: 10px;">Icon Class</label>
+                                        <input type="text" name="feature_icon_0" class="form-control form-control-sm" placeholder="fa-solid fa-star">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label" style="font-size: 10px;">Title</label>
+                                        <input type="text" name="feature_title_0" class="form-control form-control-sm" placeholder="Feature title">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" style="font-size: 10px;">Description</label>
+                                        <input type="text" name="feature_desc_0" class="form-control form-control-sm" placeholder="Short description">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" style="font-size: 10px;">Image URL (Optional)</label>
+                                        <div class="upload-group">
+                                            <input type="url" name="feature_image_0" class="form-control form-control-sm field-image-url" placeholder="Image URL">
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
+                                                <i class="fas fa-upload"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label">Body Text</label>
-                        <textarea name="body_text" class="form-control" rows="4" placeholder="Description text..."></textarea>
+                </div>
+
+                <!-- ===== TEXT BLOCK ===== -->
+                <div class="block-type-section" data-block-type="text_block">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-align-left me-2 text-primary"></i>Rich Text Block</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Section Heading</label>
+                                <input type="text" name="title" class="form-control field-title" placeholder="Heading">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Body Text</label>
+                                <textarea name="body_text" class="form-control" rows="8" placeholder="Write your content here... HTML is supported for bold, lists, etc."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Background Color</label>
+                                <div class="color-row">
+                                    <input type="color" value="#ffffff" onchange="this.nextElementSibling.value=this.value">
+                                    <input type="text" name="bg_color" class="form-control" placeholder="#ffffff">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Text Color</label>
+                                <div class="color-row">
+                                    <input type="color" value="#334155" onchange="this.nextElementSibling.value=this.value">
+                                    <input type="text" name="text_color" class="form-control" placeholder="#334155">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ===== COMPARISON TABLE ===== -->
-        <div class="block-type-section" data-block-type="comparison_table">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Comparison Table Builder</h6>
-                <div class="mb-3">
-                    <label class="form-label">Section Title</label>
-                    <input type="text" name="title" class="form-control field-title" placeholder="e.g. Compare Models">
-                </div>
-
-                <div class="mb-3 d-flex gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="compAddColumn()">
-                        <i class="fas fa-plus"></i> Add Column
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="compAddRow()">
-                        <i class="fas fa-plus"></i> Add Row
-                    </button>
-                </div>
-
-                <div class="comp-table-builder">
-                    <table id="comp-table">
-                        <thead>
-                            <tr id="comp-headers">
-                                <th><input type="text" placeholder="Feature" class="comp-header"></th>
-                                <th><input type="text" placeholder="Product A" class="comp-header"></th>
-                                <th><input type="text" placeholder="Product B" class="comp-header"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="comp-body">
-                            <tr>
-                                <td><input type="text" placeholder="Feature name" class="comp-label"></td>
-                                <td><input type="text" placeholder="Value" class="comp-value"></td>
-                                <td><input type="text" placeholder="Value" class="comp-value"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <input type="hidden" name="comparison_data" id="comparison_data">
-            </div>
-        </div>
-
-        <!-- ===== GALLERY STRIP ===== -->
-        <div class="block-type-section" data-block-type="gallery_strip">
-            <div class="form-section-card">
-                <h6 class="mb-3" style="font-weight:700;">Gallery Strip</h6>
-                <div class="mb-3">
-                    <label class="form-label">Section Title</label>
-                    <input type="text" name="title" class="form-control field-title" placeholder="e.g. Product Gallery">
-                </div>
-                <label class="form-label">Gallery Images</label>
-                <div id="gallery-items-container">
-                    <div class="repeatable-item" data-index="0">
-                        <button type="button" class="remove-item" onclick="removeRepeatable(this)" style="display:none;">&times;</button>
-                        <div class="row g-2">
-                            <div class="col-md-7">
+                <!-- ===== IMAGE + TEXT LEFT ===== -->
+                <div class="block-type-section" data-block-type="image_text_left">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-images me-2 text-primary"></i>Image Left + Text Right</h6>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Section Heading</label>
+                                <input type="text" name="title" class="form-control field-title" placeholder="Heading">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Image URL</label>
                                 <div class="upload-group">
-                                    <input type="url" name="gallery_url_0" class="form-control field-image-url" placeholder="Image URL">
-                                    <button type="button" class="btn btn-sm btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
-                                        <i class="fas fa-upload"></i>
+                                    <input type="url" name="image_url" class="form-control field-image-url" placeholder="https://...">
+                                    <button type="button" class="btn btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
+                                        <i class="fas fa-cloud-arrow-up"></i> Upload
                                     </button>
                                 </div>
                             </div>
-                            <div class="col-md-5">
-                                <input type="text" name="gallery_caption_0" class="form-control" placeholder="Caption (optional)">
+                            <div class="col-12">
+                                <label class="form-label">Image Alt</label>
+                                <input type="text" name="image_alt" class="form-control" placeholder="Image description">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Body Text</label>
+                                <textarea name="body_text" class="form-control" rows="5" placeholder="Description text... HTML supported."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addGalleryItem()">
-                    <i class="fas fa-plus"></i> Add Image
-                </button>
-            </div>
-        </div>
 
-        <!-- Submit -->
-        <div class="mt-4" id="submit-area" style="display:none;">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-plus-circle"></i> Add Block
-            </button>
+                <!-- ===== IMAGE + TEXT RIGHT ===== -->
+                <div class="block-type-section" data-block-type="image_text_right">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-images me-2 text-primary"></i>Text Left + Image Right</h6>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Section Heading</label>
+                                <input type="text" name="title" class="form-control field-title" placeholder="Heading">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Image URL</label>
+                                <div class="upload-group">
+                                    <input type="url" name="image_url" class="form-control field-image-url" placeholder="https://...">
+                                    <button type="button" class="btn btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
+                                        <i class="fas fa-cloud-arrow-up"></i> Upload
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Image Alt</label>
+                                <input type="text" name="image_alt" class="form-control" placeholder="Image description">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Body Text</label>
+                                <textarea name="body_text" class="form-control" rows="5" placeholder="Description text... HTML supported."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== COMPARISON TABLE ===== -->
+                <div class="block-type-section" data-block-type="comparison_table">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-table-columns me-2 text-primary"></i>Comparison Table Builder</h6>
+                        <div class="mb-4">
+                            <label class="form-label">Section Title</label>
+                            <input type="text" name="title" class="form-control field-title" placeholder="e.g. Compare Models">
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end mb-3">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="compAddColumn()">
+                                <i class="fas fa-plus"></i> Column
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="compAddRow()">
+                                <i class="fas fa-plus"></i> Row
+                            </button>
+                        </div>
+
+                        <div class="comp-table-builder">
+                            <table id="comp-table">
+                                <thead>
+                                    <tr id="comp-headers">
+                                        <th><input type="text" placeholder="Feature Name" class="comp-header fw-bold"></th>
+                                        <th><input type="text" placeholder="This Product" class="comp-header fw-bold"></th>
+                                        <th><input type="text" placeholder="Other Product" class="comp-header fw-bold"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="comp-body">
+                                    <tr>
+                                        <td><input type="text" placeholder="e.g. Material" class="comp-label fw-semibold"></td>
+                                        <td><input type="text" placeholder="Value" class="comp-value"></td>
+                                        <td><input type="text" placeholder="Value" class="comp-value"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="comparison_data" id="comparison_data">
+                    </div>
+                </div>
+
+                <!-- ===== GALLERY STRIP ===== -->
+                <div class="block-type-section" data-block-type="gallery_strip">
+                    <div class="form-section-card">
+                        <h6 class="mb-4" style="font-weight:700;"><i class="fas fa-film me-2 text-primary"></i>Gallery Strip</h6>
+                        <div class="mb-4">
+                            <label class="form-label">Section Title</label>
+                            <input type="text" name="title" class="form-control field-title" placeholder="e.g. Product Gallery">
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label mb-0">Gallery Images</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addGalleryItem()">
+                                <i class="fas fa-plus"></i> Add Image
+                            </button>
+                        </div>
+                        
+                        <div id="gallery-items-container">
+                            <div class="repeatable-item" data-index="0">
+                                <button type="button" class="remove-item" onclick="removeRepeatable(this)" style="display:none;"><i class="fas fa-times"></i></button>
+                                <div class="row g-3">
+                                    <div class="col-md-7">
+                                        <label class="form-label" style="font-size: 10px;">Image URL</label>
+                                        <div class="upload-group">
+                                            <input type="url" name="gallery_url_0" class="form-control form-control-sm field-image-url" placeholder="Image URL">
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
+                                                <i class="fas fa-upload"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label" style="font-size: 10px;">Caption</label>
+                                        <input type="text" name="gallery_caption_0" class="form-control form-control-sm" placeholder="Caption (optional)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="mt-4" id="submit-area" style="display:none;">
+                    <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 15px;">
+                        <i class="fas fa-plus-circle me-2"></i> Save and Add Block
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 {% endblock %}
 
@@ -602,10 +633,9 @@
             if (!this.files.length) return;
             const file = this.files[0];
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>...';
             try {
                 const url = await uploadToR2(file, 'aplus');
-                // Find the URL input field in the same upload-group
                 const group = btn.closest('.upload-group');
                 const urlInput = group.querySelector('input[type="url"], input.field-image-url');
                 if (urlInput) urlInput.value = url;
@@ -613,7 +643,11 @@
                 alert('Upload failed: ' + e.message);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload';
+                if(btn.classList.contains('btn-sm')) {
+                    btn.innerHTML = '<i class="fas fa-upload"></i>';
+                } else {
+                    btn.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> Upload';
+                }
             }
         };
         input.click();
@@ -628,20 +662,24 @@
         div.className = 'repeatable-item';
         div.dataset.index = idx;
         div.innerHTML = `
-            <button type="button" class="remove-item" onclick="removeRepeatable(this)">&times;</button>
-            <div class="row g-2">
-                <div class="col-md-3">
-                    <input type="text" name="feature_icon_${idx}" class="form-control" placeholder="Icon (e.g. verified)">
+            <button type="button" class="remove-item" onclick="removeRepeatable(this)"><i class="fas fa-times"></i></button>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" style="font-size: 10px;">Icon Class</label>
+                    <input type="text" name="feature_icon_${idx}" class="form-control form-control-sm" placeholder="fa-solid fa-star">
                 </div>
-                <div class="col-md-3">
-                    <input type="text" name="feature_title_${idx}" class="form-control" placeholder="Feature title">
+                <div class="col-md-8">
+                    <label class="form-label" style="font-size: 10px;">Title</label>
+                    <input type="text" name="feature_title_${idx}" class="form-control form-control-sm" placeholder="Feature title">
                 </div>
-                <div class="col-md-3">
-                    <input type="text" name="feature_desc_${idx}" class="form-control" placeholder="Short description">
+                <div class="col-12">
+                    <label class="form-label" style="font-size: 10px;">Description</label>
+                    <input type="text" name="feature_desc_${idx}" class="form-control form-control-sm" placeholder="Short description">
                 </div>
-                <div class="col-md-3">
+                <div class="col-12">
+                    <label class="form-label" style="font-size: 10px;">Image URL</label>
                     <div class="upload-group">
-                        <input type="url" name="feature_image_${idx}" class="form-control field-image-url" placeholder="Image URL">
+                        <input type="url" name="feature_image_${idx}" class="form-control form-control-sm field-image-url" placeholder="Image URL">
                         <button type="button" class="btn btn-sm btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
                             <i class="fas fa-upload"></i>
                         </button>
@@ -650,7 +688,16 @@
             </div>
         `;
         container.appendChild(div);
-        // Enable new inputs if section is active
+        
+        // Show remove buttons if more than one item
+        const items = container.querySelectorAll('.repeatable-item');
+        if (items.length > 1) {
+            items.forEach(item => {
+                const btn = item.querySelector('.remove-item');
+                if(btn) btn.style.display = 'flex';
+            });
+        }
+        
         const section = container.closest('.block-type-section');
         if (section && section.classList.contains('active')) {
             div.querySelectorAll('input, textarea, select').forEach(el => el.disabled = false);
@@ -666,22 +713,33 @@
         div.className = 'repeatable-item';
         div.dataset.index = idx;
         div.innerHTML = `
-            <button type="button" class="remove-item" onclick="removeRepeatable(this)">&times;</button>
-            <div class="row g-2">
+            <button type="button" class="remove-item" onclick="removeRepeatable(this)"><i class="fas fa-times"></i></button>
+            <div class="row g-3">
                 <div class="col-md-7">
+                    <label class="form-label" style="font-size: 10px;">Image URL</label>
                     <div class="upload-group">
-                        <input type="url" name="gallery_url_${idx}" class="form-control field-image-url" placeholder="Image URL">
+                        <input type="url" name="gallery_url_${idx}" class="form-control form-control-sm field-image-url" placeholder="Image URL">
                         <button type="button" class="btn btn-sm btn-outline-primary btn-upload" onclick="pickAndUpload(this)">
                             <i class="fas fa-upload"></i>
                         </button>
                     </div>
                 </div>
                 <div class="col-md-5">
-                    <input type="text" name="gallery_caption_${idx}" class="form-control" placeholder="Caption (optional)">
+                    <label class="form-label" style="font-size: 10px;">Caption</label>
+                    <input type="text" name="gallery_caption_${idx}" class="form-control form-control-sm" placeholder="Caption (optional)">
                 </div>
             </div>
         `;
         container.appendChild(div);
+        
+        const items = container.querySelectorAll('.repeatable-item');
+        if (items.length > 1) {
+            items.forEach(item => {
+                const btn = item.querySelector('.remove-item');
+                if(btn) btn.style.display = 'flex';
+            });
+        }
+        
         const section = container.closest('.block-type-section');
         if (section && section.classList.contains('active')) {
             div.querySelectorAll('input, textarea, select').forEach(el => el.disabled = false);
@@ -689,14 +747,24 @@
     }
 
     function removeRepeatable(btn) {
+        const container = btn.closest('#feature-items-container, #gallery-items-container');
         btn.closest('.repeatable-item').remove();
+        
+        // Hide remove button if only one item left
+        if (container) {
+            const items = container.querySelectorAll('.repeatable-item');
+            if (items.length === 1) {
+                const removeBtn = items[0].querySelector('.remove-item');
+                if(removeBtn) removeBtn.style.display = 'none';
+            }
+        }
     }
 
     // ========= Comparison Table Builder =========
     function compAddColumn() {
         const headerRow = document.getElementById('comp-headers');
         const th = document.createElement('th');
-        th.innerHTML = '<input type="text" placeholder="Column" class="comp-header">';
+        th.innerHTML = '<input type="text" placeholder="Column" class="comp-header fw-bold">';
         headerRow.appendChild(th);
 
         document.querySelectorAll('#comp-body tr').forEach(row => {
@@ -713,7 +781,7 @@
         for (let i = 0; i < colCount; i++) {
             const td = document.createElement('td');
             if (i === 0) {
-                td.innerHTML = '<input type="text" placeholder="Feature name" class="comp-label">';
+                td.innerHTML = '<input type="text" placeholder="Feature Name" class="comp-label fw-semibold">';
             } else {
                 td.innerHTML = '<input type="text" placeholder="Value" class="comp-value">';
             }

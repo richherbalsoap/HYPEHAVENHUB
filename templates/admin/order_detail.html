@@ -15,11 +15,12 @@
 
 <div class="row g-4">
     <div class="col-xl-8">
+        <!-- Order Summary -->
         <div class="admin-card mb-4">
             <div class="admin-card-header">
                 <div>
                     <div class="eyebrow">Order Summary</div>
-                    <h6>{{ order.order_id }}</h6>
+                    <h6 style="font-size: 20px;">{{ order.order_id }}</h6>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span>
@@ -30,44 +31,45 @@
             </div>
             <div class="admin-detail-grid">
                 <div>
-                    <span>Customer</span>
+                    <span><i class="fas fa-user" style="margin-right: 4px; font-size: 10px;"></i> Customer</span>
                     <strong>{{ order.user.get_full_name|default:order.user.email }}</strong>
                     <small>{{ order.user.email }}</small>
                     {% if order.user.phone %}<small>{{ order.user.phone }}</small>{% endif %}
                 </div>
                 <div>
-                    <span>Placed</span>
+                    <span><i class="fas fa-calendar" style="margin-right: 4px; font-size: 10px;"></i> Placed</span>
                     <strong>{{ order.created_at|date:"d M Y" }}</strong>
                     <small>{{ order.created_at|date:"h:i A" }}</small>
                 </div>
                 <div>
-                    <span>Shiprocket</span>
+                    <span><i class="fas fa-truck" style="margin-right: 4px; font-size: 10px;"></i> Shiprocket</span>
                     {% if order.shipping_tracking_id %}
                     <strong>{{ order.shipping_tracking_id }}</strong>
-                    <small><a href="https://app.shiprocket.in/seller/orders/processing" target="_blank">Dispatch Order</a></small>
+                    <small><a href="https://app.shiprocket.in/seller/orders/processing" target="_blank" style="color: var(--admin-primary);">Dispatch Order <i class="fas fa-external-link-alt" style="font-size: 9px;"></i></a></small>
                     {% else %}
-                    <strong>Not Synced</strong>
+                    <strong style="color: var(--admin-amber);">Not Synced</strong>
                     <small>Check credentials</small>
                     {% endif %}
                 </div>
                 <div>
-                    <span>Amount</span>
-                    <strong>Rs. {{ order.grand_total|floatformat:0 }}</strong>
+                    <span><i class="fas fa-indian-rupee-sign" style="margin-right: 4px; font-size: 10px;"></i> Amount</span>
+                    <strong style="font-size: 18px; color: var(--admin-primary);">₹{{ order.grand_total|floatformat:0 }}</strong>
                     <small>{{ order.items.count }} item{{ order.items.count|pluralize }}</small>
                 </div>
                 <div>
-                    <span>Payment</span>
+                    <span><i class="fas fa-credit-card" style="margin-right: 4px; font-size: 10px;"></i> Payment</span>
                     {% if payment %}
                     <strong>{{ payment.get_method_display }}</strong>
                     <small>{{ payment.payment_id }}</small>
                     {% else %}
-                    <strong>Not recorded</strong>
+                    <strong style="color: var(--admin-amber);">Not recorded</strong>
                     <small>No payment row found</small>
                     {% endif %}
                 </div>
             </div>
         </div>
 
+        <!-- Order Items -->
         <div class="admin-card mb-4">
             <div class="admin-card-header">
                 <div>
@@ -76,13 +78,13 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table admin-table mb-0">
+                <table class="table mb-0">
                     <thead>
                         <tr>
                             <th>Product</th>
                             <th>Variant</th>
                             <th>Qty</th>
-                            <th>Unit</th>
+                            <th>Unit Price</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -90,15 +92,20 @@
                         {% for item in items %}
                         <tr>
                             <td>
-                                <strong>{{ item.product_name }}</strong>
-                                {% if item.product and item.product.sku %}
-                                <small class="d-block text-muted">{{ item.product.sku }}</small>
-                                {% endif %}
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.product and item.product.display_image_url %}
+                                    <img src="{{ item.product.display_image_url }}" alt="{{ item.product_name }}"
+                                         style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--admin-border);">
+                                    {% else %}
+                                    <div style="width: 40px; height: 40px; border-radius: 8px; background: var(--admin-surface-hover); display: flex; align-items: center; justify-content: center; color: var(--admin-light); border: 1px solid var(--admin-border);"><i class="fas fa-gem" style="font-size: 14px;"></i></div>
+                                    {% endif %}
+                                    <strong>{{ item.product_name }}</strong>
+                                </div>
                             </td>
-                            <td>{{ item.variant_label|default:"-" }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>Rs. {{ item.unit_price|floatformat:0 }}</td>
-                            <td><strong>Rs. {{ item.total_price|floatformat:0 }}</strong></td>
+                            <td><span style="color: var(--admin-muted);">{{ item.variant_label|default:"—" }}</span></td>
+                            <td><span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 3px 10px;">×{{ item.quantity }}</span></td>
+                            <td>₹{{ item.unit_price|floatformat:0 }}</td>
+                            <td><strong>₹{{ item.total_price|floatformat:0 }}</strong></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -106,25 +113,29 @@
             </div>
         </div>
 
+        <!-- Address & Billing -->
         <div class="row g-4">
             <div class="col-lg-6">
                 <div class="admin-card h-100">
                     <div class="admin-card-header">
                         <div>
-                            <div class="eyebrow">Delivery</div>
-                            <h6>Address</h6>
+                            <div class="eyebrow"><i class="fas fa-location-dot" style="margin-right: 4px;"></i> Delivery</div>
+                            <h6>Shipping Address</h6>
                         </div>
                     </div>
                     {% if order.address %}
                     <div class="address-block">
-                        <strong>{{ order.address.full_name }}</strong>
+                        <strong><i class="fas fa-user" style="margin-right: 6px; font-size: 12px; color: var(--admin-primary);"></i> {{ order.address.full_name }}</strong>
                         <span>{{ order.address.address_line1 }}</span>
                         {% if order.address.address_line2 %}<span>{{ order.address.address_line2 }}</span>{% endif %}
-                        <span>{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</span>
-                        <span>{{ order.address.phone }}</span>
+                        <span><i class="fas fa-map-pin" style="margin-right: 4px; font-size: 11px;"></i> {{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}</span>
+                        <span><i class="fas fa-phone" style="margin-right: 4px; font-size: 11px;"></i> {{ order.address.phone }}</span>
                     </div>
                     {% else %}
-                    <p class="text-muted mb-0">Address was removed or is unavailable.</p>
+                    <div class="empty-state" style="padding: 24px;">
+                        <i class="fas fa-location-crosshairs" style="font-size: 24px;"></i>
+                        <p>Address was removed or is unavailable.</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -132,23 +143,24 @@
                 <div class="admin-card h-100">
                     <div class="admin-card-header">
                         <div>
-                            <div class="eyebrow">Totals</div>
-                            <h6>Billing</h6>
+                            <div class="eyebrow"><i class="fas fa-receipt" style="margin-right: 4px;"></i> Totals</div>
+                            <h6>Billing Summary</h6>
                         </div>
                     </div>
-                    <div class="total-row"><span>Subtotal</span><strong>Rs. {{ order.subtotal|floatformat:0 }}</strong></div>
-                    <div class="total-row"><span>Discount</span><strong>Rs. {{ order.discount_amount|floatformat:0 }}</strong></div>
-                    <div class="total-row"><span>Delivery</span><strong>Rs. {{ order.delivery_charge|floatformat:0 }}</strong></div>
-                    <div class="total-row grand"><span>Grand Total</span><strong>Rs. {{ order.grand_total|floatformat:0 }}</strong></div>
+                    <div class="total-row"><span>Subtotal</span><strong>₹{{ order.subtotal|floatformat:0 }}</strong></div>
+                    <div class="total-row"><span>Discount</span><strong style="color: var(--admin-green);">- ₹{{ order.discount_amount|floatformat:0 }}</strong></div>
+                    <div class="total-row"><span>Delivery</span><strong>₹{{ order.delivery_charge|floatformat:0 }}</strong></div>
+                    <div class="total-row grand"><span>Grand Total</span><strong>₹{{ order.grand_total|floatformat:0 }}</strong></div>
                 </div>
             </div>
         </div>
 
+        <!-- Tracking Timeline -->
         <div class="admin-card mt-4">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Timeline</div>
-                    <h6>Tracking history</h6>
+                    <div class="eyebrow"><i class="fas fa-timeline" style="margin-right: 4px;"></i> Timeline</div>
+                    <h6>Order Tracking History</h6>
                 </div>
             </div>
             <div class="timeline-list">
@@ -158,25 +170,29 @@
                     <div>
                         <strong>{{ event.status|title }}</strong>
                         <p>{{ event.description }}</p>
-                        <small>{{ event.created_at|date:"d M Y, h:i A" }}</small>
+                        <small><i class="fas fa-clock" style="margin-right: 4px;"></i>{{ event.created_at|date:"d M Y, h:i A" }}</small>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-muted mb-0">No tracking events yet.</p>
+                <div class="empty-state" style="padding: 24px;">
+                    <i class="fas fa-timeline" style="font-size: 24px;"></i>
+                    <p>No tracking events yet.</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
+        <!-- Complaints for this order -->
         {% if complaints %}
         <div class="admin-card mt-4">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Support</div>
+                    <div class="eyebrow"><i class="fas fa-headset" style="margin-right: 4px;"></i> Support</div>
                     <h6>Complaints for this order</h6>
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table admin-table mb-0">
+                <table class="table mb-0">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -189,12 +205,18 @@
                     <tbody>
                         {% for complaint in complaints %}
                         <tr>
-                            <td><strong>{{ complaint.complaint_id }}</strong></td>
+                            <td><strong style="color: var(--admin-primary);">{{ complaint.complaint_id }}</strong></td>
                             <td>{{ complaint.subject }}</td>
                             <td><span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span></td>
-                            <td>{{ complaint.get_priority_display }}</td>
+                            <td>
+                                <span class="status-pill priority-{{ complaint.priority }}">
+                                    {{ complaint.get_priority_display }}
+                                </span>
+                            </td>
                             <td class="text-end">
-                                <a href="{% url 'admin_complaint_detail' complaint.complaint_id %}" class="btn btn-sm btn-outline-primary">Open</a>
+                                <a href="{% url 'admin_complaint_detail' complaint.complaint_id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-folder-open"></i> Open
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -205,12 +227,13 @@
         {% endif %}
     </div>
 
+    <!-- Admin Actions Sidebar -->
     <div class="col-xl-4">
         <div class="admin-card sticky-panel">
             <div class="admin-card-header">
                 <div>
-                    <div class="eyebrow">Admin Action</div>
-                    <h6>Update order</h6>
+                    <div class="eyebrow"><i class="fas fa-sliders" style="margin-right: 4px;"></i> Admin Action</div>
+                    <h6>Update Order</h6>
                 </div>
             </div>
             <form method="POST">
@@ -220,31 +243,31 @@
                 {% endif %}
 
                 <div class="mb-3">
-                    <label class="form-label">Order Status</label>
+                    <label class="form-label"><i class="fas fa-circle-dot" style="margin-right: 4px;"></i> Order Status</label>
                     {{ form.status }}
                     {{ form.status.errors }}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Payment Method</label>
+                    <label class="form-label"><i class="fas fa-credit-card" style="margin-right: 4px;"></i> Payment Method</label>
                     {{ form.payment_method }}
                     {{ form.payment_method.errors }}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Payment Status</label>
+                    <label class="form-label"><i class="fas fa-check-double" style="margin-right: 4px;"></i> Payment Status</label>
                     {{ form.payment_status }}
                     {{ form.payment_status.errors }}
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Tracking Note</label>
+                    <label class="form-label"><i class="fas fa-message" style="margin-right: 4px;"></i> Tracking Note</label>
                     {{ form.tracking_note }}
                     {{ form.tracking_note.errors }}
                 </div>
                 <div class="mb-4">
-                    <label class="form-label">Internal Notes</label>
+                    <label class="form-label"><i class="fas fa-note-sticky" style="margin-right: 4px;"></i> Internal Notes</label>
                     {{ form.notes }}
                     {{ form.notes.errors }}
                 </div>
-                <button type="submit" class="btn btn-primary w-100">
+                <button type="submit" class="btn btn-primary w-100" style="padding: 12px;">
                     <i class="fas fa-save"></i> Save Order Update
                 </button>
             </form>

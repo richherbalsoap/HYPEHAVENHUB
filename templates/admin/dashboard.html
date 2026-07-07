@@ -3,78 +3,109 @@
 {% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="admin-section-title">
+<!-- Welcome Banner -->
+<div class="info-banner" style="background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08)); border-color: rgba(99,102,241,0.2); color: var(--admin-ink);">
+    <i class="fas fa-hand-sparkles" style="color: var(--admin-primary); font-size: 28px;"></i>
     <div>
-        <div class="eyebrow">Overview</div>
-        <h5>Business Snapshot</h5>
+        <strong style="font-size: 16px; color: var(--admin-ink);">Welcome back, {{ user.get_full_name|default:user.email }}!</strong>
+        <span style="color: var(--admin-muted);">Here's what's happening with your store today. Let's make it a great day!</span>
     </div>
-    <a href="{% url 'admin_reports' %}" class="btn btn-outline-primary">
-        <i class="fas fa-chart-line"></i> Reports
-    </a>
+    <div class="ms-auto d-none d-md-flex gap-2">
+        <a href="{% url 'admin_product_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Product</a>
+        <a href="{% url 'admin_reports' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-chart-line"></i> Reports</a>
+    </div>
 </div>
 
+<!-- Stats Row 1: Revenue & Orders -->
+<div class="row g-3 mb-3">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-primary">
+            <div class="stat-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">₹{{ total_revenue|floatformat:0 }}</div>
+                <div class="stat-label">Lifetime Revenue</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-bag-shopping"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ total_orders }}</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-amber">
+            <div class="stat-icon"><i class="fas fa-clock-rotate-left"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ pending_orders }}</div>
+                <div class="stat-label">Active Orders</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-arrow-trend-up"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">₹{{ today_revenue|floatformat:0 }}</div>
+                <div class="stat-label">Today's Revenue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row 2: Payments & Support -->
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-number">Rs. {{ total_revenue|floatformat:0 }}</div>
-            <div class="stat-label">Lifetime Revenue</div>
+        <div class="stat-card stat-teal">
+            <div class="stat-icon"><i class="fas fa-circle-check"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ paid_orders }}</div>
+                <div class="stat-label">Paid Orders</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="border-left-color: var(--admin-blue);">
-            <div class="stat-number">{{ total_orders }}</div>
-            <div class="stat-label">Total Orders (via Shiprocket)</div>
+        <div class="stat-card stat-pink">
+            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ unpaid_orders }}</div>
+                <div class="stat-label">Payment Pending</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="border-left-color: var(--admin-amber);">
-            <div class="stat-number">{{ pending_orders }}</div>
-            <div class="stat-label">Active Orders</div>
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-rotate-left"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ returned_orders }}</div>
+                <div class="stat-label">Returned Orders</div>
+            </div>
         </div>
     </div>
     <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="border-left-color: var(--admin-green);">
-            <div class="stat-number">Rs. {{ today_revenue|floatformat:0 }}</div>
-            <div class="stat-label">Today's Revenue</div>
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-headset"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ stats.open_complaints }}</div>
+                <div class="stat-label">Open Complaints</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="border-left-color: var(--admin-teal);">
-            <div class="stat-number">{{ paid_orders }}</div>
-            <div class="stat-label">Paid Orders</div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="border-left-color: var(--admin-amber);">
-            <div class="stat-number">{{ unpaid_orders }}</div>
-            <div class="stat-label">Payment Pending</div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card" style="border-left-color: var(--admin-red);">
-            <div class="stat-number">{{ returned_orders }}</div>
-            <div class="stat-label">Returned Orders</div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-number">{{ stats.open_complaints }}</div>
-            <div class="stat-label">Open Complaints</div>
-        </div>
-    </div>
-</div>
-
-<div class="alert alert-info d-flex align-items-center mb-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #93c5fd;">
-    <i class="fas fa-truck-fast fa-2x me-3"></i>
+<!-- Shiprocket Banner -->
+<div class="info-banner mb-4">
+    <i class="fas fa-truck-fast"></i>
     <div>
-        <strong>Shiprocket Integration Active</strong><br>
-        All orders are automatically pushed to Shiprocket. Manage your shipments and generate manifests directly from your Shiprocket dashboard.
+        <strong>Shiprocket Integration Active</strong>
+        <span>All orders are automatically pushed to Shiprocket. Manage shipments and generate manifests directly from your Shiprocket dashboard.</span>
     </div>
 </div>
 
+<!-- Recent Orders & Complaints -->
 <div class="row g-4">
     <div class="col-xl-8">
         <div class="admin-card h-100">
@@ -83,10 +114,10 @@
                     <div class="eyebrow">Orders</div>
                     <h6>Recent Orders</h6>
                 </div>
-                <a href="{% url 'admin_orders' %}" class="btn btn-sm btn-primary">View All</a>
+                <a href="{% url 'admin_orders' %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-right"></i> View All</a>
             </div>
             <div class="table-responsive">
-                <table class="table admin-table mb-0">
+                <table class="table mb-0">
                     <thead>
                         <tr>
                             <th>Order</th>
@@ -105,7 +136,7 @@
                                 <small class="d-block text-muted">{{ order.created_at|date:"d M, h:i A" }}</small>
                             </td>
                             <td>{{ order.user.email }}</td>
-                            <td><strong>Rs. {{ order.grand_total|floatformat:0 }}</strong></td>
+                            <td><strong>₹{{ order.grand_total|floatformat:0 }}</strong></td>
                             <td><span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span></td>
                             <td>
                                 {% if order.payment %}
@@ -115,12 +146,14 @@
                                 {% endif %}
                             </td>
                             <td class="text-end">
-                                <a href="{% url 'admin_order_detail' order.order_id %}" class="btn btn-sm btn-outline-primary">Manage</a>
+                                <a href="{% url 'admin_order_detail' order.order_id %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No orders yet</td>
+                            <td colspan="6" class="text-center py-4">
+                                <div class="empty-state"><i class="fas fa-bag-shopping"></i><p>No orders yet</p></div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -136,23 +169,23 @@
                     <div class="eyebrow">Support</div>
                     <h6>Recent Complaints</h6>
                 </div>
-                <a href="{% url 'admin_complaints' %}" class="btn btn-sm btn-primary">View All</a>
+                <a href="{% url 'admin_complaints' %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-arrow-right"></i> All</a>
             </div>
             <div class="timeline-list">
                 {% for complaint in recent_complaints %}
                 <a class="timeline-row" href="{% url 'admin_complaint_detail' complaint.complaint_id %}">
                     <div class="timeline-dot"></div>
                     <div>
-                        <div class="d-flex justify-content-between gap-2">
+                        <div class="d-flex justify-content-between gap-2 flex-wrap">
                             <strong>{{ complaint.complaint_id }}</strong>
                             <span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
                         </div>
                         <p>{{ complaint.subject|truncatewords:8 }}</p>
-                        <small>{{ complaint.user.email }} - {{ complaint.created_at|date:"d M, h:i A" }}</small>
+                        <small>{{ complaint.user.email }} · {{ complaint.created_at|date:"d M, h:i A" }}</small>
                     </div>
                 </a>
                 {% empty %}
-                <p class="text-muted mb-0">No complaints yet</p>
+                <div class="empty-state"><i class="fas fa-headset"></i><p>No complaints yet</p></div>
                 {% endfor %}
             </div>
         </div>

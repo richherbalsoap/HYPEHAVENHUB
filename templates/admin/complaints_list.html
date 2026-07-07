@@ -5,11 +5,12 @@
 {% block content %}
 <div class="admin-section-title">
     <div>
-        <div class="eyebrow">Support</div>
+        <div class="eyebrow">Support Center</div>
         <h5>Customer Complaints</h5>
     </div>
 </div>
 
+<!-- Filters -->
 <div class="admin-card mb-4">
     <form method="GET" class="row g-3 align-items-end">
         <div class="col-lg-4">
@@ -42,9 +43,10 @@
     </form>
 </div>
 
+<!-- Complaints Table -->
 <div class="admin-card">
     <div class="table-responsive">
-        <table class="table admin-table mb-0">
+        <table class="table mb-0">
             <thead>
                 <tr>
                     <th>Complaint</th>
@@ -61,21 +63,38 @@
                 {% for complaint in complaints %}
                 <tr>
                     <td>
-                        <strong>{{ complaint.complaint_id }}</strong>
+                        <strong style="color: var(--admin-primary);">{{ complaint.complaint_id }}</strong>
                         {% if complaint.order %}
-                        <small class="d-block text-muted">Order {{ complaint.order.order_id }}</small>
+                        <small class="d-block text-muted"><i class="fas fa-link" style="font-size: 9px;"></i> Order {{ complaint.order.order_id }}</small>
                         {% endif %}
                     </td>
                     <td>
                         <strong>{{ complaint.user.get_full_name|default:complaint.user.email }}</strong>
                         <small class="d-block text-muted">{{ complaint.user.email }}</small>
                     </td>
-                    <td>{{ complaint.get_complaint_type_display }}</td>
-                    <td>{{ complaint.subject|truncatewords:7 }}</td>
-                    <td><span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span></td>
-                    <td>{{ complaint.get_priority_display }}</td>
                     <td>
-                        {{ complaint.created_at|date:"d M Y" }}
+                        <span style="color: var(--admin-ink-secondary); font-size: 13px;">
+                            {% if complaint.complaint_type == 'product_quality' %}<i class="fas fa-gem" style="margin-right: 4px; font-size: 11px;"></i>{% endif %}
+                            {% if complaint.complaint_type == 'delivery' %}<i class="fas fa-truck" style="margin-right: 4px; font-size: 11px;"></i>{% endif %}
+                            {% if complaint.complaint_type == 'payment' %}<i class="fas fa-credit-card" style="margin-right: 4px; font-size: 11px;"></i>{% endif %}
+                            {% if complaint.complaint_type == 'account' %}<i class="fas fa-user" style="margin-right: 4px; font-size: 11px;"></i>{% endif %}
+                            {% if complaint.complaint_type == 'website' %}<i class="fas fa-globe" style="margin-right: 4px; font-size: 11px;"></i>{% endif %}
+                            {% if complaint.complaint_type == 'other' %}<i class="fas fa-circle-question" style="margin-right: 4px; font-size: 11px;"></i>{% endif %}
+                            {{ complaint.get_complaint_type_display }}
+                        </span>
+                    </td>
+                    <td><span style="color: var(--admin-ink-secondary);">{{ complaint.subject|truncatewords:7 }}</span></td>
+                    <td><span class="status-pill complaint-{{ complaint.status }}">{{ complaint.get_status_display }}</span></td>
+                    <td>
+                        <span class="status-pill priority-{{ complaint.priority }}">
+                            {% if complaint.priority == 'high' %}<i class="fas fa-arrow-up" style="font-size: 9px;"></i>{% endif %}
+                            {% if complaint.priority == 'medium' %}<i class="fas fa-minus" style="font-size: 9px;"></i>{% endif %}
+                            {% if complaint.priority == 'low' %}<i class="fas fa-arrow-down" style="font-size: 9px;"></i>{% endif %}
+                            {{ complaint.get_priority_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <span>{{ complaint.created_at|date:"d M Y" }}</span>
                         <small class="d-block text-muted">{{ complaint.created_at|date:"h:i A" }}</small>
                     </td>
                     <td class="text-end">
@@ -86,7 +105,12 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="text-center text-muted py-4">No complaints found</td>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <i class="fas fa-headset"></i>
+                            <p>No complaints found</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -96,12 +120,11 @@
 
 {% if complaints.has_other_pages %}
 <nav class="mt-4">
-    <ul class="pagination">
+    <ul class="pagination justify-content-center">
         {% if complaints.has_previous %}
-            <li class="page-item"><a class="page-link" href="?page=1{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">First</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ complaints.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Previous</a></li>
+            <li class="page-item"><a class="page-link" href="?page=1{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}"><i class="fas fa-angles-left"></i></a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ complaints.previous_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}"><i class="fas fa-angle-left"></i></a></li>
         {% endif %}
-
         {% for num in complaints.paginator.page_range %}
             {% if complaints.number == num %}
                 <li class="page-item active"><span class="page-link">{{ num }}</span></li>
@@ -109,10 +132,9 @@
                 <li class="page-item"><a class="page-link" href="?page={{ num }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">{{ num }}</a></li>
             {% endif %}
         {% endfor %}
-
         {% if complaints.has_next %}
-            <li class="page-item"><a class="page-link" href="?page={{ complaints.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Next</a></li>
-            <li class="page-item"><a class="page-link" href="?page={{ complaints.paginator.num_pages }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}">Last</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ complaints.next_page_number }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}"><i class="fas fa-angle-right"></i></a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ complaints.paginator.num_pages }}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_priority %}&priority={{ selected_priority }}{% endif %}"><i class="fas fa-angles-right"></i></a></li>
         {% endif %}
     </ul>
 </nav>

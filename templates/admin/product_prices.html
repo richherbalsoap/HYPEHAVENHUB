@@ -3,90 +3,101 @@
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h5><i class="fas fa-globe"></i> {{ title }}</h5>
-    <a href="{% url 'admin_products' %}" class="btn btn-secondary btn-sm">
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Pricing</div>
+        <h5>{{ title }}</h5>
+    </div>
+    <a href="{% url 'admin_products' %}" class="btn btn-outline-secondary btn-sm">
         <i class="fas fa-arrow-left"></i> Back to Products
     </a>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <!-- Add New Price Form -->
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                <h6 class="mb-0">Add / Update Price</h6>
+    <div class="col-xl-4">
+        <div class="admin-card sticky-panel">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">New Regional Price</div>
+                    <h6>Add / Update Price</h6>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="POST">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">Country</label>
-                        <select name="country_id" class="form-select bg-secondary text-white border-0" required>
-                            <option value="">Select Country...</option>
-                            {% for c in all_countries %}
-                                <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
-                            {% endfor %}
-                        </select>
-                        <small class="text-muted">You must add countries in the 'Countries' tab first.</small>
-                    </div>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label"><i class="fas fa-globe" style="margin-right: 4px;"></i> Country</label>
+                    <select name="country_id" class="form-select" required>
+                        <option value="">Select Country...</option>
+                        {% for c in all_countries %}
+                            <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+                        {% endfor %}
+                    </select>
+                    <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Add countries in the 'Currencies' tab first.</small>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Price</label>
-                        <input type="number" step="0.01" name="price" class="form-control bg-secondary text-white border-0" placeholder="e.g. 29.99" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-save"></i> Save Price
-                    </button>
-                </form>
-            </div>
+                <div class="mb-4">
+                    <label class="form-label"><i class="fas fa-money-bill-wave" style="margin-right: 4px;"></i> Price</label>
+                    <input type="number" step="0.01" name="price" class="form-control" placeholder="e.g. 29.99" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100" style="padding: 12px;">
+                    <i class="fas fa-save"></i> Save Regional Price
+                </button>
+            </form>
         </div>
     </div>
 
     <!-- Existing Prices List -->
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="px-4 py-3">Country</th>
-                                <th class="py-3">Currency</th>
-                                <th class="py-3">Price</th>
-                                <th class="px-4 py-3 text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in prices %}
-                            <tr>
-                                <td class="px-4 py-3">
-                                    <span class="badge bg-primary">{{ p.country.code }}</span>
-                                </td>
-                                <td class="py-3 fw-bold">{{ p.country.currency_code }}</td>
-                                <td class="py-3">{{ p.price }}</td>
-                                <td class="px-4 py-3 text-end">
-                                    <form method="POST" class="d-inline" onsubmit="return confirm('Remove this price?');">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="delete_price_id" value="{{ p.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">
-                                    <i class="fas fa-info-circle mb-2 fs-4 d-block"></i>
-                                    No custom country prices set yet.<br>
-                                    Default base price ({{ product.base_price }}) will be used globally.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <div class="col-xl-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow">Configured Pricing</div>
+                    <h6>Regional Prices for {{ product.name|truncatechars:30 }}</h6>
                 </div>
+                <span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 4px 12px;">Base: ₹{{ product.base_price }}</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>Currency</th>
+                            <th>Price</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in prices %}
+                        <tr>
+                            <td>
+                                <span class="status-pill" style="background: var(--admin-primary-light); color: var(--admin-primary); border: 1px solid rgba(99,102,241,0.2); padding: 4px 12px;">{{ p.country.code }}</span>
+                            </td>
+                            <td><strong style="color: var(--admin-ink-secondary);">{{ p.country.currency_code }}</strong></td>
+                            <td><strong style="color: var(--admin-green);">{{ p.country.currency_symbol }}{{ p.price }}</strong></td>
+                            <td class="text-end">
+                                <form method="POST" class="d-inline" onsubmit="return confirm('Remove this regional price?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="delete_price_id" value="{{ p.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <i class="fas fa-globe"></i>
+                                    <p>No custom regional prices set yet.<br>Default base price (₹{{ product.base_price }}) will be used globally.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

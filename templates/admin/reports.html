@@ -3,64 +3,83 @@
 {% block page_title %}Reports & Analytics{% endblock %}
 
 {% block content %}
-<div class="mb-20">
-    <h5><i class="fas fa-chart-bar"></i> Sales Analytics & Reports</h5>
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Analytics</div>
+        <h5>Sales Reports & Insights</h5>
+    </div>
 </div>
 
-<!-- Date Range Filter -->
-<div class="card mb-20">
-    <div class="card-body">
-        <form method="GET" class="row">
-            <div class="col-md-6">
-                <label class="form-label">Show data for last:</label>
-                <select name="days" class="form-select" onchange="this.form.submit()">
-                    <option value="7" {% if days == 7 %}selected{% endif %}>7 Days</option>
-                    <option value="30" {% if days == 30 %}selected{% endif %}>30 Days</option>
-                    <option value="90" {% if days == 90 %}selected{% endif %}>90 Days</option>
-                    <option value="365" {% if days == 365 %}selected{% endif %}>1 Year</option>
-                </select>
-            </div>
-        </form>
-    </div>
+<!-- Period Selector -->
+<div class="admin-card mb-4">
+    <form method="GET" class="row g-3 align-items-end">
+        <div class="col-md-6">
+            <label class="form-label"><i class="fas fa-calendar-days" style="margin-right: 4px;"></i> Time Period</label>
+            <select name="days" class="form-select" onchange="this.form.submit()">
+                <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 Days</option>
+                <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 Days</option>
+                <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 Days</option>
+                <option value="365" {% if days == 365 %}selected{% endif %}>Last 1 Year</option>
+            </select>
+        </div>
+    </form>
 </div>
 
 <!-- Key Metrics -->
-<div class="row mb-30">
-    <div class="col-md-3">
-        <div class="stat-card">
-            <div class="stat-number">₹{{ total_sales|floatformat:0 }}</div>
-            <div class="stat-label">Total Sales</div>
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-primary">
+            <div class="stat-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">₹{{ total_sales|floatformat:0 }}</div>
+                <div class="stat-label">Total Sales</div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card" style="border-left-color: #10B981;">
-            <div class="stat-number" style="color: #10B981;">{{ total_orders }}</div>
-            <div class="stat-label">Total Orders</div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-bag-shopping"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ total_orders }}</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card" style="border-left-color: #F59E0B;">
-            <div class="stat-number" style="color: #F59E0B;">₹{{ avg_order_value|floatformat:0 }}</div>
-            <div class="stat-label">Avg Order Value</div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-amber">
+            <div class="stat-icon"><i class="fas fa-chart-simple"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">₹{{ avg_order_value|floatformat:0 }}</div>
+                <div class="stat-label">Avg. Order Value</div>
+            </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="stat-card" style="border-left-color: #EF4444;">
-            <div class="stat-number" style="color: #EF4444;">{{ return_rate|floatformat:1 }}%</div>
-            <div class="stat-label">Return Rate</div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-rotate-left"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ return_rate|floatformat:1 }}%</div>
+                <div class="stat-label">Return Rate</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Top Products -->
+<!-- Top Products & Categories -->
+<div class="row g-4 mb-4">
     <div class="col-lg-6">
-        <div class="card mb-20">
-            <div class="card-body">
-                <h6 class="mb-20"><i class="fas fa-cube"></i> Top Selling Products</h6>
-                <table class="table table-sm mb-0">
-                    <thead style="background-color: #f8f9fa;">
+        <div class="admin-card h-100">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow"><i class="fas fa-trophy" style="margin-right: 4px;"></i> Performance</div>
+                    <h6>Top Selling Products</h6>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
                         <tr>
+                            <th>#</th>
                             <th>Product</th>
                             <th>Sold</th>
                             <th>Revenue</th>
@@ -69,13 +88,18 @@
                     <tbody>
                         {% for product in product_sales %}
                         <tr>
-                            <td>{{ product.product__name|truncatewords:4 }}</td>
-                            <td>{{ product.total_sold }}</td>
-                            <td>₹{{ product.total_revenue|floatformat:0 }}</td>
+                            <td>
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--admin-primary-light); color: var(--admin-primary); font-size: 11px; font-weight: 700;">{{ forloop.counter }}</span>
+                            </td>
+                            <td><strong>{{ product.product__name|truncatewords:4 }}</strong></td>
+                            <td><span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 3px 10px;">{{ product.total_sold }}</span></td>
+                            <td><strong style="color: var(--admin-green);">₹{{ product.total_revenue|floatformat:0 }}</strong></td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center text-muted">No data available</td>
+                            <td colspan="4">
+                                <div class="empty-state" style="padding: 24px;"><i class="fas fa-chart-bar"></i><p>No data available</p></div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -84,14 +108,19 @@
         </div>
     </div>
 
-    <!-- Top Categories -->
     <div class="col-lg-6">
-        <div class="card mb-20">
-            <div class="card-body">
-                <h6 class="mb-20"><i class="fas fa-tags"></i> Top Categories</h6>
-                <table class="table table-sm mb-0">
-                    <thead style="background-color: #f8f9fa;">
+        <div class="admin-card h-100">
+            <div class="admin-card-header">
+                <div>
+                    <div class="eyebrow"><i class="fas fa-tags" style="margin-right: 4px;"></i> Categories</div>
+                    <h6>Top Categories</h6>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
                         <tr>
+                            <th>#</th>
                             <th>Category</th>
                             <th>Sold</th>
                             <th>Revenue</th>
@@ -100,13 +129,18 @@
                     <tbody>
                         {% for category in category_sales %}
                         <tr>
-                            <td>{{ category.product__category__name }}</td>
-                            <td>{{ category.total_sold }}</td>
-                            <td>₹{{ category.total_revenue|floatformat:0 }}</td>
+                            <td>
+                                <span style="display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(139,92,246,0.1); color: var(--admin-purple); font-size: 11px; font-weight: 700;">{{ forloop.counter }}</span>
+                            </td>
+                            <td><strong>{{ category.product__category__name|default:"Uncategorized" }}</strong></td>
+                            <td><span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 3px 10px;">{{ category.total_sold }}</span></td>
+                            <td><strong style="color: var(--admin-green);">₹{{ category.total_revenue|floatformat:0 }}</strong></td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center text-muted">No data available</td>
+                            <td colspan="4">
+                                <div class="empty-state" style="padding: 24px;"><i class="fas fa-tags"></i><p>No data available</p></div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -117,62 +151,40 @@
 </div>
 
 <!-- Daily Sales Trend -->
-<div class="card">
-    <div class="card-body">
-        <h6 class="mb-20"><i class="fas fa-chart-line"></i> Daily Sales Trend</h6>
-        <table class="table table-sm mb-0">
-            <thead style="background-color: #f8f9fa;">
+<div class="admin-card">
+    <div class="admin-card-header">
+        <div>
+            <div class="eyebrow"><i class="fas fa-chart-line" style="margin-right: 4px;"></i> Trend</div>
+            <h6>Daily Sales Overview</h6>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
                 <tr>
                     <th>Date</th>
                     <th>Orders</th>
                     <th>Revenue</th>
-                    <th>Avg Order Value</th>
+                    <th>Avg. Order Value</th>
                 </tr>
             </thead>
             <tbody>
                 {% for day in daily_sales %}
                 <tr>
                     <td><strong>{{ day.date }}</strong></td>
-                    <td>{{ day.order_count }}</td>
-                    <td>₹{{ day.revenue|floatformat:0 }}</td>
-                    <td>₹{{ day.revenue|add:0|add:day.order_count|floatformat:0 }}</td>
+                    <td><span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 3px 10px;">{{ day.order_count }}</span></td>
+                    <td><strong style="color: var(--admin-green);">₹{{ day.revenue|floatformat:0 }}</strong></td>
+                    <td>₹{{ day.avg_order_value|floatformat:0 }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted">No data available</td>
+                    <td colspan="4">
+                        <div class="empty-state" style="padding: 24px;"><i class="fas fa-chart-line"></i><p>No data available for this period</p></div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    .card { 
-        background: white; 
-        border-radius: 10px; 
-        border: none;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .mb-30 { margin-bottom: 30px; }
-    .mb-20 { margin-bottom: 20px; }
-    .stat-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        border-left: 4px solid var(--primary);
-        margin-bottom: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .stat-number {
-        font-size: 28px;
-        font-weight: bold;
-        color: var(--primary);
-    }
-    .stat-label {
-        color: #666;
-        font-size: 14px;
-        margin-top: 5px;
-    }
-</style>
 {% endblock %}

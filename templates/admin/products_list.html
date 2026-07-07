@@ -13,16 +13,20 @@
     </a>
 </div>
 
-<!-- Search Form -->
+<!-- Search -->
 <div class="admin-card mb-4">
-    <form method="GET" class="row">
+    <form method="GET" class="row g-3 align-items-end">
         <div class="col-md-9">
-            <input type="text" name="search" class="form-control" 
-                   placeholder="Search by name or description..."
-                   value="{{ search_query }}">
+            <label class="form-label">Search Products</label>
+            <div style="position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--admin-light);"></i>
+                <input type="text" name="search" class="form-control" style="padding-left: 40px;"
+                       placeholder="Search by name or description..."
+                       value="{{ search_query }}">
+            </div>
         </div>
         <div class="col-md-3">
-            <button type="submit" class="btn btn-custom w-100">Search</button>
+            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i> Search</button>
         </div>
     </form>
 </div>
@@ -30,12 +34,13 @@
 <!-- Products Table -->
 <div class="admin-card">
     <div class="table-responsive">
-        <table class="table admin-table mb-0">
+        <table class="table mb-0">
             <thead>
                 <tr>
-                    <th>Product Name</th>
+                    <th>Product</th>
                     <th>Category</th>
-                    <th>Price</th>
+                    <th>Base Price</th>
+                    <th>Selling Price</th>
                     <th>Discount</th>
                     <th>Status</th>
                     <th class="text-end">Actions</th>
@@ -44,30 +49,61 @@
             <tbody>
                 {% for product in products %}
                 <tr>
-                    <td><strong>{{ product.name }}</strong></td>
-                    <td>{{ product.category.name|default:"—" }}</td>
-                    <td><strong>₹{{ product.base_price }}</strong></td>
-                    <td>{{ product.discount_percent }}%</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if product.display_image_url %}
+                            <img src="{{ product.display_image_url }}" alt="{{ product.name }}"
+                                 style="width: 44px; height: 44px; border-radius: 10px; object-fit: cover; border: 1px solid var(--admin-border);">
+                            {% else %}
+                            <div style="width: 44px; height: 44px; border-radius: 10px; background: var(--admin-surface-hover); display: flex; align-items: center; justify-content: center; color: var(--admin-light); border: 1px solid var(--admin-border);">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ product.name|truncatewords:5 }}</strong>
+                                {% if product.is_featured %}
+                                <span class="status-pill" style="background: var(--admin-purple-bg); color: var(--admin-purple); border: 1px solid var(--admin-purple-border); font-size: 9px; padding: 2px 8px;">Featured</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="color: var(--admin-muted);">{{ product.category.name|default:"—" }}</span></td>
+                    <td><span style="color: var(--admin-muted); text-decoration: {% if product.discount_percent > 0 %}line-through{% else %}none{% endif %};">₹{{ product.base_price|floatformat:0 }}</span></td>
+                    <td><strong style="color: var(--admin-green);">₹{{ product.selling_price|floatformat:0 }}</strong></td>
+                    <td>
+                        {% if product.discount_percent > 0 %}
+                        <span class="status-pill" style="background: var(--admin-red-bg); color: var(--admin-red); border: 1px solid var(--admin-red-border); font-size: 10px; padding: 3px 8px;">{{ product.discount_percent|floatformat:0 }}% OFF</span>
+                        {% else %}
+                        <span style="color: var(--admin-light);">—</span>
+                        {% endif %}
+                    </td>
                     <td>
                         <span class="status-pill {% if product.is_active %}status-delivered{% else %}status-cancelled{% endif %}">
                             {% if product.is_active %}Active{% else %}Inactive{% endif %}
                         </span>
                     </td>
                     <td class="text-end">
-                        <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-outline-custom" style="margin-right:4px;">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-outline-custom" style="margin-right:4px;">
-                            <i class="fas fa-globe"></i>
-                        </a>
-                        <a href="{% url 'admin_product_delete' product.id %}" class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'admin_product_edit' product.id %}" class="btn btn-sm btn-outline-custom" title="Edit">
+                                <i class="fas fa-pen-to-square"></i>
+                            </a>
+                            <a href="{% url 'admin_product_prices' product.id %}" class="btn btn-sm btn-outline-custom" title="Manage Prices">
+                                <i class="fas fa-globe"></i>
+                            </a>
+                            <a href="{% url 'admin_product_delete' product.id %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="fas fa-trash-can"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">No products found</td>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fas fa-gem"></i>
+                            <p>No products found. Start by adding your first product!</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -75,38 +111,23 @@
     </div>
 </div>
 
-<!-- Pagination -->
 {% if products.has_other_pages %}
 <nav class="mt-4">
-    <ul class="pagination">
+    <ul class="pagination justify-content-center">
         {% if products.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1&search={{ search_query }}">First</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ products.previous_page_number }}&search={{ search_query }}">Previous</a>
-            </li>
+            <li class="page-item"><a class="page-link" href="?page=1&search={{ search_query }}"><i class="fas fa-angles-left"></i></a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}&search={{ search_query }}"><i class="fas fa-angle-left"></i></a></li>
         {% endif %}
-
         {% for num in products.paginator.page_range %}
             {% if products.number == num %}
-                <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                </li>
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
             {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}&search={{ search_query }}">{{ num }}</a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?page={{ num }}&search={{ search_query }}">{{ num }}</a></li>
             {% endif %}
         {% endfor %}
-
         {% if products.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ products.next_page_number }}&search={{ search_query }}">Next</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ products.paginator.num_pages }}&search={{ search_query }}">Last</a>
-            </li>
+            <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}&search={{ search_query }}"><i class="fas fa-angle-right"></i></a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ products.paginator.num_pages }}&search={{ search_query }}"><i class="fas fa-angles-right"></i></a></li>
         {% endif %}
     </ul>
 </nav>
