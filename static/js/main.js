@@ -644,6 +644,7 @@ const setupQuickView = () => {
           variantsHtml += `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stock}" ${disabledAttr}>${v.label} - ₹${v.price}${disabledStr}</option>`;
         });
         variantsHtml += '</select></div>';
+      }
        const isDiscounted = data.discount_percent > 0;
       const priceHtml = isDiscounted 
         ? `<span class="fs-3 fw-bold me-3" id="qvPrice" style="color: var(--primary);">${data.localized_selling_price}</span>

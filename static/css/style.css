@@ -877,7 +877,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
 .product-card-quick-add {
   flex: 1;
   background: var(--primary-fixed) !important;
-  color: var(--primary) !important;
+  color: var(--on-primary-fixed) !important;
   border: none;
   padding: 12px;
   font-size: 10px;
