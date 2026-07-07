@@ -383,11 +383,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       } else {
         console.error("Failed to generate checkout token:", data.message);
-        window.location.href = "{% url 'checkout' %}";
+        try {
+          const cartRes = await fetch("{% url 'add_to_cart' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              variant_id: variantId,
+              quantity: quantity
+            })
+          });
+          const cartData = await cartRes.json();
+          if (cartData.requires_login && cartData.redirect) {
+            window.location.href = cartData.redirect;
+          } else {
+            window.location.href = "{% url 'checkout' %}";
+          }
+        } catch (cartErr) {
+          window.location.href = "{% url 'checkout' %}";
+        }
       }
     } catch (err) {
       console.error("Error initiating checkout:", err);
-      window.location.href = "{% url 'checkout' %}";
+      try {
+        const cartRes = await fetch("{% url 'add_to_cart' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+            product_id: productId,
+            variant_id: variantId,
+            quantity: quantity
+          })
+        });
+        const cartData = await cartRes.json();
+        if (cartData.requires_login && cartData.redirect) {
+          window.location.href = cartData.redirect;
+        } else {
+          window.location.href = "{% url 'checkout' %}";
+        }
+      } catch (cartErr) {
+        window.location.href = "{% url 'checkout' %}";
+      }
     } finally {
       setTimeout(() => {
         btn.style.pointerEvents = 'auto';

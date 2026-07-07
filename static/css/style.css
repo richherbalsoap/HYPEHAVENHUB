@@ -1604,7 +1604,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
 .brand-pill:hover { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
 
 /* ====== HORIZONTAL SCROLL ROWS ====== */
-.product-scroll-wrapper { scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
+.product-scroll-wrapper { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
 .product-scroll-wrapper::-webkit-scrollbar { display: none; }
 .scroll-snap-x { scroll-snap-type: x mandatory; }
 .scroll-snap-align-start { scroll-snap-align: start; }
@@ -2377,4 +2377,54 @@ html.dark .alert {
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ====== DARK MODE FOOTER OVERRIDES ====== */
+html.dark .glamour-footer {
+  background: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  border-top: 1px solid var(--outline-variant) !important;
+}
+html.dark .glamour-footer .brand-name {
+  color: var(--primary) !important;
+}
+html.dark .glamour-footer .brand-accent {
+  color: var(--primary) !important;
+}
+html.dark .footer-desc {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .footer-links a {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .footer-links a:hover {
+  color: var(--secondary) !important;
+}
+html.dark .footer-title {
+  color: var(--secondary) !important;
+}
+html.dark .social-link {
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .social-link:hover {
+  background: var(--primary) !important;
+  color: var(--on-primary) !important;
+}
+html.dark .footer-hr {
+  border-color: var(--outline-variant) !important;
+}
+html.dark .footer-bottom p {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .newsletter-input .form-control {
+  background: transparent !important;
+  border-bottom: 1px solid var(--outline-variant) !important;
+  color: var(--on-surface) !important;
+}
+html.dark .newsletter-input .form-control::placeholder {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .pay-icon {
+  color: var(--on-surface-variant) !important;
 }
