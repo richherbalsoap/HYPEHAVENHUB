@@ -192,7 +192,7 @@
 <!-- Bottom "Page" Section for A+ Content and Reviews -->
 <section class="product-bottom-page" style="background-color: var(--surface-container-lowest); width: 100%; box-shadow: 0 -12px 40px rgba(0,0,0,0.04); padding-top: 0; padding-bottom: 4rem; margin-top: -1rem; position: relative; z-index: 10;">
 
-{% if product.aplus_image_url %}
+{% if product.aplus_image_url or product.aplus_images.exists %}
 <!-- A+ Enhanced Brand Content -->
 <style>
 .aplus-fullscreen-container {
@@ -223,7 +223,12 @@
 }
 </style>
 <div class="aplus-fullscreen-container mb-5">
+  {% if product.aplus_image_url %}
   <img src="{{ product.aplus_image_url }}" alt="{{ product.name }} A+ Content" loading="lazy">
+  {% endif %}
+  {% for aplus_img in product.aplus_images.all %}
+  <img src="{{ aplus_img.url }}" alt="{{ product.name }} A+ Content" loading="lazy">
+  {% endfor %}
 </div>
 {% endif %}
 

@@ -335,6 +335,30 @@ class ProductImage(models.Model):
         return ""
 
 
+class ProductAplusImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='aplus_images')
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob storage URL (preferred)")
+    image = models.ImageField(upload_to='aplus_products/', blank=True, null=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return f"{self.product.name} - A+ Image {self.id}"
+
+    @property
+    def url(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""
+
+
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     shade_name = models.CharField(max_length=100, blank=True)

@@ -15,7 +15,7 @@ from django.conf import settings
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES,
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage,
 )
 from .forms import (
     ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm
@@ -145,7 +145,17 @@ def admin_product_create(request):
                 product.video_url = video_url
                 product.save()
 
-            # Handle A+ Image URL
+            # Handle A+ Image URL(s) (New Multiple System)
+            for key in request.POST:
+                if key.startswith('uploaded_aplus_image_url_'):
+                    url = request.POST[key]
+                    if url:
+                        ProductAplusImage.objects.create(
+                            product=product,
+                            image_url=url
+                        )
+            
+            # Handle legacy A+ Image URL
             aplus_url = request.POST.get('aplus_image_url')
             if aplus_url:
                 product.aplus_image_url = aplus_url
@@ -183,6 +193,23 @@ def admin_product_create(request):
                 except Exception as e:
                     messages.error(request, f"Image upload failed: {e}")
 
+            # Fallback for A+ images
+            aplus_images_list = []
+            for key in request.FILES:
+                if key.startswith('dynamic_aplus_image_'):
+                    aplus_images_list.extend(request.FILES.getlist(key))
+            
+            for img in aplus_images_list:
+                from .storage import upload_file
+                try:
+                    url = upload_file(img, folder="aplus_products")
+                    ProductAplusImage.objects.create(
+                        product=product,
+                        image_url=url
+                    )
+                except Exception as e:
+                    messages.error(request, f"A+ Image upload failed: {e}")
+
             messages.success(request, 'Product created successfully!')
             return redirect('admin_products')
     else:
@@ -219,7 +246,17 @@ def admin_product_edit(request, pk):
                 product.video_url = video_url
                 product.save()
                 
-            # Handle A+ Image URL
+            # Handle A+ Image URL(s) (New Multiple System)
+            for key in request.POST:
+                if key.startswith('uploaded_aplus_image_url_'):
+                    url = request.POST[key]
+                    if url:
+                        ProductAplusImage.objects.create(
+                            product=product,
+                            image_url=url
+                        )
+
+            # Handle legacy A+ Image URL
             aplus_url = request.POST.get('aplus_image_url')
             if aplus_url:
                 product.aplus_image_url = aplus_url
@@ -257,6 +294,23 @@ def admin_product_edit(request, pk):
                 except Exception as e:
                     messages.error(request, f"Image upload failed: {e}")
 
+            # Fallback for A+ images
+            aplus_images_list = []
+            for key in request.FILES:
+                if key.startswith('dynamic_aplus_image_'):
+                    aplus_images_list.extend(request.FILES.getlist(key))
+            
+            for img in aplus_images_list:
+                from .storage import upload_file
+                try:
+                    url = upload_file(img, folder="aplus_products")
+                    ProductAplusImage.objects.create(
+                        product=product,
+                        image_url=url
+                    )
+                except Exception as e:
+                    messages.error(request, f"A+ Image upload failed: {e}")
+
             messages.success(request, 'Product updated successfully!')
             return redirect('admin_products')
     else:
@@ -288,6 +342,15 @@ def admin_product_image_delete(request, pk):
     product_pk = image.product.pk
     image.delete()
     return JsonResponse({'success': True, 'message': 'Image deleted successfully'})
+
+
+@login_required
+@admin_required
+def admin_product_aplus_image_delete(request, pk):
+    """Delete a product A+ image"""
+    image = get_object_or_404(ProductAplusImage, pk=pk)
+    image.delete()
+    return JsonResponse({'success': True, 'message': 'A+ Image deleted successfully'})
 
 
 @login_required
@@ -479,7 +542,18 @@ def admin_order_detail(request, order_id):
                     description=f"Payment marked as {payment.get_status_display()}.",
                 )
 
-            messages.success(request, f"Order {order.order_id} updated successfully.")
+            # Auto-refund if admin marks as cancelled or returned
+            if order.status in ['cancelled', 'returned'] and old_status not in ['cancelled', 'returned']:
+                from .utils import process_razorpay_refund
+                refund_status, refund_msg = process_razorpay_refund(order, f"Admin marked order as {order.status}")
+                if refund_status == "processed":
+                    messages.success(request, f"Order updated and {refund_msg}")
+                elif refund_status == "failed":
+                    messages.warning(request, f"Order updated but {refund_msg}")
+                else:
+                    messages.success(request, f"Order {order.order_id} updated successfully.")
+            else:
+                messages.success(request, f"Order {order.order_id} updated successfully.")
             return redirect('admin_order_detail', order_id=order.order_id)
     else:
         form = AdminOrderUpdateForm(instance=order, payment=payment)

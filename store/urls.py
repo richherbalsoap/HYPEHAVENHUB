@@ -57,6 +57,7 @@ urlpatterns = [
     path('api/set-language/', views.set_language, name='set_language'),
     path('api/pincode-lookup/', views.pincode_lookup, name='pincode_lookup'),
     path('run-migrations/', views.run_migrations_view, name='run_migrations'),
+    path('api/razorpay-webhook/', views.razorpay_webhook, name='razorpay_webhook'),
 
     # Admin Panel
     path('admin/', RedirectView.as_view(pattern_name='admin_dashboard', permanent=False), name='admin_root'),
@@ -66,6 +67,7 @@ urlpatterns = [
     path('admin/products/<int:pk>/edit/', admin_views.admin_product_edit, name='admin_product_edit'),
     path('admin/products/<int:pk>/prices/', admin_views.admin_product_prices, name='admin_product_prices'),
     path('admin/products/images/<int:pk>/delete/', admin_views.admin_product_image_delete, name='admin_product_image_delete'),
+    path('admin/products/aplus_images/<int:pk>/delete/', admin_views.admin_product_aplus_image_delete, name='admin_product_aplus_image_delete'),
     path('admin/products/<int:pk>/delete/', admin_views.admin_product_delete, name='admin_product_delete'),
     path('admin/orders/', admin_views.admin_orders, name='admin_orders'),
     path('admin/orders/<str:order_id>/', admin_views.admin_order_detail, name='admin_order_detail'),

@@ -1191,33 +1191,8 @@ def cancel_order(request, order_id):
                     variant.save()
                     
             # Process automatic Razorpay refund if prepaid
-            payment = getattr(order, 'payment', None)
-            refund_status = "none"
-            if payment and payment.status in ['success', 'completed'] and payment.method == 'razorpay' and payment.payment_id:
-                import razorpay
-                try:
-                    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-                    amount_in_paise = int(payment.amount * 100)
-                    
-                    # Create refund request in Razorpay
-                    refund = client.payment.refund(payment.payment_id, {
-                        "amount": amount_in_paise,
-                        "notes": {
-                            "order_id": order.order_id,
-                            "reason": "Customer cancelled order"
-                        }
-                    })
-                    
-                    payment.status = 'refunded'
-                    resp_dict = payment.gateway_response or {}
-                    resp_dict['refund_id'] = refund.get('id')
-                    resp_dict['refunded_at'] = datetime.now(datetime_timezone.utc).isoformat()
-                    payment.gateway_response = resp_dict
-                    payment.save()
-                    refund_status = "processed"
-                except Exception as refund_err:
-                    logger.error(f"Razorpay automatic refund failed for order {order.order_id}: {str(refund_err)}")
-                    refund_status = "failed"
+            from .utils import process_razorpay_refund
+            refund_status, refund_msg = process_razorpay_refund(order, "Customer cancelled order")
             
             # Cancel order and tracking log
             order.status = 'cancelled'
@@ -1227,7 +1202,9 @@ def cancel_order(request, order_id):
             # Construct notification message
             notif_message = f'Your order #{order.order_id} has been cancelled.'
             if refund_status == "processed":
-                notif_message += f' A refund of INR {payment.amount:.2f} has been initiated to your payment account.'
+                payment = getattr(order, 'payment', None)
+                if payment:
+                    notif_message += f' A refund of INR {payment.amount:.2f} has been initiated to your payment account.'
             elif refund_status == "failed":
                 notif_message += ' We encountered an issue initiating your automatic refund. Our support team will process it manually.'
                 
@@ -1240,7 +1217,9 @@ def cancel_order(request, order_id):
             
             success_message = 'Order cancelled successfully.'
             if refund_status == "processed":
-                success_message += f' Refund of INR {payment.amount:.2f} initiated.'
+                payment = getattr(order, 'payment', None)
+                if payment:
+                    success_message += f' Refund of INR {payment.amount:.2f} initiated.'
             elif refund_status == "failed":
                 success_message += ' Automatic refund failed; support will process it manually.'
                 
@@ -1700,5 +1679,59 @@ def shiprocket_order_webhook(request):
         
     return JsonResponse({"ok": True, "result": True})
 
+import hmac
+import hashlib
 
-
+@csrf_exempt
+@require_POST
+def razorpay_webhook(request):
+    """Webhook for Razorpay events like refund.processed or refund.failed."""
+    webhook_secret = getattr(settings, 'RAZORPAY_WEBHOOK_SECRET', None)
+    webhook_signature = request.headers.get('X-Razorpay-Signature')
+    
+    if not webhook_secret or not webhook_signature:
+        return JsonResponse({"error": "Missing signature or secret"}, status=400)
+        
+    try:
+        body = request.body
+        expected_signature = hmac.new(
+            webhook_secret.encode('utf-8'),
+            body,
+            hashlib.sha256
+        ).hexdigest()
+        
+        if not hmac.compare_digest(expected_signature, webhook_signature):
+            return JsonResponse({"error": "Invalid signature"}, status=400)
+            
+        payload = json.loads(body)
+        event = payload.get('event')
+        
+        if event in ['refund.processed', 'refund.failed']:
+            refund_obj = payload.get('payload', {}).get('refund', {}).get('entity', {})
+            payment_id = refund_obj.get('payment_id')
+            
+            try:
+                payment = Payment.objects.get(payment_id=payment_id)
+                order = payment.order
+                
+                if event == 'refund.processed':
+                    payment.status = 'refunded'
+                    payment.save()
+                    OrderTracking.objects.create(
+                        order=order,
+                        status='refunded',
+                        description=f"Razorpay Webhook: Refund of INR {refund_obj.get('amount', 0)/100:.2f} processed successfully."
+                    )
+                elif event == 'refund.failed':
+                    OrderTracking.objects.create(
+                        order=order,
+                        status='refund_failed',
+                        description="Razorpay Webhook: Refund processing failed."
+                    )
+            except Payment.DoesNotExist:
+                logger.warning(f"Webhook received for unknown payment_id: {payment_id}")
+                
+        return JsonResponse({"status": "ok"})
+    except Exception as e:
+        logger.error(f"Error processing webhook: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
