@@ -62,7 +62,7 @@ if HAS_CRISPY_FORMS and HAS_CRISPY_BOOTSTRAP5:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'store.middleware.SecurityHeadersMiddleware',
+    # 'store.middleware.SecurityHeadersMiddleware',
     'store.middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
