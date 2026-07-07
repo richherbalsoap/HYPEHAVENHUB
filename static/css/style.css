@@ -2277,10 +2277,10 @@ html.dark {
   --surface-container-highest: #3d1d20;
   --surface-container-lowest: #190a0a;
   --surface-variant: #3d1d20;
-  --on-surface: #f7e0de;
-  --on-surface-variant: #dac1bf;
-  --on-background: #f7e0de;
-  --inverse-surface: #f7e0de;
+  --on-surface: #ffffff;
+  --on-surface-variant: #f0f0f0;
+  --on-background: #ffffff;
+  --inverse-surface: #ffffff;
   --inverse-on-surface: #1e1b18;
   --background: #190a0a;
 
