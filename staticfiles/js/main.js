@@ -644,11 +644,12 @@ const setupQuickView = () => {
           variantsHtml += `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stock}" ${disabledAttr}>${v.label} - ₹${v.price}${disabledStr}</option>`;
         });
         variantsHtml += '</select></div>';
+      }
        const isDiscounted = data.discount_percent > 0;
       const priceHtml = isDiscounted 
         ? `<span class="fs-3 fw-bold me-3" id="qvPrice" style="color: var(--primary);">${data.localized_selling_price}</span>
            <span class="text-decoration-line-through text-muted me-3" id="qvPriceOriginal" style="font-size: 14px;">${data.localized_base_price}</span>
-           <span class="badge" style="background: var(--primary-fixed); color: var(--primary); border: 1px solid var(--outline-variant); font-size: 11px;">${data.discount_percent}% OFF</span>`
+           <span class="badge" style="background: var(--primary-fixed); color: var(--on-primary-fixed); border: 1px solid var(--outline-variant); font-size: 11px;">${data.discount_percent}% OFF</span>`
         : `<span class="fs-3 fw-bold" id="qvPrice" style="color: var(--primary);">${data.localized_selling_price}</span>`;
         
       contentContainer.innerHTML = `
@@ -656,7 +657,7 @@ const setupQuickView = () => {
           <div class="col-md-6 text-center position-relative">
             <div class="position-relative overflow-hidden rounded shadow-sm">
               <img src="${data.image}" alt="${data.name}" class="img-fluid w-100 object-fit-cover" style="max-height: 400px; min-height: 300px;">
-              <span class="position-absolute px-3 py-1 text-[9px] uppercase tracking-widest font-semibold" style="background: var(--primary-fixed); color: var(--primary); font-size: 10px; border-radius: 2px; top: 12px; left: 12px;">Atelier Original</span>
+              <span class="position-absolute px-3 py-1 text-[9px] uppercase tracking-widest font-semibold" style="background: var(--primary-fixed); color: var(--on-primary-fixed); font-size: 10px; border-radius: 2px; top: 12px; left: 12px;">Atelier Original</span>
             </div>
           </div>
           <div class="col-md-6">
@@ -685,7 +686,7 @@ const setupQuickView = () => {
             ${variantsHtml}
             
             <div class="d-flex flex-column gap-2 mt-3">
-              <button class="btn w-100 py-3" id="qvAddToCartBtn" style="background-color: var(--primary-fixed) !important; color: var(--primary) !important; border: none; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 4px;">
+              <button class="btn w-100 py-3" id="qvAddToCartBtn" style="background-color: var(--primary-fixed) !important; color: var(--on-primary-fixed) !important; border: none; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 4px;">
                 Add to Bag
               </button>
               <button class="btn w-100 py-3" id="qvBuyDirectlyBtn" style="background-color: var(--primary) !important; color: var(--on-primary) !important; border: 1px solid var(--outline-variant); font-size: 11px; font-weight: bold; letter-spacing: 0.15em; text-transform: uppercase; border-radius: 4px;">

@@ -877,7 +877,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
 .product-card-quick-add {
   flex: 1;
   background: var(--primary-fixed) !important;
-  color: var(--primary) !important;
+  color: var(--on-primary-fixed) !important;
   border: none;
   padding: 12px;
   font-size: 10px;
@@ -1604,7 +1604,7 @@ a, button, .btn, input, select, textarea { transition: var(--transition); }
 .brand-pill:hover { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
 
 /* ====== HORIZONTAL SCROLL ROWS ====== */
-.product-scroll-wrapper { scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
+.product-scroll-wrapper { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
 .product-scroll-wrapper::-webkit-scrollbar { display: none; }
 .scroll-snap-x { scroll-snap-type: x mandatory; }
 .scroll-snap-align-start { scroll-snap-align: start; }
@@ -2377,4 +2377,138 @@ html.dark .alert {
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ====== DARK MODE FOOTER OVERRIDES ====== */
+html.dark .glamour-footer {
+  background: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  border-top: 1px solid var(--outline-variant) !important;
+}
+html.dark .glamour-footer .brand-name {
+  color: var(--primary) !important;
+}
+html.dark .glamour-footer .brand-accent {
+  color: var(--primary) !important;
+}
+html.dark .footer-desc {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .footer-links a {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .footer-links a:hover {
+  color: var(--secondary) !important;
+}
+html.dark .footer-title {
+  color: var(--secondary) !important;
+}
+html.dark .social-link {
+  color: var(--on-surface) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .social-link:hover {
+  background: var(--primary) !important;
+  color: var(--on-primary) !important;
+}
+html.dark .footer-hr {
+  border-color: var(--outline-variant) !important;
+}
+html.dark .footer-bottom p {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .newsletter-input .form-control {
+  background: transparent !important;
+  border-bottom: 1px solid var(--outline-variant) !important;
+  color: var(--on-surface) !important;
+}
+html.dark .newsletter-input .form-control::placeholder {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .pay-icon {
+  color: var(--on-surface-variant) !important;
+}
+
+/* ====== DARK MODE: ARTISAN NARRATIVE SECTION ====== */
+html.dark .artisan-section {
+  background-color: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+}
+html.dark .artisan-section h2 {
+  color: var(--primary) !important;
+}
+html.dark .artisan-section p,
+html.dark .artisan-section .lead {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .artisan-section .label-caps {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .artisan-section .arch-frame {
+  border-color: var(--outline-variant) !important;
+}
+
+/* ====== DARK MODE: TRUST BADGES / USP STRIP ====== */
+html.dark .jhumka-usp-strip {
+  background-color: var(--surface-container) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .usp-card {
+  background: var(--surface-container-low) !important;
+  border-color: var(--outline-variant) !important;
+}
+html.dark .usp-card h5 {
+  color: var(--on-surface) !important;
+}
+html.dark .usp-card p {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .usp-icon-wrapper {
+  color: var(--primary) !important;
+}
+
+/* ====== DARK MODE: NEWSLETTER SUBSCRIBE BUTTON ====== */
+html.dark .newsletter-input .btn-pink {
+  color: var(--on-surface) !important;
+  border-bottom-color: var(--outline-variant) !important;
+}
+
+/* ====== DARK MODE: PRODUCT CARD TEXT ====== */
+html.dark .product-name {
+  color: var(--on-surface) !important;
+}
+html.dark .price-current {
+  color: var(--primary) !important;
+}
+html.dark .price-original {
+  color: var(--on-surface-variant) !important;
+}
+html.dark .product-brand {
+  color: var(--on-surface-variant) !important;
+}
+
+/* ====== DARK MODE: VIEW FULL COLLECTION BUTTON ====== */
+html.dark .btn[style*="background-color: var(--primary-fixed)"] {
+  background-color: var(--primary-container) !important;
+  color: var(--on-primary-container) !important;
+}
+
+/* ====== DARK MODE: SECTION HEADINGS ====== */
+html.dark .section-title {
+  color: var(--on-surface) !important;
+}
+html.dark .section-eyebrow {
+  color: var(--on-surface-variant) !important;
+}
+
+/* ====== DARK MODE: SCROLL BUTTONS ====== */
+html.dark .scroll-prev,
+html.dark .scroll-next {
+  border-color: var(--outline-variant) !important;
+  color: var(--primary) !important;
+}
+html.dark .scroll-prev:hover,
+html.dark .scroll-next:hover {
+  background: var(--primary) !important;
+  color: var(--on-primary) !important;
 }
