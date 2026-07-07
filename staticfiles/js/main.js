@@ -425,12 +425,20 @@ if (checkoutForm) {
 }
 
 /* ====== CANCEL ORDER ====== */
-document.querySelector('[data-cancel-order]')?.addEventListener('click', async function () {
-  if (!confirm('Are you sure you want to cancel this order?')) return;
-  const orderId = this.dataset.cancelOrder;
-  const data = await api(`/orders/${orderId}/cancel/`);
-  if (data.success) { showToast(data.message); setTimeout(() => location.reload(), 1200); }
-  else showToast(data.message, 'error');
+document.querySelectorAll('[data-cancel-order]').forEach(btn => {
+  btn.addEventListener('click', async function () {
+    const confirmMsg = "Are you sure you want to cancel this order?\n\nIf you have already paid (e.g., via Razorpay), your refund will be automatically initiated and credited back to your original payment method within 5-7 working days.";
+    if (!confirm(confirmMsg)) return;
+    const orderId = this.dataset.cancelOrder;
+    const data = await api(`/orders/${orderId}/cancel/`);
+    if (data.success) { 
+        showToast(data.message); 
+        setTimeout(() => location.reload(), 2000); 
+    }
+    else {
+        showToast(data.message, 'error');
+    }
+  });
 });
 
 /* ====== SMOOTH REVEAL ANIMATIONS ====== */
