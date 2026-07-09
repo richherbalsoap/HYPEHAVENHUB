@@ -736,7 +736,7 @@ def cart_drawer_view(request):
     cart = get_or_create_cart(request)
     items = cart.items.select_related('product', 'variant').all()
     cart_product_ids = [item.product_id for item in items]
-    suggested_products = Product.objects.filter(is_active=True).exclude(id__in=cart_product_ids).order_by('-is_bestseller', '-view_count')[:4]
+    suggested_products = Product.objects.filter(is_active=True).exclude(id__in=cart_product_ids).order_by('-is_bestseller', '-view_count')[:8]
     return render(request, 'store/cart_drawer.html', {
         'cart': cart, 
         'items': items,

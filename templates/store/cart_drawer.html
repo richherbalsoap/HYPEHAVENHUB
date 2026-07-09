@@ -28,9 +28,14 @@
   </div>
 
   {% if suggested_products %}
-  <div class="p-3" style="border-top: 1px solid var(--outline-variant); background: var(--surface-container-lowest);">
-    <p style="font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; margin-bottom: 12px;">Explore More</p>
-    <div class="d-flex" style="gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;">
+  <div class="p-3 position-relative" style="border-top: 1px solid var(--outline-variant); background: var(--surface-container-lowest);">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <p style="font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; margin-bottom: 0;">Explore More</p>
+      <button type="button" class="btn btn-sm btn-link text-dark p-0 d-flex align-items-center" onclick="document.getElementById('exploreScrollBox').scrollBy({left: 150, behavior: 'smooth'})" title="Scroll Right">
+        <span class="material-symbols-outlined" style="font-size: 20px;">chevron_right</span>
+      </button>
+    </div>
+    <div id="exploreScrollBox" class="d-flex" style="gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none;">
       {% for sp in suggested_products %}
       <div class="suggested-item" style="min-width: 100px; max-width: 100px; flex-shrink: 0;">
         <a href="{% url 'product_detail' sp.slug %}" class="text-decoration-none">
@@ -46,6 +51,14 @@
         </a>
       </div>
       {% endfor %}
+      
+      <!-- Explore All Card -->
+      <div class="suggested-item d-flex align-items-center justify-content-center" style="min-width: 100px; max-width: 100px; flex-shrink: 0; background: var(--surface-container-low); border-radius: 8px; border: 1px dashed var(--outline-variant); margin-bottom: 8px;">
+        <a href="{% url 'product_list' %}" class="text-decoration-none text-center" style="color: var(--primary); display: block; padding: 20px 0;">
+          <span class="material-symbols-outlined mb-1" style="font-size: 24px;">arrow_forward</span>
+          <div style="font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase;">View All</div>
+        </a>
+      </div>
     </div>
   </div>
   {% endif %}
