@@ -36,6 +36,7 @@ urlpatterns = [
 
     # Cart & Checkout
     path('cart/', views.cart_view, name='cart'),
+    path('cart/drawer/', views.cart_drawer_view, name='cart_drawer'),
     path('cart/add/', views.add_to_cart, name='add_to_cart'),
     path('cart/update/', views.update_cart, name='update_cart'),
     path('cart/coupon/apply/', views.apply_coupon, name='apply_coupon'),

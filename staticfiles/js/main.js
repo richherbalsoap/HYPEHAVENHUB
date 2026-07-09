@@ -45,6 +45,26 @@ function updateCartBadge(count) {
   badges.forEach(b => { b.textContent = count; b.style.display = count > 0 ? 'flex' : 'none'; });
 }
 
+/* ====== CART DRAWER ====== */
+async function openCartDrawer() {
+  const drawerEl = document.getElementById('cartDrawer');
+  if (!drawerEl) return;
+  const bsDrawer = bootstrap.Offcanvas.getOrCreateInstance(drawerEl);
+  bsDrawer.show();
+  const bodyEl = document.getElementById('cartDrawerBody');
+  bodyEl.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+  try {
+    const res = await fetch('/cart/drawer/');
+    if (res.ok) {
+      bodyEl.innerHTML = await res.text();
+    } else {
+      bodyEl.innerHTML = '<div class="text-danger text-center py-4">Failed to load cart.</div>';
+    }
+  } catch (err) {
+    bodyEl.innerHTML = '<div class="text-danger text-center py-4">Error loading cart.</div>';
+  }
+}
+
 /* ====== ADD TO CART ====== */
 document.addEventListener('click', async (e) => {
   const btn = e.target.closest('[data-add-cart]');
@@ -68,6 +88,7 @@ document.addEventListener('click', async (e) => {
   if (data.success) {
     updateCartBadge(data.cart_count);
     showToast(data.message || 'Added to cart!');
+    if (typeof openCartDrawer === 'function') openCartDrawer();
   } else {
     showToast(data.message || 'Something went wrong', 'error');
   }
@@ -760,6 +781,7 @@ const setupQuickView = () => {
             updateCartBadge(cartRes.cart_count);
             showToast(cartRes.message || 'Added to cart!');
             modalInstance.hide();
+            if (typeof openCartDrawer === 'function') openCartDrawer();
           } else {
             showToast(cartRes.message || 'Something went wrong', 'error');
           }

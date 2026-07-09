@@ -732,6 +732,11 @@ def cart_view(request):
     items = cart.items.select_related('product', 'variant').all()
     return render(request, 'store/cart.html', {'cart': cart, 'items': items})
 
+def cart_drawer_view(request):
+    cart = get_or_create_cart(request)
+    items = cart.items.select_related('product', 'variant').all()
+    return render(request, 'store/cart_drawer.html', {'cart': cart, 'items': items})
+
 
 @require_POST
 def add_to_cart(request):

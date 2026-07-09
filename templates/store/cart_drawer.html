@@ -1,0 +1,36 @@
+{% load i18n_store %}
+{% load static %}
+{% if items %}
+  <div class="drawer-items p-3" style="overflow-y: auto; flex-grow: 1;">
+    {% for item in items %}
+      <div class="d-flex mb-3 align-items-center" style="border-bottom: 1px solid var(--outline-variant); padding-bottom: 10px;">
+        {% if item.product.display_image_url %}
+          <img src="{{ item.product.display_image_url }}" alt="{{ item.product.name }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;" class="me-3">
+        {% else %}
+          <div style="width: 60px; height: 60px; background:var(--surface-container); border-radius:8px; display:flex; align-items:center; justify-content:center;" class="me-3">
+            <span class="material-symbols-outlined">diamond</span>
+          </div>
+        {% endif %}
+        <div class="flex-grow-1">
+          <div style="font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600;">{{ item.product.name }}</div>
+          {% if item.variant %}<div style="font-size: 12px; color: var(--on-surface-variant);">{{ item.variant.label }}</div>{% endif %}
+          <div style="font-size: 13px; font-family: 'Montserrat', sans-serif; margin-top: 4px; color: var(--primary); font-weight: 600;">{% get_cart_item_price item as it_price %}{% format_price it_price|floatformat:"0" %} x {{ item.quantity }}</div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="mt-auto p-3" style="background: var(--surface-container-low); border-top: 1px solid var(--outline-variant);">
+    <div class="d-flex justify-content-between mb-3" style="font-family: 'Montserrat', sans-serif;">
+      <strong>Subtotal</strong>
+      <strong>{% get_cart_subtotal cart as c_sub %}{% format_price c_sub|floatformat:"0" %}</strong>
+    </div>
+    <a href="{% url 'cart' %}" class="btn btn-outline-dark w-100 mb-2" style="border-radius: 8px;">View Cart</a>
+    <a href="{% url 'checkout' %}" class="btn w-100" style="background: var(--primary); color: var(--surface); border-radius: 8px;">Checkout</a>
+  </div>
+{% else %}
+  <div class="text-center py-5">
+    <span class="material-symbols-outlined mb-3" style="font-size: 48px; color: var(--outline);">shopping_bag</span>
+    <h5>Your cart is empty</h5>
+    <button type="button" class="btn btn-outline-dark mt-3" data-bs-dismiss="offcanvas">Start Shopping</button>
+  </div>
+{% endif %}
