@@ -39,7 +39,7 @@
 {% block header %}
 <div class="announcement-bar">
   <div class="container text-center">
-    <span class="announcement-text">WILL YOU BE MY CUSTOMER 😍 IF YES THEN SCROLL DOWN AND BUY MY PRODUCT 🛍️</span>
+    <span class="announcement-text">{{ site_settings.announcement_text }}</span>
   </div>
 </div>
 
@@ -368,9 +368,9 @@ document.addEventListener("DOMContentLoaded", function() {
     updateThemeUI();
   }
 </script>
-<!-- Shiprocket Headless Checkout -->
+<!-- Shiprocket Headless Checkout (Custom/Django) -->
 <input type="hidden" value="hypehavenhub.in" id="sellerDomain"/>
-<script src="https://checkout-ui.shiprocket.com/assets/js/channels/shopify.js"></script>
+<!-- Removed shopify.js as it causes 404 errors on a custom Django backend -->
 </body>
 </html>
 

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import SetPasswordForm
-from .models import User, Address, Review, UserPreference, Complaint, Product, Category, Brand, Order, Payment
+from .models import User, Address, Review, UserPreference, Complaint, Product, Category, Brand, Order, Payment, SiteSetting, HeroPanel
 
 
 class SignupForm(forms.ModelForm):
@@ -231,3 +231,25 @@ class ProductForm(forms.ModelForm):
             'finish': forms.Select(attrs={'class': 'form-select'}),
         }
 
+
+class SiteSettingForm(forms.ModelForm):
+    class Meta:
+        model = SiteSetting
+        fields = ['announcement_text', 'marquee_text']
+        widgets = {
+            'announcement_text': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Free shipping on all orders!'}),
+            'marquee_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Scrolling marquee text...'}),
+        }
+
+
+class HeroPanelForm(forms.ModelForm):
+    class Meta:
+        model = HeroPanel
+        fields = ['title', 'link', 'image_url', 'image', 'order', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Hero Title (Internal)'}),
+            'link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://... (Where should it redirect?)'}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Cloudflare R2 Image URL'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }

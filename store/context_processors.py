@@ -1,5 +1,12 @@
 import requests
-from .models import Category, Cart, Wishlist, CountrySetting, LANGUAGE_CHOICES
+from .models import Category, Cart, Wishlist, CountrySetting, LANGUAGE_CHOICES, SiteSetting
+
+
+def site_settings(request):
+    settings = SiteSetting.objects.first()
+    if not settings:
+        settings = SiteSetting.objects.create()
+    return {'site_settings': settings}
 
 
 def cart_count(request):

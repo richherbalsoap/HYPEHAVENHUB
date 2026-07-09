@@ -24,7 +24,7 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
-    UserProfile, CountrySetting, LANGUAGE_CHOICES,
+    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel,
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -270,6 +270,7 @@ def home(request):
         products__is_active=True,
     ).distinct()[:10]
     flash_sale_obj = FlashSale.objects.filter(is_active=True).first()
+    hero_panels = HeroPanel.objects.filter(is_active=True)
     return render(request, 'store/home.html', {
         'featured': featured,
         'hero_products': hero_products,
@@ -279,6 +280,7 @@ def home(request):
         'categories': categories,
         'brands': brands,
         'flash_sale_end_time': flash_sale_obj.end_time.isoformat() if flash_sale_obj else None,
+        'hero_panels': hero_panels,
     })
 
 

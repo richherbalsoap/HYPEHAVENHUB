@@ -6,20 +6,60 @@
 
 {% block content %}
 
-<!-- Hero Section Banner (unchanged placement/asset, same as before) -->
+<!-- Dynamic Hero Section Carousel -->
 <section class="hero-section-banner position-relative">
-  <a href="{% url 'product_list' %}" class="d-block w-100 position-relative hero-banner-link">
-    <img src="{% static 'images/hero-slide-1.jpg' %}?v=2" alt="HYPEHAVENHUB - Handcrafted Indian Jewelry" class="hero-banner-img d-block w-100 object-fit-cover" loading="eager" fetchpriority="high">
-  </a>
+  {% if hero_panels %}
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+      
+      <!-- Indicators -->
+      <div class="carousel-indicators">
+        {% for panel in hero_panels %}
+          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+        {% endfor %}
+      </div>
+
+      <!-- Carousel items -->
+      <div class="carousel-inner">
+        {% for panel in hero_panels %}
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <a href="{{ panel.link|default:'#' }}" class="d-block w-100 position-relative hero-banner-link">
+              <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'HYPEHAVENHUB Hero Banner' }}" class="hero-banner-img d-block w-100 object-fit-cover" {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.3); border-radius: 50%; padding: 20px;"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: rgba(0,0,0,0.3); border-radius: 50%; padding: 20px;"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  {% else %}
+    <!-- Fallback if no hero panels exist -->
+    <a href="{% url 'product_list' %}" class="d-block w-100 position-relative hero-banner-link">
+      <img src="{% static 'images/hero-slide-1.jpg' %}?v=2" alt="HYPEHAVENHUB - Handcrafted Indian Jewelry" class="hero-banner-img d-block w-100 object-fit-cover" loading="eager" fetchpriority="high">
+    </a>
+  {% endif %}
 </section>
 
-<!-- Infinite Scroll Marquee -->
+<!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
-  <div class="marquee-content">
-    <span>FREE Shipping on orders above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp; Free Delivery Above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp;</span>
-    <span>FREE Shipping on orders above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp; Free Delivery Above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp;</span>
+  <div class="marquee-content" style="--dynamic-duration: calc({{ site_settings.marquee_text|length }} * 0.15s);">
+    <span>{{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp; {{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp;</span>
+    <span>{{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp; {{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp;</span>
   </div>
 </div>
+
+<style>
+  .marquee-content {
+    animation-duration: var(--dynamic-duration, 20s) !important;
+  }
+</style>
 
 <!-- Shop by Category — 3 categories, each with a finish-tinted accent so the
      section still looks intentional even before every category has a photo -->

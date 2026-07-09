@@ -95,6 +95,7 @@ TEMPLATES = [
                 'store.context_processors.categories_list',
                 'store.context_processors.company_dashboard_access',
                 'store.context_processors.global_country_context',
+                'store.context_processors.site_settings',
             ],
         },
     },

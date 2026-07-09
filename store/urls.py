@@ -63,6 +63,14 @@ urlpatterns = [
     # Admin Panel
     path('admin/', RedirectView.as_view(pattern_name='admin_dashboard', permanent=False), name='admin_root'),
     path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
+    
+    # Custom Admin: Site Settings & Hero Panels
+    path('admin/site-settings/', admin_views.admin_site_settings, name='admin_site_settings'),
+    path('admin/hero-panels/', admin_views.admin_hero_panels, name='admin_hero_panels'),
+    path('admin/hero-panels/create/', admin_views.admin_hero_panel_create, name='admin_hero_panel_create'),
+    path('admin/hero-panels/<int:pk>/edit/', admin_views.admin_hero_panel_edit, name='admin_hero_panel_edit'),
+    path('admin/hero-panels/<int:pk>/delete/', admin_views.admin_hero_panel_delete, name='admin_hero_panel_delete'),
+
     path('admin/products/', admin_views.admin_products, name='admin_products'),
     path('admin/products/create/', admin_views.admin_product_create, name='admin_product_create'),
     path('admin/products/<int:pk>/edit/', admin_views.admin_product_edit, name='admin_product_edit'),

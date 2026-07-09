@@ -15,10 +15,10 @@ from django.conf import settings
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage,
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage, SiteSetting, HeroPanel
 )
 from .forms import (
-    ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm
+    ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm, SiteSettingForm, HeroPanelForm
 )
 
 
@@ -722,7 +722,79 @@ def submit_complaint(request):
         'form': form,
         'user_orders': user_orders,
     }
-    return render(request, 'store/complaint_form.html', context)
+    return render(request, 'store/user_complaints.html', context)
+
+
+@login_required
+@admin_required
+def admin_site_settings(request):
+    """Manage global site settings like announcement text"""
+    setting, created = SiteSetting.objects.get_or_create(id=1)
+    if request.method == 'POST':
+        form = SiteSettingForm(request.POST, instance=setting)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Site settings updated successfully.')
+            return redirect('admin_site_settings')
+    else:
+        form = SiteSettingForm(instance=setting)
+    
+    return render(request, 'admin/site_settings.html', {'form': form})
+
+
+@login_required
+@admin_required
+def admin_hero_panels(request):
+    """List all hero panels"""
+    panels = HeroPanel.objects.all()
+    return render(request, 'admin/hero_panels.html', {'panels': panels})
+
+
+@login_required
+@admin_required
+def admin_hero_panel_create(request):
+    """Create a new hero panel"""
+    if request.method == 'POST':
+        form = HeroPanelForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Hero panel created successfully.')
+            return redirect('admin_hero_panels')
+    else:
+        form = HeroPanelForm()
+    
+    return render(request, 'admin/hero_panel_form.html', {'form': form, 'is_edit': False})
+
+
+@login_required
+@admin_required
+def admin_hero_panel_edit(request, pk):
+    """Edit an existing hero panel"""
+    panel = get_object_or_404(HeroPanel, pk=pk)
+    if request.method == 'POST':
+        form = HeroPanelForm(request.POST, request.FILES, instance=panel)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Hero panel updated successfully.')
+            return redirect('admin_hero_panels')
+    else:
+        form = HeroPanelForm(instance=panel)
+    
+    return render(request, 'admin/hero_panel_form.html', {'form': form, 'panel': panel, 'is_edit': True})
+
+
+@login_required
+@admin_required
+def admin_hero_panel_delete(request, pk):
+    """Delete a hero panel"""
+    panel = get_object_or_404(HeroPanel, pk=pk)
+    if request.method == 'POST':
+        panel.delete()
+        messages.success(request, 'Hero panel deleted successfully.')
+        return redirect('admin_hero_panels')
+    
+    # Just redirect back if not POST
+    return redirect('admin_hero_panels')
 
 
 @login_required

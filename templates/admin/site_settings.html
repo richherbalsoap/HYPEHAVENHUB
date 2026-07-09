@@ -1,0 +1,48 @@
+{% extends 'admin/custom_base.html' %}
+{% block title %}Site Settings{% endblock %}
+{% block page_title %}Global Site Settings{% endblock %}
+
+{% block content %}
+<div class="admin-section-title">
+    <div>
+        <h5 class="mb-1">Site Configuration</h5>
+        <div class="eyebrow">Manage global settings</div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" class="admin-card">
+            {% csrf_token %}
+            <div class="admin-card-header">
+                <div>
+                    <h6>Announcement Bar</h6>
+                    <p class="text-muted small mb-0">This text appears at the very top of the website on all pages.</p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="{{ form.announcement_text.id_for_label }}" class="form-label fw-semibold">Announcement Text</label>
+                {{ form.announcement_text }}
+                {% if form.announcement_text.errors %}
+                <div class="invalid-feedback d-block">{{ form.announcement_text.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label for="{{ form.marquee_text.id_for_label }}" class="form-label fw-semibold">Scrolling Marquee Text</label>
+                {{ form.marquee_text }}
+                {% if form.marquee_text.errors %}
+                <div class="invalid-feedback d-block">{{ form.marquee_text.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-end border-top pt-3 mt-4">
+                <button type="submit" class="btn btn-primary px-4 py-2" style="background: var(--admin-primary); border: none; border-radius: var(--radius-sm); color: white; font-weight: 500;">
+                    <i class="fas fa-save me-2"></i> Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

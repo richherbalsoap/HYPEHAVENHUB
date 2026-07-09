@@ -756,3 +756,45 @@ class ProductPrice(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.country.code} ({self.price})"
 
+
+class SiteSetting(models.Model):
+    """Singleton model for global site settings"""
+    announcement_text = models.CharField(max_length=255, default="WILL YOU BE MY CUSTOMER 😍 IF YES THEN SCROLL DOWN AND BUY MY PRODUCT 🛍️")
+    marquee_text = models.TextField(default="FREE Shipping on orders above ₹499 ✦ Use Code JHUMKA10 ✦ Authentic Oxidised Silver ✦ Free Delivery Above ₹499 ✦ Use Code JHUMKA10 ✦ Authentic Oxidised Silver ✦")
+    
+    class Meta:
+        verbose_name = "Site Setting"
+        verbose_name_plural = "Site Settings"
+        
+    def __str__(self):
+        return "Global Site Settings"
+
+
+class HeroPanel(models.Model):
+    """Model for dynamic hero slider panels"""
+    title = models.CharField(max_length=100, blank=True, help_text="Optional title for internal reference")
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob/Cloudflare R2 storage URL (preferred)")
+    image = models.ImageField(upload_to='hero_panels/', null=True, blank=True)
+    link = models.CharField(max_length=500, blank=True, help_text="Where should this panel redirect when clicked?")
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Order in which this panel appears")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Hero Panel"
+        verbose_name_plural = "Hero Panels"
+
+    def __str__(self):
+        return self.title or f"Hero Panel {self.id}"
+
+    @property
+    def display_image_url(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""
