@@ -118,17 +118,14 @@
     </div>
 
     <!-- Perspective Carousel Container -->
-    <div class="relative w-full overflow-hidden" style="height: 450px; perspective: 1200px;" id="perspectiveCarouselWrapper">
-      <div id="perspectiveCarouselTrack" class="absolute left-1/2 top-1/2 flex w-fit -translate-y-1/2 items-center" style="transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+    <div class="position-relative w-100 overflow-hidden" style="height: 450px; perspective: 1200px;" id="perspectiveCarouselWrapper">
+      <div id="perspectiveCarouselTrack" class="position-absolute start-50 top-50 d-flex align-items-center" style="width: max-content; transform: translateY(-50%); transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
         {% for img in perspective_images %}
-        <div class="shrink-0 perspective-slide" style="width: 250px; perspective: 1200px;" data-index="{{ forloop.counter0 }}">
-          <div class="flex w-full flex-col items-center gap-3 will-change-transform slide-inner" style="transform-style: preserve-3d; transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <button type="button" class="aspect-[3/4] w-full cursor-pointer border-0 bg-transparent p-0" onclick="selectPerspectiveSlide({{ forloop.counter0 }})" aria-label="Show {{ img.title }}">
-              <img src="{{ img.display_image_url }}" alt="{{ img.title }}" draggable="false" class="h-full w-full select-none rounded-lg object-cover shadow-xl" style="height: 330px;" />
+        <div class="flex-shrink-0 perspective-slide" style="width: 250px; perspective: 1200px;" data-index="{{ forloop.counter0 }}">
+          <div class="d-flex w-100 flex-column align-items-center slide-inner" style="gap: 1rem; will-change: transform; transform-style: preserve-3d; transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <button type="button" class="w-100 border-0 bg-transparent p-0" style="aspect-ratio: 3/4; cursor: pointer;" onclick="selectPerspectiveSlide({{ forloop.counter0 }})" aria-label="Show 3D Image">
+              <img src="{{ img.display_image_url }}" draggable="false" class="h-100 w-100 rounded-3 shadow-lg" style="object-fit: cover; user-select: none;" />
             </button>
-            <p class="whitespace-nowrap text-sm font-semibold slide-title mt-2" style="transition: all 0.9s ease; color: var(--on-surface);">
-              {{ img.title }}
-            </p>
           </div>
         </div>
         {% endfor %}
@@ -174,26 +171,17 @@
           
           // Update track translation
           const tx = -(currentPerspectiveIndex * slideWidth + slideWidth / 2);
-          perspectiveTrack.style.transform = `translateX(${tx}px)`;
+          perspectiveTrack.style.transform = `translateY(-50%) translateX(${tx}px)`;
 
           // Update each slide
           perspectiveSlides.forEach((slideEl, i) => {
             const inner = slideEl.querySelector('.slide-inner');
-            const title = slideEl.querySelector('.slide-title');
             
             const isActive = (i === currentPerspectiveIndex);
             const rotateY = (currentPerspectiveIndex - i) * rotationStep;
             const scale = isActive ? 1 : inactiveScale;
             
             inner.style.transform = `rotateY(${rotateY}deg) scale(${scale})`;
-            
-            if(isActive) {
-              title.style.filter = 'blur(0px)';
-              title.style.opacity = '1';
-            } else {
-              title.style.filter = 'blur(2px)';
-              title.style.opacity = '0';
-            }
           });
 
           // Update dots
