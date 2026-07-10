@@ -7,22 +7,23 @@
 {% block content %}
 
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
-<section class="cylinder-hero-section w-100" style="background-color: #050505; width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 1200px; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5% 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5% 95%, transparent 100%);">
+{% with animationDuration=32 cardWidth="clamp(250px, 35vw, 600px)" className="cylinder-hero-section w-100" containerClassName="cylinder-carousel-container" cardClassName="cylinder-card" %}
+<section class="{{ className }}" style="background-color: #050505; width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 1200px; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5% 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5% 95%, transparent 100%);">
   
-  <div class="cylinder-carousel-container" style="transform-style: preserve-3d; display: grid; place-items: center;">
+  <div class="{{ containerClassName }}" style="transform-style: preserve-3d; display: grid; place-items: center; --anim-dur: {{ animationDuration }}s; --w: {{ cardWidth }}; --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}6{% endif %};">
     {% if hero_panels %}
       {% for panel in hero_panels %}
-        <a href="{{ panel.link|default:'#' }}" class="cylinder-card" style="--i: {{ forloop.counter0 }};">
+        <a href="{{ panel.link|default:'#' }}" class="{{ cardClassName }}" style="--i: {{ forloop.counter0 }};">
           <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}" />
         </a>
       {% endfor %}
     {% else %}
-        <a href="#" class="cylinder-card" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
-        <a href="#" class="cylinder-card" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
-        <a href="#" class="cylinder-card" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
-        <a href="#" class="cylinder-card" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
-        <a href="#" class="cylinder-card" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
-        <a href="#" class="cylinder-card" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
+        <a href="#" class="{{ cardClassName }}" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
+        <a href="#" class="{{ cardClassName }}" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
+        <a href="#" class="{{ cardClassName }}" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
+        <a href="#" class="{{ cardClassName }}" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
+        <a href="#" class="{{ cardClassName }}" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
+        <a href="#" class="{{ cardClassName }}" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
     {% endif %}
   </div>
 
@@ -32,18 +33,14 @@
     }
     
     .cylinder-carousel-container {
-      --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}6{% endif %};
-      /* Increased width and changed from clamp to make sure it covers more area edge to edge */
-      --w: clamp(250px, 35vw, 600px);
       --ba: calc(1turn / var(--n));
-      --anim-dur: 36s;
       animation: ry var(--anim-dur) linear infinite;
     }
     
     @media (max-width: 768px) {
       .cylinder-carousel-container {
-        --w: clamp(160px, 45vw, 300px); /* wider on mobile to reach edges */
-        --anim-dur: 26s;
+        --w: clamp(160px, 45vw, 300px) !important; /* Override cardWidth prop on mobile to reach edges */
+        --anim-dur: 26s !important;
       }
     }
 
