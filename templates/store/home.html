@@ -7,9 +7,67 @@
 {% block content %}
 
 <!-- Dynamic Hero Section Carousel -->
-<!-- Dynamic Hero Section Carousel (Interactive 3D Coverflow) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
+<section class="cylinder-hero-section w-100" style="background-color: #050505; width: 100vw; height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); display: grid; place-items: center; perspective: 35em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent); mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent);">
+  
+  <div class="cylinder-carousel-container" style="transform-style: preserve-3d; display: grid; place-items: center;">
+    {% if hero_panels %}
+      {% for panel in hero_panels %}
+        <a href="{{ panel.link|default:'#' }}" class="cylinder-card" style="--i: {{ forloop.counter0 }};">
+          <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}" />
+        </a>
+      {% endfor %}
+    {% else %}
+        <a href="#" class="cylinder-card" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
+        <a href="#" class="cylinder-card" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
+        <a href="#" class="cylinder-card" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
+        <a href="#" class="cylinder-card" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
+        <a href="#" class="cylinder-card" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
+        <a href="#" class="cylinder-card" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
+    {% endif %}
+  </div>
+
+  <style>
+    @keyframes ry {
+      to { transform: rotateY(1turn); }
+    }
+    
+    .cylinder-carousel-container {
+      --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}6{% endif %};
+      --w: 250px;
+      --ba: calc(1turn / var(--n));
+      --anim-dur: 32s;
+      animation: ry var(--anim-dur) linear infinite;
+    }
+    
+    @media (max-width: 768px) {
+      .cylinder-carousel-container {
+        --w: 180px; /* smaller width for mobile */
+      }
+    }
+
+    .cylinder-card {
+      grid-area: 1 / 1;
+      width: var(--w);
+      aspect-ratio: 7 / 10;
+      border-radius: 1rem;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: rotateY(calc(var(--i) * var(--ba))) translateZ(calc(-1 * (0.5 * var(--w) + 0.5em) / tan(0.5 * var(--ba))));
+      display: block;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    
+    .cylinder-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+  </style>
+</section>
 
 <section class="coverflow-hero-section w-100" style="background-color: #050505; width: 100vw; height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); display: flex; align-items: center; justify-content: center;">
   <div class="swiper heroSwiper" style="width: 100%; height: 100%; padding-top: 50px; padding-bottom: 50px;">
