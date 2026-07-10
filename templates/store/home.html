@@ -8,7 +8,7 @@
 
 <!-- Dynamic Hero Section Carousel -->
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
-<section class="cylinder-hero-section w-100" style="background-color: #050505; width: 100vw; height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); display: grid; place-items: center; perspective: 35em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent); mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent);">
+<section class="cylinder-hero-section w-100" style="background-color: #050505; width: 100%; height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 42em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12% 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12% 88%, transparent);">
   
   <div class="cylinder-carousel-container" style="transform-style: preserve-3d; display: grid; place-items: center;">
     {% if hero_panels %}
@@ -34,15 +34,19 @@
     
     .cylinder-carousel-container {
       --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}6{% endif %};
-      --w: 250px;
+      /* vw-based so the ring's diameter scales with screen width and reaches
+         the left/right fade-mask edges on every screen size, instead of a
+         fixed px width that leaves a small ring stuck in the middle */
+      --w: clamp(160px, 21vw, 340px);
       --ba: calc(1turn / var(--n));
-      --anim-dur: 32s;
+      --anim-dur: 36s;
       animation: ry var(--anim-dur) linear infinite;
     }
     
     @media (max-width: 768px) {
       .cylinder-carousel-container {
-        --w: 180px; /* smaller width for mobile */
+        --w: clamp(100px, 24vw, 170px); /* smaller ring, still edge-to-edge on phones */
+        --anim-dur: 26s;
       }
     }
 
