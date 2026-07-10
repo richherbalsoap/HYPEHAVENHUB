@@ -7,8 +7,8 @@
 {% block content %}
 
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
-{% with animationDuration=32 cardWidth="clamp(250px, 35vw, 600px)" className="cylinder-hero-section w-100" containerClassName="cylinder-carousel-container" cardClassName="cylinder-card" %}
-<section class="{{ className }}" style="background-color: #050505; width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 1200px; -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5% 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0%, #000 5% 95%, transparent 100%);">
+{% with animationDuration=32 cardWidth="clamp(160px, 50vw, 250px)" className="cylinder-hero-section w-100" containerClassName="cylinder-carousel-container" cardClassName="cylinder-card" %}
+<section class="{{ className }}" style="background-color: #050505; width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 42em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 15% 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15% 85%, transparent);">
   
   <div class="{{ containerClassName }}" style="transform-style: preserve-3d; display: grid; place-items: center; --anim-dur: {{ animationDuration }}s; --w: {{ cardWidth }}; --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}12{% endif %};">
     {% if hero_panels %}
