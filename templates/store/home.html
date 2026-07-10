@@ -8,22 +8,28 @@
 
 <!-- Dynamic Hero Section Carousel -->
 <!-- Dynamic Hero Section Carousel (3D Cylinder) -->
-<section class="cylinder-hero-section position-relative overflow-hidden w-100" style="background-color: #fff3ed; padding: 4rem 0; min-height: 500px; display: flex; align-items: center; justify-content: center;">
+<section class="cylinder-hero-section position-relative overflow-hidden w-100" style="background-color: #050505; padding: 0; height: 80vh; min-height: 600px; display: flex; align-items: center; justify-content: center;">
   <div class="cylinder-scene w-100 h-100">
     <div class="cylinder-carousel">
-      {% if hero_panels and hero_panels|length >= 3 %}
-        {% for panel in hero_panels %}
-          <div class="cylinder-item cylinder-dynamic-item" data-index="{{ forloop.counter0 }}">
-            <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}">
-          </div>
-        {% endfor %}
+      {% if hero_panels %}
+        <!-- We use JS to dynamically duplicate and arrange these items below -->
+        <div id="dynamic-cylinder-data" class="d-none">
+          {% for panel in hero_panels %}
+            <div class="source-item" data-img="{{ panel.display_image_url }}" data-title="{{ panel.title|default:'Banner' }}"></div>
+          {% endfor %}
+        </div>
       {% else %}
-        <div class="cylinder-item cylinder-static-item" style="--i: 0; --total: 6"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 1; --total: 6"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 2; --total: 6"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 3; --total: 6"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 4; --total: 6"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 5; --total: 6"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jewelry 6"></div>
+        <!-- Fallback static items (10 total for a wide cylinder) -->
+        <div class="cylinder-item cylinder-static-item" style="--i: 0; --total: 10"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 1; --total: 10"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 2; --total: 10"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 3; --total: 10"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 4; --total: 10"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 5; --total: 10"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 6; --total: 10"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 7; --total: 10"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 8; --total: 10"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 9; --total: 10"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5"></div>
       {% endif %}
     </div>
   </div>
@@ -31,7 +37,7 @@
 
 <style>
   .cylinder-scene {
-    perspective: 1000px;
+    perspective: 1500px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,10 +46,10 @@
   .cylinder-carousel {
     position: relative;
     /* Edge to edge scale */
-    width: 300px;
-    height: 400px;
+    width: 320px;
+    height: 450px;
     transform-style: preserve-3d;
-    animation: cylinder-spin 35s infinite linear;
+    animation: cylinder-spin 45s infinite linear;
     cursor: grab;
   }
   .cylinder-carousel:hover,
@@ -57,22 +63,34 @@
     left: 0;
     width: 100%;
     height: 100%;
-    border-radius: 20px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     transition: transform 0.3s;
     user-select: none;
-    border: 3px solid rgba(255, 255, 255, 0.5);
-    background: #fff;
+    background: #000;
   }
   .cylinder-static-item {
-    transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(350px);
+    transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(750px);
+  }
+  /* Optional reflection or fading to give it a polished look */
+  .cylinder-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+    pointer-events: none;
   }
   .cylinder-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     pointer-events: none;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+  }
+  .cylinder-item:hover img {
+    opacity: 1;
   }
   @keyframes cylinder-spin {
     from { transform: rotateY(0deg) rotateX(-2deg); }
@@ -82,41 +100,54 @@
   @media (max-width: 768px) {
     .cylinder-carousel {
         width: 220px;
-        height: 300px;
+        height: 320px;
     }
     .cylinder-static-item {
-        transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(240px);
+        transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(450px);
     }
   }
 </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Dynamic math for items if they are rendered dynamically
-    const dynamicItems = document.querySelectorAll('.cylinder-dynamic-item');
-    if (dynamicItems.length > 0) {
-      const total = dynamicItems.length;
-      // Math: translateZ = (width / 2) / tan(PI / total)
-      // Since width is 300px on desktop and 220px on mobile
-      const isMobile = window.innerWidth <= 768;
-      const width = isMobile ? 220 : 300;
-      const tz = Math.round((width / 2) / Math.tan(Math.PI / total)) + 50; // extra 50px for gap
-      
-      dynamicItems.forEach((item) => {
-        const i = parseInt(item.getAttribute('data-index'));
-        const angle = i * (360 / total);
-        item.style.transform = `rotateY(${angle}deg) translateZ(${tz}px)`;
-      });
-      
-      window.addEventListener('resize', () => {
-        const isMobileNow = window.innerWidth <= 768;
-        const newWidth = isMobileNow ? 220 : 300;
-        const newTz = Math.round((newWidth / 2) / Math.tan(Math.PI / total)) + 50;
-        dynamicItems.forEach((item) => {
-          const i = parseInt(item.getAttribute('data-index'));
-          const angle = i * (360 / total);
-          item.style.transform = `rotateY(${angle}deg) translateZ(${newTz}px)`;
-        });
-      });
+    const dataContainer = document.getElementById('dynamic-cylinder-data');
+    const carousel = document.querySelector('.cylinder-carousel');
+    if (dataContainer && carousel) {
+      const sourceItems = Array.from(dataContainer.querySelectorAll('.source-item'));
+      if (sourceItems.length > 0) {
+        // We want exactly 10 items for a good cylinder effect.
+        // If we have 1 item, repeat 10 times. If 3, repeat to get 9 or 12. Let's aim for 10.
+        const targetTotal = 10;
+        for (let i = 0; i < targetTotal; i++) {
+          const source = sourceItems[i % sourceItems.length];
+          const item = document.createElement('div');
+          item.className = 'cylinder-item cylinder-dynamic-item';
+          item.setAttribute('data-index', i);
+          
+          const img = document.createElement('img');
+          img.src = source.getAttribute('data-img');
+          img.alt = source.getAttribute('data-title');
+          
+          item.appendChild(img);
+          carousel.appendChild(item);
+        }
+        
+        const updateTransforms = () => {
+          const dynamicItems = carousel.querySelectorAll('.cylinder-dynamic-item');
+          const isMobile = window.innerWidth <= 768;
+          // Matching the static CSS translates
+          const tz = isMobile ? 450 : 750;
+          const total = targetTotal;
+          
+          dynamicItems.forEach((item) => {
+            const i = parseInt(item.getAttribute('data-index'));
+            const angle = i * (360 / total);
+            item.style.transform = `rotateY(${angle}deg) translateZ(${tz}px)`;
+          });
+        };
+        
+        updateTransforms();
+        window.addEventListener('resize', updateTransforms);
+      }
     }
   });
 </script>
