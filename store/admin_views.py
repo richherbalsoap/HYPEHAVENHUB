@@ -797,57 +797,45 @@ def admin_hero_panel_delete(request, pk):
 @login_required
 @admin_required
 def admin_perspective_carousels(request):
-    """List all perspective carousel images"""
-    images = PerspectiveCarouselImage.objects.all()
+    """List all perspective carousel images (Unified Interface)"""
+    images = PerspectiveCarouselImage.objects.all().order_by('order', '-created_at')
     return render(request, 'admin/perspective_carousels.html', {'images': images})
 
 
 @login_required
 @admin_required
-def admin_perspective_carousel_create(request):
-    """Create a new perspective carousel image"""
+def admin_perspective_carousel_upload(request):
+    """Handle bulk uploading of perspective carousel images"""
     if request.method == 'POST':
-        form = PerspectiveCarouselImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Carousel image created successfully.')
-            return redirect('admin_perspective_carousels')
-    else:
-        form = PerspectiveCarouselImageForm()
-    
-    return render(request, 'admin/perspective_carousel_form.html', {'form': form, 'is_edit': False})
+        # Check for presigned URL dynamic image fields
+        i = 0
+        while True:
+            img_url = request.POST.get(f'dynamic_image_{i}_url')
+            if img_url:
+                PerspectiveCarouselImage.objects.create(
+                    image_url=img_url,
+                    is_active=True,
+                    order=0
+                )
+                i += 1
+            elif i > 50:
+                break
+            else:
+                i += 1
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 
 @login_required
 @admin_required
-def admin_perspective_carousel_edit(request, pk):
-    """Edit an existing perspective carousel image"""
-    image = get_object_or_404(PerspectiveCarouselImage, pk=pk)
+def admin_perspective_carousel_delete_ajax(request, pk):
+    """Delete a perspective carousel image via AJAX"""
     if request.method == 'POST':
-        form = PerspectiveCarouselImageForm(request.POST, request.FILES, instance=image)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Carousel image updated successfully.')
-            return redirect('admin_perspective_carousels')
-    else:
-        form = PerspectiveCarouselImageForm(instance=image)
-    
-    return render(request, 'admin/perspective_carousel_form.html', {'form': form, 'image': image, 'is_edit': True})
-
-
-@login_required
-@admin_required
-def admin_perspective_carousel_delete(request, pk):
-    """Delete a perspective carousel image"""
-    image = get_object_or_404(PerspectiveCarouselImage, pk=pk)
-    if request.method == 'POST':
+        image = get_object_or_404(PerspectiveCarouselImage, pk=pk)
         image.delete()
-        messages.success(request, 'Carousel image deleted successfully.')
-        return redirect('admin_perspective_carousels')
-    return redirect('admin_perspective_carousels')
-    
-    # Just redirect back if not POST
-    return redirect('admin_hero_panels')
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
 
 
 @login_required
