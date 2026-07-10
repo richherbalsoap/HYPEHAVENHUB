@@ -64,9 +64,6 @@
     background: var(--cyl-bg);
     background-image: radial-gradient(circle at center, var(--cyl-grad-center) 0%, var(--cyl-grad-edge) 100%);
     perspective: clamp(30em, 55vw, 70em);
-    
-    /* GSAP-like Entry Animation */
-    animation: stage-entry 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   /* Grain Texture */
@@ -78,17 +75,6 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 1;
-  }
-
-  @keyframes stage-entry {
-    from {
-      opacity: 0;
-      transform: translateZ(-1500px) scale(0.8) translateY(50px);
-    }
-    to {
-      opacity: 1;
-      transform: translateZ(0) scale(1) translateY(0);
-    }
   }
 
   /* Fade masks */
