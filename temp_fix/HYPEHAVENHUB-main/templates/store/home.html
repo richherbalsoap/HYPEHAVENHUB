@@ -1,24 +1,91 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n_store %}
 
 {% block title %}HYPEHAVENHUB - Handcrafted Indian Jewelry{% endblock %}
 
 {% block content %}
 
-<!-- Hero Section Banner (unchanged placement/asset, same as before) -->
-<section class="hero-section-banner position-relative">
-  <a href="{% url 'product_list' %}" class="d-block w-100 position-relative hero-banner-link">
-    <img src="{% static 'images/hero-slide-1.jpg' %}?v=2" alt="HYPEHAVENHUB - Handcrafted Indian Jewelry" class="hero-banner-img d-block w-100 object-fit-cover" loading="eager">
-  </a>
+<!-- Dynamic Hero Section Carousel -->
+<!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
+<section class="cylinder-hero-section w-100" style="background-color: #050505; width: 100%; height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 35em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent); mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent);">
+  
+  <div class="cylinder-carousel-container" style="transform-style: preserve-3d; display: grid; place-items: center;">
+    {% if hero_panels %}
+      {% for panel in hero_panels %}
+        <a href="{{ panel.link|default:'#' }}" class="cylinder-card" style="--i: {{ forloop.counter0 }};">
+          <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}" />
+        </a>
+      {% endfor %}
+    {% else %}
+        <a href="#" class="cylinder-card" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
+        <a href="#" class="cylinder-card" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
+        <a href="#" class="cylinder-card" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
+        <a href="#" class="cylinder-card" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
+        <a href="#" class="cylinder-card" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
+        <a href="#" class="cylinder-card" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
+    {% endif %}
+  </div>
+
+  <style>
+    @keyframes ry {
+      to { transform: rotateY(-1turn); }
+    }
+    
+    .cylinder-carousel-container {
+      --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}6{% endif %};
+      /* vw-based so the ring's diameter scales with screen width and reaches
+         the left/right fade-mask edges on every screen size, instead of a
+         fixed px width that leaves a small ring stuck in the middle */
+      --w: clamp(150px, 15vw, 260px);
+      --ba: calc(1turn / var(--n));
+      --anim-dur: 36s;
+      animation: ry var(--anim-dur) linear infinite;
+    }
+    
+    @media (max-width: 768px) {
+      .cylinder-carousel-container {
+        --w: clamp(120px, 32vw, 190px); /* smaller ring, still edge-to-edge on phones */
+        --anim-dur: 26s;
+      }
+    }
+
+    .cylinder-card {
+      grid-area: 1 / 1;
+      width: var(--w);
+      aspect-ratio: 7 / 10;
+      border-radius: 1rem;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: rotateY(calc(var(--i) * var(--ba))) translateZ(calc((0.5 * var(--w) + 0.5em) / tan(0.5 * var(--ba))));
+      display: block;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    
+    .cylinder-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+  </style>
 </section>
 
-<!-- Infinite Scroll Marquee -->
+<!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
-  <div class="marquee-content">
-    <span>FREE Shipping on orders above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp; Free Delivery Above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp;</span>
-    <span>FREE Shipping on orders above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp; Free Delivery Above &#8377;499 &nbsp;&#10022;&nbsp; Use Code JHUMKA10 &nbsp;&#10022;&nbsp; Authentic Oxidised Silver &nbsp;&#10022;&nbsp;</span>
+  <div class="marquee-content" style="--dynamic-duration: calc({{ site_settings.marquee_text|length }} * 0.15s);">
+    <span>{{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp; {{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp;</span>
+    <span>{{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp; {{ site_settings.marquee_text }} &nbsp;&#10022;&nbsp;</span>
   </div>
 </div>
+
+<style>
+  .marquee-content {
+    animation-duration: var(--dynamic-duration, 20s) !important;
+  }
+</style>
 
 <!-- Shop by Category — 3 categories, each with a finish-tinted accent so the
      section still looks intentional even before every category has a photo -->
@@ -65,54 +132,125 @@
 </section>
 {% endif %}
 
-<!-- Best Selling Row (Horizontal Scroll) -->
-{% if bestsellers %}
-<section class="py-5 bg-light-green position-relative overflow-hidden">
+<!-- New Arrivals Perspective Carousel -->
+{% if perspective_images %}
+<section class="py-5 position-relative overflow-hidden" id="new-arrivals" style="background-color: var(--surface);">
   <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-end mb-4">
       <div>
-        <span class="section-eyebrow">Customer Favorites</span>
-        <h2 class="section-title mb-0">Best Sellers</h2>
-      </div>
-      <a href="{% url 'product_list' %}?sort=popularity" class="text-decoration-none fw-600 text-gold hover-underline">View All <span class="material-symbols-outlined ms-1" style="font-size: inherit; vertical-align: middle;">arrow_forward</span></a>
-    </div>
-
-    <div class="row g-4">
-      {% for product in bestsellers %}
-      <div class="col-6 col-md-4 col-lg-3">
-        {% include 'store/_product_card.html' with product=product %}
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- New Arrivals Row -->
-{% if new_arrivals %}
-<section class="py-5 position-relative overflow-hidden">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <span class="section-eyebrow">Just Added</span>
+        <span class="section-eyebrow">Seasonal Curation</span>
         <h2 class="section-title mb-0">New Arrivals</h2>
       </div>
-      <a href="{% url 'product_list' %}?sort=-created_at" class="text-decoration-none fw-600 text-gold hover-underline">View All <span class="material-symbols-outlined ms-1" style="font-size: inherit; vertical-align: middle;">arrow_forward</span></a>
     </div>
 
-    <div class="row g-4">
-      {% for product in new_arrivals %}
-      <div class="col-6 col-md-4 col-lg-3">
-        {% include 'store/_product_card.html' with product=product %}
+    <!-- Perspective Carousel Container -->
+    <div class="position-relative w-100 overflow-hidden" style="height: 450px; perspective: 1200px;" id="perspectiveCarouselWrapper">
+      <div id="perspectiveCarouselTrack" class="position-absolute start-50 top-50 d-flex align-items-center" style="width: max-content; transform: translateY(-50%); transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        {% for img in perspective_images %}
+        <div class="flex-shrink-0 perspective-slide" style="width: 250px; perspective: 1200px;" data-index="{{ forloop.counter0 }}">
+          <div class="d-flex w-100 flex-column align-items-center slide-inner" style="gap: 1rem; will-change: transform; transform-style: preserve-3d; transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <button type="button" class="w-100 border-0 bg-transparent p-0" style="aspect-ratio: 3/4; cursor: pointer;" onclick="selectPerspectiveSlide({{ forloop.counter0 }})" aria-label="Show 3D Image">
+              <img src="{{ img.display_image_url }}" draggable="false" class="h-100 w-100 rounded-3 shadow-lg" style="object-fit: cover; user-select: none;" />
+            </button>
+          </div>
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
+    </div>
+
+    <!-- Controls -->
+    <div class="d-flex justify-content-center mt-4">
+      <div class="d-flex items-center justify-content-center gap-3 rounded-full border border-neutral-300 px-3 py-2 shadow-sm" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);">
+        <button type="button" aria-label="Show previous slide" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" id="pc-prev" style="width: 36px; height: 36px; border: none; background: transparent;">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
+        <div class="d-flex align-items-center justify-content-center gap-2" id="pc-dots">
+          {% for img in perspective_images %}
+          <button type="button" class="rounded-pill transition-all pc-dot" data-index="{{ forloop.counter0 }}" style="height: 8px; border: none; background: var(--primary);" onclick="selectPerspectiveSlide({{ forloop.counter0 }})"></button>
+          {% endfor %}
+        </div>
+
+        <button type="button" aria-label="Show next slide" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" id="pc-next" style="width: 36px; height: 36px; border: none; background: transparent;">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        let currentPerspectiveIndex = 0;
+        const perspectiveSlides = document.querySelectorAll('.perspective-slide');
+        const perspectiveDots = document.querySelectorAll('.pc-dot');
+        const perspectiveTrack = document.getElementById('perspectiveCarouselTrack');
+        if (!perspectiveTrack || perspectiveSlides.length === 0) return;
+
+        const maxPerspectiveIndex = perspectiveSlides.length - 1;
+        const slideWidth = 250;
+        const rotationStep = 60;
+        const inactiveScale = 0.85;
+
+        window.selectPerspectiveSlide = function(index) {
+          if(index < 0) index = 0;
+          if(index > maxPerspectiveIndex) index = maxPerspectiveIndex;
+          currentPerspectiveIndex = index;
+          
+          // Update track translation
+          const tx = -(currentPerspectiveIndex * slideWidth + slideWidth / 2);
+          perspectiveTrack.style.transform = `translateY(-50%) translateX(${tx}px)`;
+
+          // Update each slide
+          perspectiveSlides.forEach((slideEl, i) => {
+            const inner = slideEl.querySelector('.slide-inner');
+            
+            const isActive = (i === currentPerspectiveIndex);
+            const rotateY = (currentPerspectiveIndex - i) * rotationStep;
+            const scale = isActive ? 1 : inactiveScale;
+            
+            inner.style.transform = `rotateY(${rotateY}deg) scale(${scale})`;
+          });
+
+          // Update dots
+          perspectiveDots.forEach((dot, i) => {
+            if(i === currentPerspectiveIndex) {
+              dot.style.width = '28px';
+              dot.style.opacity = '1';
+            } else {
+              dot.style.width = '8px';
+              dot.style.opacity = '0.3';
+            }
+          });
+
+          // Update buttons disabled state
+          document.getElementById('pc-prev').disabled = (currentPerspectiveIndex === 0);
+          document.getElementById('pc-next').disabled = (currentPerspectiveIndex === maxPerspectiveIndex);
+        }
+
+        document.getElementById('pc-prev').addEventListener('click', () => {
+          selectPerspectiveSlide(currentPerspectiveIndex - 1);
+        });
+        document.getElementById('pc-next').addEventListener('click', () => {
+          selectPerspectiveSlide(currentPerspectiveIndex + 1);
+        });
+
+        // Initialize
+        selectPerspectiveSlide(0);
+      });
+    </script>
+
+    <!-- View All Collections Action Call -->
+    <div class="d-flex justify-content-center mt-5">
+      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: var(--primary-fixed) !important; color: var(--on-primary-fixed) !important; border: none; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 6px rgba(42,0,2,0.05); text-decoration: none;">
+        View Full Collection
+      </a>
     </div>
   </div>
 </section>
 {% endif %}
 
+
 <!-- Artisan Narrative Section -->
-<section class="py-5 position-relative overflow-hidden mt-5" style="background-color: var(--primary); color: var(--surface);">
+<section class="py-5 position-relative overflow-hidden mt-5 artisan-section" style="background-color: var(--primary); color: var(--surface);">
   <div class="position-absolute w-100 h-100 top-0 start-0 opacity-10 pointer-events-none"></div>
   <div class="container position-relative z-1 py-5">
     <div class="row align-items-center g-5">
