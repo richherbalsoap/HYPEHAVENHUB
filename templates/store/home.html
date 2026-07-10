@@ -26,39 +26,89 @@
         <div class="cylinder-card" style="--i:7"><img src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400" alt="jhumka 8"></div>
     {% endif %}
   </div>
+  <!-- Fade Mask Right -->
+  <div class="cyl-mask-right"></div>
+  <!-- Floating particles container -->
+  <div class="cyl-particles" id="cylParticles"></div>
 </div>
 
 <style>
+  /* --- Luxury Enhancements: Light/Dark Mode & Lighting --- */
+  :root {
+    --cyl-bg: #0d0d0d;
+    --cyl-grad-center: rgba(30,30,30,1);
+    --cyl-grad-edge: #0d0d0d;
+    --cyl-card-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15);
+    --cyl-reflect: rgba(0,0,0,0.4);
+    --cyl-particle: rgba(255,255,255,0.3);
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --cyl-bg: #f8f9fa;
+      --cyl-grad-center: #ffffff;
+      --cyl-grad-edge: #e9ecef;
+      --cyl-card-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
+      --cyl-reflect: rgba(255,255,255,0.5);
+      --cyl-particle: rgba(0,0,0,0.1);
+    }
+  }
+
   /* Full viewport-spanning wrapper */
   .cyl-wrapper{
     position: relative;
     width: 100vw;
     margin-left: calc(-50vw + 50%);
-    min-height: 480px;
+    min-height: 520px;
     display: grid;
     place-items: center;
     overflow: hidden;
-    background: #0d0d0d;
+    background: var(--cyl-bg);
+    background-image: radial-gradient(circle at center, var(--cyl-grad-center) 0%, var(--cyl-grad-edge) 100%);
     perspective: clamp(30em, 55vw, 70em);
+    
+    /* GSAP-like Entry Animation */
+    animation: stage-entry 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .cyl-wrapper::before,
+  /* Grain Texture */
+  .cyl-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes stage-entry {
+    from {
+      opacity: 0;
+      transform: translateZ(-1500px) scale(0.8) translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) scale(1) translateY(0);
+    }
+  }
+
+  /* Fade masks */
   .cyl-wrapper::after{
     content: "";
     position: absolute;
-    top: 0;
-    bottom: 0;
+    top: 0; bottom: 0; left: 0;
     width: 15%;
-    z-index: 2;
-    pointer-events: none;
+    z-index: 2; pointer-events: none;
+    background: linear-gradient(90deg, var(--cyl-bg), transparent);
   }
-  .cyl-wrapper::before{
-    left: 0;
-    background: linear-gradient(90deg, #0d0d0d, transparent);
-  }
-  .cyl-wrapper::after{
-    right: 0;
-    background: linear-gradient(90deg, transparent, #0d0d0d);
+  .cyl-mask-right {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; right: 0;
+    width: 15%;
+    z-index: 2; pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--cyl-bg));
   }
 
   /* rotating group */
@@ -69,15 +119,12 @@
     --ba: calc(1turn / var(--n));
     --w: clamp(160px, 17vw, 320px);
     --radius: clamp(280px, 34vw, 620px);
-    animation: cyl-rotate var(--anim-dur, 28s) linear infinite;
+    /* JS will handle rotation for buttery smooth inertia, removing CSS animation */
+    will-change: transform;
+    cursor: grab;
   }
-
-  @keyframes cyl-rotate{
-    to { transform: rotateY(1turn); }
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .cyl-stage{ animation-duration: 120s; }
+  .cyl-stage:active {
+    cursor: grabbing;
   }
 
   /* individual card */
@@ -88,11 +135,19 @@
     border-radius: 16px;
     overflow: hidden;
     backface-visibility: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,.45);
-
+    box-shadow: var(--cyl-card-shadow);
+    
+    /* Reflection Effect */
+    -webkit-box-reflect: below 5px linear-gradient(transparent 50%, var(--cyl-reflect));
+    
     transform:
       rotateY(calc(var(--i) * var(--ba)))
       translateZ(calc(-1 * var(--radius)));
+    
+    /* JS will update CSS vars for center highlight */
+    filter: brightness(var(--card-bright, 0.85)) blur(var(--card-blur, 2px));
+    transition: filter 0.2s ease-out; /* Smooth transitions for highlights */
+    will-change: filter, transform;
   }
 
   .cylinder-card img{
@@ -100,8 +155,144 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Particles */
+  .cyl-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .cyl-particle {
+    position: absolute;
+    background: var(--cyl-particle);
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: float-up linear infinite;
+  }
+  @keyframes float-up {
+    from { transform: translateY(100vh); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    to   { transform: translateY(-10vh); opacity: 0; }
   }
 </style>
+
+<!-- JS for Inertia Drag, Smooth Scroll, and Highlighting -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const stage = document.querySelector('.cyl-stage');
+  const cards = document.querySelectorAll('.cylinder-card');
+  if (!stage || cards.length === 0) return;
+
+  const n = Math.max(3, cards.length); // Same as max(3, length) in CSS
+  const anglePerCard = 360 / n;
+  
+  let currentY = 0;
+  let targetY = 0;
+  let velocity = 0.15; // base auto-rotation speed
+  
+  let isDragging = false;
+  let startX = 0;
+  let lastX = 0;
+
+  // Drag Events
+  const onPointerDown = (e) => {
+    isDragging = true;
+    startX = e.clientX || e.touches?.[0].clientX;
+    lastX = startX;
+    stage.style.cursor = 'grabbing';
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+    const clientX = e.clientX || e.touches?.[0].clientX;
+    const deltaX = clientX - lastX;
+    lastX = clientX;
+    
+    // Convert drag pixels to rotation degrees
+    velocity = deltaX * 0.4;
+    targetY += velocity;
+  };
+
+  const onPointerUp = () => {
+    isDragging = false;
+    stage.style.cursor = 'grab';
+  };
+
+  stage.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+  stage.addEventListener('touchstart', onPointerDown, {passive: true});
+  window.addEventListener('touchmove', onPointerMove, {passive: true});
+  window.addEventListener('touchend', onPointerUp);
+
+  // Animation Loop
+  function tick() {
+    if (!isDragging) {
+      // Auto rotation + inertia friction
+      velocity = velocity * 0.92 + 0.15 * 0.08; 
+      targetY += velocity;
+    }
+
+    // Smoothly interpolate currentY towards targetY
+    currentY += (targetY - currentY) * (isDragging ? 0.8 : 0.1);
+    
+    stage.style.transform = `rotateY(${currentY}deg)`;
+
+    // Center Card Highlight Logic
+    cards.forEach((card, i) => {
+      // Calculate world rotation of this card
+      let worldRot = (currentY + i * anglePerCard) % 360;
+      if (worldRot < 0) worldRot += 360;
+      
+      // Distance from front center (360 or 0)
+      let dist = Math.min(worldRot, 360 - worldRot);
+      
+      if (dist < anglePerCard) {
+        // Map distance to a 0-1 progress
+        let progress = Math.max(0, 1 - (dist / (anglePerCard * 0.8)));
+        // Scale: 1.0 to 1.1x
+        let scale = 1.0 + (0.1 * progress);
+        // Brightness: 0.85 to 1.0
+        let bright = 0.85 + (0.15 * progress);
+        // Blur: 2px to 0px
+        let blur = 2 * (1 - progress);
+
+        // Apply
+        card.style.transform = `rotateY(calc(var(--i) * var(--ba))) translateZ(calc(-1 * var(--radius))) scale(${scale})`;
+        card.style.setProperty('--card-bright', bright);
+        card.style.setProperty('--card-blur', blur);
+      } else {
+        card.style.transform = `rotateY(calc(var(--i) * var(--ba))) translateZ(calc(-1 * var(--radius))) scale(1.0)`;
+        card.style.setProperty('--card-bright', '0.85');
+        card.style.setProperty('--card-blur', '2');
+      }
+    });
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  // Floating Particles
+  const particlesContainer = document.getElementById('cylParticles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'cyl-particle';
+    const size = Math.random() * 4 + 2; // 2px to 6px
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    p.style.animationDelay = (Math.random() * -20) + 's';
+    particlesContainer.appendChild(p);
+  }
+});
+</script>
 
 <!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
