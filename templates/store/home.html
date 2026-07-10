@@ -8,7 +8,7 @@
 
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
 <div class="cyl-wrapper">
-  <div class="cyl-stage" style="--n:{% if hero_panels %}{{ hero_panels|length }}{% else %}8{% endif %}; --w:220px; --anim-dur:28s;">
+  <div class="cyl-stage" style="--n:{% if hero_panels %}{{ hero_panels|length }}{% else %}8{% endif %}; --anim-dur:28s;">
     {% if hero_panels %}
       {% for panel in hero_panels %}
         <div class="cylinder-card" style="--i:{{ forloop.counter0 }}">
@@ -37,7 +37,7 @@
     --cyl-grad-center: rgba(30,30,30,1);
     --cyl-grad-edge: #0d0d0d;
     --cyl-card-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15);
-    --cyl-reflect: rgba(0,0,0,0.4);
+    --cyl-reflect: rgba(0,0,0,0.15); /* Reduced from 0.4 to fix lag */
     --cyl-particle: rgba(255,255,255,0.3);
   }
 
@@ -47,7 +47,7 @@
       --cyl-grad-center: #ffffff;
       --cyl-grad-edge: #e9ecef;
       --cyl-card-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
-      --cyl-reflect: rgba(255,255,255,0.5);
+      --cyl-reflect: rgba(255,255,255,0.2); /* Reduced from 0.5 to fix lag */
       --cyl-particle: rgba(0,0,0,0.1);
     }
   }
@@ -120,11 +120,10 @@
   }
 
   .cylinder-card:hover {
-    filter: brightness(1.1);
     transform:
       rotateY(calc(var(--i) * var(--ba)))
       translateZ(calc(-1 * var(--radius)))
-      scale(1.05);
+      scale(1.02); /* Minimal scale, removed filter for performance */
   }
 
   @keyframes spin-cyl {
