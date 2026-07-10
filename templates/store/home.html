@@ -141,12 +141,27 @@
     transform:
       rotateY(calc(var(--i) * var(--ba)))
       translateZ(calc(-1 * var(--radius)));
-    
-    /* JS will update CSS vars for center highlight */
-    filter: brightness(var(--card-bright, 0.85)) blur(var(--card-blur, 2px));
-    transition: filter 0.2s ease-out; /* Smooth transitions for highlights */
-    will-change: filter, transform;
+      
+    /* Remove blur for mobile performance, keep basic brightness */
+    filter: brightness(0.9);
   }
+
+  .cylinder-card:hover {
+    filter: brightness(1.1);
+    transform:
+      rotateY(calc(var(--i) * var(--ba)))
+      translateZ(calc(-1 * var(--radius)))
+      scale(1.05);
+  }
+
+  @keyframes spin-cyl {
+    to { transform: rotateY(1turn); }
+  }
+  
+  .cyl-stage {
+    animation: spin-cyl var(--anim-dur) linear infinite;
+  }
+
 
   .cylinder-card img{
     width: 100%;
@@ -156,63 +171,6 @@
     user-select: none;
   }
 </style>
-
-<!-- JS for Auto-Rotation and Highlighting -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const stage = document.querySelector('.cyl-stage');
-  const cards = document.querySelectorAll('.cylinder-card');
-  if (!stage || cards.length === 0) return;
-
-  const n = Math.max(3, cards.length); // Same as max(3, length) in CSS
-  const anglePerCard = 360 / n;
-  
-  let currentY = 0;
-  const velocity = 0.15; // base auto-rotation speed
-
-  // Remove grab cursor styles since dragging is disabled
-  stage.style.cursor = 'default';
-  
-  // Animation Loop
-  function tick() {
-    currentY += velocity;
-    stage.style.transform = `rotateY(${currentY}deg)`;
-
-    // Center Card Highlight Logic
-    cards.forEach((card, i) => {
-      // Calculate world rotation of this card
-      let worldRot = (currentY + i * anglePerCard) % 360;
-      if (worldRot < 0) worldRot += 360;
-      
-      // Distance from front center (360 or 0)
-      let dist = Math.min(worldRot, 360 - worldRot);
-      
-      if (dist < anglePerCard) {
-        // Map distance to a 0-1 progress
-        let progress = Math.max(0, 1 - (dist / (anglePerCard * 0.8)));
-        // Scale: 1.0 to 1.1x
-        let scale = 1.0 + (0.1 * progress);
-        // Brightness: 0.85 to 1.0
-        let bright = 0.85 + (0.15 * progress);
-        // Blur: 2px to 0px
-        let blur = 2 * (1 - progress);
-
-        // Apply
-        card.style.transform = `rotateY(calc(var(--i) * var(--ba))) translateZ(calc(-1 * var(--radius))) scale(${scale})`;
-        card.style.setProperty('--card-bright', bright);
-        card.style.setProperty('--card-blur', blur);
-      } else {
-        card.style.transform = `rotateY(calc(var(--i) * var(--ba))) translateZ(calc(-1 * var(--radius))) scale(1.0)`;
-        card.style.setProperty('--card-bright', '0.85');
-        card.style.setProperty('--card-blur', '2');
-      }
-    });
-
-    requestAnimationFrame(tick);
-  }
-  tick();
-});
-</script>
 
 <!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
