@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import SetPasswordForm
-from .models import User, Address, Review, UserPreference, Complaint, Product, Category, Brand, Order, Payment, SiteSetting, HeroPanel
+from .models import User, Address, Review, UserPreference, Complaint, Product, Category, Brand, Order, Payment, SiteSetting, HeroPanel, PerspectiveCarouselImage
 
 
 class SignupForm(forms.ModelForm):
@@ -249,6 +249,18 @@ class HeroPanelForm(forms.ModelForm):
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Hero Title (Internal)'}),
             'link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://... (Where should it redirect?)'}),
+            'image_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Cloudflare R2 Image URL'}),
+            'order': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class PerspectiveCarouselImageForm(forms.ModelForm):
+    class Meta:
+        model = PerspectiveCarouselImage
+        fields = ['title', 'link', 'image_url', 'image', 'order', 'is_active']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Image Title'}),
+            'link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://... (Redirect on click)'}),
             'image_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Cloudflare R2 Image URL'}),
             'order': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),

@@ -1014,6 +1014,9 @@
                 <a class="nav-link {% if 'admin_hero_panel' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_hero_panels' %}">
                     <i class="fas fa-images nav-icon"></i> Hero Panels
                 </a>
+                <a class="nav-link {% if 'admin_perspective_carousel' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'admin_perspective_carousels' %}">
+                    <i class="fas fa-cube nav-icon"></i> 3D Carousels
+                </a>
                 <a class="nav-link {% if 'admin_countr' in request.resolver_match.url_name %}active{% endif %}"
                    href="{% url 'admin_countries' %}">
                     <i class="fas fa-coins nav-icon"></i> Currencies

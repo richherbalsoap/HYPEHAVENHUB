@@ -70,6 +70,11 @@ urlpatterns = [
     path('admin/hero-panels/create/', admin_views.admin_hero_panel_create, name='admin_hero_panel_create'),
     path('admin/hero-panels/<int:pk>/edit/', admin_views.admin_hero_panel_edit, name='admin_hero_panel_edit'),
     path('admin/hero-panels/<int:pk>/delete/', admin_views.admin_hero_panel_delete, name='admin_hero_panel_delete'),
+    
+    path('admin/perspective-carousels/', admin_views.admin_perspective_carousels, name='admin_perspective_carousels'),
+    path('admin/perspective-carousels/create/', admin_views.admin_perspective_carousel_create, name='admin_perspective_carousel_create'),
+    path('admin/perspective-carousels/<int:pk>/edit/', admin_views.admin_perspective_carousel_edit, name='admin_perspective_carousel_edit'),
+    path('admin/perspective-carousels/<int:pk>/delete/', admin_views.admin_perspective_carousel_delete, name='admin_perspective_carousel_delete'),
 
     path('admin/products/', admin_views.admin_products, name='admin_products'),
     path('admin/products/create/', admin_views.admin_product_create, name='admin_product_create'),

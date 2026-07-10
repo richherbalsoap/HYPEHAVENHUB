@@ -1,0 +1,91 @@
+{% extends 'admin/custom_base.html' %}
+{% block title %}Perspective Carousels{% endblock %}
+{% block page_title %}Perspective Carousels{% endblock %}
+
+{% block content %}
+<div class="admin-section-title">
+    <div>
+        <h5 class="mb-1">Perspective Carousels</h5>
+        <div class="eyebrow">Manage homepage carousels</div>
+    </div>
+    <a href="{% url 'admin_perspective_carousel_create' %}" class="btn btn-primary" style="background: var(--admin-primary); border: none; border-radius: var(--radius-sm); font-weight: 500;">
+        <i class="fas fa-plus me-2"></i> Add New image
+    </a>
+</div>
+
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="table admin-table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Image</th>
+                    <th>Title</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for image in images %}
+                <tr>
+                    <td>
+                        {% if image.image %}
+                        <img src="{{ image.image.url }}" alt="Perspective Carousel" class="rounded" style="width: 60px; height: 40px; object-fit: cover; border: 1px solid var(--admin-border);">
+                        {% else %}
+                        <div class="rounded d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 40px; border: 1px solid var(--admin-border);">
+                            <i class="fas fa-image text-muted"></i>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="fw-semibold">{{ image.title }}</td>
+                    <td>
+                        <span class="badge" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border);">{{ image.order }}</span>
+                    </td>
+                    <td>
+                        {% if image.is_active %}
+                        <span class="status-pill" style="background: var(--admin-green-bg); color: var(--admin-green); border: 1px solid var(--admin-green-border); padding: 4px 10px; font-size: 11px;">Active</span>
+                        {% else %}
+                        <span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-muted); border: 1px solid var(--admin-border); padding: 4px 10px; font-size: 11px;">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'admin_perspective_carousel_edit' image.id %}" class="btn btn-sm btn-light" style="border: 1px solid var(--admin-border);">
+                            <i class="fas fa-pen text-primary"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-light ms-1" style="border: 1px solid var(--admin-border);" data-bs-toggle="modal" data-bs-target="#deleteModal{{ image.id }}">
+                            <i class="fas fa-trash text-danger"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Delete Modal -->
+                <div class="modal fade" id="deleteModal{{ image.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: var(--shadow-lg);">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title fw-bold">Delete Perspective Carousel</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete the Perspective Carousel <strong>"{{ image.title }}"</strong>? This action cannot be undone.</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{% url 'admin_perspective_carousel_delete' image.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">No Perspective Carousels found. Click 'Add New image' to create one.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

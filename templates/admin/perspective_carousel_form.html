@@ -1,0 +1,87 @@
+{% extends 'admin/custom_base.html' %}
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Perspective Carousel{% endblock %}
+{% block page_title %}{% if is_edit %}Edit Perspective Carousel{% else %}Create Perspective Carousel{% endif %}{% endblock %}
+
+{% block content %}
+<div class="admin-section-title">
+    <div>
+        <h5 class="mb-1">{% if is_edit %}Edit "{{ image.title }}"{% else %}Create New image{% endif %}</h5>
+        <div class="eyebrow">Manage image details</div>
+    </div>
+    <a href="{% url 'admin_perspective_carousels' %}" class="btn btn-outline-secondary btn-sm" style="border-radius: var(--radius-sm); font-weight: 500;">
+        <i class="fas fa-arrow-left me-1"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" enctype="multipart/form-data" class="admin-card">
+            {% csrf_token %}
+            <div class="admin-card-header mb-4">
+                <h6>image Information</h6>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">Internal Title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.link.id_for_label }}" class="form-label fw-semibold">Click Link (URL)</label>
+                    {{ form.link }}
+                    {% if form.link.errors %}<div class="text-danger small mt-1">{{ form.link.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+            
+            <hr class="my-4" style="border-color: var(--admin-border);">
+            
+            <div class="row g-3">
+                <div class="col-12 mb-3">
+                    <label for="{{ form.image_url.id_for_label }}" class="form-label fw-semibold">Image URL (Cloudflare R2)</label>
+                    {{ form.image_url }}
+                    <div class="form-text small">Use this for Cloudflare R2 uploaded images.</div>
+                    {% if form.image_url.errors %}<div class="text-danger small mt-1">{{ form.image_url.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-8 mb-3">
+                    <label for="{{ form.image.id_for_label }}" class="form-label fw-semibold">Background Image</label>
+                    <input type="file" name="{{ form.image.name }}" id="{{ form.image.id_for_label }}" class="form-control" accept="image/*" {% if not is_edit %}required{% endif %}>
+                    {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors.0 }}</div>{% endif %}
+                </div>
+                {% if is_edit and image.image %}
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <img src="{{ image.image.url }}" alt="Current Image" class="img-thumbnail w-100" style="max-height: 100px; object-fit: cover; border-radius: 8px;">
+                </div>
+                {% endif %}
+            </div>
+            
+            <hr class="my-4" style="border-color: var(--admin-border);">
+            
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <label for="{{ form.order.id_for_label }}" class="form-label fw-semibold">Display Order</label>
+                    {{ form.order }}
+                    <div class="form-text small">Lower numbers appear first (e.g. 0, 1, 2).</div>
+                </div>
+                
+                <div class="col-md-8 d-flex align-items-center mt-md-4 pt-md-2">
+                    <div class="form-check form-switch p-3 rounded w-100" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        {{ form.is_active }}
+                        <label class="form-check-label ms-2 fw-semibold text-primary" for="{{ form.is_active.id_for_label }}">Set as Active</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end border-top pt-4 mt-4">
+                <button type="submit" class="btn btn-primary px-4 py-2" style="background: var(--admin-primary); border: none; border-radius: var(--radius-sm); color: white; font-weight: 500;">
+                    <i class="fas fa-save me-2"></i> {% if is_edit %}Save Changes{% else %}Create image{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

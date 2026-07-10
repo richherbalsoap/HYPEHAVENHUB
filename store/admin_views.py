@@ -15,10 +15,10 @@ from django.conf import settings
 
 from .models import (
     User, Product, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage, SiteSetting, HeroPanel
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage, SiteSetting, HeroPanel, PerspectiveCarouselImage
 )
 from .forms import (
-    ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm, SiteSettingForm, HeroPanelForm
+    ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm, SiteSettingForm, HeroPanelForm, PerspectiveCarouselImageForm
 )
 
 
@@ -792,6 +792,59 @@ def admin_hero_panel_delete(request, pk):
         panel.delete()
         messages.success(request, 'Hero panel deleted successfully.')
         return redirect('admin_hero_panels')
+
+
+@login_required
+@admin_required
+def admin_perspective_carousels(request):
+    """List all perspective carousel images"""
+    images = PerspectiveCarouselImage.objects.all()
+    return render(request, 'admin/perspective_carousels.html', {'images': images})
+
+
+@login_required
+@admin_required
+def admin_perspective_carousel_create(request):
+    """Create a new perspective carousel image"""
+    if request.method == 'POST':
+        form = PerspectiveCarouselImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Carousel image created successfully.')
+            return redirect('admin_perspective_carousels')
+    else:
+        form = PerspectiveCarouselImageForm()
+    
+    return render(request, 'admin/perspective_carousel_form.html', {'form': form, 'is_edit': False})
+
+
+@login_required
+@admin_required
+def admin_perspective_carousel_edit(request, pk):
+    """Edit an existing perspective carousel image"""
+    image = get_object_or_404(PerspectiveCarouselImage, pk=pk)
+    if request.method == 'POST':
+        form = PerspectiveCarouselImageForm(request.POST, request.FILES, instance=image)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Carousel image updated successfully.')
+            return redirect('admin_perspective_carousels')
+    else:
+        form = PerspectiveCarouselImageForm(instance=image)
+    
+    return render(request, 'admin/perspective_carousel_form.html', {'form': form, 'image': image, 'is_edit': True})
+
+
+@login_required
+@admin_required
+def admin_perspective_carousel_delete(request, pk):
+    """Delete a perspective carousel image"""
+    image = get_object_or_404(PerspectiveCarouselImage, pk=pk)
+    if request.method == 'POST':
+        image.delete()
+        messages.success(request, 'Carousel image deleted successfully.')
+        return redirect('admin_perspective_carousels')
+    return redirect('admin_perspective_carousels')
     
     # Just redirect back if not POST
     return redirect('admin_hero_panels')
