@@ -7,101 +7,65 @@
 {% block content %}
 
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
-<div class="cyl-wrapper">
-  <div class="cyl-stage" style="--n:{% if hero_panels %}{{ hero_panels|length }}{% else %}8{% endif %}; --w:220px; --anim-dur:28s;">
+<section class="cylinder-carousel-section" style="width: 100%; min-height: 500px; height: 85vh; max-height: 800px; display: grid; place-items: center; overflow: hidden; background-color: #050505; position: relative; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); width: 100vw; perspective: 35em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent); mask-image: linear-gradient(90deg, transparent, #000 20% 80%, transparent);">
+  
+  <div class="cylinder-carousel-container" style="transform-style: preserve-3d; display: grid; place-items: center;">
     {% if hero_panels %}
       {% for panel in hero_panels %}
-        <div class="cylinder-card" style="--i:{{ forloop.counter0 }}">
-          <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}">
-        </div>
+        <a href="{{ panel.link|default:'#' }}" class="cylinder-card" style="--i: {{ forloop.counter0 }};">
+          <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}" />
+        </a>
       {% endfor %}
     {% else %}
-        <div class="cylinder-card" style="--i:0"><img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400" alt="jhumka 1"></div>
-        <div class="cylinder-card" style="--i:1"><img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&sig=2" alt="jhumka 2"></div>
-        <div class="cylinder-card" style="--i:2"><img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400" alt="jhumka 3"></div>
-        <div class="cylinder-card" style="--i:3"><img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400" alt="jhumka 4"></div>
-        <div class="cylinder-card" style="--i:4"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400" alt="jhumka 5"></div>
-        <div class="cylinder-card" style="--i:5"><img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400" alt="jhumka 6"></div>
-        <div class="cylinder-card" style="--i:6"><img src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=400" alt="jhumka 7"></div>
-        <div class="cylinder-card" style="--i:7"><img src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400" alt="jhumka 8"></div>
+        <a href="#" class="cylinder-card" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
+        <a href="#" class="cylinder-card" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
+        <a href="#" class="cylinder-card" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
+        <a href="#" class="cylinder-card" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
+        <a href="#" class="cylinder-card" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
+        <a href="#" class="cylinder-card" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
     {% endif %}
   </div>
-</div>
 
-<style>
-  /* Full viewport-spanning wrapper */
-  .cyl-wrapper{
-    position: relative;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    min-height: 480px;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    background: #0d0d0d;
-    perspective: clamp(30em, 55vw, 70em);
-  }
+  <style>
+    @keyframes ry {
+      to { transform: rotateY(1turn); }
+    }
+    
+    .cylinder-carousel-container {
+      --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}6{% endif %};
+      --w: 250px;
+      --ba: calc(1turn / var(--n));
+      --anim-dur: 32s;
+      animation: ry var(--anim-dur) linear infinite;
+    }
 
-  .cyl-wrapper::before,
-  .cyl-wrapper::after{
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 15%;
-    z-index: 2;
-    pointer-events: none;
-  }
-  .cyl-wrapper::before{
-    left: 0;
-    background: linear-gradient(90deg, #0d0d0d, transparent);
-  }
-  .cyl-wrapper::after{
-    right: 0;
-    background: linear-gradient(90deg, transparent, #0d0d0d);
-  }
+    @media (prefers-reduced-motion: reduce) {
+      .cylinder-carousel-container {
+        animation-duration: 128s;
+      }
+    }
 
-  /* rotating group */
-  .cyl-stage{
-    display: grid;
-    place-items: center;
-    transform-style: preserve-3d;
-    --ba: calc(1turn / var(--n));
-    --w: clamp(160px, 17vw, 320px);
-    --radius: clamp(280px, 34vw, 620px);
-    animation: cyl-rotate var(--anim-dur, 28s) linear infinite;
-  }
-
-  @keyframes cyl-rotate{
-    to { transform: rotateY(1turn); }
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .cyl-stage{ animation-duration: 120s; }
-  }
-
-  /* individual card */
-  .cylinder-card{
-    grid-area: 1 / 1;
-    width: var(--w, 220px);
-    aspect-ratio: 7 / 10;
-    border-radius: 16px;
-    overflow: hidden;
-    backface-visibility: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,.45);
-
-    transform:
-      rotateY(calc(var(--i) * var(--ba)))
-      translateZ(calc(-1 * var(--radius)));
-  }
-
-  .cylinder-card img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-</style>
+    .cylinder-card {
+      grid-area: 1 / 1;
+      width: var(--w);
+      aspect-ratio: 7 / 10;
+      border-radius: 1rem;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      transform: rotateY(calc(var(--i) * var(--ba))) translateZ(calc(-1 * (0.5 * var(--w) + 0.5em) / tan(0.5 * var(--ba))));
+      display: block;
+      overflow: hidden;
+    }
+    
+    .cylinder-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 1rem;
+    }
+  </style>
+</section>
 
 <!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
