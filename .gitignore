@@ -9,3 +9,10 @@ media/
 __pycache__/
 
 .env*
+
+node_modules/
+dist/
+django.log
+package-lock.json
+__pycache__/
+*.pyc

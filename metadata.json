@@ -1,0 +1,6 @@
+{
+  "name": "HypeHavenHub",
+  "description": "Premium boutique store for handcrafted 12 and 16-piece Jhumka box sets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
