@@ -252,7 +252,7 @@
 {% endif %}
 
 <!-- New Arrivals Perspective Carousel -->
-{% if perspective_images %}
+{% if new_arrivals %}
 <section class="py-5 position-relative overflow-hidden" id="new-arrivals" style="background-color: var(--surface);">
   <div class="container">
     <div class="d-flex justify-content-between align-items-end mb-4">
@@ -265,11 +265,11 @@
     <!-- Perspective Carousel Container -->
     <div class="position-relative w-100 overflow-hidden" style="height: 450px; perspective: 1200px;" id="perspectiveCarouselWrapper">
       <div id="perspectiveCarouselTrack" class="position-absolute start-50 top-50 d-flex align-items-center" style="width: max-content; transform: translateY(-50%); transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-        {% for img in perspective_images %}
+        {% for product in new_arrivals %}
         <div class="flex-shrink-0 perspective-slide" style="width: 250px; perspective: 1200px;" data-index="{{ forloop.counter0 }}">
           <div class="d-flex w-100 flex-column align-items-center slide-inner" style="gap: 1rem; will-change: transform; transform-style: preserve-3d; transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
             <button type="button" class="w-100 border-0 bg-transparent p-0" style="aspect-ratio: 3/4; cursor: pointer;" onclick="selectPerspectiveSlide({{ forloop.counter0 }})" aria-label="Show 3D Image">
-              <img src="{{ img.display_image_url }}" draggable="false" class="h-100 w-100 rounded-3 shadow-lg" style="object-fit: cover; user-select: none;" />
+              <img src="{{ product.display_image_url }}" draggable="false" class="h-100 w-100 rounded-3 shadow-lg" style="object-fit: cover; user-select: none;" />
             </button>
           </div>
         </div>
@@ -285,7 +285,7 @@
         </button>
 
         <div class="d-flex align-items-center justify-content-center gap-2" id="pc-dots">
-          {% for img in perspective_images %}
+          {% for product in new_arrivals %}
           <button type="button" class="rounded-pill transition-all pc-dot" data-index="{{ forloop.counter0 }}" style="height: 8px; border: none; background: var(--primary);" onclick="selectPerspectiveSlide({{ forloop.counter0 }})"></button>
           {% endfor %}
         </div>
@@ -359,7 +359,7 @@
 
     <!-- View All Collections Action Call -->
     <div class="d-flex justify-content-center mt-5">
-      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: var(--primary-fixed) !important; color: var(--on-primary-fixed) !important; border: none; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 6px rgba(42,0,2,0.05); text-decoration: none;">
+      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: #000 !important; color: #fff !important; border: 2px solid #000 !important; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 6px rgba(42,0,2,0.05); text-decoration: none;">
         View Full Collection
       </a>
     </div>

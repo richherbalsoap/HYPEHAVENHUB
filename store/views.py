@@ -24,7 +24,7 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
-    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, PerspectiveCarouselImage
+    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -272,26 +272,9 @@ def home(request):
     flash_sale_obj = FlashSale.objects.filter(is_active=True).first()
     hero_panels = HeroPanel.objects.filter(is_active=True)
     
-    perspective_images = list(PerspectiveCarouselImage.objects.filter(is_active=True))
-    # If no images are uploaded yet, use placeholders so the 3D animation is visible
-    if not perspective_images:
-        class MockImage:
-            def __init__(self, title, url):
-                self.title = title
-                self.display_image_url = url
-        
-        perspective_images = [
-            MockImage("Mystic Rings", "https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=500&q=80"),
-            MockImage("Classic Gold", "https://images.unsplash.com/photo-1599643478514-4a4e0f068ee1?w=500&q=80"),
-            MockImage("Diamond Pearl", "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80"),
-            MockImage("Silver Chain", "https://images.unsplash.com/photo-1574482705009-3221971775f9?w=500&q=80"),
-            MockImage("Gemstone Drop", "https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=500&q=80")
-        ]
-
     return render(request, 'store/home.html', {
         'featured': featured,
         'hero_products': hero_products,
-        'perspective_images': perspective_images,
         'new_arrivals': new_arrivals,
         'bestsellers': bestsellers,
         'flash_sale': flash_sale,
