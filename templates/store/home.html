@@ -7,159 +7,267 @@
 {% block content %}
 
 <!-- Dynamic Hero Section Carousel -->
-<!-- Dynamic Hero Section Swipeable Carousel -->
-<section class="hero-swipe-section p-0 m-0 w-100 position-relative">
-  <div class="hero-swipe-container" id="heroSwipeContainer">
-    {% if hero_panels %}
-      {% for panel in hero_panels %}
-        <div class="hero-swipe-slide">
-          <a href="{{ panel.link|default:'#' }}" class="d-block w-100 h-100">
-            <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'HYPEHAVENHUB Hero Banner' }}" {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}>
-          </a>
+<!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
+<section class="cylinder-hero-section position-relative overflow-hidden w-100" style="background-color: #050505; width: 100vw; height: 80vh; min-height: 500px; max-height: 800px; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); display: flex; align-items: center; justify-content: center; touch-action: pan-y;">
+  <div class="cylinder-scene w-100 h-100" id="cylinderScene" style="perspective: 1000px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: grab;">
+    <div class="cylinder-carousel" id="cylinderCarousel" style="position: relative; transform-style: preserve-3d; will-change: transform;">
+      {% if hero_panels %}
+        <!-- Hidden source data for JS -->
+        <div id="dynamic-cylinder-data" class="d-none">
+          {% for panel in hero_panels %}
+            <div class="source-item" data-img="{{ panel.display_image_url }}" data-title="{{ panel.title|default:'Banner' }}" data-link="{{ panel.link|default:'#' }}"></div>
+          {% endfor %}
         </div>
-      {% endfor %}
-    {% else %}
-      <!-- Fallback -->
-      <div class="hero-swipe-slide">
-        <a href="{% url 'product_list' %}" class="d-block w-100 h-100">
-          <img src="{% static 'images/hero-slide-1.jpg' %}?v=2" alt="HYPEHAVENHUB - Handcrafted Indian Jewelry" loading="eager" fetchpriority="high">
-        </a>
-      </div>
-    {% endif %}
+      {% else %}
+        <!-- Fallback data if admin hasn't added hero panels -->
+        <div id="dynamic-cylinder-data" class="d-none">
+          <div class="source-item" data-img="{% static 'images/hero-slide-1.jpg' %}?v=2" data-title="Hero 1" data-link="#"></div>
+          <div class="source-item" data-img="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" data-title="Jewelry 2" data-link="#"></div>
+          <div class="source-item" data-img="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" data-title="Jewelry 3" data-link="#"></div>
+          <div class="source-item" data-img="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" data-title="Jewelry 4" data-link="#"></div>
+        </div>
+      {% endif %}
+    </div>
   </div>
-
-  {% if hero_panels and hero_panels|length > 1 %}
-  <div class="hero-swipe-indicators" id="heroSwipeIndicators">
-    {% for panel in hero_panels %}
-      <div class="hero-swipe-dot {% if forloop.first %}active{% endif %}" data-index="{{ forloop.counter0 }}"></div>
-    {% endfor %}
-  </div>
-  {% endif %}
 </section>
 
 <style>
-  .hero-swipe-section {
-    width: 100vw;
-    height: 75vh;
-    min-height: 450px;
-    max-height: 800px;
+  .cylinder-hero-section {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .cylinder-scene:active {
+    cursor: grabbing !important;
+  }
+  .cylinder-item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center;
+    border-radius: 16px;
     overflow: hidden;
-    position: relative;
-    background-color: #050505;
-    /* Edge to edge fix */
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    background: #000;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
-  @media (max-width: 768px) {
-    .hero-swipe-section {
-      height: 60vh;
-      min-height: 350px;
-    }
+  .cylinder-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 70%, rgba(0,0,0,0.9) 100%);
+    pointer-events: none;
   }
-  .hero-swipe-container {
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-    height: 100%;
-    scrollbar-width: none; /* Firefox */
-  }
-  .hero-swipe-container::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
-  }
-  .hero-swipe-slide {
-    flex: 0 0 100%;
-    width: 100%;
-    height: 100%;
-    scroll-snap-align: start;
-    position: relative;
-  }
-  .hero-swipe-slide img {
+  .cylinder-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.4s ease;
   }
-
-  /* Indicators */
-  .hero-swipe-indicators {
-    position: absolute;
-    bottom: 25px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    z-index: 10;
+  .cylinder-item.active-item img {
+    opacity: 1;
   }
-  .hero-swipe-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.4);
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-  }
-  .hero-swipe-dot.active {
-    background-color: #fff;
-    transform: scale(1.2);
-  }
+  /* Dimensions for carousel & items will be set via JS to perfectly match the edge to edge UI feel */
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('heroSwipeContainer');
-    const dots = document.querySelectorAll('.hero-swipe-dot');
-    if (!container || dots.length === 0) return;
+    const dataContainer = document.getElementById('dynamic-cylinder-data');
+    const carousel = document.getElementById('cylinderCarousel');
+    const scene = document.getElementById('cylinderScene');
+    if (!carousel || !scene || !dataContainer) return;
 
-    // Optional: Auto-play functionality
-    let autoPlayInterval;
-    const startAutoPlay = () => {
-      autoPlayInterval = setInterval(() => {
-        let index = Math.round(container.scrollLeft / container.clientWidth) + 1;
-        if (index >= dots.length) index = 0;
-        container.scrollTo({
-          left: index * container.clientWidth,
-          behavior: 'smooth'
-        });
-      }, 5000);
+    const sourceItems = Array.from(dataContainer.querySelectorAll('.source-item'));
+    if (sourceItems.length === 0) return;
+
+    // To make it look like a wide cylinder (left-to-right), we need a good number of items (around 10)
+    // If the user only uploaded 3, we duplicate them until we have at least 10.
+    const minItems = 10;
+    const targetTotal = Math.max(minItems, Math.ceil(minItems / sourceItems.length) * sourceItems.length);
+    
+    // Create elements
+    const itemElements = [];
+    for (let i = 0; i < targetTotal; i++) {
+      const source = sourceItems[i % sourceItems.length];
+      
+      const a = document.createElement('a');
+      a.href = source.getAttribute('data-link');
+      a.className = 'cylinder-item';
+      a.setAttribute('data-index', i);
+      // Prevent default drag on links so swipe works
+      a.addEventListener('dragstart', (e) => e.preventDefault());
+      
+      const img = document.createElement('img');
+      img.src = source.getAttribute('data-img');
+      img.alt = source.getAttribute('data-title');
+      img.draggable = false;
+      
+      a.appendChild(img);
+      carousel.appendChild(a);
+      itemElements.push(a);
+    }
+
+    let isMobile = window.innerWidth <= 768;
+    
+    // Layout configuration
+    let theta = 360 / targetTotal;
+    let tz = 0;
+
+    const updateLayout = () => {
+      isMobile = window.innerWidth <= 768;
+      // Make them wider to feel more edge-to-edge
+      const itemWidth = isMobile ? window.innerWidth * 0.75 : 450;
+      const itemHeight = isMobile ? window.innerWidth * 1.1 : 550;
+      
+      carousel.style.width = `${itemWidth}px`;
+      carousel.style.height = `${itemHeight}px`;
+      
+      // Calculate radius (tz) so items touch edge-to-edge
+      const gap = isMobile ? 15 : 30;
+      tz = Math.round((itemWidth / 2) / Math.tan(Math.PI / targetTotal)) + gap;
+
+      itemElements.forEach((item, i) => {
+        const angle = i * theta;
+        item.style.width = `${itemWidth}px`;
+        item.style.height = `${itemHeight}px`;
+        item.style.margin = `-${itemHeight/2}px 0 0 -${itemWidth/2}px`; // center it absolute
+        item.style.transform = `rotateY(${angle}deg) translateZ(${tz}px)`;
+      });
+      updateActiveItem();
     };
-    
-    const stopAutoPlay = () => clearInterval(autoPlayInterval);
-    
-    startAutoPlay();
-    container.addEventListener('touchstart', stopAutoPlay, { passive: true });
-    container.addEventListener('mouseenter', stopAutoPlay);
-    container.addEventListener('mouseleave', startAutoPlay);
 
-    // Update dots on scroll
-    let scrollTimeout;
-    container.addEventListener('scroll', () => {
-      if (scrollTimeout) cancelAnimationFrame(scrollTimeout);
-      scrollTimeout = requestAnimationFrame(() => {
-        const index = Math.round(container.scrollLeft / container.clientWidth);
-        dots.forEach((dot, i) => {
-          if (i === index) {
-            dot.classList.add('active');
+    // --- Interaction Physics ---
+    let isDragging = false;
+    let startX = 0;
+    let currentRotateY = 0;
+    let targetRotateY = 0;
+    let dragRotateY = 0;
+    let velocity = 0;
+    let lastX = 0;
+    let lastTime = 0;
+    let animationFrame;
+
+    const animate = () => {
+      if (!isDragging) {
+        // Apply inertia and snap
+        velocity *= 0.92; // friction
+        targetRotateY += velocity;
+        
+        // Snap to nearest item when slow
+        if (Math.abs(velocity) < 0.2) {
+           const snapAngle = Math.round(targetRotateY / theta) * theta;
+           targetRotateY += (snapAngle - targetRotateY) * 0.08;
+        }
+        
+        currentRotateY += (targetRotateY - currentRotateY) * 0.1;
+      } else {
+        currentRotateY += (dragRotateY - currentRotateY) * 0.25;
+      }
+      
+      carousel.style.transform = `rotateY(${currentRotateY}deg)`;
+      updateActiveItem();
+      
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    const updateActiveItem = () => {
+      let normalizedRotation = ((currentRotateY % 360) + 360) % 360;
+      let frontAngle = (360 - normalizedRotation) % 360;
+      let closestIndex = Math.round(frontAngle / theta) % targetTotal;
+      if (closestIndex < 0) closestIndex += targetTotal;
+      
+      itemElements.forEach((item, i) => {
+          if (i === closestIndex) {
+              item.classList.add('active-item');
+              item.style.boxShadow = '0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(255,255,255,0.15)';
+              item.style.zIndex = '10';
           } else {
-            dot.classList.remove('active');
+              item.classList.remove('active-item');
+              item.style.boxShadow = '0 15px 35px rgba(0,0,0,0.5)';
+              item.style.zIndex = '1';
           }
-        });
       });
-    }, { passive: true });
+    };
 
-    // Click dot to scroll
-    dots.forEach((dot) => {
-      dot.addEventListener('click', () => {
-        const index = parseInt(dot.getAttribute('data-index'));
-        container.scrollTo({
-          left: index * container.clientWidth,
-          behavior: 'smooth'
-        });
-      });
-    });
+    const startDrag = (e) => {
+      isDragging = true;
+      startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+      lastX = startX;
+      lastTime = Date.now();
+      scene.style.cursor = 'grabbing';
+      dragRotateY = currentRotateY;
+      velocity = 0;
+    };
+
+    const drag = (e) => {
+      if (!isDragging) return;
+      const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+      const deltaX = x - startX;
+      
+      // Calculate velocity
+      const now = Date.now();
+      const dt = now - lastTime;
+      if (dt > 0) {
+          // Normalize velocity so swipe speed feels natural
+          velocity = (x - lastX) / dt * (isMobile ? 1.5 : 0.8);
+      }
+      lastX = x;
+      lastTime = now;
+
+      // Map pixels to degrees (sensitivity)
+      const sensitivity = isMobile ? 0.4 : 0.2;
+      dragRotateY = targetRotateY + (deltaX * sensitivity);
+    };
+
+    const endDrag = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      scene.style.cursor = 'grab';
+      targetRotateY = dragRotateY;
+      
+      // If we clicked without dragging much, let the click happen, otherwise prevent it
+      const endX = e.type.includes('mouse') ? e.pageX : (e.changedTouches ? e.changedTouches[0].pageX : startX);
+      if (Math.abs(endX - startX) > 10) {
+         // prevent click if it was a drag
+         setTimeout(() => {
+            const preventClick = (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                window.removeEventListener('click', preventClick, true);
+            };
+            window.addEventListener('click', preventClick, true);
+         }, 0);
+      }
+    };
+
+    scene.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', drag);
+    window.addEventListener('mouseup', endDrag);
+    scene.addEventListener('mouseleave', endDrag);
+
+    scene.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', drag, { passive: true });
+    window.addEventListener('touchend', endDrag);
+
+    window.addEventListener('resize', updateLayout);
+    
+    // Auto rotation feature
+    let autoRotate = true;
+    scene.addEventListener('mouseenter', () => autoRotate = false);
+    scene.addEventListener('mouseleave', () => autoRotate = true);
+    scene.addEventListener('touchstart', () => autoRotate = false, { passive: true });
+    
+    // Using simple slow rotation
+    setInterval(() => {
+        if (!isDragging && autoRotate && Math.abs(velocity) < 0.1) {
+            targetRotateY -= 0.1; // slowly spin
+        }
+    }, 16);
+
+    updateLayout();
+    animate();
   });
 </script>
 
