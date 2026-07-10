@@ -52,6 +52,18 @@
     }
   }
 
+  /* Mobile-specific adjustments to make the glass effect even lighter */
+  @media (max-width: 768px) {
+    :root {
+      --cyl-reflect: rgba(0,0,0,0.05);
+    }
+  }
+  @media (max-width: 768px) and (prefers-color-scheme: light) {
+    :root {
+      --cyl-reflect: rgba(255,255,255,0.08);
+    }
+  }
+
   /* Full viewport-spanning wrapper */
   .cyl-wrapper{
     position: relative;
