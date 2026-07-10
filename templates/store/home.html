@@ -28,8 +28,6 @@
   </div>
   <!-- Fade Mask Right -->
   <div class="cyl-mask-right"></div>
-  <!-- Floating particles container -->
-  <div class="cyl-particles" id="cylParticles"></div>
 </div>
 
 <style>
@@ -156,33 +154,10 @@
     object-fit: cover;
     display: block;
     user-select: none;
-    -webkit-user-drag: none;
-  }
-
-  /* Particles */
-  .cyl-particles {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .cyl-particle {
-    position: absolute;
-    background: var(--cyl-particle);
-    border-radius: 50%;
-    filter: blur(1px);
-    animation: float-up linear infinite;
-  }
-  @keyframes float-up {
-    from { transform: translateY(100vh); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 1; }
-    to   { transform: translateY(-10vh); opacity: 0; }
   }
 </style>
 
-<!-- JS for Inertia Drag, Smooth Scroll, and Highlighting -->
+<!-- JS for Auto-Rotation and Highlighting -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const stage = document.querySelector('.cyl-stage');
@@ -193,55 +168,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const anglePerCard = 360 / n;
   
   let currentY = 0;
-  let targetY = 0;
-  let velocity = 0.15; // base auto-rotation speed
+  const velocity = 0.15; // base auto-rotation speed
+
+  // Remove grab cursor styles since dragging is disabled
+  stage.style.cursor = 'default';
   
-  let isDragging = false;
-  let startX = 0;
-  let lastX = 0;
-
-  // Drag Events
-  const onPointerDown = (e) => {
-    isDragging = true;
-    startX = e.clientX || e.touches?.[0].clientX;
-    lastX = startX;
-    stage.style.cursor = 'grabbing';
-  };
-
-  const onPointerMove = (e) => {
-    if (!isDragging) return;
-    const clientX = e.clientX || e.touches?.[0].clientX;
-    const deltaX = clientX - lastX;
-    lastX = clientX;
-    
-    // Convert drag pixels to rotation degrees
-    velocity = deltaX * 0.4;
-    targetY += velocity;
-  };
-
-  const onPointerUp = () => {
-    isDragging = false;
-    stage.style.cursor = 'grab';
-  };
-
-  stage.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-  stage.addEventListener('touchstart', onPointerDown, {passive: true});
-  window.addEventListener('touchmove', onPointerMove, {passive: true});
-  window.addEventListener('touchend', onPointerUp);
-
   // Animation Loop
   function tick() {
-    if (!isDragging) {
-      // Auto rotation + inertia friction
-      velocity = velocity * 0.92 + 0.15 * 0.08; 
-      targetY += velocity;
-    }
-
-    // Smoothly interpolate currentY towards targetY
-    currentY += (targetY - currentY) * (isDragging ? 0.8 : 0.1);
-    
+    currentY += velocity;
     stage.style.transform = `rotateY(${currentY}deg)`;
 
     // Center Card Highlight Logic
@@ -277,20 +211,6 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(tick);
   }
   tick();
-
-  // Floating Particles
-  const particlesContainer = document.getElementById('cylParticles');
-  for (let i = 0; i < 20; i++) {
-    const p = document.createElement('div');
-    p.className = 'cyl-particle';
-    const size = Math.random() * 4 + 2; // 2px to 6px
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.left = Math.random() * 100 + 'vw';
-    p.style.animationDuration = (Math.random() * 10 + 10) + 's';
-    p.style.animationDelay = (Math.random() * -20) + 's';
-    particlesContainer.appendChild(p);
-  }
 });
 </script>
 
