@@ -39,7 +39,7 @@
     place-items: center;
     overflow: hidden;
     background: #0d0d0d;
-    perspective: 35em;
+    perspective: clamp(28em, 40vw, 55em);
   }
 
   .cyl-wrapper::before,
@@ -67,6 +67,7 @@
     place-items: center;
     transform-style: preserve-3d;
     --ba: calc(1turn / var(--n));
+    --w: clamp(160px, 17vw, 320px);
     animation: cyl-rotate var(--anim-dur, 28s) linear infinite;
   }
 
