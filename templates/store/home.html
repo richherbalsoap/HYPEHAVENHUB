@@ -106,47 +106,123 @@
 </section>
 {% endif %}
 
-<!-- New Arrivals Product Carousel -->
-{% if new_arrivals %}
-<section class="py-5 position-relative overflow-hidden product-scroll-row" id="new-arrivals">
+<!-- New Arrivals Perspective Carousel -->
+{% if perspective_images %}
+<section class="py-5 position-relative overflow-hidden" id="new-arrivals" style="background-color: var(--surface);">
   <div class="container">
     <div class="d-flex justify-content-between align-items-end mb-4">
       <div>
         <span class="section-eyebrow">Seasonal Curation</span>
         <h2 class="section-title mb-0">New Arrivals</h2>
       </div>
-      
-      <!-- Navigation Buttons & Hint -->
-      <div class="d-flex align-items-center gap-3">
-        <span class="d-none d-sm-inline font-body text-uppercase font-semibold text-muted" style="font-size: 10px; letter-spacing: 1.5px; font-family: 'Montserrat', sans-serif;">Swipe or Slide &bull;</span>
-        <div class="d-flex gap-2">
-          <button class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center scroll-prev" aria-label="Previous Slide" style="width: 44px; height: 44px; border-color: var(--outline-variant); color: var(--primary);">
-            <span class="material-symbols-outlined">chevron_left</span>
-          </button>
-          <button class="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center scroll-next" aria-label="Next Slide" style="width: 44px; height: 44px; border-color: var(--outline-variant); color: var(--primary);">
-            <span class="material-symbols-outlined">chevron_right</span>
-          </button>
-        </div>
-      </div>
     </div>
 
-    <!-- Horizontal Product Carousel Wrapper -->
-    <div class="relative w-full">
-      <div class="d-flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-4 pb-4 scrollbar-none product-scroll-wrapper" id="productCarousel" onscroll="updateScrollIndicator()" style="-webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scrollbar-width: none;">
-        {% for product in new_arrivals %}
-        <div class="snap-start flex-shrink-0" style="width: 280px; scroll-snap-align: start;">
-          {% include 'store/_product_card.html' with product=product %}
+    <!-- Perspective Carousel Container -->
+    <div class="relative w-full overflow-hidden" style="height: 450px; perspective: 1200px;" id="perspectiveCarouselWrapper">
+      <div id="perspectiveCarouselTrack" class="absolute left-1/2 top-1/2 flex w-fit -translate-y-1/2 items-center" style="transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        {% for img in perspective_images %}
+        <div class="shrink-0 perspective-slide" style="width: 250px; perspective: 1200px;" data-index="{{ forloop.counter0 }}">
+          <div class="flex w-full flex-col items-center gap-3 will-change-transform slide-inner" style="transform-style: preserve-3d; transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <button type="button" class="aspect-[3/4] w-full cursor-pointer border-0 bg-transparent p-0" onclick="selectPerspectiveSlide({{ forloop.counter0 }})" aria-label="Show {{ img.title }}">
+              <img src="{{ img.display_image_url }}" alt="{{ img.title }}" draggable="false" class="h-full w-full select-none rounded-lg object-cover shadow-xl" style="height: 330px;" />
+            </button>
+            <p class="whitespace-nowrap text-sm font-semibold slide-title mt-2" style="transition: all 0.9s ease; color: var(--on-surface);">
+              {{ img.title }}
+            </p>
+          </div>
         </div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Custom scrollbar progress indicator track -->
-    <div class="w-full max-w-md mx-auto mt-4 px-3">
-      <div class="relative w-full h-[2px] rounded-full overflow-hidden" style="background: rgba(135, 114, 112, 0.2);">
-        <div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-300 w-[15%]" id="carouselScrollProgress" style="background-color: var(--primary);"></div>
+    <!-- Controls -->
+    <div class="d-flex justify-content-center mt-4">
+      <div class="d-flex items-center justify-content-center gap-3 rounded-full border border-neutral-300 px-3 py-2 shadow-sm" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);">
+        <button type="button" aria-label="Show previous slide" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" id="pc-prev" style="width: 36px; height: 36px; border: none; background: transparent;">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+
+        <div class="d-flex align-items-center justify-content-center gap-2" id="pc-dots">
+          {% for img in perspective_images %}
+          <button type="button" class="rounded-pill transition-all pc-dot" data-index="{{ forloop.counter0 }}" style="height: 8px; border: none; background: var(--primary);" onclick="selectPerspectiveSlide({{ forloop.counter0 }})"></button>
+          {% endfor %}
+        </div>
+
+        <button type="button" aria-label="Show next slide" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" id="pc-next" style="width: 36px; height: 36px; border: none; background: transparent;">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
       </div>
     </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        let currentPerspectiveIndex = 0;
+        const perspectiveSlides = document.querySelectorAll('.perspective-slide');
+        const perspectiveDots = document.querySelectorAll('.pc-dot');
+        const perspectiveTrack = document.getElementById('perspectiveCarouselTrack');
+        if (!perspectiveTrack || perspectiveSlides.length === 0) return;
+
+        const maxPerspectiveIndex = perspectiveSlides.length - 1;
+        const slideWidth = 250;
+        const rotationStep = 60;
+        const inactiveScale = 0.85;
+
+        window.selectPerspectiveSlide = function(index) {
+          if(index < 0) index = 0;
+          if(index > maxPerspectiveIndex) index = maxPerspectiveIndex;
+          currentPerspectiveIndex = index;
+          
+          // Update track translation
+          const tx = -(currentPerspectiveIndex * slideWidth + slideWidth / 2);
+          perspectiveTrack.style.transform = `translateX(${tx}px)`;
+
+          // Update each slide
+          perspectiveSlides.forEach((slideEl, i) => {
+            const inner = slideEl.querySelector('.slide-inner');
+            const title = slideEl.querySelector('.slide-title');
+            
+            const isActive = (i === currentPerspectiveIndex);
+            const rotateY = (currentPerspectiveIndex - i) * rotationStep;
+            const scale = isActive ? 1 : inactiveScale;
+            
+            inner.style.transform = `rotateY(${rotateY}deg) scale(${scale})`;
+            
+            if(isActive) {
+              title.style.filter = 'blur(0px)';
+              title.style.opacity = '1';
+            } else {
+              title.style.filter = 'blur(2px)';
+              title.style.opacity = '0';
+            }
+          });
+
+          // Update dots
+          perspectiveDots.forEach((dot, i) => {
+            if(i === currentPerspectiveIndex) {
+              dot.style.width = '28px';
+              dot.style.opacity = '1';
+            } else {
+              dot.style.width = '8px';
+              dot.style.opacity = '0.3';
+            }
+          });
+
+          // Update buttons disabled state
+          document.getElementById('pc-prev').disabled = (currentPerspectiveIndex === 0);
+          document.getElementById('pc-next').disabled = (currentPerspectiveIndex === maxPerspectiveIndex);
+        }
+
+        document.getElementById('pc-prev').addEventListener('click', () => {
+          selectPerspectiveSlide(currentPerspectiveIndex - 1);
+        });
+        document.getElementById('pc-next').addEventListener('click', () => {
+          selectPerspectiveSlide(currentPerspectiveIndex + 1);
+        });
+
+        // Initialize
+        selectPerspectiveSlide(0);
+      });
+    </script>
 
     <!-- View All Collections Action Call -->
     <div class="d-flex justify-content-center mt-5">
@@ -156,23 +232,8 @@
     </div>
   </div>
 </section>
-
-<script>
-  function updateScrollIndicator() {
-    const carousel = document.getElementById('productCarousel');
-    const bar = document.getElementById('carouselScrollProgress');
-    if (!carousel || !bar) return;
-    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
-    if (maxScroll <= 0) {
-      bar.style.width = '100%';
-      return;
-    }
-    const percentage = (carousel.scrollLeft / maxScroll) * 100;
-    bar.style.width = Math.max(15, percentage) + '%';
-  }
-  document.addEventListener('DOMContentLoaded', updateScrollIndicator);
-</script>
 {% endif %}
+
 
 <!-- Artisan Narrative Section -->
 <section class="py-5 position-relative overflow-hidden mt-5 artisan-section" style="background-color: var(--primary); color: var(--surface);">

@@ -798,3 +798,31 @@ class HeroPanel(models.Model):
             except Exception:
                 pass
         return ""
+
+class PerspectiveCarouselImage(models.Model):
+    title = models.CharField(max_length=100, blank=True)
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob/Cloudflare R2 storage URL (preferred)")
+    image = models.ImageField(upload_to='perspective_carousel/', null=True, blank=True)
+    link = models.CharField(max_length=500, blank=True, help_text="Where should this panel redirect when clicked?")
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Order in which this image appears")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Perspective Carousel Image"
+        verbose_name_plural = "Perspective Carousel Images"
+
+    def __str__(self):
+        return self.title or f"Perspective Carousel Image {self.id}"
+
+    @property
+    def display_image_url(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""

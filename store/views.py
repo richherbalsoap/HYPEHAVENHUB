@@ -24,7 +24,7 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
-    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel,
+    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, PerspectiveCarouselImage
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -271,9 +271,11 @@ def home(request):
     ).distinct()[:10]
     flash_sale_obj = FlashSale.objects.filter(is_active=True).first()
     hero_panels = HeroPanel.objects.filter(is_active=True)
+    perspective_images = PerspectiveCarouselImage.objects.filter(is_active=True)
     return render(request, 'store/home.html', {
         'featured': featured,
         'hero_products': hero_products,
+        'perspective_images': perspective_images,
         'new_arrivals': new_arrivals,
         'bestsellers': bestsellers,
         'flash_sale': flash_sale,

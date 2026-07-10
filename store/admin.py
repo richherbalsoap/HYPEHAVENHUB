@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CountrySetting, ProductPrice, UserProfile, SiteSetting, HeroPanel
+from .models import CountrySetting, ProductPrice, UserProfile, SiteSetting, HeroPanel, PerspectiveCarouselImage
 
 @admin.register(CountrySetting)
 class CountrySettingAdmin(admin.ModelAdmin):
@@ -27,6 +27,12 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
 @admin.register(HeroPanel)
 class HeroPanelAdmin(admin.ModelAdmin):
+    list_display = ('title', 'order', 'is_active', 'created_at')
+    list_editable = ('order', 'is_active')
+    search_fields = ('title',)
+
+@admin.register(PerspectiveCarouselImage)
+class PerspectiveCarouselImageAdmin(admin.ModelAdmin):
     list_display = ('title', 'order', 'is_active', 'created_at')
     list_editable = ('order', 'is_active')
     search_fields = ('title',)
