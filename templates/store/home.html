@@ -8,29 +8,31 @@
 
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
 {% with animationDuration=32 cardWidth="clamp(160px, 50vw, 250px)" className="cylinder-hero-section w-100" containerClassName="cylinder-carousel-container" cardClassName="cylinder-card" %}
-<section class="{{ className }}" style="background-color: #050505; width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 42em; -webkit-mask-image: linear-gradient(90deg, transparent, #000 15% 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15% 85%, transparent);">
+<section class="{{ className }}" style="background-color: #050505; width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; display: grid; place-items: center; perspective: 1000px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 15% 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15% 85%, transparent);">
   
-  <div class="{{ containerClassName }}" style="transform-style: preserve-3d; display: grid; place-items: center; --anim-dur: {{ animationDuration }}s; --w: {{ cardWidth }}; --n: {% if hero_panels %}{{ hero_panels|length }}{% else %}12{% endif %};">
-    {% if hero_panels %}
-      {% for panel in hero_panels %}
-        <a href="{{ panel.link|default:'#' }}" class="{{ cardClassName }}" style="--i: {{ forloop.counter0 }};">
-          <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}" />
-        </a>
-      {% endfor %}
-    {% else %}
-        <a href="#" class="{{ cardClassName }}" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 6;"><img src="https://images.unsplash.com/photo-1582738411706-bfc8e691d1c2?w=600" alt="Jellyfish 7" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 7;"><img src="https://images.unsplash.com/photo-1551244072-5d12893278ab?w=600" alt="Jellyfish 8" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 8;"><img src="https://images.unsplash.com/photo-1588392382834-a891154bca4d?w=600" alt="Jellyfish 9" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 9;"><img src="https://images.unsplash.com/photo-1493606371202-6275828f90f3?w=600" alt="Jellyfish 10" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 10;"><img src="https://images.unsplash.com/photo-1522069169874-c58ec4b76be1?w=600" alt="Jellyfish 11" /></a>
-        <a href="#" class="{{ cardClassName }}" style="--i: 11;"><img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600" alt="Jellyfish 12" /></a>
-    {% endif %}
+  <div class="cylinder-carousel-scene" style="transform-style: preserve-3d; display: grid; place-items: center; width: 100%; height: 100%; transform: translateZ(calc(var(--radius) * -1)); --anim-dur: {{ animationDuration }}s; --w: {{ cardWidth }}; --n-actual: {% if hero_panels %}{{ hero_panels|length }}{% else %}12{% endif %}; --n: max(3, var(--n-actual)); --ba: calc(1turn / var(--n)); --radius: calc((0.5 * var(--w) + 0.5em) / tan(0.5 * var(--ba)));">
+    <div class="{{ containerClassName }}" style="transform-style: preserve-3d; display: grid; place-items: center;">
+      {% if hero_panels %}
+        {% for panel in hero_panels %}
+          <a href="{{ panel.link|default:'#' }}" class="{{ cardClassName }}" style="--i: {{ forloop.counter0 }};">
+            <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}" />
+          </a>
+        {% endfor %}
+      {% else %}
+          <a href="#" class="{{ cardClassName }}" style="--i: 0;"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jellyfish 1" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 1;"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jellyfish 2" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 2;"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jellyfish 3" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 3;"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jellyfish 4" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 4;"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jellyfish 5" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 5;"><img src="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" alt="Jellyfish 6" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 6;"><img src="https://images.unsplash.com/photo-1582738411706-bfc8e691d1c2?w=600" alt="Jellyfish 7" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 7;"><img src="https://images.unsplash.com/photo-1551244072-5d12893278ab?w=600" alt="Jellyfish 8" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 8;"><img src="https://images.unsplash.com/photo-1588392382834-a891154bca4d?w=600" alt="Jellyfish 9" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 9;"><img src="https://images.unsplash.com/photo-1493606371202-6275828f90f3?w=600" alt="Jellyfish 10" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 10;"><img src="https://images.unsplash.com/photo-1522069169874-c58ec4b76be1?w=600" alt="Jellyfish 11" /></a>
+          <a href="#" class="{{ cardClassName }}" style="--i: 11;"><img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600" alt="Jellyfish 12" /></a>
+      {% endif %}
+    </div>
   </div>
 
   <style>
@@ -39,13 +41,12 @@
     }
     
     .cylinder-carousel-container {
-      --ba: calc(1turn / var(--n));
       animation: ry var(--anim-dur) linear infinite;
     }
     
     @media (max-width: 768px) {
-      .cylinder-carousel-container {
-        --w: clamp(160px, 45vw, 300px) !important; /* Override cardWidth prop on mobile to reach edges */
+      .cylinder-carousel-scene {
+        --w: clamp(160px, 45vw, 300px) !important; /* Override cardWidth prop on mobile */
         --anim-dur: 26s !important;
       }
     }
@@ -57,7 +58,7 @@
       border-radius: 1rem;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      transform: rotateY(calc(var(--i) * var(--ba))) translateZ(calc((0.5 * var(--w) + 0.5em) / tan(0.5 * var(--ba))));
+      transform: rotateY(calc(var(--i) * var(--ba))) translateZ(var(--radius));
       display: block;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       overflow: hidden;
