@@ -7,55 +7,56 @@
 {% block content %}
 
 <!-- Dynamic Hero Section Carousel -->
-<!-- Dynamic Hero Section Carousel (3D Cylinder) -->
-<section class="cylinder-hero-section position-relative overflow-hidden w-100" style="background-color: #050505; padding: 0; height: 80vh; min-height: 600px; display: flex; align-items: center; justify-content: center;">
-  <div class="cylinder-scene w-100 h-100">
-    <div class="cylinder-carousel">
+<!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
+<section class="cylinder-hero-section position-relative overflow-hidden w-100" style="background-color: #050505; padding: 0; height: 80vh; min-height: 500px; display: flex; align-items: center; justify-content: center; touch-action: pan-y;">
+  <div class="cylinder-scene w-100 h-100" id="cylinderScene">
+    <div class="cylinder-carousel" id="cylinderCarousel">
       {% if hero_panels %}
-        <!-- We use JS to dynamically duplicate and arrange these items below -->
         <div id="dynamic-cylinder-data" class="d-none">
           {% for panel in hero_panels %}
             <div class="source-item" data-img="{{ panel.display_image_url }}" data-title="{{ panel.title|default:'Banner' }}"></div>
           {% endfor %}
         </div>
       {% else %}
-        <!-- Fallback static items (10 total for a wide cylinder) -->
-        <div class="cylinder-item cylinder-static-item" style="--i: 0; --total: 10"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 1; --total: 10"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 2; --total: 10"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 3; --total: 10"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 4; --total: 10"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 5; --total: 10"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 6; --total: 10"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 7; --total: 10"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 8; --total: 10"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4"></div>
-        <div class="cylinder-item cylinder-static-item" style="--i: 9; --total: 10"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5"></div>
+        <!-- Fallback static items -->
+        <div class="cylinder-item cylinder-static-item" style="--i: 0; --total: 10"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 1; --total: 10"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 2; --total: 10"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 3; --total: 10"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 4; --total: 10"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 5; --total: 10"><img src="https://images.unsplash.com/photo-1540968221243-29f5d70540bf?w=600" alt="Jewelry 1" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 6; --total: 10"><img src="https://images.unsplash.com/photo-1596135187959-562c650d98bc?w=600" alt="Jewelry 2" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 7; --total: 10"><img src="https://images.unsplash.com/photo-1628944682084-831f35256163?w=600" alt="Jewelry 3" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 8; --total: 10"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600" alt="Jewelry 4" draggable="false"></div>
+        <div class="cylinder-item cylinder-static-item" style="--i: 9; --total: 10"><img src="https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=600" alt="Jewelry 5" draggable="false"></div>
       {% endif %}
     </div>
   </div>
 </section>
 
 <style>
+  .cylinder-hero-section {
+    user-select: none;
+    -webkit-user-select: none;
+  }
   .cylinder-scene {
-    perspective: 1500px;
+    perspective: 1200px;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    cursor: grab;
+  }
+  .cylinder-scene:active {
+    cursor: grabbing;
   }
   .cylinder-carousel {
     position: relative;
-    /* Edge to edge scale */
-    width: 320px;
+    width: 300px;
     height: 450px;
     transform-style: preserve-3d;
-    animation: cylinder-spin 45s infinite linear;
-    cursor: grab;
-  }
-  .cylinder-carousel:hover,
-  .cylinder-carousel:active {
-    cursor: grabbing;
-    animation-play-state: paused;
+    transition: transform 0.1s ease-out; /* Smooth snapping or dragging */
+    will-change: transform;
   }
   .cylinder-item {
     position: absolute;
@@ -65,20 +66,20 @@
     height: 100%;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-    transition: transform 0.3s;
-    user-select: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
     background: #000;
+    /* Optimize rendering */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   .cylinder-static-item {
-    transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(750px);
+    transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(650px);
   }
-  /* Optional reflection or fading to give it a polished look */
   .cylinder-item::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.8) 100%);
     pointer-events: none;
   }
   .cylinder-item img {
@@ -86,37 +87,42 @@
     height: 100%;
     object-fit: cover;
     pointer-events: none;
-    opacity: 0.9;
+    opacity: 0.8;
     transition: opacity 0.3s;
   }
-  .cylinder-item:hover img {
+  
+  /* Current/Front item highlight effect */
+  .cylinder-item.active-item img {
     opacity: 1;
   }
-  @keyframes cylinder-spin {
-    from { transform: rotateY(0deg) rotateX(-2deg); }
-    to { transform: rotateY(-360deg) rotateX(-2deg); }
+  .cylinder-item.active-item {
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.1);
   }
-  
+
   @media (max-width: 768px) {
     .cylinder-carousel {
         width: 220px;
         height: 320px;
     }
     .cylinder-static-item {
-        transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(450px);
+        transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(350px);
     }
   }
 </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const dataContainer = document.getElementById('dynamic-cylinder-data');
-    const carousel = document.querySelector('.cylinder-carousel');
-    if (dataContainer && carousel) {
+    const carousel = document.getElementById('cylinderCarousel');
+    const scene = document.getElementById('cylinderScene');
+    if (!carousel || !scene) return;
+
+    let targetTotal = 10;
+    
+    // Dynamic Loading
+    if (dataContainer) {
       const sourceItems = Array.from(dataContainer.querySelectorAll('.source-item'));
       if (sourceItems.length > 0) {
-        // We want exactly 10 items for a good cylinder effect.
-        // If we have 1 item, repeat 10 times. If 3, repeat to get 9 or 12. Let's aim for 10.
-        const targetTotal = 10;
+        // Build items
         for (let i = 0; i < targetTotal; i++) {
           const source = sourceItems[i % sourceItems.length];
           const item = document.createElement('div');
@@ -126,29 +132,118 @@
           const img = document.createElement('img');
           img.src = source.getAttribute('data-img');
           img.alt = source.getAttribute('data-title');
+          img.draggable = false;
           
           item.appendChild(img);
           carousel.appendChild(item);
         }
-        
-        const updateTransforms = () => {
-          const dynamicItems = carousel.querySelectorAll('.cylinder-dynamic-item');
-          const isMobile = window.innerWidth <= 768;
-          // Matching the static CSS translates
-          const tz = isMobile ? 450 : 750;
-          const total = targetTotal;
-          
-          dynamicItems.forEach((item) => {
-            const i = parseInt(item.getAttribute('data-index'));
-            const angle = i * (360 / total);
-            item.style.transform = `rotateY(${angle}deg) translateZ(${tz}px)`;
-          });
-        };
-        
-        updateTransforms();
-        window.addEventListener('resize', updateTransforms);
       }
     }
+
+    const items = carousel.querySelectorAll('.cylinder-item');
+    targetTotal = items.length || 10;
+    
+    let isMobile = window.innerWidth <= 768;
+    let tz = isMobile ? 350 : 650;
+    const theta = 360 / targetTotal;
+
+    const updateTransforms = () => {
+      isMobile = window.innerWidth <= 768;
+      tz = isMobile ? 350 : 650;
+      items.forEach((item, i) => {
+        const angle = i * theta;
+        item.style.transform = `rotateY(${angle}deg) translateZ(${tz}px)`;
+      });
+      updateActiveItem();
+    };
+    
+    // Interaction State
+    let isDragging = false;
+    let startX = 0;
+    let currentRotateY = 0;
+    let targetRotateY = 0;
+    let dragRotateY = 0;
+    
+    // Physics / Animation loop
+    let animationFrame;
+    const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+
+    const animate = () => {
+      if (!isDragging) {
+        // Smoothly snap to target or just smoothly damp
+        currentRotateY = lerp(currentRotateY, targetRotateY, 0.05);
+      } else {
+        currentRotateY = lerp(currentRotateY, dragRotateY, 0.2);
+      }
+      
+      carousel.style.transform = `rotateY(${currentRotateY}deg) rotateX(-2deg)`;
+      updateActiveItem();
+      
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    const updateActiveItem = () => {
+        // Calculate which item is at the front
+        // Normalizing the current rotation to positive degrees
+        let normalizedRotation = ((currentRotateY % 360) + 360) % 360;
+        // The front item is the one whose angle is closest to -normalizedRotation
+        // Actually, since we rotate the container by currentRotateY, the item at -currentRotateY is at the front.
+        let frontAngle = (360 - normalizedRotation) % 360;
+        
+        let closestIndex = Math.round(frontAngle / theta) % targetTotal;
+        if (closestIndex < 0) closestIndex += targetTotal;
+        
+        items.forEach((item, i) => {
+            if (i === closestIndex) {
+                item.classList.add('active-item');
+            } else {
+                item.classList.remove('active-item');
+            }
+        });
+    }
+
+    // Event Listeners for Dragging
+    const startDrag = (e) => {
+      if (e.type === 'touchstart') e.preventDefault();
+      isDragging = true;
+      startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+      scene.style.cursor = 'grabbing';
+      dragRotateY = currentRotateY;
+    };
+
+    const drag = (e) => {
+      if (!isDragging) return;
+      const x = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+      const deltaX = x - startX;
+      // Sensitivity multiplier
+      const sensitivity = isMobile ? 0.4 : 0.2;
+      dragRotateY = targetRotateY + (deltaX * sensitivity);
+    };
+
+    const endDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      scene.style.cursor = 'grab';
+      // Snap to nearest item
+      targetRotateY = Math.round(dragRotateY / theta) * theta;
+    };
+
+    // Mouse Events
+    scene.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', drag);
+    window.addEventListener('mouseup', endDrag);
+
+    // Touch Events
+    scene.addEventListener('touchstart', startDrag, { passive: false });
+    window.addEventListener('touchmove', drag, { passive: false });
+    window.addEventListener('touchend', endDrag);
+    
+    // Resize Event
+    window.addEventListener('resize', updateTransforms);
+
+    // Initialization
+    updateTransforms();
+    animate();
   });
 </script>
 
