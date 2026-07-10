@@ -26,95 +26,62 @@
         <div class="cylinder-card" style="--i:7"><img src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400" alt="jhumka 8"></div>
     {% endif %}
   </div>
-  <!-- Fade Mask Right -->
-  <div class="cyl-mask-right"></div>
+  </div>
 </div>
 
 <style>
-  /* --- Luxury Enhancements: Light/Dark Mode & Lighting --- */
-  :root {
-    --cyl-bg: #0d0d0d;
-    --cyl-grad-center: rgba(30,30,30,1);
-    --cyl-grad-edge: #0d0d0d;
-    --cyl-card-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15);
-    --cyl-reflect: rgba(0,0,0,0.15); /* Reduced from 0.4 to fix lag */
-    --cyl-particle: rgba(255,255,255,0.3);
-  }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      --cyl-bg: #f8f9fa;
-      --cyl-grad-center: #ffffff;
-      --cyl-grad-edge: #e9ecef;
-      --cyl-card-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
-      --cyl-reflect: rgba(255,255,255,0.2); /* Reduced from 0.5 to fix lag */
-      --cyl-particle: rgba(0,0,0,0.1);
-    }
-  }
-
-  /* Mobile-specific adjustments to make the glass effect even lighter */
-  @media (max-width: 768px) {
-    :root {
-      --cyl-reflect: rgba(0,0,0,0.05);
-    }
-  }
-  @media (max-width: 768px) and (prefers-color-scheme: light) {
-    :root {
-      --cyl-reflect: rgba(255,255,255,0.08);
-    }
-  }
-
   /* Full viewport-spanning wrapper */
   .cyl-wrapper{
     position: relative;
     width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    min-height: 520px;
+    margin-left: calc(-50vw + 50%);   /* full-bleed trick, overflow-x issue avoid karne ke liye */
+    min-height: 480px;
     display: grid;
     place-items: center;
     overflow: hidden;
-    background: var(--cyl-bg);
-    background-image: radial-gradient(circle at center, var(--cyl-grad-center) 0%, var(--cyl-grad-edge) 100%);
-    perspective: clamp(30em, 55vw, 70em);
+    background: #0d0d0d; 
+    perspective: clamp(30em, 55vw, 70em); 
   }
 
-  /* Grain texture removed for performance */
-
-  /* Fade masks */
+  .cyl-wrapper::before,
   .cyl-wrapper::after{
     content: "";
     position: absolute;
-    top: 0; bottom: 0; left: 0;
+    top: 0;
+    bottom: 0;
     width: 15%;
-    z-index: 2; pointer-events: none;
-    background: linear-gradient(90deg, var(--cyl-bg), transparent);
+    z-index: 2;
+    pointer-events: none;
   }
-  .cyl-mask-right {
-    content: "";
-    position: absolute;
-    top: 0; bottom: 0; right: 0;
-    width: 15%;
-    z-index: 2; pointer-events: none;
-    background: linear-gradient(90deg, transparent, var(--cyl-bg));
+  .cyl-wrapper::before{
+    left: 0;
+    background: linear-gradient(90deg, #0d0d0d, transparent);
+  }
+  .cyl-wrapper::after{
+    right: 0;
+    background: linear-gradient(90deg, transparent, #0d0d0d);
   }
 
-  /* rotating group */
+  /* rotating group — cylinder ka core */
   .cyl-stage{
     display: grid;
     place-items: center;
     transform-style: preserve-3d;
-    --ba: calc(1turn / var(--n));
+    --ba: calc(1turn / var(--n));      /* angle between each card */
     --w: clamp(160px, 17vw, 320px);
     --radius: clamp(280px, 34vw, 620px);
-    /* JS will handle rotation for buttery smooth inertia, removing CSS animation */
-    will-change: transform;
-    cursor: grab;
-  }
-  .cyl-stage:active {
-    cursor: grabbing;
+    animation: cyl-rotate var(--anim-dur, 28s) linear infinite;
   }
 
-  /* individual card */
+  @keyframes cyl-rotate{
+    to { transform: rotateY(1turn); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .cyl-stage{ animation-duration: 120s; }
+  }
+
+  /* individual card — sab ek hi grid cell mein stack hote hain, phir 3D transform se circle mein spread hote hain */
   .cylinder-card{
     grid-area: 1 / 1;
     width: var(--w, 220px);
@@ -122,66 +89,12 @@
     border-radius: 16px;
     overflow: hidden;
     backface-visibility: hidden;
-    
-    /* Reflection Effect */
-    -webkit-box-reflect: below 5px linear-gradient(transparent 50%, var(--cyl-reflect));
-    
+    box-shadow: 0 10px 30px rgba(0,0,0,.45);
+
     transform:
       rotateY(calc(var(--i) * var(--ba)))
       translateZ(calc(-1 * var(--radius)));
   }
-
-  .cylinder-card:hover {
-    transform:
-      rotateY(calc(var(--i) * var(--ba)))
-      translateZ(calc(-1 * var(--radius)))
-      scale(1.02); /* Minimal scale, removed filter for performance */
-  }
-
-  @keyframes spin-cyl {
-    to { transform: rotateY(1turn); }
-  }
-  
-  .cyl-stage {
-    animation: spin-cyl var(--anim-dur) linear infinite;
-  }
-
-  /* --- Mobile-Only 2D Lightweight Animation --- */
-  @media (max-width: 768px) {
-    .cyl-wrapper {
-      perspective: none;
-      min-height: auto;
-      padding: 40px 0;
-    }
-    .cyl-stage {
-      display: flex;
-      place-items: start;
-      transform-style: flat;
-      animation: mobile-scroll 20s ease-in-out infinite alternate;
-      gap: 16px;
-      width: max-content;
-      padding: 0 20px;
-    }
-    .cylinder-card {
-      grid-area: auto;
-      transform: none !important; /* Remove 3D entirely on mobile */
-      width: 65vw;
-      max-width: 260px;
-      aspect-ratio: 3/4;
-      /* Very faint reflection for mobile to avoid lag */
-      -webkit-box-reflect: below 2px linear-gradient(transparent 70%, var(--cyl-reflect));
-    }
-    .cylinder-card:hover {
-      transform: none !important;
-    }
-  }
-
-  @keyframes mobile-scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-100% + 100vw)); }
-  }
-
-
 
   .cylinder-card img{
     width: 100%;
