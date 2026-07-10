@@ -245,7 +245,7 @@ class SiteSettingForm(forms.ModelForm):
 class HeroPanelForm(forms.ModelForm):
     class Meta:
         model = HeroPanel
-        fields = ['title', 'link', 'image_url', 'image', 'order', 'is_active']
+        fields = ['title', 'link', 'image_url', 'order', 'is_active']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Hero Title (Internal)'}),
             'link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://... (Where should it redirect?)'}),
@@ -257,7 +257,7 @@ class HeroPanelForm(forms.ModelForm):
 class PerspectiveCarouselImageForm(forms.ModelForm):
     class Meta:
         model = PerspectiveCarouselImage
-        fields = ['title', 'link', 'image_url', 'image', 'order', 'is_active']
+        fields = ['title', 'link', 'image_url', 'order', 'is_active']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Image Title'}),
             'link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://... (Redirect on click)'}),
