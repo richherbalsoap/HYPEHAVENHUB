@@ -8,10 +8,10 @@
 
 <!-- Dynamic Hero Section Carousel -->
 <!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
-<section class="cylinder-hero-section w-100" style="background-color: #fff3ed; width: 100vw; height: 70vh; min-height: 450px; overflow: hidden; position: relative; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); display: flex; align-items: center; justify-content: center; touch-action: pan-y;">
-  <div class="cylinder-scene" id="cylinderScene" style="perspective: 1200px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: grab;">
+<section class="cylinder-hero-section w-100" style="background-color: #050505; width: 100vw; height: 85vh; min-height: 500px; max-height: 800px; overflow: hidden; position: relative; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); display: flex; align-items: center; justify-content: center; touch-action: pan-y;">
+  <div class="cylinder-scene" id="cylinderScene" style="perspective: 1000px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; cursor: grab;">
     <div class="cylinder-carousel" id="cylinderCarousel" style="position: relative; transform-style: preserve-3d; will-change: transform;">
-            <div id="dynamic-cylinder-data" class="d-none">
+      <div id="dynamic-cylinder-data" class="d-none">
         {% if hero_panels %}
           {% for panel in hero_panels %}
             <div class="source-item" data-img="{{ panel.display_image_url }}" data-title="{{ panel.title|default:'Banner' }}" data-link="{{ panel.link|default:'#' }}"></div>
@@ -25,7 +25,6 @@
           <div class="source-item" data-img="https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=600" data-title="Jellyfish 6" data-link="#"></div>
         {% endif %}
       </div>
-    </div>
     </div>
   </div>
 </section>
@@ -43,25 +42,20 @@
     top: 50%;
     left: 50%;
     transform-origin: center;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     background: #000;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+    transition: filter 0.3s ease;
   }
   .cylinder-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     pointer-events: none;
-    opacity: 0.9;
-    transition: opacity 0.4s ease;
   }
-  .cylinder-item.active-item img {
-    opacity: 1;
-  }
-  /* Optional reflection or dark overlay can be added here */
 </style>
 
 <script>
@@ -74,9 +68,11 @@
     const sourceItems = Array.from(dataContainer.querySelectorAll('.source-item'));
     if (sourceItems.length === 0) return;
 
-    // Vengeance UI uses a lot of items for a smooth cylinder. We repeat user items to fill it.
-    const minItems = 12;
-    const targetTotal = Math.max(minItems, Math.ceil(minItems / sourceItems.length) * sourceItems.length);
+    let targetTotal = sourceItems.length;
+    // We want a minimum of 5 or 6 items to make a proper 3D shape
+    if (targetTotal < 5) {
+      targetTotal = sourceItems.length * Math.ceil(5 / sourceItems.length);
+    }
     
     const itemElements = [];
     for (let i = 0; i < targetTotal; i++) {
@@ -104,15 +100,15 @@
 
     const updateLayout = () => {
       isMobile = window.innerWidth <= 768;
-      // Dimensions inspired by typical Vengeance UI card sizes (narrower, taller)
-      const itemWidth = isMobile ? window.innerWidth * 0.5 : 280;
-      const itemHeight = isMobile ? itemWidth * 1.5 : 400;
+      // Closer to Vengeance UI sizing
+      const itemWidth = isMobile ? window.innerWidth * 0.6 : 300;
+      const itemHeight = isMobile ? itemWidth * 1.4 : 450;
       
       carousel.style.width = `${itemWidth}px`;
       carousel.style.height = `${itemHeight}px`;
       
-      // Calculate radius to form a continuous circle with a slight gap
-      const gap = isMobile ? 15 : 25;
+      // Calculate radius. Add some gap so they aren't touching exactly.
+      const gap = isMobile ? 20 : 40;
       tz = Math.round((itemWidth / 2) / Math.tan(Math.PI / targetTotal)) + gap;
 
       itemElements.forEach((item, i) => {
@@ -122,7 +118,6 @@
         item.style.margin = `-${itemHeight/2}px 0 0 -${itemWidth/2}px`;
         item.style.transform = `rotateY(${angle}deg) translateZ(${tz}px)`;
       });
-      updateActiveItem();
     };
 
     let isDragging = false;
@@ -136,21 +131,15 @@
 
     const animate = () => {
       if (!isDragging) {
-        velocity *= 0.95; // friction
+        velocity *= 0.95; // Smooth friction
         targetRotateY += velocity;
         
-        // Auto rotate if not interacting
-        if (Math.abs(velocity) < 0.05 && autoRotate) {
-           targetRotateY -= 0.15; // Slow spin to the left
+        // Auto rotate smoothly if velocity is low
+        if (Math.abs(velocity) < 0.1 && autoRotate) {
+           targetRotateY -= 0.1; // Slow spin to the left
         }
         
-        // Snap logic when stopped
-        if (Math.abs(velocity) < 0.1 && !autoRotate) {
-           const snapAngle = Math.round(targetRotateY / theta) * theta;
-           targetRotateY += (snapAngle - targetRotateY) * 0.1;
-        }
-        
-        currentRotateY += (targetRotateY - currentRotateY) * 0.1;
+        currentRotateY += (targetRotateY - currentRotateY) * 0.08;
       } else {
         currentRotateY += (dragRotateY - currentRotateY) * 0.3;
       }
@@ -167,12 +156,15 @@
       if (closestIndex < 0) closestIndex += targetTotal;
       
       itemElements.forEach((item, i) => {
-          if (i === closestIndex) {
-              item.classList.add('active-item');
-              item.style.boxShadow = '0 20px 40px rgba(0,0,0,0.2), 0 0 10px rgba(255,255,255,0.4)';
+          let itemAngle = i * theta;
+          let diff = Math.abs(frontAngle - itemAngle);
+          if (diff > 180) diff = 360 - diff;
+          
+          // Items in the back get darker
+          if (diff > 45) {
+             item.style.filter = 'brightness(0.5)';
           } else {
-              item.classList.remove('active-item');
-              item.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+             item.style.filter = 'brightness(1)';
           }
       });
     };
@@ -196,12 +188,13 @@
       const now = Date.now();
       const dt = now - lastTime;
       if (dt > 0) {
-          velocity = (x - lastX) / dt * (isMobile ? 1.5 : 0.8);
+          velocity = (x - lastX) / dt * (isMobile ? 1.5 : 1.0);
       }
       lastX = x;
       lastTime = now;
 
-      const sensitivity = isMobile ? 0.5 : 0.3;
+      // Make dragging feel 1-to-1 with the cylinder rotation
+      const sensitivity = isMobile ? 0.6 : 0.4;
       dragRotateY = targetRotateY + (deltaX * sensitivity);
     };
 
@@ -212,7 +205,7 @@
       targetRotateY = dragRotateY;
       
       const endX = e.type.includes('mouse') ? e.pageX : (e.changedTouches ? e.changedTouches[0].pageX : startX);
-      if (Math.abs(endX - startX) > 10) {
+      if (Math.abs(endX - startX) > 5) {
          setTimeout(() => {
             const preventClick = (ev) => {
                 ev.preventDefault();
@@ -222,6 +215,11 @@
             window.addEventListener('click', preventClick, true);
          }, 0);
       }
+      
+      // Resume auto rotation after a delay if not touched again
+      setTimeout(() => {
+         if (!isDragging) autoRotate = true;
+      }, 3000);
     };
 
     scene.addEventListener('mousedown', startDrag);
@@ -237,8 +235,9 @@
     
     let autoRotate = true;
     scene.addEventListener('mouseenter', () => autoRotate = false);
-    scene.addEventListener('mouseleave', () => autoRotate = true);
-    scene.addEventListener('touchstart', () => autoRotate = false, { passive: true });
+    scene.addEventListener('mouseleave', () => {
+        if(!isDragging) autoRotate = true;
+    });
 
     updateLayout();
     animate();
