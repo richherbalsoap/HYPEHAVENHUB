@@ -146,6 +146,42 @@
     animation: spin-cyl var(--anim-dur) linear infinite;
   }
 
+  /* --- Mobile-Only 2D Lightweight Animation --- */
+  @media (max-width: 768px) {
+    .cyl-wrapper {
+      perspective: none;
+      min-height: auto;
+      padding: 40px 0;
+    }
+    .cyl-stage {
+      display: flex;
+      place-items: start;
+      transform-style: flat;
+      animation: mobile-scroll 20s ease-in-out infinite alternate;
+      gap: 16px;
+      width: max-content;
+      padding: 0 20px;
+    }
+    .cylinder-card {
+      grid-area: auto;
+      transform: none !important; /* Remove 3D entirely on mobile */
+      width: 65vw;
+      max-width: 260px;
+      aspect-ratio: 3/4;
+      /* Very faint reflection for mobile to avoid lag */
+      -webkit-box-reflect: below 2px linear-gradient(transparent 70%, var(--cyl-reflect));
+    }
+    .cylinder-card:hover {
+      transform: none !important;
+    }
+  }
+
+  @keyframes mobile-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-100% + 100vw)); }
+  }
+
+
 
   .cylinder-card img{
     width: 100%;
