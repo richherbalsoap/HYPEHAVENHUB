@@ -50,12 +50,12 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         csp_parts = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://checkout.razorpay.com https://*.razorpay.com https://checkout-ui.shiprocket.com https://*.shiprocket.com https://*.shiprocket.in https://shiprocket.in https://*.fastrr.com https://fastrr.com https://*.otpless.com https://otpless.com https://www.googletagmanager.com https://www.google-analytics.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://checkout.razorpay.com https://*.razorpay.com https://checkout-ui.shiprocket.com https://*.shiprocket.com https://*.shiprocket.in https://shiprocket.in https://*.fastrr.com https://fastrr.com https://*.otpless.com https://otpless.com https://www.googletagmanager.com https://www.google-analytics.com https://images.unsplash.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
             "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
-            "img-src 'self' data: https://*.r2.dev https://*.googleusercontent.com https://*.supabase.co https://*.neon.tech https://*.cloudinary.com https://*.s3.amazonaws.com https://*.r2.cloudflarestorage.com https://*.razorpay.com https://*.shiprocket.com https://*.shiprocket.in https://shiprocket.in https://*.fastrr.com https://fastrr.com https://www.google-analytics.com",
-            "connect-src 'self' https://api.postalpincode.in https://api.zippopotam.us https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.r2.cloudflarestorage.com https://checkout-api.shiprocket.com https://*.shiprocket.com https://*.shiprocket.in https://shiprocket.in https://*.fastrr.com https://fastrr.com https://*.cred.club https://cred.club https://*.google.com https://*.otpless.com https://otpless.com https://api.razorpay.com https://*.razorpay.com https://www.google-analytics.com",
-            "media-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com",
+            "img-src * data: blob: 'self'",
+            "connect-src 'self' https://api.postalpincode.in https://api.zippopotam.us https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://*.r2.cloudflarestorage.com https://checkout-api.shiprocket.com https://*.shiprocket.com https://*.shiprocket.in https://shiprocket.in https://*.fastrr.com https://fastrr.com https://*.cred.club https://cred.club https://*.google.com https://*.otpless.com https://otpless.com https://api.razorpay.com https://*.razorpay.com https://www.google-analytics.com https://images.unsplash.com",
+            "media-src * data: blob: 'self'",
             "frame-src 'self' https://api.razorpay.com https://*.razorpay.com https://*.otpless.com https://otpless.com https://*.shiprocket.in https://shiprocket.in",
             "object-src 'none'",
             "base-uri 'self'",
