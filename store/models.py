@@ -791,3 +791,18 @@ class HeroPanel(models.Model):
     def display_image_url(self):
         return self.image_url if self.image_url else ''
 
+
+class ProductQuestion(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='questions')
+    question = models.TextField()
+    email = models.EmailField()
+    display_name = models.CharField(max_length=100)
+    is_answered = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Question by {self.display_name} on {self.product.name}"
+

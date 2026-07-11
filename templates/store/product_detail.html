@@ -451,7 +451,7 @@
 <div class="container pb-5">
   <!-- Product Reviews -->
   <div class="mt-4" id="reviews-section">
-    <div class="review-header-section d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-4 rounded" style="background-color: #f6ebd8;">
+    <div class="review-header-section d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-4 rounded" style="background-color: #1a1a1a; color: #ffffff;">
       <div class="review-stats mb-3 mb-md-0">
         <h3 class="section-title mb-1" style="font-size: 1.8rem; font-family: 'Playfair Display', serif;">Customer Reviews</h3>
         <div class="d-flex align-items-center gap-2">
@@ -463,7 +463,7 @@
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 4 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 4.8 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
           </div>
-          <span class="text-muted">{{ product.review_count }} reviews</span>
+          <span class="text-muted" style="color: #ccc !important;">{{ product.review_count }} reviews</span>
         </div>
       </div>
       <div class="review-actions d-flex flex-column gap-2" style="min-width: 200px;">
@@ -472,7 +472,7 @@
         {% elif not user.is_authenticated %}
           <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-write-review w-100" style="background-color: #3b8c7b; color: #fff; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: none; text-align: center;">Write a review</a>
         {% endif %}
-        <button class="btn btn-ask-question w-100" style="background-color: #fcecd5; color: #000; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: 1px solid #d4c5b3;">Ask a question</button>
+        <button class="btn btn-ask-question w-100" onclick="openQuestionModal()" style="background-color: transparent; color: #fff; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: 1px solid #fff;">Ask a question</button>
       </div>
     </div>
     
@@ -486,6 +486,49 @@
         {% endfor %}
       </div>
     {% endif %}
+
+    <!-- Full Screen Ask Question Modal -->
+    <div id="questionModal" class="review-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 1050; overflow-y: auto;">
+      <div class="review-modal-content" style="background: white; height: 100%; display: flex; flex-direction: column;">
+        <div class="review-modal-header border-bottom p-3 d-flex justify-content-between align-items-center">
+           <div></div>
+           <button class="btn btn-link text-dark p-0" onclick="closeQuestionModal()">
+             <span class="material-symbols-outlined" style="font-size: 28px;">close</span>
+           </button>
+        </div>
+        
+        <div class="review-modal-body p-4" style="max-width: 600px; margin: 0 auto; width: 100%;">
+          <div class="text-left mb-4">
+            <h3 style="font-weight: 500; margin-bottom: 24px; color: black;">Ask a question about this product</h3>
+          </div>
+
+          <form method="POST" id="questionFormModal">
+            {% csrf_token %}
+            <div class="mb-4 text-start">
+              <label class="form-label" style="color: black; font-weight: 400;">Question</label>
+              <textarea name="question" class="form-control" rows="4" placeholder="Write your question here" required style="border: 1px solid #ccc; padding: 12px; border-radius: 6px;"></textarea>
+            </div>
+            
+            <div class="mb-4 text-start">
+              <label class="form-label" style="color: black; font-weight: 400;">Email address (Required)</label>
+              <input type="email" name="email" class="form-control" placeholder="Your email address" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}" required style="border: 1px solid #ccc; padding: 12px; border-radius: 6px;">
+              <small class="text-muted mt-1 d-block" style="font-size: 13px;">We respect your privacy.</small>
+            </div>
+            
+            <div class="mb-5 text-start">
+              <label class="form-label" style="color: black; font-weight: 400;">Display name (Required)</label>
+              <input type="text" name="display_name" class="form-control" placeholder="Display name" value="{% if user.is_authenticated %}{{ user.get_full_name }}{% endif %}" required style="border: 1px solid #ccc; padding: 12px; border-radius: 6px;">
+            </div>
+            
+            <p class="text-center" style="font-size: 13px; color: #666; margin-bottom: 24px;">
+              We'll only contact you about your question if necessary. By submitting your question, you agree to our <a href="#" style="color: #666; text-decoration: underline;">terms and conditions</a> and <a href="#" style="color: #666; text-decoration: underline;">privacy policy</a>.
+            </p>
+            
+            <button type="submit" class="btn w-100" style="background-color: #1c7360; color: white; border: none; font-weight: 600; padding: 14px; border-radius: 6px;">Next</button>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- Full Screen Review Modal -->
     {% if user.is_authenticated and not user_review %}
@@ -863,6 +906,14 @@ document.addEventListener('DOMContentLoaded', () => {
 </style>
 
 <script>
+function openQuestionModal() {
+  document.getElementById('questionModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeQuestionModal() {
+  document.getElementById('questionModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
 function openReviewModal() {
   document.getElementById('reviewModal').style.display = 'block';
   document.body.style.overflow = 'hidden';

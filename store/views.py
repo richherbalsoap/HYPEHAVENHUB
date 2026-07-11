@@ -24,7 +24,7 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
-    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel
+    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, ProductQuestion
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -409,25 +409,36 @@ def product_detail(request, slug):
         user_in_wishlist = Wishlist.objects.filter(user=request.user, product=product).exists()
 
     review_form = ReviewForm()
-    if request.method == 'POST' and request.user.is_authenticated:
-        review_form = ReviewForm(request.POST)
-        if review_form.is_valid():
-            if not Review.objects.filter(user=request.user, product=product).exists():
-                rev = review_form.save(commit=False)
-                rev.user = request.user
-                rev.product = product
-                has_order = Order.objects.filter(
-                    user=request.user, items__product=product, status='delivered'
-                ).exists()
-                rev.is_verified_purchase = has_order
-                rev.save()
-                images_files = request.FILES.getlist('review_images')
-                for img in images_files[:3]:
-                    ReviewImage.objects.create(review=rev, image=img)
-                messages.success(request, 'Review submitted successfully!')
-                return redirect('product_detail', slug=slug)
-            else:
-                messages.warning(request, 'You have already reviewed this product.')
+    if request.method == 'POST':
+        if 'question' in request.POST and 'email' in request.POST:
+            ProductQuestion.objects.create(
+                product=product,
+                question=request.POST.get('question'),
+                email=request.POST.get('email'),
+                display_name=request.POST.get('display_name')
+            )
+            messages.success(request, 'Your question has been submitted successfully!')
+            return redirect('product_detail', slug=slug)
+            
+        elif request.user.is_authenticated:
+            review_form = ReviewForm(request.POST)
+            if review_form.is_valid():
+                if not Review.objects.filter(user=request.user, product=product).exists():
+                    rev = review_form.save(commit=False)
+                    rev.user = request.user
+                    rev.product = product
+                    has_order = Order.objects.filter(
+                        user=request.user, items__product=product, status='delivered'
+                    ).exists()
+                    rev.is_verified_purchase = has_order
+                    rev.save()
+                    images_files = request.FILES.getlist('review_images')
+                    for img in images_files[:3]:
+                        ReviewImage.objects.create(review=rev, image=img)
+                    messages.success(request, 'Review submitted successfully!')
+                    return redirect('product_detail', slug=slug)
+                else:
+                    messages.warning(request, 'You have already reviewed this product.')
 
     return render(request, 'store/product_detail.html', {
         'product': product,

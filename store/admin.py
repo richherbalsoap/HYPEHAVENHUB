@@ -31,3 +31,10 @@ class HeroPanelAdmin(admin.ModelAdmin):
     list_editable = ('order', 'is_active')
     search_fields = ('title',)
 
+from .models import ProductQuestion
+
+@admin.register(ProductQuestion)
+class ProductQuestionAdmin(admin.ModelAdmin):
+    list_display = ('product', 'display_name', 'email', 'is_answered', 'created_at')
+    list_filter = ('is_answered', 'created_at')
+    search_fields = ('question', 'display_name', 'email', 'product__name')
