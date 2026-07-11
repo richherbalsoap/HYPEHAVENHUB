@@ -1398,11 +1398,84 @@ def pincode_lookup(request):
     if not pincode or len(pincode) < 6:
         return JsonResponse({'success': False, 'message': 'Invalid pincode.'})
     
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Try using Shiprocket Courier Serviceability
+    try:
+        from .shipping import ShiprocketService
+        token = ShiprocketService._get_token()
+        if token:
+            url = "https://apiv2.shiprocket.in/v1/external/courier/serviceability/"
+            params = {
+                'pickup_postcode': '360004',  # Default warehouse pickup location (Rajkot, Gujarat)
+                'delivery_postcode': pincode,
+                'weight': '0.5',
+                'cod': '0'  # Prepaid order serviceability check only (no COD)
+            }
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+            response = requests.get(url, params=params, headers=headers, timeout=8)
+            if response.status_code == 200:
+                res_data = response.json()
+                if res_data.get('status') == 200:
+                    data = res_data.get('data', {})
+                    available_couriers = data.get('available_courier_companies', [])
+                    if available_couriers:
+                        # Extract ETD and location info
+                        etds = []
+                        city = ""
+                        state = ""
+                        for courier in available_couriers:
+                            etd = courier.get('etd')
+                            if etd:
+                                etds.append(etd)
+                            # Get city and state if available
+                            if not city:
+                                city = courier.get('city', '')
+                            if not state:
+                                state = courier.get('state', '')
+                        
+                        etd_str = "3-5 Days"
+                        if etds:
+                            try:
+                                from datetime import datetime
+                                parsed_dates = []
+                                for e in etds:
+                                    try:
+                                        parsed_dates.append(datetime.strptime(e.split()[0], "%Y-%m-%d"))
+                                    except:
+                                        pass
+                                if parsed_dates:
+                                    fastest_date = min(parsed_dates)
+                                    etd_str = fastest_date.strftime("%d %b, %Y")
+                            except:
+                                etd_str = etds[0]
+                                
+                        return JsonResponse({
+                            'success': True,
+                            'serviceable': True,
+                            'city': city,
+                            'state': state,
+                            'etd': etd_str,
+                            'message': f'Serviceable. Estimated delivery by {etd_str}.'
+                        })
+                    else:
+                        return JsonResponse({
+                            'success': False,
+                            'serviceable': False,
+                            'message': 'Pincode not serviceable by Shiprocket.'
+                        })
+    except Exception as e:
+        logger.error(f"Shiprocket serviceability API error: {str(e)}")
+        # Continue to fallback below
+
+    # Fallback to Postal Pincode API if Shiprocket is unconfigured/offline
     try:
         url = f"https://api.postalpincode.in/pincode/{pincode}"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        
-        # Disable SSL warnings
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
         response = requests.get(url, headers=headers, verify=False, timeout=8)
@@ -1410,24 +1483,32 @@ def pincode_lookup(request):
             data = response.json()
             if data and data[0].get('Status') == 'Success':
                 post_offices = data[0].get('PostOffice', [])
-                locations = []
-                seen = set()
-                for po in post_offices:
-                    city = po.get('District', '')
-                    state = po.get('State', '')
-                    if city and state and (city, state) not in seen:
-                        seen.add((city, state))
-                        locations.append({'city': city, 'state': state})
-                return JsonResponse({'success': True, 'locations': locations})
+                city = ""
+                state = ""
+                if post_offices:
+                    city = post_offices[0].get('District', '')
+                    state = post_offices[0].get('State', '')
+                
+                # Mock a delivery date of 3-5 days
+                from datetime import datetime, timedelta
+                etd_date = datetime.now() + timedelta(days=4)
+                etd_str = etd_date.strftime("%d %b, %Y")
+                
+                return JsonResponse({
+                    'success': True,
+                    'serviceable': True,
+                    'city': city,
+                    'state': state,
+                    'etd': etd_str,
+                    'message': f'Serviceable. Estimated delivery by {etd_str}.'
+                })
             else:
                 return JsonResponse({'success': False, 'message': 'Pincode not found.'})
         else:
-            return JsonResponse({'success': False, 'message': f'API Error: {response.status_code}'})
+            return JsonResponse({'success': False, 'message': 'Unable to verify pincode serviceability.'})
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Pincode lookup error: {str(e)}")
-        return JsonResponse({'success': False, 'message': f'Error fetching details: {str(e)}'})
+        logger.error(f"Pincode lookup fallback error: {str(e)}")
+        return JsonResponse({'success': False, 'message': f'Error checking pincode: {str(e)}'})
 
 
 # ==========================================
