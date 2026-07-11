@@ -272,6 +272,10 @@ def home(request):
     flash_sale_obj = FlashSale.objects.filter(is_active=True).first()
     hero_panels = HeroPanel.objects.filter(is_active=True)
     
+    wishlist_product_ids = []
+    if request.user.is_authenticated:
+        wishlist_product_ids = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
+    
     return render(request, 'store/home.html', {
         'featured': featured,
         'hero_products': hero_products,
@@ -282,6 +286,7 @@ def home(request):
         'brands': brands,
         'flash_sale_end_time': flash_sale_obj.end_time.isoformat() if flash_sale_obj else None,
         'hero_panels': hero_panels,
+        'wishlist_product_ids': wishlist_product_ids,
     })
 
 

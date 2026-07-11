@@ -164,121 +164,238 @@
 </section>
 {% endif %}
 
-<!-- New Arrivals Perspective Carousel -->
-{% if new_arrivals %}
-<section class="py-5 position-relative overflow-hidden" id="new-arrivals" style="background-color: var(--surface);">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-end mb-4">
-      <div>
-        <span class="section-eyebrow">Seasonal Curation</span>
-        <h2 class="section-title mb-0">New Arrivals</h2>
+<!-- Shop By Range Section -->
+<section class="py-5 position-relative overflow-hidden" id="shop-by-range" style="background-color: #000; color: #fff;">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h2 class="section-title text-white text-uppercase" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 8px;">Shop By Range</h2>
+      <p class="section-subtitle mb-0" style="color: #a0a0a0; font-size: 14px; font-style: italic;">Curated selections designed for every occasion</p>
+    </div>
+
+    <!-- Range Switcher Tabs -->
+    <div class="d-flex justify-content-center mb-5">
+      <div class="d-inline-flex p-1 rounded-pill" style="background-color: #121212; border: 1.5px solid #222;">
+        <button class="range-tab-btn active" onclick="switchRangeTab('new-launch')" id="btn-new-launch">NEW LAUNCH</button>
+        <button class="range-tab-btn" onclick="switchRangeTab('trending-product')" id="btn-trending-product">TRENDING PRODUCT</button>
+        <button class="range-tab-btn" onclick="switchRangeTab('best-seller')" id="btn-best-seller">BEST SELLER</button>
       </div>
     </div>
 
-    <!-- Perspective Carousel Container -->
-    <div class="position-relative w-100 overflow-hidden" style="height: 450px; perspective: 1200px;" id="perspectiveCarouselWrapper">
-      <div id="perspectiveCarouselTrack" class="position-absolute start-50 top-50 d-flex align-items-center" style="width: max-content; transform: translateY(-50%); transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-        {% for product in new_arrivals %}
-        <div class="flex-shrink-0 perspective-slide" style="width: 250px; perspective: 1200px;" data-index="{{ forloop.counter0 }}">
-          <div class="d-flex w-100 flex-column align-items-center slide-inner" style="gap: 1rem; will-change: transform; transform-style: preserve-3d; transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <button type="button" class="w-100 border-0 bg-transparent p-0" style="aspect-ratio: 3/4; cursor: pointer;" onclick="selectPerspectiveSlide({{ forloop.counter0 }})" aria-label="Show 3D Image">
-              <img src="{{ product.display_image_url }}" draggable="false" class="h-100 w-100 rounded-3 shadow-lg" style="object-fit: cover; user-select: none;" />
-            </button>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
+    <!-- Grids -->
+    <!-- New Launch Grid (Default Active) -->
+    <div class="row g-4 range-products-grid" id="grid-new-launch">
+      {% for product in new_arrivals %}
+        {% include 'store/_product_range_card.html' with product=product badge="NEW LAUNCH" %}
+      {% empty %}
+        <div class="col-12 text-center py-5 text-muted">No new launches found.</div>
+      {% endfor %}
     </div>
 
-    <!-- Controls -->
-    <div class="d-flex justify-content-center mt-4">
-      <div class="d-flex items-center justify-content-center gap-3 rounded-full border border-neutral-300 px-3 py-2 shadow-sm" style="background: rgba(255,255,255,0.7); backdrop-filter: blur(4px);">
-        <button type="button" aria-label="Show previous slide" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" id="pc-prev" style="width: 36px; height: 36px; border: none; background: transparent;">
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
-
-        <div class="d-flex align-items-center justify-content-center gap-2" id="pc-dots">
-          {% for product in new_arrivals %}
-          <button type="button" class="rounded-pill transition-all pc-dot" data-index="{{ forloop.counter0 }}" style="height: 8px; border: none; background: var(--primary);" onclick="selectPerspectiveSlide({{ forloop.counter0 }})"></button>
-          {% endfor %}
-        </div>
-
-        <button type="button" aria-label="Show next slide" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" id="pc-next" style="width: 36px; height: 36px; border: none; background: transparent;">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
+    <!-- Trending Product Grid -->
+    <div class="row g-4 range-products-grid" id="grid-trending-product" style="display: none;">
+      {% for product in featured %}
+        {% include 'store/_product_range_card.html' with product=product badge="TRENDING NOW" %}
+      {% empty %}
+        <div class="col-12 text-center py-5 text-muted">No trending products found.</div>
+      {% endfor %}
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        let currentPerspectiveIndex = 0;
-        const perspectiveSlides = document.querySelectorAll('.perspective-slide');
-        const perspectiveDots = document.querySelectorAll('.pc-dot');
-        const perspectiveTrack = document.getElementById('perspectiveCarouselTrack');
-        if (!perspectiveTrack || perspectiveSlides.length === 0) return;
-
-        const maxPerspectiveIndex = perspectiveSlides.length - 1;
-        const slideWidth = 250;
-        const rotationStep = 60;
-        const inactiveScale = 0.85;
-
-        window.selectPerspectiveSlide = function(index) {
-          if(index < 0) index = 0;
-          if(index > maxPerspectiveIndex) index = maxPerspectiveIndex;
-          currentPerspectiveIndex = index;
-          
-          // Update track translation
-          const tx = -(currentPerspectiveIndex * slideWidth + slideWidth / 2);
-          perspectiveTrack.style.transform = `translateY(-50%) translateX(${tx}px)`;
-
-          // Update each slide
-          perspectiveSlides.forEach((slideEl, i) => {
-            const inner = slideEl.querySelector('.slide-inner');
-            
-            const isActive = (i === currentPerspectiveIndex);
-            const rotateY = (currentPerspectiveIndex - i) * rotationStep;
-            const scale = isActive ? 1 : inactiveScale;
-            
-            inner.style.transform = `rotateY(${rotateY}deg) scale(${scale})`;
-          });
-
-          // Update dots
-          perspectiveDots.forEach((dot, i) => {
-            if(i === currentPerspectiveIndex) {
-              dot.style.width = '28px';
-              dot.style.opacity = '1';
-            } else {
-              dot.style.width = '8px';
-              dot.style.opacity = '0.3';
-            }
-          });
-
-          // Update buttons disabled state
-          document.getElementById('pc-prev').disabled = (currentPerspectiveIndex === 0);
-          document.getElementById('pc-next').disabled = (currentPerspectiveIndex === maxPerspectiveIndex);
-        }
-
-        document.getElementById('pc-prev').addEventListener('click', () => {
-          selectPerspectiveSlide(currentPerspectiveIndex - 1);
-        });
-        document.getElementById('pc-next').addEventListener('click', () => {
-          selectPerspectiveSlide(currentPerspectiveIndex + 1);
-        });
-
-        // Initialize
-        selectPerspectiveSlide(0);
-      });
-    </script>
+    <!-- Best Seller Grid -->
+    <div class="row g-4 range-products-grid" id="grid-best-seller" style="display: none;">
+      {% for product in bestsellers %}
+        {% include 'store/_product_range_card.html' with product=product badge="TOP SELLER" %}
+      {% empty %}
+        <div class="col-12 text-center py-5 text-muted">No best sellers found.</div>
+      {% endfor %}
+    </div>
 
     <!-- View All Collections Action Call -->
     <div class="d-flex justify-content-center mt-5">
-      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: #000 !important; color: #fff !important; border: 2px solid #000 !important; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 6px rgba(42,0,2,0.05); text-decoration: none;">
+      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: #fff !important; color: #000 !important; border: 2px solid #fff !important; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 12px rgba(255,255,255,0.05); text-decoration: none;">
         View Full Collection
       </a>
     </div>
   </div>
 </section>
-{% endif %}
+
+<style>
+  /* Shop By Range Layout and Tabs */
+  .range-tab-btn {
+    background: transparent;
+    color: #a0a0a0;
+    border: none;
+    padding: 10px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+  }
+  .range-tab-btn:hover {
+    color: #fff;
+  }
+  .range-tab-btn.active {
+    background-color: #fff;
+    color: #000;
+    box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+  }
+
+  .range-product-card {
+    background-color: #141414;
+    border: 1.5px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .range-product-card:hover {
+    transform: translateY(-4px);
+    border-color: #444;
+  }
+  .range-img-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: #0b0b0b;
+    overflow: hidden;
+  }
+  .range-product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .range-product-card:hover .range-product-img {
+    transform: scale(1.05);
+  }
+  .range-card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: #ffd885;
+    color: #3a2500;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  .range-wishlist-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: #888;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    transition: background 0.2s, color 0.2s;
+  }
+  .range-wishlist-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+  .range-wishlist-btn.active {
+    color: #ff4757;
+  }
+  .range-wishlist-btn i {
+    font-size: 16px;
+  }
+  .range-card-info {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: left;
+  }
+  .range-product-meta {
+    font-size: 10px;
+    font-weight: 700;
+    color: #888;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .range-product-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 38px;
+    transition: color 0.2s;
+  }
+  .range-product-title:hover {
+    color: #ffd885;
+    text-decoration: none;
+  }
+  .range-product-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .range-add-btn {
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #fff;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: auto;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    text-transform: uppercase;
+  }
+  .range-add-btn:hover {
+    background-color: transparent;
+    color: #fff;
+  }
+</style>
+
+<script>
+  function switchRangeTab(tabName) {
+    // Hide all grids
+    document.querySelectorAll('.range-products-grid').forEach(grid => {
+      grid.style.display = 'none';
+    });
+    
+    // Deactivate all tab buttons
+    document.querySelectorAll('.range-tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // Show selected grid and activate selected button
+    const targetGrid = document.getElementById('grid-' + tabName);
+    if (targetGrid) {
+      targetGrid.style.display = 'flex';
+    }
+    const targetBtn = document.getElementById('btn-' + tabName);
+    if (targetBtn) {
+      targetBtn.classList.add('active');
+    }
+  }
+</script>
+
 
 
 <!-- Artisan Narrative Section -->
