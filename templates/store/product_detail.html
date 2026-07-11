@@ -293,7 +293,7 @@
           line-height: 1.6;
         }
         .custom-accordion-item.active .custom-accordion-content {
-          max-height: 1200px;
+          max-height: 9999px;
           transition: max-height 0.4s ease-in;
         }
         .spec-item {
@@ -357,41 +357,44 @@
       </div>
 
       <!-- Description Section -->
-      <div class="custom-accordion-item active mb-4" style="margin-top: 24px; border: 1.5px solid var(--outline-variant); border-radius: 8px; overflow: hidden; background: var(--surface-container-lowest);">
-        <div class="custom-accordion-header" style="background: var(--surface-container-low); padding: 14px 20px; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-transform: uppercase; color: var(--on-surface); border-bottom: 1.5px solid var(--outline-variant); cursor: default; user-select: none;">
+      <div class="custom-accordion-item mb-4" style="margin-top: 24px;">
+        <div class="custom-accordion-header" id="accordionHeaderDesc">
           <span>Description</span>
+          <span class="accordion-indicator" style="font-size: 18px; font-weight: bold;">+</span>
         </div>
-        <div style="background: var(--surface-container-lowest); padding: 20px; font-size: 14px; color: var(--on-surface-variant); line-height: 1.6;">
-          <p class="mb-4">{{ product.description|linebreaksbr }}</p>
-          
-          <div class="product-specifications" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--outline-variant);">
-            {% if product.material %}
-            <div class="spec-item">
-              <span class="spec-label">Material</span>
-              <span class="spec-value">{{ product.material }}</span>
-            </div>
-            {% endif %}
-            {% if product.weight %}
-            <div class="spec-item">
-              <span class="spec-label">Weight</span>
-              <span class="spec-value">{{ product.weight }}</span>
-            </div>
-            {% endif %}
-            {% if product.finish %}
-            <div class="spec-item">
-              <span class="spec-label">Color / Finish</span>
-              <span class="spec-value">{{ product.get_finish_display }}</span>
-            </div>
-            {% endif %}
-            {% if product.metal_purity %}
-            <div class="spec-item">
-              <span class="spec-label">Metal Purity</span>
-              <span class="spec-value">{{ product.metal_purity }}</span>
-            </div>
-            {% endif %}
-            <div class="spec-item">
-              <span class="spec-label">Pack Details</span>
-              <span class="spec-value">1 Item</span>
+        <div class="custom-accordion-content">
+          <div class="custom-accordion-content-inner">
+            <p class="mb-4">{{ product.description|linebreaksbr }}</p>
+            
+            <div class="product-specifications" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--outline-variant);">
+              {% if product.material %}
+              <div class="spec-item">
+                <span class="spec-label">Material</span>
+                <span class="spec-value">{{ product.material }}</span>
+              </div>
+              {% endif %}
+              {% if product.weight %}
+              <div class="spec-item">
+                <span class="spec-label">Weight</span>
+                <span class="spec-value">{{ product.weight }}</span>
+              </div>
+              {% endif %}
+              {% if product.finish %}
+              <div class="spec-item">
+                <span class="spec-label">Color / Finish</span>
+                <span class="spec-value">{{ product.get_finish_display }}</span>
+              </div>
+              {% endif %}
+              {% if product.metal_purity %}
+              <div class="spec-item">
+                <span class="spec-label">Metal Purity</span>
+                <span class="spec-value">{{ product.metal_purity }}</span>
+              </div>
+              {% endif %}
+              <div class="spec-item">
+                <span class="spec-label">Pack Details</span>
+                <span class="spec-value">1 Item</span>
+              </div>
             </div>
           </div>
         </div>
