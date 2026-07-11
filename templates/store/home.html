@@ -370,6 +370,41 @@
     background-color: transparent;
     color: #fff;
   }
+  
+  /* Shop By Range Card Image Slider Arrows */
+  .range-card-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 3;
+    transition: background-color 0.2s, opacity 0.2s;
+    opacity: 0;
+  }
+  .range-product-card:hover .range-card-arrow {
+    opacity: 1;
+  }
+  .range-card-arrow:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  .range-card-arrow.left-arrow {
+    left: 8px;
+  }
+  .range-card-arrow.right-arrow {
+    right: 8px;
+  }
+  .range-card-arrow span {
+    font-size: 18px;
+  }
 </style>
 
 <script>
@@ -393,6 +428,27 @@
     if (targetBtn) {
       targetBtn.classList.add('active');
     }
+  }
+
+  function slideCardPhoto(event, button, direction) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const container = button.closest('.range-img-container');
+    const img = container.querySelector('.range-product-img');
+    if (!img) return;
+    
+    const galleryStr = img.dataset.gallery || '';
+    if (!galleryStr) return;
+    
+    const gallery = galleryStr.split(',');
+    if (gallery.length <= 1) return;
+    
+    let currentIndex = parseInt(img.dataset.currentIndex || 0);
+    currentIndex = (currentIndex + direction + gallery.length) % gallery.length;
+    
+    img.src = gallery[currentIndex];
+    img.dataset.currentIndex = currentIndex;
   }
 </script>
 

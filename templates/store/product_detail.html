@@ -20,7 +20,7 @@
     <!-- Gallery -->
     <div class="col-lg-5">
       <div class="product-gallery">
-        <div class="gallery-main" id="mainGalleryContainer">
+        <div class="gallery-main" id="mainGalleryContainer" style="position: relative;">
           {% if product.display_image_url %}
             <img src="{{ product.display_image_url }}" alt="{{ product.name }}" id="mainGalleryImage">
             {% if product.video_url %}
@@ -32,6 +32,15 @@
             <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surface-container);color:var(--primary);font-size:80px;">
               <span class="material-symbols-outlined" style="font-size:80px;">diamond</span>
             </div>
+          {% endif %}
+          
+          {% if product.display_gallery_urls|length > 1 or product.video_url %}
+          <button class="gallery-arrow left-arrow" id="mainGalleryPrev" onclick="slideMainGallery(-1)" aria-label="Previous image">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button class="gallery-arrow right-arrow" id="mainGalleryNext" onclick="slideMainGallery(1)" aria-label="Next image">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
           {% endif %}
         </div>
         
@@ -155,6 +164,38 @@
 
       <!-- Custom Product Details: Pincode Check, Badges, and Accordions -->
       <style>
+        /* Gallery Navigation Arrows */
+        .gallery-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          background: rgba(0, 0, 0, 0.4);
+          border: none;
+          color: #fff;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 5;
+          transition: background-color 0.2s, transform 0.2s;
+        }
+        .gallery-arrow:hover {
+          background-color: rgba(0, 0, 0, 0.6);
+          transform: translateY(-50%) scale(1.05);
+        }
+        .gallery-arrow.left-arrow {
+          left: 16px;
+        }
+        .gallery-arrow.right-arrow {
+          right: 16px;
+        }
+        .gallery-arrow span {
+          font-size: 24px;
+        }
+
         /* Pincode Container */
         .pincode-check-container {
           margin-top: 24px;
@@ -505,6 +546,23 @@
 
 {% block extra_js %}
 <script>
+  window.slideMainGallery = function(direction) {
+    const thumbs = document.querySelectorAll('.gallery-thumb');
+    if (thumbs.length <= 1) return;
+    
+    let activeIndex = -1;
+    thumbs.forEach((thumb, index) => {
+      if (thumb.classList.contains('active')) {
+        activeIndex = index;
+      }
+    });
+    
+    if (activeIndex === -1) activeIndex = 0;
+    
+    const nextIndex = (activeIndex + direction + thumbs.length) % thumbs.length;
+    thumbs[nextIndex].click();
+  };
+
 document.addEventListener('DOMContentLoaded', () => {
   // Custom Accordions Toggle
   document.querySelectorAll('.custom-accordion-header').forEach(header => {
