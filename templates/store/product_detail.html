@@ -450,42 +450,120 @@
 
 <div class="container pb-5">
   <!-- Product Reviews -->
-  <div class="mt-4">
-    <div class="section-header text-start mb-4">
-      <h3 class="section-title" style="font-size: 1.5rem;">Product Reviews ({{ product.review_count }})</h3>
+  <div class="mt-4" id="reviews-section">
+    <div class="review-header-section d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-4 rounded" style="background-color: #f6ebd8;">
+      <div class="review-stats mb-3 mb-md-0">
+        <h3 class="section-title mb-1" style="font-size: 1.8rem; font-family: 'Playfair Display', serif;">Customer Reviews</h3>
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold fs-4">{{ product.average_rating|default:"5.0"|floatformat:1 }}</span>
+          <div class="d-flex" style="color: #3b8c7b;">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 1 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 2 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 3 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 4 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 4.8 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
+          </div>
+          <span class="text-muted">{{ product.review_count }} reviews</span>
+        </div>
+      </div>
+      <div class="review-actions d-flex flex-column gap-2" style="min-width: 200px;">
+        {% if user.is_authenticated and not user_review %}
+          <button class="btn btn-write-review w-100" onclick="openReviewModal()" style="background-color: #3b8c7b; color: #fff; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: none;">Write a review</button>
+        {% elif not user.is_authenticated %}
+          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-write-review w-100" style="background-color: #3b8c7b; color: #fff; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: none; text-align: center;">Write a review</a>
+        {% endif %}
+        <button class="btn btn-ask-question w-100" style="background-color: #fcecd5; color: #000; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: 1px solid #d4c5b3;">Ask a question</button>
+      </div>
     </div>
     
-    <!-- Write Review -->
+    <!-- Review Photos Carousel (if any) -->
+    {% if reviews %}
+      <div class="review-photos-scroll mb-4" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px;">
+        {% for review in reviews %}
+          {% for img in review.images.all %}
+            <img src="{{ img.image.url }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" alt="Review Image">
+          {% endfor %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Full Screen Review Modal -->
     {% if user.is_authenticated and not user_review %}
-    <div class="mb-4 p-4 rounded-3" style="background: var(--surface-container-low); border: 1px dashed var(--outline-variant);">
-      <h6 class="fw-700 mb-3" style="font-family: 'Playfair Display', serif;">{% t "write_review" %}</h6>
-      <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-          <label class="form-label">Rating</label>
-          <div class="star-rating-input">
-            <span class="material-symbols-outlined" data-val="1" style="cursor:pointer;">star</span>
-            <span class="material-symbols-outlined" data-val="2" style="cursor:pointer;">star</span>
-            <span class="material-symbols-outlined" data-val="3" style="cursor:pointer;">star</span>
-            <span class="material-symbols-outlined" data-val="4" style="cursor:pointer;">star</span>
-            <span class="material-symbols-outlined" data-val="5" style="cursor:pointer;">star</span>
+    <div id="reviewModal" class="review-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 1050; overflow-y: auto;">
+      <div class="review-modal-content" style="background: var(--surface); height: 100%; display: flex; flex-direction: column;">
+        <div class="review-modal-header border-bottom p-3 d-flex justify-content-between align-items-center">
+           <div></div>
+           <button class="btn btn-link text-dark p-0" onclick="closeReviewModal()">
+             <span class="material-symbols-outlined" style="font-size: 28px;">close</span>
+           </button>
+        </div>
+        
+        <div class="review-modal-body p-4" style="max-width: 600px; margin: 0 auto; width: 100%;">
+          <div class="text-center mb-4">
+            <h2 style="font-weight: 700; margin-bottom: 8px; font-family: 'Playfair Display', serif;">How would you rate this product?</h2>
+            <p class="text-muted">We would love it if you would share a bit about your experience.</p>
           </div>
-          <input type="hidden" name="rating" id="ratingInput" required>
+
+          <div class="product-info-modal text-center mb-5">
+            {% if product.display_image_url %}
+              <img src="{{ product.display_image_url }}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            {% endif %}
+            <h5 style="font-weight: 600;">{{ product.name }}</h5>
+          </div>
+
+          <form method="POST" enctype="multipart/form-data" id="reviewFormModal">
+            {% csrf_token %}
+            <div class="rating-selection text-center mb-5">
+              <div class="star-rating-large d-flex justify-content-center gap-2 mb-2">
+                <div class="star-wrapper text-center" data-val="1">
+                  <span class="material-symbols-outlined rating-star" style="font-size: 48px; color: #3b8c7b; font-variation-settings: 'FILL' 0; cursor: pointer;">star</span>
+                  <div class="rating-label text-muted" style="font-size: 12px; font-weight: 600;">Poor</div>
+                </div>
+                <div class="star-wrapper text-center" data-val="2">
+                  <span class="material-symbols-outlined rating-star" style="font-size: 48px; color: #3b8c7b; font-variation-settings: 'FILL' 0; cursor: pointer;">star</span>
+                  <div class="rating-label text-muted" style="font-size: 12px; font-weight: 600;">&nbsp;</div>
+                </div>
+                <div class="star-wrapper text-center" data-val="3">
+                  <span class="material-symbols-outlined rating-star" style="font-size: 48px; color: #3b8c7b; font-variation-settings: 'FILL' 0; cursor: pointer;">star</span>
+                  <div class="rating-label text-muted" style="font-size: 12px; font-weight: 600;">&nbsp;</div>
+                </div>
+                <div class="star-wrapper text-center" data-val="4">
+                  <span class="material-symbols-outlined rating-star" style="font-size: 48px; color: #3b8c7b; font-variation-settings: 'FILL' 0; cursor: pointer;">star</span>
+                  <div class="rating-label text-muted" style="font-size: 12px; font-weight: 600;">&nbsp;</div>
+                </div>
+                <div class="star-wrapper text-center" data-val="5">
+                  <span class="material-symbols-outlined rating-star" style="font-size: 48px; color: #3b8c7b; font-variation-settings: 'FILL' 0; cursor: pointer;">star</span>
+                  <div class="rating-label text-muted" style="font-size: 12px; font-weight: 600;">Great</div>
+                </div>
+              </div>
+              <input type="hidden" name="rating" id="ratingInputModal" required>
+            </div>
+
+            <div id="reviewDetailsSection" style="display: none;">
+              <div class="mb-4">
+                <label class="form-label text-muted fw-bold">Review title (Required)</label>
+                <input type="text" name="title" class="form-control" placeholder="Summarize your review" required style="border: 1px solid #ddd; padding: 12px;">
+              </div>
+              <div class="mb-4">
+                <label class="form-label text-muted fw-bold">Review content (Required)</label>
+                <textarea name="body" class="form-control" rows="5" placeholder="Start writing here..." required style="border: 1px solid #ddd; padding: 12px;"></textarea>
+              </div>
+              <div class="mb-4">
+                <label class="form-label text-muted fw-bold">Photos (Optional)</label>
+                <input type="file" name="review_images" class="form-control" multiple accept="image/*" style="border: 1px solid #ddd; padding: 12px;">
+              </div>
+              <p class="text-muted text-center" style="font-size: 12px; margin-bottom: 24px;">
+                We'll only contact you about your review if necessary. By submitting your review, you agree to our terms and conditions and privacy policy.
+              </p>
+              <div class="d-flex gap-3">
+                 <button type="button" class="btn btn-outline-secondary w-50" onclick="hideReviewDetails()" style="font-weight: 600; padding: 12px;">Back</button>
+                 <button type="submit" class="btn w-50" style="background-color: #3b8c7b; color: white; border: none; font-weight: 600; padding: 12px;">Submit</button>
+              </div>
+            </div>
+
+          </form>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Title</label>
-          <input type="text" name="title" class="form-control" placeholder="Summarize your review" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Review</label>
-          <textarea name="body" class="form-control" rows="3" placeholder="Share your experience..." required></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Photos (optional)</label>
-          <input type="file" name="review_images" class="form-control" multiple accept="image/*">
-        </div>
-        <button type="submit" class="btn-artisan-primary" style="width: auto; padding: 10px 28px;">Submit Review</button>
-      </form>
+      </div>
     </div>
     {% endif %}
 
@@ -763,6 +841,78 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.innerHTML = originalHtml;
       }, 3000);
     }
+  });
+});
+</script>
+
+<style>
+.review-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  z-index: 1050;
+  overflow-y: auto;
+}
+.review-photos-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.review-photos-scroll::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+</style>
+
+<script>
+function openReviewModal() {
+  document.getElementById('reviewModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeReviewModal() {
+  document.getElementById('reviewModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  // Reset form
+  hideReviewDetails();
+  document.getElementById('ratingInputModal').value = '';
+  document.querySelectorAll('.star-wrapper').forEach(w => {
+    w.querySelector('.rating-star').style.fontVariationSettings = "'FILL' 0";
+  });
+}
+function showReviewDetails() {
+  document.getElementById('reviewDetailsSection').style.display = 'block';
+  document.querySelector('.rating-selection').style.display = 'none';
+  document.querySelector('.product-info-modal').style.display = 'none';
+  document.querySelector('.review-modal-body h2').textContent = "{{ product.name|escapejs }}";
+}
+function hideReviewDetails() {
+  document.getElementById('reviewDetailsSection').style.display = 'none';
+  document.querySelector('.rating-selection').style.display = 'block';
+  document.querySelector('.product-info-modal').style.display = 'block';
+  document.querySelector('.review-modal-body h2').textContent = "How would you rate this product?";
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const modalStars = document.querySelectorAll('.star-wrapper');
+  const ratingInputModal = document.getElementById('ratingInputModal');
+  
+  modalStars.forEach(wrapper => {
+    wrapper.addEventListener('click', () => {
+      const val = parseInt(wrapper.dataset.val);
+      ratingInputModal.value = val;
+      
+      modalStars.forEach(w => {
+        const star = w.querySelector('.rating-star');
+        if(parseInt(w.dataset.val) <= val) {
+          star.style.fontVariationSettings = "'FILL' 1";
+        } else {
+          star.style.fontVariationSettings = "'FILL' 0";
+        }
+      });
+      
+      // Auto-advance to details after 500ms
+      setTimeout(() => {
+        showReviewDetails();
+      }, 500);
+    });
   });
 });
 </script>
