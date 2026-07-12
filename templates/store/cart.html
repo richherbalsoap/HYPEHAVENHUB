@@ -153,7 +153,7 @@
       proceedBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
       
       try {
-        const response = await fetch("{% url 'sr_initiate_checkout' %}", {
+        const response = await fetch("{% url 'razorpay_direct_checkout' %}", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -162,23 +162,76 @@
         });
         const data = await response.json();
         
-        if (data.success && data.token) {
-          // Trigger Headless Checkout iframe
-          HeadlessCheckout.addToCart(event, data.token, {
-            fallbackUrl: "{% url 'checkout' %}"
+        if (data.requires_login && data.redirect) {
+          window.location.href = data.redirect;
+          return;
+        }
+        
+        if (data.success && data.razorpay_order_id) {
+          // Load Razorpay script dynamically if not present
+          if (typeof Razorpay === 'undefined') {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+              script.onload = resolve;
+              script.onerror = reject;
+              document.head.appendChild(script);
+            });
+          }
+
+          var options = {
+            "key": data.razorpay_key_id,
+            "amount": data.amount,
+            "currency": "INR",
+            "name": "HYPEHAVENHUB",
+            "description": "Order Payment",
+            "order_id": data.razorpay_order_id,
+            "handler": async function (response) {
+              // Verify payment
+              const verifyRes = await fetch("{% url 'verify_payment' %}", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_signature: response.razorpay_signature,
+                  order_id: data.order_id
+                })
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success !== false) {
+                window.location.href = "/orders/?status=SUCCESS";
+              } else {
+                alert("Payment verification failed. " + verifyData.message);
+                window.location.href = "/orders/?status=FAILED";
+              }
+            },
+            "prefill": {
+              "name": data.customer_name,
+              "email": data.customer_email,
+              "contact": data.customer_phone
+            },
+            "theme": {
+              "color": "#d4af37"
+            }
+          };
+          var rzp1 = new Razorpay(options);
+          rzp1.on('payment.failed', function (response){
+            alert("Payment failed: " + response.error.description);
           });
+          rzp1.open();
         } else {
-          console.error("Failed to generate checkout token:", data.message);
-          window.location.href = "{% url 'checkout' %}";
+          alert("Failed to initiate checkout: " + (data.message || "Unknown error"));
         }
       } catch (err) {
         console.error("Error initiating checkout:", err);
-        window.location.href = "{% url 'checkout' %}";
+        alert("Something went wrong. Please try again later.");
       } finally {
-        setTimeout(() => {
-          proceedBtn.style.pointerEvents = "auto";
-          proceedBtn.innerHTML = originalHtml;
-        }, 3000);
+        proceedBtn.style.pointerEvents = "auto";
+        proceedBtn.innerHTML = originalHtml;
       }
     });
   });

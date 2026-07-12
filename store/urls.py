@@ -102,6 +102,6 @@ urlpatterns = [
     path('shiprocket/collection-products/', views.shiprocket_fetch_collection_products, name='sr_fetch_collection_products'),
 
     # Shiprocket Checkout & Webhooks
-    path('shiprocket/checkout/initiate/', views.shiprocket_initiate_checkout, name='sr_initiate_checkout'),
+    path('razorpay/checkout/initiate/', views.razorpay_direct_checkout, name='razorpay_direct_checkout'),
     path('shiprocket/webhook/order/', views.shiprocket_order_webhook, name='sr_order_webhook'),
 ]

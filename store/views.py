@@ -939,19 +939,8 @@ from django.views.decorators.cache import never_cache
 
 @never_cache
 def checkout_view(request):
-    if not request.user.is_authenticated:
-        return redirect(build_login_redirect_url(request, fallback='/checkout/', notice='order_required'))
-
-    cart = get_or_create_cart(request)
-    if not cart.items.exists():
-        messages.warning(request, 'Your cart is empty.')
-        return redirect('cart')
-    addresses = Address.objects.filter(user=request.user).order_by('-is_default', '-id')
-    return render(request, 'store/checkout.html', {
-        'cart': cart,
-        'addresses': addresses,
-        'items': cart.items.select_related('product', 'variant').all(),
-    })
+    messages.info(request, 'Checkout is now handled directly from the cart.')
+    return redirect('cart')
 
 
 @require_POST
@@ -1055,6 +1044,143 @@ def place_order(request):
             })
 
     return JsonResponse({'success': False, 'message': 'Invalid payment method.'})
+
+@require_POST
+def razorpay_direct_checkout(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'requires_login': True,
+            'redirect': build_login_redirect_url(request, fallback='/checkout/', notice='order_required'),
+            'message': 'Order karva mate pehla login karo.'
+        }, status=401)
+
+    try:
+        data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
+    except Exception:
+        data = {}
+        
+    product_id = data.get('product_id')
+    variant_id = data.get('variant_id')
+    quantity = int(data.get('quantity', 1))
+
+    subtotal = Decimal('0.00')
+    discount_amount = Decimal('0.00')
+    delivery_charge = Decimal('0.00')
+    coupon = None
+    items_to_create = []
+
+    if product_id:
+        # Buy Now flow
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        variant = None
+        if variant_id:
+            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        
+        unit_price = product.selling_price
+        if variant:
+            unit_price += variant.additional_price
+        
+        total_price = unit_price * quantity
+        subtotal = total_price
+        # Basic delivery charge for Buy Now
+        country_setting = CountrySetting.objects.filter(is_active=True, is_default=True).first()
+        if country_setting:
+            delivery_charge = country_setting.shipping_charge
+
+        items_to_create.append({
+            'product': product,
+            'variant': variant,
+            'product_name': product.name,
+            'variant_label': variant.label if variant else '',
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'total_price': total_price
+        })
+    else:
+        # Cart Checkout flow
+        cart = get_or_create_cart(request)
+        if not cart.items.exists():
+            return JsonResponse({'success': False, 'message': 'Cart is empty.'})
+            
+        subtotal = cart.subtotal
+        discount_amount = cart.discount_amount
+        delivery_charge = cart.delivery_charge
+        coupon = cart.coupon
+        
+        for item in cart.items.all():
+            items_to_create.append({
+                'product': item.product,
+                'variant': item.variant,
+                'product_name': item.product.name,
+                'variant_label': item.variant.label if item.variant else '',
+                'quantity': item.quantity,
+                'unit_price': item.unit_price,
+                'total_price': item.total_price
+            })
+
+    grand_total = subtotal - discount_amount + delivery_charge
+
+    # Create Order without address
+    order = Order.objects.create(
+        user=request.user,
+        address=None,
+        subtotal=subtotal,
+        discount_amount=discount_amount,
+        delivery_charge=delivery_charge,
+        grand_total=grand_total,
+        coupon=coupon,
+        status='pending',
+    )
+
+    for item_data in items_to_create:
+        OrderItem.objects.create(order=order, **item_data)
+
+    payment = Payment.objects.create(
+        order=order,
+        method='razorpay',
+        amount=order.grand_total,
+        status='pending',
+    )
+
+    import razorpay
+    try:
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        amount_in_paise = int(order.grand_total * 100)
+        
+        razorpay_order = client.order.create(data={
+            'amount': amount_in_paise,
+            'currency': 'INR',
+            'receipt': str(order.order_id),
+        })
+        
+        payment.gateway_response = {
+            'razorpay_order_id': razorpay_order['id'],
+            'amount': amount_in_paise,
+            'currency': 'INR'
+        }
+        payment.save()
+        
+        customer_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
+        
+        return JsonResponse({
+            'success': True,
+            'payment_method': 'razorpay',
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'amount': amount_in_paise,
+            'order_id': order.order_id,
+            'customer_name': customer_name,
+            'customer_email': request.user.email,
+            'customer_phone': getattr(request.user, 'phone', ''),
+        })
+    except Exception as e:
+        logger.error(f"Razorpay order creation failed: {str(e)}")
+        order.delete()
+        return JsonResponse({
+            'success': False,
+            'message': 'Failed to initiate Razorpay payment. Please try again.'
+        })
 
 
 @require_POST
