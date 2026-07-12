@@ -6,17 +6,21 @@
 
 {% block content %}
 
-<!-- Premium Luxury Editorial Hero Section -->
+<!-- Anime.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+
+<!-- Premium Luxury Editorial Hero Section with Anime.js -->
 <section class="luxury-hero">
+  <div class="hero-bg-accent"></div>
   <div class="hero-container">
     <!-- Left Column: Editorial Copy -->
     <div class="hero-editorial">
-      <span class="hero-eyebrow">Artisanal Indian Heritage</span>
-      <h1 class="hero-headline">Timeless <br>Artistry, <br><span class="accent-text">Reimagined.</span></h1>
-      <p class="hero-description">Discover handcrafted Jhumkas, necklaces, and bracelets created to bridge the gap between heritage tradition and modern sophistication.</p>
-      <div class="hero-actions">
-        <a href="{% url 'product_list' %}" class="hero-btn-primary">Explore Collection</a>
-        <a href="#shop-by-range" class="hero-btn-secondary">View Best Sellers</a>
+      <span class="hero-eyebrow anime-item">Artisanal Indian Heritage</span>
+      <h1 class="hero-headline anime-item">Timeless <br>Artistry, <br><span class="accent-text">Reimagined.</span></h1>
+      <p class="hero-description anime-item">Discover handcrafted Jhumkas, necklaces, and bracelets created to bridge the gap between heritage tradition and modern sophistication.</p>
+      <div class="hero-actions anime-item">
+        <a href="{% url 'product_list' %}" class="hero-btn-primary hero-hover">Explore Collection</a>
+        <a href="#shop-by-range" class="hero-btn-secondary hero-hover">View Best Sellers</a>
       </div>
     </div>
     
@@ -24,17 +28,23 @@
     <div class="hero-showcase">
       <div class="collage-grid">
         <!-- Main Large Frame -->
-        <div class="collage-item main-frame">
-          <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800" alt="Featured Jewelry">
+        <div class="collage-item main-frame anime-image">
+          <div class="img-wrapper">
+            <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800" alt="Featured Jewelry">
+          </div>
           <div class="frame-tag">FEATURED</div>
         </div>
         <!-- Overlapping Medium Frame -->
-        <div class="collage-item detail-frame-1">
-          <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500" alt="Jewelry Close-up">
+        <div class="collage-item detail-frame-1 anime-image">
+          <div class="img-wrapper">
+            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500" alt="Jewelry Close-up">
+          </div>
         </div>
         <!-- Secondary Offset Frame -->
-        <div class="collage-item detail-frame-2">
-          <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500" alt="Necklace Craftsmanship">
+        <div class="collage-item detail-frame-2 anime-image">
+          <div class="img-wrapper">
+            <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500" alt="Necklace Craftsmanship">
+          </div>
         </div>
       </div>
     </div>
@@ -54,8 +64,7 @@
   }
 
   /* Decorative luxury background pattern */
-  .luxury-hero::before {
-    content: "";
+  .hero-bg-accent {
     position: absolute;
     top: -50%;
     right: -10%;
@@ -64,6 +73,7 @@
     background: radial-gradient(circle, rgba(115, 92, 0, 0.08) 0%, transparent 70%);
     pointer-events: none;
     z-index: 1;
+    opacity: 0; /* Animated by Anime.js */
   }
 
   .hero-container {
@@ -82,6 +92,30 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  /* Initial states for Anime.js */
+  .anime-item {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  
+  .anime-image {
+    opacity: 0;
+  }
+  
+  .img-wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .img-wrapper img {
+    transform: scale(1.2); /* For reveal animation */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .hero-eyebrow {
@@ -108,6 +142,7 @@
     font-style: italic;
     color: var(--secondary-fixed-dim, #e9c349);
     font-weight: 400;
+    display: inline-block;
   }
 
   .hero-description {
@@ -188,15 +223,6 @@
     border-radius: 4px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
-  }
-
-  .collage-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.8s ease;
   }
 
   /* Main Large Frame */
@@ -240,24 +266,6 @@
     width: 40%;
     height: 42%;
     z-index: 1;
-  }
-
-  /* Parallax hover effects on the collage */
-  .collage-grid:hover .main-frame {
-    transform: translateY(-8px) scale(1.02);
-  }
-  
-  .collage-grid:hover .detail-frame-1 {
-    transform: translate(-10px, 10px) scale(1.05);
-    box-shadow: 0 30px 50px rgba(233, 195, 73, 0.15);
-  }
-
-  .collage-grid:hover .detail-frame-2 {
-    transform: translate(8px, -8px) scale(0.98);
-  }
-
-  .collage-item:hover img {
-    transform: scale(1.08);
   }
 
   /* Responsive Design - Tablet and Mobile */
@@ -340,10 +348,6 @@
       display: none; /* Hide 3rd image on tiny mobile to keep it super clean */
     }
     
-    .collage-item img {
-      height: 100%;
-    }
-
     .hero-actions {
       flex-direction: column;
       width: 100%;
@@ -356,6 +360,137 @@
     }
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if anime is defined
+    if (typeof anime === 'undefined') {
+      console.warn('Anime.js not loaded');
+      document.querySelectorAll('.anime-item, .anime-image').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
+      return;
+    }
+
+    const tl = anime.timeline({
+      easing: 'easeOutExpo',
+      duration: 1000
+    });
+
+    // 1. Fade in the background accent
+    tl.add({
+      targets: '.hero-bg-accent',
+      opacity: [0, 1],
+      scale: [0.8, 1],
+      duration: 1500,
+      easing: 'easeOutQuart'
+    });
+
+    // 2. Stagger text elements
+    tl.add({
+      targets: '.anime-item',
+      translateY: [30, 0],
+      opacity: [0, 1],
+      delay: anime.stagger(150),
+      easing: 'spring(1, 80, 10, 0)',
+    }, '-=1000'); // Overlap with background animation
+
+    // 3. Accent text distinct pop
+    tl.add({
+      targets: '.hero-headline .accent-text',
+      color: ['#ffffff', '#e9c349'],
+      scale: [0.95, 1],
+      duration: 800,
+    }, '-=800');
+
+    // 4. Reveal images smoothly
+    tl.add({
+      targets: '.anime-image',
+      translateY: [40, 0],
+      opacity: [0, 1],
+      delay: anime.stagger(150, {start: 100}),
+      easing: 'spring(1, 80, 12, 0)'
+    }, '-=1200');
+
+    // 5. Scale down image inner wrappers for a parallax reveal feel
+    tl.add({
+      targets: '.img-wrapper img',
+      scale: [1.2, 1],
+      duration: 1200,
+      easing: 'easeOutQuart'
+    }, '-=1400');
+    
+    // 6. Setup Parallax Hover effects using Anime.js
+    const setupHoverEffects = () => {
+      const collageGrid = document.querySelector('.collage-grid');
+      
+      if (!collageGrid) return;
+      
+      const mainFrame = document.querySelector('.main-frame');
+      const detailFrame1 = document.querySelector('.detail-frame-1');
+      const detailFrame2 = document.querySelector('.detail-frame-2');
+      const allImages = document.querySelectorAll('.img-wrapper img');
+      
+      collageGrid.addEventListener('mouseenter', () => {
+        anime({
+          targets: mainFrame,
+          translateY: -8,
+          scale: 1.02,
+          duration: 400,
+          easing: 'easeOutQuad'
+        });
+        anime({
+          targets: detailFrame1,
+          translateX: -10,
+          translateY: 10,
+          scale: 1.05,
+          boxShadow: '0 30px 50px rgba(233, 195, 73, 0.15)',
+          duration: 400,
+          easing: 'easeOutQuad'
+        });
+        anime({
+          targets: detailFrame2,
+          translateX: 8,
+          translateY: -8,
+          scale: 0.98,
+          duration: 400,
+          easing: 'easeOutQuad'
+        });
+        anime({
+          targets: allImages,
+          scale: 1.08,
+          duration: 800,
+          easing: 'easeOutQuart'
+        });
+      });
+      
+      collageGrid.addEventListener('mouseleave', () => {
+        anime({
+          targets: [mainFrame, detailFrame1, detailFrame2],
+          translateX: 0,
+          translateY: 0,
+          scale: 1,
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
+          duration: 600,
+          easing: 'easeOutElastic(1, .8)'
+        });
+        anime({
+          targets: allImages,
+          scale: 1,
+          duration: 600,
+          easing: 'easeOutQuart'
+        });
+      });
+    };
+    
+    // Only setup hover effects on non-mobile
+    if (window.innerWidth > 991) {
+      // Add slight delay to ensure entrance animations are mostly complete
+      setTimeout(setupHoverEffects, 1000);
+    }
+  });
+</script>
 
 
 
