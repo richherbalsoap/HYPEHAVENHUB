@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Refund & Cancellation Policy - HYPEHAVENHUB{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4 text-center" style="font-family: 'Playfair Display', serif;">Refund & Cancellation Policy</h1>
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="mt-4">Cancellations</h5>
+                <p>You can cancel your order within 24 hours of placing it, provided it hasn't been shipped yet. Once the order is shipped, we cannot accept any cancellations.</p>
+                
+                <h5 class="mt-4">Returns & Refunds</h5>
+                <p>We accept returns only in the case of damaged or defective items. Please raise a return request within 48 hours of delivery with photographic evidence.</p>
+                <p>Refunds for approved returns will be processed within 5-7 business days to the original payment method.</p>
+                
+                <h5 class="mt-4">Exceptions</h5>
+                <p>For hygiene reasons, earrings (including jhumkas) cannot be returned unless they are damaged upon arrival.</p>
+                
+                <p class="mt-4">If you need to request a cancellation or refund, please <a href="{% url 'contact_us' %}">contact us</a>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

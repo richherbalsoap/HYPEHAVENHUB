@@ -1970,3 +1970,21 @@ def razorpay_webhook(request):
     except Exception as e:
         logger.error(f"Error processing webhook: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+
+def contact_us(request):
+    return render(request, 'store/contact_us.html')
+
+def about_us(request):
+    return render(request, 'store/about_us.html')
+
+def privacy_policy(request):
+    return render(request, 'store/privacy_policy.html')
+
+def terms_conditions(request):
+    return render(request, 'store/terms_conditions.html')
+
+def refund_policy(request):
+    return render(request, 'store/refund_policy.html')
+
+def shipping_policy(request):
+    return render(request, 'store/shipping_policy.html')

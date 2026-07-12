@@ -176,7 +176,7 @@
 <footer class="glamour-footer">
   <div class="container">
     <div class="row g-4">
-      <div class="col-lg-4 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <div class="footer-brand d-flex align-items-center">
           <img src="{% static 'images/logo.jpg' %}" alt="HYPEHAVENHUB Logo" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--outline-variant);" class="me-2">
           <span class="brand-name">HYPEHAVEN<span class="brand-accent">HUB</span></span>
@@ -209,7 +209,18 @@
           <li><a href="{% url 'address_list' %}">{% t "addresses" %}</a></li>
         </ul>
       </div>
-      <div class="col-lg-4 col-md-6">
+      <div class="col-lg-2 col-md-6">
+        <h6 class="footer-title">Help & Policies</h6>
+        <ul class="footer-links">
+          <li><a href="{% url 'contact_us' %}">Contact Us</a></li>
+          <li><a href="{% url 'about_us' %}">About Us</a></li>
+          <li><a href="{% url 'privacy_policy' %}">Privacy Policy</a></li>
+          <li><a href="{% url 'terms_conditions' %}">Terms & Conditions</a></li>
+          <li><a href="{% url 'refund_policy' %}">Refund Policy</a></li>
+          <li><a href="{% url 'shipping_policy' %}">Shipping Policy</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-3 col-md-6">
         <h6 class="footer-title">{% t "stay_in_the_loop" %}</h6>
         <p class="footer-desc">{% t "newsletter_desc" %}</p>
         <div class="input-group newsletter-input">

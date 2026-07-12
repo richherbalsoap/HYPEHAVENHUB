@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n_store %}
+
+{% block title %}Contact Us - HYPEHAVENHUB{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4 text-center" style="font-family: 'Playfair Display', serif;">Contact Us</h1>
+            <div class="card border-0 shadow-sm p-4">
+                <p>We'd love to hear from you! If you have any questions, concerns, or feedback, please reach out to us using the details below:</p>
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-3"><strong>Business Name:</strong> HYPEHAVENHUB</li>
+                    <li class="mb-3"><strong>Email:</strong> <a href="mailto:support@hypehavenhub.in">support@hypehavenhub.in</a></li>
+                    <li class="mb-3"><strong>Phone/WhatsApp:</strong> <a href="https://wa.me/919999999999">+91 99999 99999</a></li>
+                    <li class="mb-3"><strong>Address:</strong> New Delhi, India</li>
+                    <li class="mb-3"><strong>GST:</strong> Not Applicable (or update with your GSTIN)</li>
+                </ul>
+                
+                <h4 class="mt-4 mb-3" style="font-family: 'Playfair Display', serif;">Send us a message</h4>
+                <form action="{% url 'submit_complaint' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="subject" placeholder="Your Name or Subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-control" name="description" rows="4" placeholder="How can we help you?" required></textarea>
+                    </div>
+                    <input type="hidden" name="complaint_type" value="other">
+                    <!-- If user is not authenticated, complaint submission might require login depending on logic, but we'll provide a generic mailto fallback or simple button -->
+                    <button type="submit" class="btn btn-dark w-100">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

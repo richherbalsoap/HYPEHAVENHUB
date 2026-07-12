@@ -11,6 +11,12 @@ urlpatterns = [
     path('category/<slug:slug>/', views.category_products, name='category_products'),
     path('brand/<slug:slug>/', views.brand_products, name='brand_products'),
     path('search/suggestions/', views.search_suggestions, name='search_suggestions'),
+    path('contact/', views.contact_us, name='contact_us'),
+    path('about/', views.about_us, name='about_us'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('terms-conditions/', views.terms_conditions, name='terms_conditions'),
+    path('refund-policy/', views.refund_policy, name='refund_policy'),
+    path('shipping-policy/', views.shipping_policy, name='shipping_policy'),
 
     # Authentication
     path('auth/signup/', views.signup_view, name='signup'),
