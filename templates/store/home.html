@@ -6,493 +6,260 @@
 
 {% block content %}
 
-<!-- Anime.js CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+<!-- Kanba-style Hero Section -->
+<section class="kanba-hero">
+  <!-- Top Right Blob -->
+  <svg class="blob-top-right" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#550000" d="M200,0 L200,200 C150,180 120,130 90,110 C50,80 10,60 0,0 Z" />
+  </svg>
+  
+  <!-- Bottom Left Blob -->
+  <svg class="blob-bottom-left" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <path fill="#550000" d="M0,200 L200,200 C180,180 150,120 120,80 C90,40 40,20 0,0 Z" />
+  </svg>
 
-<!-- Premium Luxury Editorial Hero Section with Anime.js -->
-<section class="luxury-hero">
-  <div class="hero-bg-accent"></div>
-  <div class="hero-container">
-    <!-- Left Column: Editorial Copy -->
-    <div class="hero-editorial">
-      <span class="hero-eyebrow anime-item">Artisanal Indian Heritage</span>
-      <h1 class="hero-headline anime-item">Timeless <br>Artistry, <br><span class="accent-text">Reimagined.</span></h1>
-      <p class="hero-description anime-item">Discover handcrafted Jhumkas, necklaces, and bracelets created to bridge the gap between heritage tradition and modern sophistication.</p>
-      <div class="hero-actions anime-item">
-        <a href="{% url 'product_list' %}" class="hero-btn-primary hero-hover">Explore Collection</a>
-        <a href="#shop-by-range" class="hero-btn-secondary hero-hover">View Best Sellers</a>
-      </div>
+  <div class="scroll-indicator">
+    <span>SCROLL</span>
+    <span class="material-symbols-outlined">arrow_downward</span>
+  </div>
+
+  <div class="hero-container-kanba">
+    <!-- Left Column: Image / Illustration -->
+    <div class="hero-image-col">
+       <div class="image-wrapper">
+         <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600" alt="Handcrafted Jewelry" class="floating-jewelry">
+       </div>
     </div>
     
-    <!-- Right Column: Asymmetric Layered Collage -->
-    <div class="hero-showcase">
-      <div class="collage-grid">
-        <!-- Main Large Frame -->
-        <div class="collage-item main-frame anime-image">
-          <div class="img-wrapper">
-            <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800" alt="Featured Jewelry">
-          </div>
-          <div class="frame-tag">FEATURED</div>
-        </div>
-        <!-- Overlapping Medium Frame -->
-        <div class="collage-item detail-frame-1 anime-image">
-          <div class="img-wrapper">
-            <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500" alt="Jewelry Close-up">
-          </div>
-        </div>
-        <!-- Secondary Offset Frame -->
-        <div class="collage-item detail-frame-2 anime-image">
-          <div class="img-wrapper">
-            <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500" alt="Necklace Craftsmanship">
-          </div>
-        </div>
-      </div>
+    <!-- Right Column: Text -->
+    <div class="hero-text-col">
+      <h1 class="hero-title-kanba">ARTISANAL<br>INDIAN HERITAGE<br>IS ONE CLICK AWAY</h1>
+      <p class="hero-subtitle-kanba">let the journey begin</p>
+      <a href="{% url 'product_list' %}" class="btn-kanba-primary">EXPLORE COLLECTION</a>
     </div>
   </div>
 </section>
 
 <style>
-  /* Luxury Editorial Hero styling */
-  .luxury-hero {
-    background: #0d0d0d;
-    color: #ffffff;
-    padding: 100px 0;
-    overflow: hidden;
+  /* Kanba-style Hero styling */
+  .kanba-hero {
+    background-color: #ffffff;
+    min-height: 85vh;
     position: relative;
+    overflow: hidden;
     width: 100vw;
     margin-left: calc(-50vw + 50%); /* Full bleed */
-  }
-
-  /* Decorative luxury background pattern */
-  .hero-bg-accent {
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(115, 92, 0, 0.08) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0; /* Animated by Anime.js */
-  }
-
-  .hero-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-    display: grid;
-    grid-template-columns: 1fr 1.1fr;
+    display: flex;
     align-items: center;
-    gap: 60px;
-    position: relative;
-    z-index: 2;
+    padding-top: 50px;
   }
 
-  .hero-editorial {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  /* Initial states for Anime.js */
-  .anime-item {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  
-  .anime-image {
-    opacity: 0;
-  }
-  
-  .img-wrapper {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-  
-  .img-wrapper img {
-    transform: scale(1.2); /* For reveal animation */
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .hero-eyebrow {
-    font-family: var(--font-body);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--secondary-fixed-dim, #e9c349);
-    margin-bottom: 20px;
-    font-weight: 500;
-  }
-
-  .hero-headline {
-    font-family: var(--font-display);
-    font-size: clamp(2.8rem, 5.8vw, 4.8rem);
-    line-height: 1.05;
-    font-weight: 700;
-    margin-bottom: 24px;
-    color: #ffffff;
-    letter-spacing: -0.01em;
-  }
-
-  .hero-headline .accent-text {
-    font-style: italic;
-    color: var(--secondary-fixed-dim, #e9c349);
-    font-weight: 400;
-    display: inline-block;
-  }
-
-  .hero-description {
-    font-family: var(--font-body);
-    color: #a6a6a6;
-    font-size: clamp(15px, 1.1vw, 17px);
-    line-height: 1.7;
-    max-width: 480px;
-    margin-bottom: 40px;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .hero-btn-primary {
-    display: inline-block;
-    background: var(--secondary-fixed-dim, #e9c349);
-    color: #0d0d0d;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 16px 32px;
-    border-radius: 2px;
-    text-decoration: none;
-    border: 2px solid var(--secondary-fixed-dim, #e9c349);
-    transition: var(--transition);
-  }
-
-  .hero-btn-primary:hover {
-    background: transparent;
-    color: var(--secondary-fixed-dim, #e9c349);
-  }
-
-  .hero-btn-secondary {
-    display: inline-block;
-    background: transparent;
-    color: #ffffff;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 16px 32px;
-    border-radius: 2px;
-    text-decoration: none;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    transition: var(--transition);
-  }
-
-  .hero-btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: #ffffff;
-    color: #ffffff;
-  }
-
-  /* Asymmetric Collage styling */
-  .hero-showcase {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .collage-grid {
-    position: relative;
-    width: 100%;
-    max-width: 500px;
-    aspect-ratio: 1 / 1.1;
-  }
-
-  .collage-item {
+  /* SVG Blobs */
+  .blob-top-right {
     position: absolute;
-    overflow: hidden;
-    border-radius: 4px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  /* Main Large Frame */
-  .main-frame {
-    top: 5%;
-    left: 15%;
-    width: 65%;
-    height: 75%;
-    z-index: 2;
-  }
-
-  .main-frame .frame-tag {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    background: rgba(13, 13, 13, 0.85);
-    backdrop-filter: blur(4px);
-    color: var(--secondary-fixed-dim, #e9c349);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    padding: 6px 12px;
-    border-radius: 2px;
-    font-family: var(--font-body);
-    font-weight: 500;
-  }
-
-  /* Overlapping Medium Frame (detail-frame-1) */
-  .detail-frame-1 {
-    bottom: 0;
-    left: 0;
-    width: 45%;
-    height: 40%;
-    z-index: 3;
-    border-color: rgba(233, 195, 73, 0.2);
-  }
-
-  /* Secondary Offset Frame (detail-frame-2) */
-  .detail-frame-2 {
     top: 0;
     right: 0;
-    width: 40%;
-    height: 42%;
+    width: 55vw;
+    height: auto;
     z-index: 1;
+    pointer-events: none;
+    transform-origin: top right;
   }
 
-  /* Responsive Design - Tablet and Mobile */
+  .blob-bottom-left {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30vw;
+    height: auto;
+    z-index: 1;
+    pointer-events: none;
+    transform-origin: bottom left;
+  }
+
+  .kanba-hero::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.05);
+    z-index: 0;
+  }
+  
+  .kanba-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 10%;
+    right: 20%;
+    width: 400px;
+    height: 400px;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    border: 1px solid rgba(0,0,0,0.05);
+    z-index: 0;
+  }
+
+  .hero-container-kanba {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Left Column (Image) */
+  .hero-image-col {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+
+  .image-wrapper {
+    width: 100%;
+    max-width: 450px;
+    border-radius: 50% 30% 70% 30% / 30% 30% 70% 70%;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 8px solid #ffffff;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-jewelry {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+  }
+
+  /* Right Column (Text) */
+  .hero-text-col {
+    flex: 1;
+    padding-left: 60px;
+    text-align: left;
+  }
+
+  .hero-title-kanba {
+    font-family: var(--font-display);
+    color: #550000;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .hero-subtitle-kanba {
+    font-family: var(--font-body);
+    color: #555555;
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 40px;
+    text-transform: lowercase;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-kanba-primary {
+    display: inline-block;
+    background-color: #550000;
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 18px 40px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(85, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+
+  .btn-kanba-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(85, 0, 0, 0.4);
+    background-color: #400000;
+    color: #ffffff;
+  }
+
+  /* Scroll Indicator */
+  .scroll-indicator {
+    position: absolute;
+    bottom: 50px;
+    left: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #550000;
+    z-index: 2;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  .scroll-indicator span.material-symbols-outlined {
+    margin-bottom: 10px;
+    font-size: 18px;
+    animation: bounce 2s infinite;
+    transform: rotate(180deg);
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(180deg); }
+    40% { transform: translateY(10px) rotate(180deg); }
+    60% { transform: translateY(5px) rotate(180deg); }
+  }
+
+  /* Responsive Design */
   @media (max-width: 991px) {
-    .luxury-hero {
-      padding: 80px 0;
-    }
-
-    .hero-container {
-      grid-template-columns: 1fr;
+    .hero-container-kanba {
+      flex-direction: column-reverse;
       text-align: center;
-      gap: 60px;
+      padding: 60px 20px;
+      gap: 40px;
+    }
+    
+    .hero-text-col {
+      padding-left: 0;
+    }
+    
+    .blob-top-right {
+      width: 80vw;
+    }
+    
+    .blob-bottom-left {
+      width: 50vw;
     }
 
-    .hero-editorial {
-      align-items: center;
-    }
-
-    .hero-description {
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .hero-actions {
-      justify-content: center;
-    }
-
-    .hero-showcase {
-      justify-content: center;
-    }
-
-    .collage-grid {
-      max-width: 440px;
+    .scroll-indicator {
+      display: none;
     }
   }
 
   @media (max-width: 576px) {
-    .luxury-hero {
-      padding: 50px 0;
+    .hero-title-kanba {
+      font-size: 2rem;
     }
-
-    .hero-container {
-      gap: 40px;
-      padding: 0 16px;
-    }
-
-    /* Convert collage into a clean, mobile-optimized display */
-    .collage-grid {
-      display: flex;
-      gap: 16px;
-      width: 100%;
-      height: auto;
-      aspect-ratio: auto;
-      max-width: 100%;
-    }
-
-    .collage-item {
-      position: relative;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 3 / 4;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      transform: none !important;
-    }
-
-    .main-frame {
-      top: auto;
-      left: auto;
-      width: 60%;
-    }
-
-    .detail-frame-1 {
-      bottom: auto;
-      left: auto;
-      width: 40%;
-      display: block;
-    }
-
-    .detail-frame-2 {
-      display: none; /* Hide 3rd image on tiny mobile to keep it super clean */
-    }
-    
-    .hero-actions {
-      flex-direction: column;
-      width: 100%;
-      gap: 12px;
-    }
-
-    .hero-btn-primary, .hero-btn-secondary {
-      width: 100%;
-      text-align: center;
+    .blob-top-right {
+      width: 100vw;
     }
   }
 </style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Check if anime is defined
-    if (typeof anime === 'undefined') {
-      console.warn('Anime.js not loaded');
-      document.querySelectorAll('.anime-item, .anime-image').forEach(el => {
-        el.style.opacity = '1';
-        el.style.transform = 'none';
-      });
-      return;
-    }
-
-    const tl = anime.timeline({
-      easing: 'easeOutExpo',
-      duration: 1000
-    });
-
-    // 1. Fade in the background accent
-    tl.add({
-      targets: '.hero-bg-accent',
-      opacity: [0, 1],
-      scale: [0.8, 1],
-      duration: 1500,
-      easing: 'easeOutQuart'
-    });
-
-    // 2. Stagger text elements
-    tl.add({
-      targets: '.anime-item',
-      translateY: [30, 0],
-      opacity: [0, 1],
-      delay: anime.stagger(150),
-      easing: 'spring(1, 80, 10, 0)',
-    }, '-=1000'); // Overlap with background animation
-
-    // 3. Accent text distinct pop
-    tl.add({
-      targets: '.hero-headline .accent-text',
-      color: ['#ffffff', '#e9c349'],
-      scale: [0.95, 1],
-      duration: 800,
-    }, '-=800');
-
-    // 4. Reveal images smoothly
-    tl.add({
-      targets: '.anime-image',
-      translateY: [40, 0],
-      opacity: [0, 1],
-      delay: anime.stagger(150, {start: 100}),
-      easing: 'spring(1, 80, 12, 0)'
-    }, '-=1200');
-
-    // 5. Scale down image inner wrappers for a parallax reveal feel
-    tl.add({
-      targets: '.img-wrapper img',
-      scale: [1.2, 1],
-      duration: 1200,
-      easing: 'easeOutQuart'
-    }, '-=1400');
-    
-    // 6. Setup Parallax Hover effects using Anime.js
-    const setupHoverEffects = () => {
-      const collageGrid = document.querySelector('.collage-grid');
-      
-      if (!collageGrid) return;
-      
-      const mainFrame = document.querySelector('.main-frame');
-      const detailFrame1 = document.querySelector('.detail-frame-1');
-      const detailFrame2 = document.querySelector('.detail-frame-2');
-      const allImages = document.querySelectorAll('.img-wrapper img');
-      
-      collageGrid.addEventListener('mouseenter', () => {
-        anime({
-          targets: mainFrame,
-          translateY: -8,
-          scale: 1.02,
-          duration: 400,
-          easing: 'easeOutQuad'
-        });
-        anime({
-          targets: detailFrame1,
-          translateX: -10,
-          translateY: 10,
-          scale: 1.05,
-          boxShadow: '0 30px 50px rgba(233, 195, 73, 0.15)',
-          duration: 400,
-          easing: 'easeOutQuad'
-        });
-        anime({
-          targets: detailFrame2,
-          translateX: 8,
-          translateY: -8,
-          scale: 0.98,
-          duration: 400,
-          easing: 'easeOutQuad'
-        });
-        anime({
-          targets: allImages,
-          scale: 1.08,
-          duration: 800,
-          easing: 'easeOutQuart'
-        });
-      });
-      
-      collageGrid.addEventListener('mouseleave', () => {
-        anime({
-          targets: [mainFrame, detailFrame1, detailFrame2],
-          translateX: 0,
-          translateY: 0,
-          scale: 1,
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
-          duration: 600,
-          easing: 'easeOutElastic(1, .8)'
-        });
-        anime({
-          targets: allImages,
-          scale: 1,
-          duration: 600,
-          easing: 'easeOutQuart'
-        });
-      });
-    };
-    
-    // Only setup hover effects on non-mobile
-    if (window.innerWidth > 991) {
-      // Add slight delay to ensure entrance animations are mostly complete
-      setTimeout(setupHoverEffects, 1000);
-    }
-  });
-</script>
-
-
 
 <!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
