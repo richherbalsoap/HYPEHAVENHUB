@@ -6,104 +6,358 @@
 
 {% block content %}
 
-<!-- Dynamic Hero Section Carousel (Interactive 3D Cylinder) -->
-<div class="cyl-wrapper">
-  <div class="cyl-stage" style="--n:{% if hero_panels %}{{ hero_panels|length }}{% else %}8{% endif %}; --anim-dur:28s;">
-    {% if hero_panels %}
-      {% for panel in hero_panels %}
-        <div class="cylinder-card" style="--i:{{ forloop.counter0 }}">
-          <img src="{{ panel.display_image_url }}" alt="{{ panel.title|default:'Banner' }}">
+<!-- Premium Luxury Editorial Hero Section -->
+<section class="luxury-hero">
+  <div class="hero-container">
+    <!-- Left Column: Editorial Copy -->
+    <div class="hero-editorial">
+      <span class="hero-eyebrow">Artisanal Indian Heritage</span>
+      <h1 class="hero-headline">Timeless <br>Artistry, <br><span class="accent-text">Reimagined.</span></h1>
+      <p class="hero-description">Discover handcrafted Jhumkas, necklaces, and bracelets created to bridge the gap between heritage tradition and modern sophistication.</p>
+      <div class="hero-actions">
+        <a href="{% url 'product_list' %}" class="hero-btn-primary">Explore Collection</a>
+        <a href="#shop-by-range" class="hero-btn-secondary">View Best Sellers</a>
+      </div>
+    </div>
+    
+    <!-- Right Column: Asymmetric Layered Collage -->
+    <div class="hero-showcase">
+      <div class="collage-grid">
+        <!-- Main Large Frame -->
+        <div class="collage-item main-frame">
+          <img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=800" alt="Featured Jewelry">
+          <div class="frame-tag">FEATURED</div>
         </div>
-      {% endfor %}
-    {% else %}
-        <div class="cylinder-card" style="--i:0"><img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400" alt="jhumka 1"></div>
-        <div class="cylinder-card" style="--i:1"><img src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&sig=2" alt="jhumka 2"></div>
-        <div class="cylinder-card" style="--i:2"><img src="https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=400" alt="jhumka 3"></div>
-        <div class="cylinder-card" style="--i:3"><img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400" alt="jhumka 4"></div>
-        <div class="cylinder-card" style="--i:4"><img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400" alt="jhumka 5"></div>
-        <div class="cylinder-card" style="--i:5"><img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400" alt="jhumka 6"></div>
-        <div class="cylinder-card" style="--i:6"><img src="https://images.unsplash.com/photo-1599643477877-530eb83abc8e?w=400" alt="jhumka 7"></div>
-        <div class="cylinder-card" style="--i:7"><img src="https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400" alt="jhumka 8"></div>
-    {% endif %}
+        <!-- Overlapping Medium Frame -->
+        <div class="collage-item detail-frame-1">
+          <img src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500" alt="Jewelry Close-up">
+        </div>
+        <!-- Secondary Offset Frame -->
+        <div class="collage-item detail-frame-2">
+          <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500" alt="Necklace Craftsmanship">
+        </div>
+      </div>
+    </div>
   </div>
-  </div>
-</div>
+</section>
 
 <style>
-  /* Full viewport-spanning wrapper */
-  .cyl-wrapper{
+  /* Luxury Editorial Hero styling */
+  .luxury-hero {
+    background: #0d0d0d;
+    color: #ffffff;
+    padding: 100px 0;
+    overflow: hidden;
     position: relative;
     width: 100vw;
-    margin-left: calc(-50vw + 50%);   /* full-bleed trick, overflow-x issue avoid karne ke liye */
-    min-height: 480px;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    background: #0d0d0d; 
-    perspective: clamp(30em, 55vw, 70em); 
+    margin-left: calc(-50vw + 50%); /* Full bleed */
   }
 
-  .cyl-wrapper::before,
-  .cyl-wrapper::after{
+  /* Decorative luxury background pattern */
+  .luxury-hero::before {
     content: "";
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 15%;
-    z-index: 2;
+    top: -50%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(115, 92, 0, 0.08) 0%, transparent 70%);
     pointer-events: none;
-  }
-  .cyl-wrapper::before{
-    left: 0;
-    background: linear-gradient(90deg, #0d0d0d, transparent);
-  }
-  .cyl-wrapper::after{
-    right: 0;
-    background: linear-gradient(90deg, transparent, #0d0d0d);
+    z-index: 1;
   }
 
-  /* rotating group — cylinder ka core */
-  .cyl-stage{
+  .hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
     display: grid;
-    place-items: center;
-    transform-style: preserve-3d;
-    --ba: calc(1turn / var(--n));      /* angle between each card */
-    --w: clamp(160px, 17vw, 320px);
-    --radius: clamp(280px, 34vw, 620px);
-    animation: cyl-rotate var(--anim-dur, 28s) linear infinite;
+    grid-template-columns: 1fr 1.1fr;
+    align-items: center;
+    gap: 60px;
+    position: relative;
+    z-index: 2;
   }
 
-  @keyframes cyl-rotate{
-    to { transform: rotateY(1turn); }
+  .hero-editorial {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  @media (prefers-reduced-motion: reduce){
-    .cyl-stage{ animation-duration: 120s; }
+  .hero-eyebrow {
+    font-family: var(--font-body);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--secondary-fixed-dim, #e9c349);
+    margin-bottom: 20px;
+    font-weight: 500;
   }
 
-  /* individual card — sab ek hi grid cell mein stack hote hain, phir 3D transform se circle mein spread hote hain */
-  .cylinder-card{
-    grid-area: 1 / 1;
-    width: var(--w, 220px);
-    aspect-ratio: 7 / 10;
-    border-radius: 16px;
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 5.8vw, 4.8rem);
+    line-height: 1.05;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-headline .accent-text {
+    font-style: italic;
+    color: var(--secondary-fixed-dim, #e9c349);
+    font-weight: 400;
+  }
+
+  .hero-description {
+    font-family: var(--font-body);
+    color: #a6a6a6;
+    font-size: clamp(15px, 1.1vw, 17px);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 40px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .hero-btn-primary {
+    display: inline-block;
+    background: var(--secondary-fixed-dim, #e9c349);
+    color: #0d0d0d;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 16px 32px;
+    border-radius: 2px;
+    text-decoration: none;
+    border: 2px solid var(--secondary-fixed-dim, #e9c349);
+    transition: var(--transition);
+  }
+
+  .hero-btn-primary:hover {
+    background: transparent;
+    color: var(--secondary-fixed-dim, #e9c349);
+  }
+
+  .hero-btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 16px 32px;
+    border-radius: 2px;
+    text-decoration: none;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+  }
+
+  .hero-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+
+  /* Asymmetric Collage styling */
+  .hero-showcase {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .collage-grid {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1 / 1.1;
+  }
+
+  .collage-item {
+    position: absolute;
     overflow: hidden;
-    backface-visibility: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,.45);
-
-    transform:
-      rotateY(calc(var(--i) * var(--ba)))
-      translateZ(calc(-1 * var(--radius)));
+    border-radius: 4px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
   }
 
-  .cylinder-card img{
+  .collage-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    user-select: none;
+    transition: transform 0.8s ease;
+  }
+
+  /* Main Large Frame */
+  .main-frame {
+    top: 5%;
+    left: 15%;
+    width: 65%;
+    height: 75%;
+    z-index: 2;
+  }
+
+  .main-frame .frame-tag {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(4px);
+    color: var(--secondary-fixed-dim, #e9c349);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-family: var(--font-body);
+    font-weight: 500;
+  }
+
+  /* Overlapping Medium Frame (detail-frame-1) */
+  .detail-frame-1 {
+    bottom: 0;
+    left: 0;
+    width: 45%;
+    height: 40%;
+    z-index: 3;
+    border-color: rgba(233, 195, 73, 0.2);
+  }
+
+  /* Secondary Offset Frame (detail-frame-2) */
+  .detail-frame-2 {
+    top: 0;
+    right: 0;
+    width: 40%;
+    height: 42%;
+    z-index: 1;
+  }
+
+  /* Parallax hover effects on the collage */
+  .collage-grid:hover .main-frame {
+    transform: translateY(-8px) scale(1.02);
+  }
+  
+  .collage-grid:hover .detail-frame-1 {
+    transform: translate(-10px, 10px) scale(1.05);
+    box-shadow: 0 30px 50px rgba(233, 195, 73, 0.15);
+  }
+
+  .collage-grid:hover .detail-frame-2 {
+    transform: translate(8px, -8px) scale(0.98);
+  }
+
+  .collage-item:hover img {
+    transform: scale(1.08);
+  }
+
+  /* Responsive Design - Tablet and Mobile */
+  @media (max-width: 991px) {
+    .luxury-hero {
+      padding: 80px 0;
+    }
+
+    .hero-container {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 60px;
+    }
+
+    .hero-editorial {
+      align-items: center;
+    }
+
+    .hero-description {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .hero-actions {
+      justify-content: center;
+    }
+
+    .hero-showcase {
+      justify-content: center;
+    }
+
+    .collage-grid {
+      max-width: 440px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .luxury-hero {
+      padding: 50px 0;
+    }
+
+    .hero-container {
+      gap: 40px;
+      padding: 0 16px;
+    }
+
+    /* Convert collage into a clean, mobile-optimized display */
+    .collage-grid {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      height: auto;
+      aspect-ratio: auto;
+      max-width: 100%;
+    }
+
+    .collage-item {
+      position: relative;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3 / 4;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      transform: none !important;
+    }
+
+    .main-frame {
+      top: auto;
+      left: auto;
+      width: 60%;
+    }
+
+    .detail-frame-1 {
+      bottom: auto;
+      left: auto;
+      width: 40%;
+      display: block;
+    }
+
+    .detail-frame-2 {
+      display: none; /* Hide 3rd image on tiny mobile to keep it super clean */
+    }
+    
+    .collage-item img {
+      height: 100%;
+    }
+
+    .hero-actions {
+      flex-direction: column;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .hero-btn-primary, .hero-btn-secondary {
+      width: 100%;
+      text-align: center;
+    }
   }
 </style>
+
+
 
 <!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
