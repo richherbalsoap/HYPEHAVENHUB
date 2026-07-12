@@ -1083,10 +1083,8 @@ def razorpay_direct_checkout(request):
         
         total_price = unit_price * quantity
         subtotal = total_price
-        # Basic delivery charge for Buy Now
-        country_setting = CountrySetting.objects.filter(is_active=True, is_default=True).first()
-        if country_setting:
-            delivery_charge = country_setting.shipping_charge
+        # Basic delivery charge for Buy Now (0 for now to match Cart behavior)
+        delivery_charge = Decimal('0.00')
 
         items_to_create.append({
             'product': product,
