@@ -1,4 +1,5 @@
 from django import template
+from django.utils.safestring import mark_safe
 from store.translations import translate as _translate
 
 register = template.Library()
@@ -13,7 +14,7 @@ def t(context, key):
     request = context.get('request')
     if not request:
         return key
-    return _translate(request, key)
+    return mark_safe(_translate(request, key))
 
 
 @register.simple_tag(takes_context=True)
