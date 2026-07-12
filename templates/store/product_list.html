@@ -9,7 +9,7 @@
   <div class="catalog-hero-bg"></div>
   <div class="container-fluid px-4 position-relative z-1">
     <div class="catalog-hero-inner row align-items-center">
-      <div class="col-lg-8 text-center text-lg-start">
+      <div class="col-12 text-center text-lg-start">
         <div class="section-eyebrow d-inline-block px-3 py-1 rounded-pill mb-3" style="background: rgba(255,248,245,0.6); color: var(--primary); font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid var(--outline-variant); box-shadow: var(--shadow);">
           {% if selected_category %}
             {{ selected_category_name|default:"Jewelry Collection" }}
@@ -27,12 +27,6 @@
         <p class="lead text-muted mb-0" style="font-size: 16px; max-width: 600px; margin: 0 auto 0 0;">
           Discover our handcrafted jhumkas, necklaces and bracelets. Perfectly curated to add that extra spark to your ethnic wardrobe.
         </p>
-      </div>
-      <div class="col-lg-4 text-center mt-4 mt-lg-0">
-        <div class="catalog-hero-count d-inline-flex flex-column align-items-center justify-content-center bg-white rounded-circle shadow-lg" style="width: 140px; height: 140px; border: 4px solid var(--outline-variant); animation: float 4s ease-in-out infinite;">
-          <strong style="font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--primary); line-height: 1;">{{ page_obj.paginator.count }}</strong>
-          <span style="color: var(--on-surface-variant); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; font-family: 'Montserrat', sans-serif;">Designs</span>
-        </div>
       </div>
     </div>
   </div>
