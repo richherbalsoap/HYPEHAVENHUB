@@ -2645,18 +2645,28 @@ html.dark .product-card:hover {
   margin-bottom: 0;
 }
 .horizontal-filter-bar .form-select,
-.horizontal-filter-bar .form-control {
-  height: 36px;
-  font-size: 13px;
+.horizontal-filter-bar .form-control,
+.horizontal-filter-bar .btn {
+  height: 42px;
+  font-size: 14px;
   border-radius: 6px;
   border: 1px solid var(--outline-variant);
-  background-color: var(--surface-container-lowest);
-  color: var(--on-surface);
   box-shadow: none;
 }
+.horizontal-filter-bar .form-select,
+.horizontal-filter-bar .form-control {
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  padding: 8px 12px;
+}
 .horizontal-filter-bar .form-select {
-  padding-right: 30px;
-  min-width: 150px;
+  padding-right: 36px;
+  min-width: 160px;
+}
+.horizontal-filter-bar .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .w-100-mobile {
   width: auto;
