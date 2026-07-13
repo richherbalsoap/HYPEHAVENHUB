@@ -79,43 +79,19 @@
     filter: drop-shadow(0 20px 30px rgba(0,0,0,0.45));
   }
 
-  .hhh-info{
-    position:absolute; bottom:20px; left:16px; z-index:60; max-width:300px;
-  }
-  @media(min-width:640px){ .hhh-info{ bottom:72px; left:96px; max-width:320px; } }
-  .hhh-info .hhh-title{
-    font-weight:700; text-transform:uppercase; letter-spacing:0.02em;
-    margin-bottom:6px; font-size:15px; color:#fff; opacity:0.95;
-  }
-  @media(min-width:640px){ .hhh-info .hhh-title{ font-size:22px; margin-bottom:12px; } }
-  .hhh-info .hhh-desc{
-    display:none; font-size:14px; color:#fff; opacity:0.85; line-height:1.6; margin-bottom:18px;
-  }
-  @media(min-width:640px){ .hhh-info .hhh-desc{ display:block; margin-bottom:20px; } }
 
-  .hhh-navbtns{ display:flex; gap:10px; }
-  .hhh-navbtn{
-    width:44px; height:44px; border-radius:9999px;
-    background:transparent; border:2px solid #fff; color:#fff;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:transform 150ms, background-color 150ms;
-  }
-  @media(min-width:640px){ .hhh-navbtn{ width:60px; height:60px; } }
-  .hhh-navbtn:hover{ transform:scale(1.08); background-color:rgba(255,255,255,0.12); }
-  .hhh-navbtn svg{ width:22px; height:22px; }
-  @media(min-width:640px){ .hhh-navbtn svg{ width:26px; height:26px; } }
 
   .hhh-cta{
-    position:absolute; bottom:20px; right:16px; z-index:60;
+    position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:60;
     display:flex; align-items:center; gap:8px;
     font-family:'Anton', sans-serif; font-weight:400;
     color:#fff; opacity:0.95; text-decoration:none;
     font-size:clamp(16px,3.6vw,48px); line-height:1;
     letter-spacing:-0.02em; text-transform:uppercase;
-    transition:opacity 200ms;
+    transition:opacity 200ms, transform 200ms;
   }
-  .hhh-cta:hover{ opacity:1; color:#fff; }
-  @media(min-width:640px){ .hhh-cta{ bottom:72px; right:40px; gap:10px; } }
+  .hhh-cta:hover{ opacity:1; color:#fff; transform:translateX(-50%) scale(1.05); }
+  @media(min-width:640px){ .hhh-cta{ bottom:50px; gap:10px; } }
   .hhh-cta svg{ width:16px; height:16px; }
   @media(min-width:640px){ .hhh-cta svg{ width:30px; height:30px; } }
 
@@ -202,14 +178,6 @@
         <div class="hhh-brand"><img src="' + logo + '" alt="HypeHavenHub" /></div>\
         <div class="hhh-dots">' + dotsHTML + '</div>\
         <div class="hhh-carousel">' + cardsHTML + '</div>\
-        <div class="hhh-info">\
-          <p class="hhh-title" id="hhh-info-title">HypeHavenHub Jhumkas</p>\
-          <p class="hhh-desc">Handcrafted oxidised jewelry, finished by hand and shipped ready to wear. Stay gorgeous, stay you.</p>\
-          <div class="hhh-navbtns">\
-            <button class="hhh-navbtn" id="hhhPrevBtn" aria-label="Previous">' + ArrowLeftSVG + '</button>\
-            <button class="hhh-navbtn" id="hhhNextBtn" aria-label="Next">' + ArrowRightSVG + '</button>\
-          </div>\
-        </div>\
         <a class="hhh-cta" href="' + shopUrl + '">Shop Now ' + ArrowRightSVG + '</a>\
       </div>\
     </div>';
@@ -219,14 +187,12 @@
 
   var outer = document.getElementById('hhh-outer');
   var ghost = document.getElementById('hhh-ghost');
-  var infoTitle = document.getElementById('hhh-info-title');
 
   // Set initial state instantly
   function setInitialState() {
     var active = IMAGES[activeIndex];
     outer.style.backgroundColor = active.bg;
     ghost.innerText = active.word;
-    infoTitle.innerText = active.label;
     
     for(var i=0; i<4; i++){
       document.getElementById('hhh-dot-'+i).classList.toggle('active', i === activeIndex);
@@ -257,7 +223,7 @@
     // Timeline for smooth orchestration
     var tl = anime.timeline({
       easing: 'spring(1, 150, 14, 0)',
-      duration: 450,
+      duration: 250,
       complete: function() {
         activeIndex = nextIndex;
         isAnimating = false;
@@ -268,28 +234,27 @@
     tl.add({
       targets: outer,
       backgroundColor: active.bg,
-      duration: 400,
+      duration: 250,
       easing: 'easeInOutSine'
     }, 0);
 
-    // Animate Ghost Text & Title (fade out, change, fade in)
+    // Animate Ghost Text (fade out, change, fade in)
     tl.add({
-      targets: [ghost, infoTitle],
+      targets: ghost,
       opacity: [1, 0],
       translateX: isNext ? [0, -30] : [0, 30],
-      duration: 150,
+      duration: 100,
       easing: 'easeInQuad',
       complete: function() {
         ghost.innerText = active.word;
-        infoTitle.innerText = active.label;
       }
     }, 0).add({
-      targets: [ghost, infoTitle],
+      targets: ghost,
       opacity: [0, 1],
       translateX: isNext ? [30, 0] : [-30, 0],
-      duration: 250,
+      duration: 150,
       easing: 'easeOutQuad'
-    }, 150);
+    }, 100);
 
     // Animate dots
     for(var i=0; i<4; i++){
@@ -331,11 +296,8 @@
     });
   }
 
-  var autoTimer = setInterval(function(){ navigate('next'); }, 4500);
-  function resetAuto(){ clearInterval(autoTimer); autoTimer = setInterval(function(){ navigate('next'); }, 4500); }
-
-  document.getElementById('hhhPrevBtn').addEventListener('click', function(){ navigate('prev'); resetAuto(); });
-  document.getElementById('hhhNextBtn').addEventListener('click', function(){ navigate('next'); resetAuto(); });
+  var autoTimer = setInterval(function(){ navigate('next'); }, 2500);
+  function resetAuto(){ clearInterval(autoTimer); autoTimer = setInterval(function(){ navigate('next'); }, 2500); }
 
   window.addEventListener('resize', function(){
     var nowMobile = window.innerWidth < 640;
