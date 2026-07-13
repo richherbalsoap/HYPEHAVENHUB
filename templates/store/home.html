@@ -256,8 +256,8 @@
 
     // Timeline for smooth orchestration
     var tl = anime.timeline({
-      easing: 'spring(1, 80, 10, 0)',
-      duration: 800,
+      easing: 'spring(1, 150, 14, 0)',
+      duration: 450,
       complete: function() {
         activeIndex = nextIndex;
         isAnimating = false;
@@ -268,7 +268,7 @@
     tl.add({
       targets: outer,
       backgroundColor: active.bg,
-      duration: 600,
+      duration: 400,
       easing: 'easeInOutSine'
     }, 0);
 
@@ -277,7 +277,7 @@
       targets: [ghost, infoTitle],
       opacity: [1, 0],
       translateX: isNext ? [0, -30] : [0, 30],
-      duration: 200,
+      duration: 150,
       easing: 'easeInQuad',
       complete: function() {
         ghost.innerText = active.word;
@@ -287,9 +287,9 @@
       targets: [ghost, infoTitle],
       opacity: [0, 1],
       translateX: isNext ? [30, 0] : [-30, 0],
-      duration: 400,
+      duration: 250,
       easing: 'easeOutQuad'
-    }, 200);
+    }, 150);
 
     // Animate dots
     for(var i=0; i<4; i++){
