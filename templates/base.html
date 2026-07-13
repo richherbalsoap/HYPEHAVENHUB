@@ -18,6 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/7.2.3/css/flag-icons.min.css">
 {% load static %}
 {% load i18n_store %}
 <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20260707-darkmode-v4">
@@ -70,10 +71,21 @@
     <div class="nav-icons d-flex align-items-center gap-2 ms-auto">
       
       <!-- Localization Trigger -->
-      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-2" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Change Currency" aria-label="Change Currency Settings">
-        <span class="material-symbols-outlined">payments</span>
-        <span class="ms-1 d-none d-md-inline" style="font-size: 13px; font-weight: 500;">
-          {% if current_country %}{{ current_country.currency_code }} ({{ current_country.currency_symbol }}){% else %}INR (₹){% endif %}
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-2" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Ship to" aria-label="Ship to">
+        <span class="ms-1 d-none d-md-flex align-items-center gap-1" style="font-size: 13px; font-weight: 600;">
+          {% if current_country and current_country.code %}
+            <span class="fi fi-{{ current_country.code|lower }}" style="border-radius: 2px;"></span> Ship to {{ current_country.name }} <span class="material-symbols-outlined" style="font-size: 16px;">keyboard_arrow_down</span>
+          {% else %}
+            <span class="fi fi-in" style="border-radius: 2px;"></span> Ship to India <span class="material-symbols-outlined" style="font-size: 16px;">keyboard_arrow_down</span>
+          {% endif %}
+        </span>
+        <!-- Mobile View Trigger -->
+        <span class="d-md-none d-flex align-items-center gap-1">
+            {% if current_country and current_country.code %}
+              <span class="fi fi-{{ current_country.code|lower }}" style="border-radius: 2px; font-size: 18px;"></span>
+            {% else %}
+              <span class="fi fi-in" style="border-radius: 2px; font-size: 18px;"></span>
+            {% endif %}
         </span>
       </button>
 
@@ -285,37 +297,81 @@
 
 <!-- Localization Modal -->
 <div class="modal fade" id="localizationModal" tabindex="-1" aria-labelledby="localizationModalLabel" aria-hidden="true" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title" id="localizationModalLabel">Select Currency</h5>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg desertcart-modal" style="border-radius: 16px;">
+      <div class="modal-header border-0 pb-0 flex-column align-items-start position-relative">
+        <h4 class="modal-title fw-bold" id="localizationModalLabel" style="font-family: 'Montserrat', sans-serif;">Ship to</h4>
+        <p class="text-muted small mb-0">164+ destinations • prices update instantly</p>
         {% if current_country %}
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close position-absolute" style="top: 1.25rem; right: 1.25rem;" data-bs-dismiss="modal" aria-label="Close"></button>
         {% endif %}
       </div>
-      <div class="modal-body pb-4">
-        <p class="text-muted small mb-4">Please select your preferred currency for regional pricing.</p>
+      <div class="modal-body pb-4 pt-3">
+        <div class="search-box mb-4 position-relative">
+          <span class="material-symbols-outlined position-absolute text-muted" style="left: 12px; top: 10px;">search</span>
+          <input type="text" id="countrySearchInput" class="form-control" placeholder="Search countries — e.g. Germany, KS" style="padding-left: 40px; border-radius: 8px; border: 1px solid #ced4da;">
+        </div>
+
+        <div class="current-shipping-box p-3 mb-4 rounded-3 d-flex justify-content-between align-items-center" style="background-color: #f7fdf0; border: 1px solid #e1f0c4;">
+          <div>
+            <span style="font-size: 11px; font-weight: 600; color: #6c757d; letter-spacing: 0.5px;" class="d-block mb-1"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: text-bottom;">location_on</span> CURRENTLY SHIPPING TO</span>
+            <div class="d-flex align-items-center gap-2">
+                {% if current_country and current_country.code %}
+                    <span class="fi fi-{{ current_country.code|lower }} fs-5 rounded-1"></span>
+                    <span class="fw-bold">{{ current_country.code }}</span> 
+                    <span class="fw-bold">{{ current_country.name }}</span>
+                {% else %}
+                    <span class="fi fi-in fs-5 rounded-1"></span>
+                    <span class="fw-bold">IN</span>
+                    <span class="fw-bold">India</span>
+                {% endif %}
+            </div>
+          </div>
+          <span class="badge" style="background-color: #bbf706; color: #3d5200; font-size: 11px; padding: 5px 8px; border-radius: 4px;">SELECTED</span>
+        </div>
+
+        <h6 class="text-muted small fw-bold mb-3" style="letter-spacing: 0.5px;">POPULAR</h6>
         
-        <form action="{% url 'set_country_session' %}" method="post" class="mb-0">
+        <form id="countrySelectForm" action="{% url 'set_country_session' %}" method="post" class="mb-0">
             {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label fw-500">Currency</label>
-                <select name="country_id" class="form-select form-select-lg" onchange="this.form.submit()">
-                    <option value="" disabled>Select currency</option>
-                    {% for country in unique_currencies %}
-                        <option value="{{ country.id }}" {% if country.currency_code == current_country.currency_code %}selected{% endif %}>
-                            {{ country.currency_code }} ({{ country.currency_symbol }}){% if country.currency_name %} - {{ country.currency_name }}{% endif %}
-                        </option>
-                    {% endfor %}
-                </select>
+            <input type="hidden" name="country_id" id="selectedCountryId">
+            <div class="country-list row g-2">
+                {% for country in unique_currencies %}
+                    {% if country.code in 'IN,CN,CA,AU,AE' %}
+                    <div class="col-12 col-md-6 country-item-col" data-name="{{ country.name|lower }}" data-code="{{ country.code|lower }}">
+                        <div class="country-item p-2 rounded-2 d-flex justify-content-between align-items-center cursor-pointer {% if current_country and current_country.id == country.id %}active{% endif %}" onclick="submitCountry({{ country.id }})" style="cursor: pointer; transition: all 0.2s;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold text-muted small" style="width: 20px;">{{ country.code }}</span>
+                                <span class="fi fi-{{ country.code|lower }} rounded-1"></span>
+                                <span class="country-name" style="font-weight: 500;">{{ country.name }}</span>
+                            </div>
+                            {% if current_country and current_country.id == country.id %}
+                            <span class="material-symbols-outlined text-primary" style="font-size: 18px;">check</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
             </div>
         </form>
+      </div>
+      
+      <div class="modal-footer border-0 justify-content-start pt-0 pb-3 ps-4">
+          <div class="d-flex align-items-center gap-2">
+              <span style="width: 8px; height: 8px; background-color: #84cc16; border-radius: 50%; display: inline-block;"></span>
+              <span class="small fw-500" style="color: #4b5563;">Shipping to {% if current_country %}{{ current_country.name }}{% else %}India{% endif %}</span>
+          </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+function submitCountry(id) {
+    document.getElementById('selectedCountryId').value = id;
+    document.getElementById('countrySelectForm').submit();
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const hasCountry = "{{ active_country }}" !== "";
     const locModalEl = document.getElementById('localizationModal');
@@ -328,6 +384,23 @@ document.addEventListener("DOMContentLoaded", function() {
     
     if (!hasCountry) {
         locModal.show();
+    }
+
+    const searchInput = document.getElementById('countrySearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            const cols = document.querySelectorAll('.country-item-col');
+            cols.forEach(col => {
+                const name = col.getAttribute('data-name');
+                const code = col.getAttribute('data-code');
+                if (name.includes(term) || code.includes(term)) {
+                    col.style.display = '';
+                } else {
+                    col.style.display = 'none';
+                }
+            });
+        });
     }
 });
 </script>

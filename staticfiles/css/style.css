@@ -2694,3 +2694,28 @@ html.dark .horizontal-filter-bar {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
 }
 
+/* Desertcart-style Modal */
+.desertcart-modal .country-item {
+    background-color: transparent;
+}
+.desertcart-modal .country-item:hover {
+    background-color: #f1f5f9;
+}
+.desertcart-modal .country-item.active {
+    background-color: #eff6ff;
+}
+html.dark .desertcart-modal .country-item:hover {
+    background-color: #334155;
+}
+html.dark .desertcart-modal .country-item.active {
+    background-color: #1e293b;
+}
+html.dark .desertcart-modal .current-shipping-box {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+html.dark .desertcart-modal .badge {
+    background-color: #84cc16 !important;
+    color: #1a2e05 !important;
+}
+
