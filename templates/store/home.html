@@ -4,156 +4,282 @@
 
 {% block title %}HYPEHAVENHUB - Handcrafted Indian Jewelry{% endblock %}
 
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 
-<!-- Elegant Arch Hero Section -->
-<section class="elegant-hero">
-  <div class="elegant-hero-container">
-    <!-- Left Column: Image in Arch -->
-    <div class="elegant-hero-image">
-       <div class="arch-frame-container">
-         <div class="arch-frame-inner">
-           <!-- Ideally, a heavy jewelry image with a red/maroon background. We use a placeholder that fits the luxury theme. -->
-           <img src="https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?w=800" alt="Authentic Indian Jewelry" class="arch-img">
-         </div>
-       </div>
-    </div>
-    
-    <!-- Right Column: Text -->
-    <div class="elegant-hero-text">
-      <h1 class="elegant-title">Timeless<br>Elegance,<br>Handcrafted<br>Legacy.</h1>
-      <p class="elegant-subtitle">Explore our curated collection of<br>authentic Indian jewelry.</p>
-      <a href="{% url 'product_list' %}" class="elegant-btn">EXPLORE COLLECTION</a>
-    </div>
-  </div>
-</section>
+<!-- HypeHavenHub Hero Carousel (all styles/IDs are hhh- prefixed to avoid clashing with site-wide CSS/JS) -->
+<div id="hhh-hero-root"></div>
 
 <style>
-  /* Elegant Arch Hero styling */
-  .elegant-hero {
-    background-color: #051024; /* Dark Maroon */
-    min-height: 90vh;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%); /* Full bleed */
-    display: flex;
-    align-items: center;
-    padding: 60px 0;
+  #hhh-hero-root, #hhh-hero-root *{ box-sizing:border-box; }
+  #hhh-hero-root{ width:100%; font-family:'Inter', sans-serif; }
+
+  .hhh-hero-outer{
+    position:relative;
+    width:100vw;
+    margin-left: calc(-50vw + 50%); /* full bleed, matches other hero sections */
+    overflow:hidden;
+    transition: background-color 650ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .hhh-hero-inner{
+    position:relative;
+    width:100%;
+    height:100vh;
+    min-height:560px;
+    overflow:hidden;
   }
 
-  .elegant-hero-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    padding: 0 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 60px;
+  .hhh-grain{
+    position:absolute; inset:0; pointer-events:none; z-index:50;
+    opacity:0.4;
+    background-size:200px 200px;
+    background-repeat:repeat;
   }
 
-  /* Left Column (Image) */
-  .elegant-hero-image {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+  .hhh-ghost{
+    position:absolute; inset-inline:0; top:13%;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none; user-select:none; z-index:2;
+    font-family:'Anton', sans-serif;
+    font-size:clamp(70px, 22vw, 300px);
+    font-weight:900;
+    color:#fff;
+    line-height:1;
+    text-transform:uppercase;
+    letter-spacing:-0.02em;
+    white-space:nowrap;
+    opacity:1;
+    transition: opacity 400ms;
   }
 
-  .arch-frame-container {
-    width: 100%;
-    max-width: 480px;
-    aspect-ratio: 3.5 / 5;
-    border: 2px solid #8EA4C8; /* Gold border */
-    border-radius: 250px 250px 0 0;
-    padding: 12px; /* Gap between border and image */
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  .hhh-brand{
+    position:absolute; top:20px; left:16px; z-index:60;
+    display:flex; align-items:center; gap:10px;
+  }
+  .hhh-brand img{ height:40px; width:auto; display:block; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
+  @media(min-width:640px){ .hhh-brand{ left:32px; } .hhh-brand img{ height:52px; } }
+
+  .hhh-carousel{ position:absolute; inset:0; z-index:3; }
+  .hhh-card{
+    position:absolute;
+    aspect-ratio: 0.74 / 1;
+    transition: transform 650ms cubic-bezier(0.4,0,0.2,1),
+                filter 650ms cubic-bezier(0.4,0,0.2,1),
+                opacity 650ms cubic-bezier(0.4,0,0.2,1),
+                left 650ms cubic-bezier(0.4,0,0.2,1);
+    will-change: transform, filter, opacity;
+  }
+  .hhh-card img{
+    width:100%; height:100%;
+    object-fit:contain;
+    object-position:bottom center;
+    display:block;
+    -webkit-user-drag:none;
+    user-select:none;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.45));
   }
 
-  .arch-frame-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 238px 238px 0 0;
-    overflow: hidden;
+  .hhh-info{
+    position:absolute; bottom:20px; left:16px; z-index:60; max-width:300px;
   }
+  @media(min-width:640px){ .hhh-info{ bottom:72px; left:96px; max-width:320px; } }
+  .hhh-info .hhh-title{
+    font-weight:700; text-transform:uppercase; letter-spacing:0.02em;
+    margin-bottom:6px; font-size:15px; color:#fff; opacity:0.95;
+  }
+  @media(min-width:640px){ .hhh-info .hhh-title{ font-size:22px; margin-bottom:12px; } }
+  .hhh-info .hhh-desc{
+    display:none; font-size:14px; color:#fff; opacity:0.85; line-height:1.6; margin-bottom:18px;
+  }
+  @media(min-width:640px){ .hhh-info .hhh-desc{ display:block; margin-bottom:20px; } }
 
-  .arch-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    filter: contrast(1.1) saturate(1.1);
+  .hhh-navbtns{ display:flex; gap:10px; }
+  .hhh-navbtn{
+    width:44px; height:44px; border-radius:9999px;
+    background:transparent; border:2px solid #fff; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform 150ms, background-color 150ms;
   }
+  @media(min-width:640px){ .hhh-navbtn{ width:60px; height:60px; } }
+  .hhh-navbtn:hover{ transform:scale(1.08); background-color:rgba(255,255,255,0.12); }
+  .hhh-navbtn svg{ width:22px; height:22px; }
+  @media(min-width:640px){ .hhh-navbtn svg{ width:26px; height:26px; } }
 
-  /* Right Column (Text) */
-  .elegant-hero-text {
-    flex: 1;
-    text-align: left;
-    padding-left: 20px;
+  .hhh-cta{
+    position:absolute; bottom:20px; right:16px; z-index:60;
+    display:flex; align-items:center; gap:8px;
+    font-family:'Anton', sans-serif; font-weight:400;
+    color:#fff; opacity:0.95; text-decoration:none;
+    font-size:clamp(16px,3.6vw,48px); line-height:1;
+    letter-spacing:-0.02em; text-transform:uppercase;
+    transition:opacity 200ms;
   }
+  .hhh-cta:hover{ opacity:1; color:#fff; }
+  @media(min-width:640px){ .hhh-cta{ bottom:72px; right:40px; gap:10px; } }
+  .hhh-cta svg{ width:16px; height:16px; }
+  @media(min-width:640px){ .hhh-cta svg{ width:30px; height:30px; } }
 
-  .elegant-title {
-    font-family: var(--font-display, 'Playfair Display', serif);
-    color: #E8EEF2; /* Light Beige / Gold */
-    font-size: clamp(3rem, 5vw, 5rem);
-    font-weight: 500;
-    line-height: 1.1;
-    margin-bottom: 24px;
-    letter-spacing: -0.01em;
+  .hhh-dots{
+    position:absolute; top:20px; right:16px; z-index:60;
+    display:flex; gap:6px;
   }
-
-  .elegant-subtitle {
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    color: #E8EEF2;
-    font-size: clamp(1rem, 1.2vw, 1.2rem);
-    font-weight: 400;
-    margin-bottom: 40px;
-    line-height: 1.6;
-    opacity: 0.9;
+  @media(min-width:640px){ .hhh-dots{ top:28px; right:32px; gap:8px; } }
+  .hhh-dot{
+    width:6px; height:6px; border-radius:50%;
+    background:rgba(255,255,255,0.4);
+    transition: background-color 300ms, transform 300ms;
   }
-
-  .elegant-btn {
-    display: inline-block;
-    background-color: #8EA4C8; /* Gold Button */
-    color: #051024; /* Dark Maroon Text */
-    font-family: var(--font-body, 'Montserrat', sans-serif);
-    font-weight: 700;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 18px 36px;
-    border-radius: 4px; /* Slight rounding */
-    text-decoration: none;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-
-  .elegant-btn:hover {
-    background-color: #E6C27A;
-    transform: translateY(-2px);
-    color: #051024;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 991px) {
-    .elegant-hero-container {
-      flex-direction: column;
-      text-align: center;
-      gap: 50px;
-    }
-    
-    .elegant-hero-text {
-      padding-left: 0;
-    }
-  }
-
-  @media (max-width: 576px) {
-    .elegant-title {
-      font-size: 2.5rem;
-    }
-    .arch-frame-container {
-      padding: 8px;
-    }
-  }
+  .hhh-dot.active{ background:#fff; transform:scale(1.3); }
 </style>
+
+<script>
+(function(){
+  var IMAGES = [
+    { src: "{% static 'images/hero-carousel/img1.webp' %}", bg: '#7C1F45', panel: '#9A2E5B', label: 'Ruby Kundan Jhumka', word: 'JHUMKA' },
+    { src: "{% static 'images/hero-carousel/img2.webp' %}", bg: '#28553A', panel: '#38724D', label: 'Emerald Kundan Jhumka', word: 'JHUMKA' },
+    { src: "{% static 'images/hero-carousel/img3.webp' %}", bg: '#A97A2E', panel: '#C4954B', label: 'Pearl Chandbali', word: 'CHANDBALI' },
+    { src: "{% static 'images/hero-carousel/img4.webp' %}", bg: '#C97B95', panel: '#D998AE', label: 'Rose Pearl Studs', word: 'STUDS' }
+  ];
+  var logo = "{% static 'images/logo.jpg' %}";
+  var shopUrl = "{% url 'product_list' %}";
+
+  var ArrowLeftSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>';
+  var ArrowRightSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+
+  var root = document.getElementById('hhh-hero-root');
+  if (!root) return;
+
+  var activeIndex = 0;
+  var isAnimating = false;
+  var isMobile = window.innerWidth < 640;
+
+  window.addEventListener('resize', function(){
+    var nowMobile = window.innerWidth < 640;
+    if (nowMobile !== isMobile) { isMobile = nowMobile; render(); }
+  });
+
+  IMAGES.forEach(function(i){ var im = new Image(); im.src = i.src; });
+
+  function navigate(dir){
+    if (isAnimating) return;
+    isAnimating = true;
+    activeIndex = dir === 'next' ? (activeIndex + 1) % 4 : (activeIndex + 3) % 4;
+    render();
+    setTimeout(function(){ isAnimating = false; }, 650);
+  }
+
+  var autoTimer = setInterval(function(){ navigate('next'); }, 4500);
+  function resetAuto(){ clearInterval(autoTimer); autoTimer = setInterval(function(){ navigate('next'); }, 4500); }
+
+  function roleStyle(role){
+    if (role === 'center'){
+      return {
+        transform: 'translateX(-50%) scale(' + (isMobile ? 0.85 : 1.0) + ')',
+        filter: 'blur(0px)', opacity: 1, zIndex: 20,
+        left: '50%',
+        height: isMobile ? '48%' : '68%',
+        bottom: isMobile ? '18%' : '8%'
+      };
+    }
+    if (role === 'left'){
+      return {
+        transform: 'translateX(-50%) scale(1)',
+        filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
+        left: isMobile ? '18%' : '27%',
+        height: isMobile ? '15%' : '24%',
+        bottom: isMobile ? '28%' : '14%'
+      };
+    }
+    if (role === 'right'){
+      return {
+        transform: 'translateX(-50%) scale(1)',
+        filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
+        left: isMobile ? '82%' : '73%',
+        height: isMobile ? '15%' : '24%',
+        bottom: isMobile ? '28%' : '14%'
+      };
+    }
+    return {
+      transform: 'translateX(-50%) scale(1)',
+      filter: 'blur(4px)', opacity: 0.9, zIndex: 5,
+      left: '50%',
+      height: isMobile ? '12%' : '19%',
+      bottom: isMobile ? '28%' : '14%'
+    };
+  }
+
+  function render(){
+    var center = activeIndex;
+    var left = (activeIndex + 3) % 4;
+    var right = (activeIndex + 1) % 4;
+    var back = (activeIndex + 2) % 4;
+    var roles = {};
+    roles[center] = 'center'; roles[left] = 'left'; roles[right] = 'right'; roles[back] = 'back';
+
+    var active = IMAGES[activeIndex];
+
+    var cards = IMAGES.map(function(img, idx){
+      var role = roles[idx];
+      var s = roleStyle(role);
+      return '\
+      <div class="hhh-card" style="\
+        transform:' + s.transform + ';\
+        filter:' + s.filter + ';\
+        opacity:' + s.opacity + ';\
+        z-index:' + s.zIndex + ';\
+        left:' + s.left + ';\
+        height:' + s.height + ';\
+        bottom:' + s.bottom + ';\
+      ">\
+        <img src="' + img.src + '" alt="' + img.label + '" draggable="false" />\
+      </div>';
+    }).join('');
+
+    var dots = IMAGES.map(function(_, idx){ return '<div class="hhh-dot ' + (idx===activeIndex?'active':'') + '"></div>'; }).join('');
+
+    root.innerHTML = '\
+    <div class="hhh-hero-outer" style="background-color:' + active.bg + ';">\
+      <div class="hhh-hero-inner">\
+        <div class="hhh-grain" style="background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.08%22/></svg>\')"></div>\
+\
+        <div class="hhh-ghost">' + active.word + '</div>\
+\
+        <div class="hhh-brand">\
+          <img src="' + logo + '" alt="HypeHavenHub" />\
+        </div>\
+\
+        <div class="hhh-dots">' + dots + '</div>\
+\
+        <div class="hhh-carousel">' + cards + '</div>\
+\
+        <div class="hhh-info">\
+          <p class="hhh-title">HypeHavenHub Jhumkas</p>\
+          <p class="hhh-desc">Handcrafted oxidised jhumka earrings, finished by hand and shipped ready to wear. Stay gorgeous, stay you — new drops every week.</p>\
+          <div class="hhh-navbtns">\
+            <button class="hhh-navbtn" id="hhhPrevBtn" aria-label="Previous">' + ArrowLeftSVG + '</button>\
+            <button class="hhh-navbtn" id="hhhNextBtn" aria-label="Next">' + ArrowRightSVG + '</button>\
+          </div>\
+        </div>\
+\
+        <a class="hhh-cta" href="' + shopUrl + '">\
+          Shop Now ' + ArrowRightSVG + '\
+        </a>\
+      </div>\
+    </div>\
+    ';
+
+    document.getElementById('hhhPrevBtn').addEventListener('click', function(){ navigate('prev'); resetAuto(); });
+    document.getElementById('hhhNextBtn').addEventListener('click', function(){ navigate('next'); resetAuto(); });
+  }
+
+  render();
+})();
+</script>
 
 <!-- Dynamic Infinite Scroll Marquee -->
 <div class="marquee-strip py-2">
