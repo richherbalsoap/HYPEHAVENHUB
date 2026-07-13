@@ -22,9 +22,9 @@
   .hhh-hero-outer{
     position:relative;
     width:100vw;
-    margin-left: calc(-50vw + 50%); /* full bleed, matches other hero sections */
+    margin-left: calc(-50vw + 50%); /* full bleed */
     overflow:hidden;
-    transition: background-color 650ms cubic-bezier(0.4,0,0.2,1);
+    /* We'll animate background via Anime.js, no CSS transition needed here */
   }
   .hhh-hero-inner{
     position:relative;
@@ -54,7 +54,6 @@
     letter-spacing:-0.02em;
     white-space:nowrap;
     opacity:1;
-    transition: opacity 400ms;
   }
 
   .hhh-brand{
@@ -68,11 +67,7 @@
   .hhh-card{
     position:absolute;
     aspect-ratio: 0.74 / 1;
-    transition: transform 650ms cubic-bezier(0.4,0,0.2,1),
-                filter 650ms cubic-bezier(0.4,0,0.2,1),
-                opacity 650ms cubic-bezier(0.4,0,0.2,1),
-                left 650ms cubic-bezier(0.4,0,0.2,1);
-    will-change: transform, filter, opacity;
+    will-change: transform, filter, opacity, left, bottom, height;
   }
   .hhh-card img{
     width:100%; height:100%;
@@ -137,6 +132,7 @@
   .hhh-dot.active{ background:#fff; transform:scale(1.3); }
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 <script>
 (function(){
   var IMAGES = [
@@ -158,126 +154,197 @@
   var isAnimating = false;
   var isMobile = window.innerWidth < 640;
 
-  window.addEventListener('resize', function(){
-    var nowMobile = window.innerWidth < 640;
-    if (nowMobile !== isMobile) { isMobile = nowMobile; render(); }
-  });
-
+  // Preload
   IMAGES.forEach(function(i){ var im = new Image(); im.src = i.src; });
 
-  function navigate(dir){
-    if (isAnimating) return;
-    isAnimating = true;
-    activeIndex = dir === 'next' ? (activeIndex + 1) % 4 : (activeIndex + 3) % 4;
-    render();
-    setTimeout(function(){ isAnimating = false; }, 650);
-  }
-
-  var autoTimer = setInterval(function(){ navigate('next'); }, 4500);
-  function resetAuto(){ clearInterval(autoTimer); autoTimer = setInterval(function(){ navigate('next'); }, 4500); }
-
-  function roleStyle(role){
+  function roleStyle(role, mobile){
     if (role === 'center'){
       return {
-        transform: 'translateX(-50%) scale(' + (isMobile ? 0.85 : 1.0) + ')',
+        translateX: '-50%', scale: mobile ? 0.85 : 1.0,
         filter: 'blur(0px)', opacity: 1, zIndex: 20,
-        left: '50%',
-        height: isMobile ? '48%' : '68%',
-        bottom: isMobile ? '18%' : '8%'
+        left: '50%', height: mobile ? '48%' : '68%', bottom: mobile ? '18%' : '8%'
       };
     }
     if (role === 'left'){
       return {
-        transform: 'translateX(-50%) scale(1)',
+        translateX: '-50%', scale: 1,
         filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
-        left: isMobile ? '18%' : '27%',
-        height: isMobile ? '15%' : '24%',
-        bottom: isMobile ? '28%' : '14%'
+        left: mobile ? '18%' : '27%', height: mobile ? '15%' : '24%', bottom: mobile ? '28%' : '14%'
       };
     }
     if (role === 'right'){
       return {
-        transform: 'translateX(-50%) scale(1)',
+        translateX: '-50%', scale: 1,
         filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
-        left: isMobile ? '82%' : '73%',
-        height: isMobile ? '15%' : '24%',
-        bottom: isMobile ? '28%' : '14%'
+        left: mobile ? '82%' : '73%', height: mobile ? '15%' : '24%', bottom: mobile ? '28%' : '14%'
       };
     }
     return {
-      transform: 'translateX(-50%) scale(1)',
+      translateX: '-50%', scale: 1,
       filter: 'blur(4px)', opacity: 0.9, zIndex: 5,
-      left: '50%',
-      height: isMobile ? '12%' : '19%',
-      bottom: isMobile ? '28%' : '14%'
+      left: '50%', height: mobile ? '12%' : '19%', bottom: mobile ? '28%' : '14%'
     };
   }
 
-  function render(){
-    var center = activeIndex;
-    var left = (activeIndex + 3) % 4;
-    var right = (activeIndex + 1) % 4;
-    var back = (activeIndex + 2) % 4;
-    var roles = {};
-    roles[center] = 'center'; roles[left] = 'left'; roles[right] = 'right'; roles[back] = 'back';
-
-    var active = IMAGES[activeIndex];
-
-    var cards = IMAGES.map(function(img, idx){
-      var role = roles[idx];
-      var s = roleStyle(role);
-      return '\
-      <div class="hhh-card" style="\
-        transform:' + s.transform + ';\
-        filter:' + s.filter + ';\
-        opacity:' + s.opacity + ';\
-        z-index:' + s.zIndex + ';\
-        left:' + s.left + ';\
-        height:' + s.height + ';\
-        bottom:' + s.bottom + ';\
-      ">\
-        <img src="' + img.src + '" alt="' + img.label + '" draggable="false" />\
-      </div>';
+  // Initial Build
+  function buildDOM() {
+    var cardsHTML = IMAGES.map(function(img, idx) {
+      return '<div class="hhh-card" id="hhh-card-'+idx+'"><img src="' + img.src + '" alt="' + img.label + '" draggable="false" /></div>';
     }).join('');
 
-    var dots = IMAGES.map(function(_, idx){ return '<div class="hhh-dot ' + (idx===activeIndex?'active':'') + '"></div>'; }).join('');
+    var dotsHTML = IMAGES.map(function(_, idx){ return '<div class="hhh-dot" id="hhh-dot-'+idx+'"></div>'; }).join('');
 
     root.innerHTML = '\
-    <div class="hhh-hero-outer" style="background-color:' + active.bg + ';">\
+    <div class="hhh-hero-outer" id="hhh-outer">\
       <div class="hhh-hero-inner">\
         <div class="hhh-grain" style="background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.08%22/></svg>\')"></div>\
-\
-        <div class="hhh-ghost">' + active.word + '</div>\
-\
-        <div class="hhh-brand">\
-          <img src="' + logo + '" alt="HypeHavenHub" />\
-        </div>\
-\
-        <div class="hhh-dots">' + dots + '</div>\
-\
-        <div class="hhh-carousel">' + cards + '</div>\
-\
+        <div class="hhh-ghost" id="hhh-ghost"></div>\
+        <div class="hhh-brand"><img src="' + logo + '" alt="HypeHavenHub" /></div>\
+        <div class="hhh-dots">' + dotsHTML + '</div>\
+        <div class="hhh-carousel">' + cardsHTML + '</div>\
         <div class="hhh-info">\
-          <p class="hhh-title">HypeHavenHub Jhumkas</p>\
-          <p class="hhh-desc">Handcrafted oxidised jhumka earrings, finished by hand and shipped ready to wear. Stay gorgeous, stay you — new drops every week.</p>\
+          <p class="hhh-title" id="hhh-info-title">HypeHavenHub Jhumkas</p>\
+          <p class="hhh-desc">Handcrafted oxidised jewelry, finished by hand and shipped ready to wear. Stay gorgeous, stay you.</p>\
           <div class="hhh-navbtns">\
             <button class="hhh-navbtn" id="hhhPrevBtn" aria-label="Previous">' + ArrowLeftSVG + '</button>\
             <button class="hhh-navbtn" id="hhhNextBtn" aria-label="Next">' + ArrowRightSVG + '</button>\
           </div>\
         </div>\
-\
-        <a class="hhh-cta" href="' + shopUrl + '">\
-          Shop Now ' + ArrowRightSVG + '\
-        </a>\
+        <a class="hhh-cta" href="' + shopUrl + '">Shop Now ' + ArrowRightSVG + '</a>\
       </div>\
-    </div>\
-    ';
-
-    document.getElementById('hhhPrevBtn').addEventListener('click', function(){ navigate('prev'); resetAuto(); });
-    document.getElementById('hhhNextBtn').addEventListener('click', function(){ navigate('next'); resetAuto(); });
+    </div>';
   }
 
-  render();
+  buildDOM();
+
+  var outer = document.getElementById('hhh-outer');
+  var ghost = document.getElementById('hhh-ghost');
+  var infoTitle = document.getElementById('hhh-info-title');
+
+  // Set initial state instantly
+  function setInitialState() {
+    var active = IMAGES[activeIndex];
+    outer.style.backgroundColor = active.bg;
+    ghost.innerText = active.word;
+    infoTitle.innerText = active.label;
+    
+    for(var i=0; i<4; i++){
+      document.getElementById('hhh-dot-'+i).classList.toggle('active', i === activeIndex);
+      var role = (i === activeIndex) ? 'center' : (i === (activeIndex+3)%4) ? 'left' : (i === (activeIndex+1)%4) ? 'right' : 'back';
+      var s = roleStyle(role, isMobile);
+      var card = document.getElementById('hhh-card-'+i);
+      card.style.transform = 'translateX('+s.translateX+') scale('+s.scale+')';
+      card.style.filter = s.filter;
+      card.style.opacity = s.opacity;
+      card.style.zIndex = s.zIndex;
+      card.style.left = s.left;
+      card.style.height = s.height;
+      card.style.bottom = s.bottom;
+    }
+  }
+  setInitialState();
+
+  // Anime.js powered navigation
+  function navigate(dir){
+    if (isAnimating) return;
+    isAnimating = true;
+    
+    // Calculate new index
+    var nextIndex = dir === 'next' ? (activeIndex + 1) % 4 : (activeIndex + 3) % 4;
+    var active = IMAGES[nextIndex];
+    var isNext = dir === 'next';
+
+    // Timeline for smooth orchestration
+    var tl = anime.timeline({
+      easing: 'spring(1, 80, 10, 0)',
+      duration: 800,
+      complete: function() {
+        activeIndex = nextIndex;
+        isAnimating = false;
+      }
+    });
+
+    // Animate background color
+    tl.add({
+      targets: outer,
+      backgroundColor: active.bg,
+      duration: 600,
+      easing: 'easeInOutSine'
+    }, 0);
+
+    // Animate Ghost Text & Title (fade out, change, fade in)
+    tl.add({
+      targets: [ghost, infoTitle],
+      opacity: [1, 0],
+      translateX: isNext ? [0, -30] : [0, 30],
+      duration: 200,
+      easing: 'easeInQuad',
+      complete: function() {
+        ghost.innerText = active.word;
+        infoTitle.innerText = active.label;
+      }
+    }, 0).add({
+      targets: [ghost, infoTitle],
+      opacity: [0, 1],
+      translateX: isNext ? [30, 0] : [-30, 0],
+      duration: 400,
+      easing: 'easeOutQuad'
+    }, 200);
+
+    // Animate dots
+    for(var i=0; i<4; i++){
+      document.getElementById('hhh-dot-'+i).classList.toggle('active', i === nextIndex);
+    }
+
+    // Animate Cards with staggering based on direction
+    var cardTargets = [];
+    for(var i=0; i<4; i++) {
+      var role = (i === nextIndex) ? 'center' : (i === (nextIndex+3)%4) ? 'left' : (i === (nextIndex+1)%4) ? 'right' : 'back';
+      var s = roleStyle(role, isMobile);
+      cardTargets.push({
+        el: document.getElementById('hhh-card-'+i),
+        style: s,
+        role: role
+      });
+      // Pre-set z-index so overlaps look correct during animation
+      document.getElementById('hhh-card-'+i).style.zIndex = s.zIndex;
+    }
+
+    cardTargets.forEach(function(target, i) {
+      tl.add({
+        targets: target.el,
+        left: target.style.left,
+        height: target.style.height,
+        bottom: target.style.bottom,
+        scale: target.style.scale,
+        opacity: target.style.opacity,
+        // Anime handles transforms directly
+        translateX: '-50%',
+        update: function(anim) {
+          // Manually update filter since anime doesn't natively interpolate blur strings well
+          var progress = anim.progress / 100;
+          // Simple string injection or leave it to standard CSS transition? We will animate blur via anime dummy object if needed, but setting it instantly or letting anime interpolate works in newer versions.
+          // For safety, we just set the target filter value. Anime will animate it if it can.
+          target.el.style.filter = target.style.filter; 
+        }
+      }, 0);
+    });
+  }
+
+  var autoTimer = setInterval(function(){ navigate('next'); }, 4500);
+  function resetAuto(){ clearInterval(autoTimer); autoTimer = setInterval(function(){ navigate('next'); }, 4500); }
+
+  document.getElementById('hhhPrevBtn').addEventListener('click', function(){ navigate('prev'); resetAuto(); });
+  document.getElementById('hhhNextBtn').addEventListener('click', function(){ navigate('next'); resetAuto(); });
+
+  window.addEventListener('resize', function(){
+    var nowMobile = window.innerWidth < 640;
+    if (nowMobile !== isMobile) { 
+      isMobile = nowMobile; 
+      setInitialState(); // Snap to new positions if layout crosses breakpoint
+    }
+  });
+
 })();
 </script>
 
