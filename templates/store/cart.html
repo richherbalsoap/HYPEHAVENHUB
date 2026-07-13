@@ -17,42 +17,119 @@
   {% endif %}
   <div class="luxury-line mx-auto mb-5" style="max-width: 80px;"></div>
 
+  <style>
+    .cart-item-custom {
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      border: 1px solid var(--outline-variant);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: var(--surface-container-low);
+    }
+    .cart-item-left {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex: 1;
+      min-width: 0;
+    }
+    .cart-item-image-box {
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface-container);
+    }
+    .cart-item-image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .cart-item-details-box {
+      flex: 1;
+      min-width: 0;
+    }
+    .cart-item-name-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--on-surface);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cart-item-actions-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    @media (max-width: 575px) {
+      .cart-item-custom {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+      }
+      .cart-item-actions-box {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--outline-variant);
+        padding-top: 12px;
+      }
+      .cart-item-actions-box .total-price {
+        margin-right: auto;
+        margin-left: 12px;
+      }
+    }
+  </style>
+
   {% if items %}
   <div class="row g-4">
     <div class="col-lg-8">
       {% for item in items %}
-      <div class="cart-item" id="cart-item-{{ item.id }}" data-cart-item style="border: 1px solid var(--outline-variant); border-radius: 16px; padding: 20px; margin-bottom: 16px; background: var(--surface-container-low);">
-        {% if item.product.display_image_url %}
-          <img src="{{ item.product.display_image_url }}" class="cart-item-image arch-frame" alt="{{ item.product.name }}" style="border-radius: 12px;">
-        {% else %}
-          <div class="cart-item-image" style="display:flex;align-items:center;justify-content:center;background:var(--surface-container);border-radius:12px;color:var(--primary);font-size:32px;">
-            <span class="material-symbols-outlined" style="font-size: 40px;">diamond</span>
-          </div>
-        {% endif %}
-        <div class="cart-item-details flex-grow-1">
-          <!-- Brand removed -->
-          <div class="cart-item-name" style="font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; color: var(--on-surface);">
-            <a href="{% url 'product_detail' item.product.slug %}" class="text-decoration-none" style="color: var(--on-surface);">{{ item.product.name }}</a>
-          </div>
-          {% if item.variant %}
-          <div class="cart-item-variant" style="color: var(--on-surface-variant); font-size: 13px;">
-            {% if item.variant.color_code %}
-              <span class="d-inline-block rounded-circle border me-1" style="width: 14px; height: 14px; background: {{ item.variant.color_code }}; border-color: var(--outline-variant) !important;"></span>
-            {% endif %}
-            {{ item.variant.label }}
-          </div>
+      <div class="cart-item-custom" id="cart-item-{{ item.id }}" data-cart-item>
+        <div class="cart-item-left">
+          <div class="cart-item-image-box">
+          {% if item.product.display_image_url %}
+            <img src="{{ item.product.display_image_url }}" alt="{{ item.product.name }}">
+          {% else %}
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--primary);">
+              <span class="material-symbols-outlined" style="font-size: 32px;">diamond</span>
+            </div>
           {% endif %}
-          <div class="cart-item-price" style="color: var(--primary); font-weight: 600; font-family: 'Montserrat', sans-serif;">{% get_cart_item_price item as it_price %}{% format_price it_price|floatformat:"0" %}</div>
-        </div>
-        <div class="d-flex flex-column align-items-end gap-3">
-          <div class="qty-selector" style="border: 1px solid var(--outline-variant); border-radius: 10px; overflow: hidden;">
-            <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "decrease"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 6px 12px; color: var(--primary); font-weight: 700;">-</button>
-            <span class="qty-num" id="qty-{{ item.id }}" style="padding: 6px 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--on-surface);">{{ item.quantity }}</span>
-            <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "increase"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 6px 12px; color: var(--primary); font-weight: 700;">+</button>
           </div>
-          <div class="fw-700" id="total-{{ item.id }}" style="font-family: 'Playfair Display', serif; font-size: 17px; color: var(--on-surface);">{% get_cart_item_total item as it_total %}{% format_price it_total|floatformat:"0" %}</div>
-          <button class="btn btn-sm" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "remove"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" title="Remove" style="color: var(--primary); opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
-            <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+          <div class="cart-item-details-box">
+            <div class="cart-item-name-text">
+              <a href="{% url 'product_detail' item.product.slug %}" class="text-decoration-none" style="color: var(--on-surface);" title="{{ item.product.name }}">{{ item.product.name }}</a>
+            </div>
+            {% if item.variant %}
+            <div style="color: var(--on-surface-variant); font-size: 13px; margin-top: 4px;">
+              {% if item.variant.color_code %}
+                <span class="d-inline-block rounded-circle border me-1" style="width: 12px; height: 12px; background: {{ item.variant.color_code }}; border-color: var(--outline-variant) !important; vertical-align: middle;"></span>
+              {% endif %}
+              <span style="vertical-align: middle;">{{ item.variant.label }}</span>
+            </div>
+            {% endif %}
+            <div style="color: var(--primary); font-weight: 600; font-family: 'Montserrat', sans-serif; font-size: 14px; margin-top: 4px;">{% get_cart_item_price item as it_price %}{% format_price it_price|floatformat:"0" %}</div>
+          </div>
+        </div>
+        <div class="cart-item-actions-box">
+          <div class="qty-selector" style="border: 1px solid var(--outline-variant); border-radius: 10px; overflow: hidden; display: flex; align-items: center;">
+            <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "decrease"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 4px 12px; color: var(--primary); font-weight: 700; font-size: 16px;">-</button>
+            <span class="qty-num" id="qty-{{ item.id }}" style="padding: 4px 8px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: var(--on-surface); font-size: 14px;">{{ item.quantity }}</span>
+            <button class="qty-btn" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "increase"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" style="background: transparent; border: none; padding: 4px 12px; color: var(--primary); font-weight: 700; font-size: 16px;">+</button>
+          </div>
+          <div class="fw-700 total-price" id="total-{{ item.id }}" style="font-family: 'Playfair Display', serif; font-size: 16px; color: var(--on-surface);">{% get_cart_item_total item as it_total %}{% format_price it_total|floatformat:"0" %}</div>
+          <button class="btn btn-sm p-1" hx-post="{% url 'update_cart' %}" hx-vals='{"item_id": {{ item.id }}, "action": "remove"}' hx-target="#cart-container" hx-select="#cart-container" hx-swap="outerHTML" title="Remove" style="color: var(--primary); opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+            <span class="material-symbols-outlined" style="font-size: 22px;">delete</span>
           </button>
         </div>
       </div>
