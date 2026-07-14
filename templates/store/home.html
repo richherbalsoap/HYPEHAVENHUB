@@ -555,7 +555,19 @@
     position:relative;
     border-radius:50% 50% 6px 6px / 34% 34% 6px 6px;
     padding:6px;
-    background:linear-gradient(160deg, var(--hhh-gold) 0%, rgba(201,161,90,.25) 40%, var(--hhh-gold) 100%);
+    background:linear-gradient(180deg, rgba(201,161,90,0.2) 0%, var(--hhh-gold-light) 50%, rgba(201,161,90,0.2) 100%);
+    background-size: 100% 300%;
+    animation: hhh-border-glow 3s ease-in-out infinite alternate;
+  }
+  @keyframes hhh-border-glow {
+    0% {
+      background-position: 0% 0%;
+      box-shadow: 0 0 5px rgba(201,161,90,0.2);
+    }
+    100% {
+      background-position: 0% 100%;
+      box-shadow: 0 0 20px rgba(233,209,156,0.8);
+    }
   }
   .hhh-arch__frame::before{
     content:"";
