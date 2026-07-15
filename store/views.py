@@ -1966,6 +1966,13 @@ def razorpay_webhook(request):
             except Payment.DoesNotExist:
                 logger.warning(f"Webhook received for unknown payment_id: {payment_id}")
                 
+        elif event == 'order.paid':
+            logger.info(f"Order paid webhook received: {payload}")
+            # Magic checkout success handling can be done here if needed
+        elif event == 'checkout.abandoned':
+            logger.info(f"Abandoned checkout webhook received: {payload}")
+            # Track abandoned carts for retargeting here
+                
         return JsonResponse({"status": "ok"})
     except Exception as e:
         logger.error(f"Error processing webhook: {str(e)}")

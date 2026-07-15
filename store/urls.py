@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import RedirectView
 from . import views
 from . import admin_views
+from . import magic_checkout_api
 
 urlpatterns = [
     # Home & Products
@@ -65,6 +66,9 @@ urlpatterns = [
     path('api/pincode-lookup/', views.pincode_lookup, name='pincode_lookup'),
     path('run-migrations/', views.run_migrations_view, name='run_migrations'),
     path('api/razorpay-webhook/', views.razorpay_webhook, name='razorpay_webhook'),
+    path('api/magic-checkout/shipping/', magic_checkout_api.shipping_info, name='magic_checkout_shipping'),
+    path('api/magic-checkout/promotions/', magic_checkout_api.get_promotions, name='magic_checkout_get_promotions'),
+    path('api/magic-checkout/promotions/apply/', magic_checkout_api.apply_promotion, name='magic_checkout_apply_promotion'),
 
     # Admin Panel
     path('admin/', RedirectView.as_view(pattern_name='admin_dashboard', permanent=False), name='admin_root'),
