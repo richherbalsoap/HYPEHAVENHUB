@@ -341,7 +341,7 @@ if (checkoutForm) {
               "name": "HYPEHAVENHUB",
               "description": "Premium Assorted Jhumka Box Sets",
               "order_id": data.razorpay_order_id,
-              "magic": true, // Enabled Razorpay Magic Checkout
+              "one_click_checkout": true, // Enabled Razorpay Magic Checkout
               "handler": async function (paymentRes) {
                 console.log("Razorpay payment successful response:", paymentRes);
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verifying Payment...';
