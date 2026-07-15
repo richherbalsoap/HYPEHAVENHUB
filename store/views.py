@@ -1232,6 +1232,37 @@ def verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
+            if order.user.username == 'guest_checkout':
+                try:
+                    rzp_order = client.order.fetch(razorpay_order_id)
+                    shipping_address = rzp_order.get('shipping_address') or rzp_order.get('notes', {}).get('shipping_address')
+                    if not shipping_address:
+                        rzp_payment = client.payment.fetch(razorpay_payment_id)
+                        shipping_address = rzp_payment.get('notes', {}).get('shipping_address')
+                        contact = rzp_payment.get('contact', '')
+                        email = rzp_payment.get('email', 'guest@hypehavenhub.com')
+                    else:
+                        contact = rzp_order.get('customer_details', {}).get('contact', '')
+                        email = rzp_order.get('customer_details', {}).get('email', 'guest@hypehavenhub.com')
+
+                    if shipping_address:
+                        from store.models import Address
+                        address_obj, _ = Address.objects.get_or_create(
+                            user=order.user,
+                            street_address=shipping_address.get('line1', shipping_address.get('street_address', '')),
+                            city=shipping_address.get('city', ''),
+                            state=shipping_address.get('state', ''),
+                            postal_code=shipping_address.get('zipcode', ''),
+                            country=shipping_address.get('country', 'IN'),
+                            defaults={
+                                'name': shipping_address.get('name', 'Guest User'),
+                                'phone_number': contact
+                            }
+                        )
+                        order.address = address_obj
+                except Exception as e:
+                    logger.error(f"Error fetching Magic Checkout address: {e}")
+
             # Update order status
             order.status = 'confirmed'
             order.save()

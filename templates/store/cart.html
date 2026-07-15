@@ -287,15 +287,18 @@
                 window.location.href = "/orders/?status=FAILED";
               }
             },
-            "prefill": {
-              "name": data.customer_name,
-              "email": data.customer_email,
-              "contact": data.customer_phone
-            },
             "theme": {
-              "color": "#d4af37"
+              "color": "#3b8c7b"
             }
           };
+
+          if (data.customer_email || data.customer_phone || data.customer_name) {
+            options.prefill = {};
+            if (data.customer_name && data.customer_name !== 'Guest User') options.prefill.name = data.customer_name;
+            if (data.customer_email && data.customer_email !== 'guest@hypehavenhub.com') options.prefill.email = data.customer_email;
+            if (data.customer_phone) options.prefill.contact = data.customer_phone;
+            if (Object.keys(options.prefill).length === 0) delete options.prefill;
+          }
           var rzp1 = new Razorpay(options);
           rzp1.on('payment.failed', function (response){
             alert("Payment failed: " + response.error.description);
