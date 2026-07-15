@@ -1047,18 +1047,23 @@ def place_order(request):
 
 @require_POST
 def razorpay_direct_checkout(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'requires_login': True,
-            'redirect': build_login_redirect_url(request, fallback='/checkout/', notice='order_required'),
-            'message': 'Order karva mate pehla login karo.'
-        }, status=401)
-
     try:
         data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
     except Exception:
         data = {}
+        
+    user = request.user
+    if not user.is_authenticated:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user, _ = User.objects.get_or_create(
+            username='guest_checkout',
+            defaults={
+                'email': 'guest@hypehavenhub.com',
+                'first_name': 'Guest',
+                'last_name': 'User',
+            }
+        )
         
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
@@ -1121,7 +1126,7 @@ def razorpay_direct_checkout(request):
 
     # Create Order without address
     order = Order.objects.create(
-        user=request.user,
+        user=user,
         address=None,
         subtotal=subtotal,
         discount_amount=discount_amount,
@@ -1159,7 +1164,7 @@ def razorpay_direct_checkout(request):
         }
         payment.save()
         
-        customer_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
+        customer_name = f"{user.first_name} {user.last_name}".strip() if user.username != 'guest_checkout' else ''
         
         return JsonResponse({
             'success': True,
@@ -1169,8 +1174,8 @@ def razorpay_direct_checkout(request):
             'amount': amount_in_paise,
             'order_id': order.order_id,
             'customer_name': customer_name,
-            'customer_email': request.user.email,
-            'customer_phone': getattr(request.user, 'phone', ''),
+            'customer_email': user.email if user.username != 'guest_checkout' else '',
+            'customer_phone': getattr(user, 'phone', '') if user.username != 'guest_checkout' else '',
         })
     except Exception as e:
         logger.error(f"Razorpay order creation failed: {str(e)}")
@@ -1183,9 +1188,6 @@ def razorpay_direct_checkout(request):
 
 @require_POST
 def verify_payment(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'success': False, 'message': 'Authentication required.'}, status=401)
-
     from django.db import transaction
     from store.exceptions import InventoryConflictError
 
@@ -1200,7 +1202,10 @@ def verify_payment(request):
             return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
 
         with transaction.atomic():
-            order = Order.objects.select_for_update().get(order_id=local_order_id, user=request.user)
+            order = Order.objects.select_for_update().get(order_id=local_order_id)
+            if request.user.is_authenticated and order.user != request.user and order.user.username != 'guest_checkout':
+                return JsonResponse({'success': False, 'message': 'Unauthorized access.'}, status=403)
+            
             payment = order.payment
 
             # Verify signature
