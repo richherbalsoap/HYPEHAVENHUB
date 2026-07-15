@@ -850,6 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
           "name": "HYPEHAVENHUB",
           "description": "Order Payment",
           "order_id": data.razorpay_order_id,
+          "magic": true, // Enabled Razorpay Magic Checkout
           "handler": async function (response) {
             // Verify payment
             const verifyRes = await fetch("{% url 'verify_payment' %}", {
