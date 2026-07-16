@@ -24,7 +24,7 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
-    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, PerspectiveCarouselImage
+    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, ProductQuestion
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -270,42 +270,15 @@ def home(request):
         products__is_active=True,
     ).distinct()[:10]
     flash_sale_obj = FlashSale.objects.filter(is_active=True).first()
-    # NOTE: the 3D cylinder hero math (translateZ / tan(180deg / n)) breaks down
-    # for very low panel counts (n=1 -> divide by zero, n=2 -> tan(90deg) is
-    # undefined) and gets visually distorted for very high counts (cards recede
-    # past the CSS perspective plane and bunch up into a tiny cluster). Pad/cap
-    # here so the template's --n is always a geometry-safe number.
-    hero_panels_qs = list(HeroPanel.objects.filter(is_active=True))
-    RING_SLOTS = 9  # enough cards around the ring so it spans full-width edge-to-edge
-    RING_CAP = 12   # hard cap so it never over-recedes past the perspective plane
-    if not hero_panels_qs:
-        hero_panels = []  # template falls back to its own static demo images
-    elif len(hero_panels_qs) < RING_SLOTS:
-        from itertools import cycle, islice
-        hero_panels = list(islice(cycle(hero_panels_qs), RING_SLOTS))
-    else:
-        hero_panels = hero_panels_qs[:RING_CAP]
+    hero_panels = HeroPanel.objects.filter(is_active=True)
     
-    perspective_images = list(PerspectiveCarouselImage.objects.filter(is_active=True))
-    # If no images are uploaded yet, use placeholders so the 3D animation is visible
-    if not perspective_images:
-        class MockImage:
-            def __init__(self, title, url):
-                self.title = title
-                self.display_image_url = url
-        
-        perspective_images = [
-            MockImage("Mystic Rings", "https://images.unsplash.com/photo-1605100804763-247f66156ce4?w=500&q=80"),
-            MockImage("Classic Gold", "https://images.unsplash.com/photo-1599643478514-4a4e0f068ee1?w=500&q=80"),
-            MockImage("Diamond Pearl", "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80"),
-            MockImage("Silver Chain", "https://images.unsplash.com/photo-1574482705009-3221971775f9?w=500&q=80"),
-            MockImage("Gemstone Drop", "https://images.unsplash.com/photo-1515562141207-7a8efd3f0aee?w=500&q=80")
-        ]
-
+    wishlist_product_ids = []
+    if request.user.is_authenticated:
+        wishlist_product_ids = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
+    
     return render(request, 'store/home.html', {
         'featured': featured,
         'hero_products': hero_products,
-        'perspective_images': perspective_images,
         'new_arrivals': new_arrivals,
         'bestsellers': bestsellers,
         'flash_sale': flash_sale,
@@ -313,6 +286,7 @@ def home(request):
         'brands': brands,
         'flash_sale_end_time': flash_sale_obj.end_time.isoformat() if flash_sale_obj else None,
         'hero_panels': hero_panels,
+        'wishlist_product_ids': wishlist_product_ids,
     })
 
 
@@ -435,25 +409,36 @@ def product_detail(request, slug):
         user_in_wishlist = Wishlist.objects.filter(user=request.user, product=product).exists()
 
     review_form = ReviewForm()
-    if request.method == 'POST' and request.user.is_authenticated:
-        review_form = ReviewForm(request.POST)
-        if review_form.is_valid():
-            if not Review.objects.filter(user=request.user, product=product).exists():
-                rev = review_form.save(commit=False)
-                rev.user = request.user
-                rev.product = product
-                has_order = Order.objects.filter(
-                    user=request.user, items__product=product, status='delivered'
-                ).exists()
-                rev.is_verified_purchase = has_order
-                rev.save()
-                images_files = request.FILES.getlist('review_images')
-                for img in images_files[:3]:
-                    ReviewImage.objects.create(review=rev, image=img)
-                messages.success(request, 'Review submitted successfully!')
-                return redirect('product_detail', slug=slug)
-            else:
-                messages.warning(request, 'You have already reviewed this product.')
+    if request.method == 'POST':
+        if 'question' in request.POST and 'email' in request.POST:
+            ProductQuestion.objects.create(
+                product=product,
+                question=request.POST.get('question'),
+                email=request.POST.get('email'),
+                display_name=request.POST.get('display_name')
+            )
+            messages.success(request, 'Your question has been submitted successfully!')
+            return redirect('product_detail', slug=slug)
+            
+        elif request.user.is_authenticated:
+            review_form = ReviewForm(request.POST)
+            if review_form.is_valid():
+                if not Review.objects.filter(user=request.user, product=product).exists():
+                    rev = review_form.save(commit=False)
+                    rev.user = request.user
+                    rev.product = product
+                    has_order = Order.objects.filter(
+                        user=request.user, items__product=product, status='delivered'
+                    ).exists()
+                    rev.is_verified_purchase = has_order
+                    rev.save()
+                    images_files = request.FILES.getlist('review_images')
+                    for img in images_files[:3]:
+                        ReviewImage.objects.create(review=rev, image=img)
+                    messages.success(request, 'Review submitted successfully!')
+                    return redirect('product_detail', slug=slug)
+                else:
+                    messages.warning(request, 'You have already reviewed this product.')
 
     return render(request, 'store/product_detail.html', {
         'product': product,
@@ -954,19 +939,8 @@ from django.views.decorators.cache import never_cache
 
 @never_cache
 def checkout_view(request):
-    if not request.user.is_authenticated:
-        return redirect(build_login_redirect_url(request, fallback='/checkout/', notice='order_required'))
-
-    cart = get_or_create_cart(request)
-    if not cart.items.exists():
-        messages.warning(request, 'Your cart is empty.')
-        return redirect('cart')
-    addresses = Address.objects.filter(user=request.user).order_by('-is_default', '-id')
-    return render(request, 'store/checkout.html', {
-        'cart': cart,
-        'addresses': addresses,
-        'items': cart.items.select_related('product', 'variant').all(),
-    })
+    messages.info(request, 'Checkout is now handled directly from the cart.')
+    return redirect('cart')
 
 
 @require_POST
@@ -1033,12 +1007,29 @@ def place_order(request):
         try:
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
             amount_in_paise = int(order.grand_total * 100)
-            
+
+            # Build line_items for Magic Checkout. WITHOUT line_items_total,
+            # Razorpay silently creates a Standard Checkout order instead of Magic Checkout.
+            rzp_line_items = []
+            for item in cart.items.all():
+                unit_price_paise = int(item.unit_price * 100)
+                rzp_line_items.append({
+                    "sku": item.variant.sku if item.variant else f"PROD-{item.product.id}",
+                    "variant_id": str(item.variant.id) if item.variant else str(item.product.id),
+                    "price": unit_price_paise,
+                    "offer_price": unit_price_paise,
+                    "quantity": item.quantity,
+                    "name": item.product.name[:250],
+                })
+            line_items_total = sum(li['offer_price'] * li['quantity'] for li in rzp_line_items)
+
             # Create Razorpay Order
             razorpay_order = client.order.create(data={
                 'amount': amount_in_paise,
                 'currency': 'INR',
                 'receipt': str(order.order_id),
+                'line_items_total': line_items_total,  # mandatory for Magic Checkout
+                'line_items': rzp_line_items,
             })
             
             payment.gateway_response = {
@@ -1056,6 +1047,8 @@ def place_order(request):
                 'razorpay_order_id': razorpay_order['id'],
                 'razorpay_key_id': settings.RAZORPAY_KEY_ID,
                 'amount': amount_in_paise,
+                'line_items_total': line_items_total,
+                'line_items': rzp_line_items,
                 'order_id': order.order_id,
                 'customer_name': customer_name,
                 'customer_email': request.user.email,
@@ -1071,12 +1064,172 @@ def place_order(request):
 
     return JsonResponse({'success': False, 'message': 'Invalid payment method.'})
 
+@require_POST
+def razorpay_direct_checkout(request):
+    try:
+        data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
+    except Exception:
+        data = {}
+        
+    user = request.user
+    if not user.is_authenticated:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user, _ = User.objects.get_or_create(
+            username='guest_checkout',
+            defaults={
+                'email': 'guest@hypehavenhub.com',
+                'first_name': 'Guest',
+                'last_name': 'User',
+            }
+        )
+        
+    product_id = data.get('product_id')
+    variant_id = data.get('variant_id')
+    quantity = int(data.get('quantity', 1))
+
+    subtotal = Decimal('0.00')
+    discount_amount = Decimal('0.00')
+    delivery_charge = Decimal('0.00')
+    coupon = None
+    items_to_create = []
+
+    if product_id:
+        # Buy Now flow
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        variant = None
+        if variant_id:
+            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        
+        unit_price = product.selling_price
+        if variant:
+            unit_price += variant.additional_price
+        
+        total_price = unit_price * quantity
+        subtotal = total_price
+        # Basic delivery charge for Buy Now (0 for now to match Cart behavior)
+        delivery_charge = Decimal('0.00')
+
+        items_to_create.append({
+            'product': product,
+            'variant': variant,
+            'product_name': product.name,
+            'variant_label': variant.label if variant else '',
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'total_price': total_price
+        })
+    else:
+        # Cart Checkout flow
+        cart = get_or_create_cart(request)
+        if not cart.items.exists():
+            return JsonResponse({'success': False, 'message': 'Cart is empty.'})
+            
+        subtotal = cart.subtotal
+        discount_amount = cart.discount_amount
+        delivery_charge = cart.delivery_charge
+        coupon = cart.coupon
+        
+        for item in cart.items.all():
+            items_to_create.append({
+                'product': item.product,
+                'variant': item.variant,
+                'product_name': item.product.name,
+                'variant_label': item.variant.label if item.variant else '',
+                'quantity': item.quantity,
+                'unit_price': item.unit_price,
+                'total_price': item.total_price
+            })
+
+    grand_total = subtotal - discount_amount + delivery_charge
+
+    # Create Order without address
+    order = Order.objects.create(
+        user=user,
+        address=None,
+        subtotal=subtotal,
+        discount_amount=discount_amount,
+        delivery_charge=delivery_charge,
+        grand_total=grand_total,
+        coupon=coupon,
+        status='pending',
+    )
+
+    for item_data in items_to_create:
+        OrderItem.objects.create(order=order, **item_data)
+
+    payment = Payment.objects.create(
+        order=order,
+        method='razorpay',
+        amount=order.grand_total,
+        status='pending',
+    )
+
+    import razorpay
+    try:
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        amount_in_paise = int(order.grand_total * 100)
+
+        # Build line_items in the format Razorpay's Orders API expects.
+        # sku/variant_id/price/offer_price/quantity/name are mandatory fields.
+        rzp_line_items = []
+        for item_data in items_to_create:
+            variant = item_data.get('variant')
+            product = item_data['product']
+            unit_price_paise = int(item_data['unit_price'] * 100)
+            rzp_line_items.append({
+                "sku": variant.sku if variant else f"PROD-{product.id}",
+                "variant_id": str(variant.id) if variant else str(product.id),
+                "price": unit_price_paise,
+                "offer_price": unit_price_paise,
+                "quantity": item_data['quantity'],
+                "name": item_data['product_name'][:250] + (" - " + item_data['variant_label'] if item_data['variant_label'] else ""),
+            })
+        line_items_total = sum(li['offer_price'] * li['quantity'] for li in rzp_line_items)
+
+        # WITHOUT line_items_total here, Razorpay creates a Standard Checkout
+        # order instead of Magic Checkout, no matter what the frontend sends.
+        razorpay_order = client.order.create(data={
+            'amount': amount_in_paise,
+            'currency': 'INR',
+            'receipt': str(order.order_id),
+            'line_items_total': line_items_total,
+            'line_items': rzp_line_items,
+        })
+        
+        payment.gateway_response = {
+            'razorpay_order_id': razorpay_order['id'],
+            'amount': amount_in_paise,
+            'currency': 'INR'
+        }
+        payment.save()
+        
+        customer_name = f"{user.first_name} {user.last_name}".strip() if user.username != 'guest_checkout' else ''
+
+        return JsonResponse({
+            'success': True,
+            'payment_method': 'razorpay',
+            'razorpay_order_id': razorpay_order['id'],
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'amount': amount_in_paise,
+            'line_items_total': line_items_total,
+            'line_items': rzp_line_items,
+            'order_id': order.order_id,
+            'customer_name': customer_name,
+            'customer_email': user.email if user.username != 'guest_checkout' else '',
+            'customer_phone': getattr(user, 'phone', '') if user.username != 'guest_checkout' else '',
+        })
+    except Exception as e:
+        logger.error(f"Razorpay order creation failed: {str(e)}")
+        order.delete()
+        return JsonResponse({
+            'success': False,
+            'message': 'Failed to initiate Razorpay payment. Please try again.'
+        })
+
 
 @require_POST
 def verify_payment(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'success': False, 'message': 'Authentication required.'}, status=401)
-
     from django.db import transaction
     from store.exceptions import InventoryConflictError
 
@@ -1091,7 +1244,10 @@ def verify_payment(request):
             return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
 
         with transaction.atomic():
-            order = Order.objects.select_for_update().get(order_id=local_order_id, user=request.user)
+            order = Order.objects.select_for_update().get(order_id=local_order_id)
+            if request.user.is_authenticated and order.user != request.user and order.user.username != 'guest_checkout':
+                return JsonResponse({'success': False, 'message': 'Unauthorized access.'}, status=403)
+            
             payment = order.payment
 
             # Verify signature
@@ -1117,6 +1273,37 @@ def verify_payment(request):
             payment.payment_id = razorpay_payment_id
             payment.gateway_response = params_dict
             payment.save()
+
+            if order.user.username == 'guest_checkout':
+                try:
+                    rzp_order = client.order.fetch(razorpay_order_id)
+                    shipping_address = rzp_order.get('shipping_address') or rzp_order.get('notes', {}).get('shipping_address')
+                    if not shipping_address:
+                        rzp_payment = client.payment.fetch(razorpay_payment_id)
+                        shipping_address = rzp_payment.get('notes', {}).get('shipping_address')
+                        contact = rzp_payment.get('contact', '')
+                        email = rzp_payment.get('email', 'guest@hypehavenhub.com')
+                    else:
+                        contact = rzp_order.get('customer_details', {}).get('contact', '')
+                        email = rzp_order.get('customer_details', {}).get('email', 'guest@hypehavenhub.com')
+
+                    if shipping_address:
+                        from store.models import Address
+                        address_obj, _ = Address.objects.get_or_create(
+                            user=order.user,
+                            street_address=shipping_address.get('line1', shipping_address.get('street_address', '')),
+                            city=shipping_address.get('city', ''),
+                            state=shipping_address.get('state', ''),
+                            postal_code=shipping_address.get('zipcode', ''),
+                            country=shipping_address.get('country', 'IN'),
+                            defaults={
+                                'name': shipping_address.get('name', 'Guest User'),
+                                'phone_number': contact
+                            }
+                        )
+                        order.address = address_obj
+                except Exception as e:
+                    logger.error(f"Error fetching Magic Checkout address: {e}")
 
             # Update order status
             order.status = 'confirmed'
@@ -1429,11 +1616,84 @@ def pincode_lookup(request):
     if not pincode or len(pincode) < 6:
         return JsonResponse({'success': False, 'message': 'Invalid pincode.'})
     
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Try using Shiprocket Courier Serviceability
+    try:
+        from .shipping import ShiprocketService
+        token = ShiprocketService._get_token()
+        if token:
+            url = "https://apiv2.shiprocket.in/v1/external/courier/serviceability/"
+            params = {
+                'pickup_postcode': '360004',  # Default warehouse pickup location (Rajkot, Gujarat)
+                'delivery_postcode': pincode,
+                'weight': '0.5',
+                'cod': '0'  # Prepaid order serviceability check only (no COD)
+            }
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+            response = requests.get(url, params=params, headers=headers, timeout=8)
+            if response.status_code == 200:
+                res_data = response.json()
+                if res_data.get('status') == 200:
+                    data = res_data.get('data', {})
+                    available_couriers = data.get('available_courier_companies', [])
+                    if available_couriers:
+                        # Extract ETD and location info
+                        etds = []
+                        city = ""
+                        state = ""
+                        for courier in available_couriers:
+                            etd = courier.get('etd')
+                            if etd:
+                                etds.append(etd)
+                            # Get city and state if available
+                            if not city:
+                                city = courier.get('city', '')
+                            if not state:
+                                state = courier.get('state', '')
+                        
+                        etd_str = "3-5 Days"
+                        if etds:
+                            try:
+                                from datetime import datetime
+                                parsed_dates = []
+                                for e in etds:
+                                    try:
+                                        parsed_dates.append(datetime.strptime(e.split()[0], "%Y-%m-%d"))
+                                    except:
+                                        pass
+                                if parsed_dates:
+                                    fastest_date = min(parsed_dates)
+                                    etd_str = fastest_date.strftime("%d %b, %Y")
+                            except:
+                                etd_str = etds[0]
+                                
+                        return JsonResponse({
+                            'success': True,
+                            'serviceable': True,
+                            'city': city,
+                            'state': state,
+                            'etd': etd_str,
+                            'message': f'Serviceable. Estimated delivery by {etd_str}.'
+                        })
+                    else:
+                        return JsonResponse({
+                            'success': False,
+                            'serviceable': False,
+                            'message': 'Pincode not serviceable by Shiprocket.'
+                        })
+    except Exception as e:
+        logger.error(f"Shiprocket serviceability API error: {str(e)}")
+        # Continue to fallback below
+
+    # Fallback to Postal Pincode API if Shiprocket is unconfigured/offline
     try:
         url = f"https://api.postalpincode.in/pincode/{pincode}"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        
-        # Disable SSL warnings
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         
         response = requests.get(url, headers=headers, verify=False, timeout=8)
@@ -1441,24 +1701,32 @@ def pincode_lookup(request):
             data = response.json()
             if data and data[0].get('Status') == 'Success':
                 post_offices = data[0].get('PostOffice', [])
-                locations = []
-                seen = set()
-                for po in post_offices:
-                    city = po.get('District', '')
-                    state = po.get('State', '')
-                    if city and state and (city, state) not in seen:
-                        seen.add((city, state))
-                        locations.append({'city': city, 'state': state})
-                return JsonResponse({'success': True, 'locations': locations})
+                city = ""
+                state = ""
+                if post_offices:
+                    city = post_offices[0].get('District', '')
+                    state = post_offices[0].get('State', '')
+                
+                # Mock a delivery date of 3-5 days
+                from datetime import datetime, timedelta
+                etd_date = datetime.now() + timedelta(days=4)
+                etd_str = etd_date.strftime("%d %b, %Y")
+                
+                return JsonResponse({
+                    'success': True,
+                    'serviceable': True,
+                    'city': city,
+                    'state': state,
+                    'etd': etd_str,
+                    'message': f'Serviceable. Estimated delivery by {etd_str}.'
+                })
             else:
                 return JsonResponse({'success': False, 'message': 'Pincode not found.'})
         else:
-            return JsonResponse({'success': False, 'message': f'API Error: {response.status_code}'})
+            return JsonResponse({'success': False, 'message': 'Unable to verify pincode serviceability.'})
     except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Pincode lookup error: {str(e)}")
-        return JsonResponse({'success': False, 'message': f'Error fetching details: {str(e)}'})
+        logger.error(f"Pincode lookup fallback error: {str(e)}")
+        return JsonResponse({'success': False, 'message': f'Error checking pincode: {str(e)}'})
 
 
 # ==========================================
@@ -1776,7 +2044,32 @@ def razorpay_webhook(request):
             except Payment.DoesNotExist:
                 logger.warning(f"Webhook received for unknown payment_id: {payment_id}")
                 
+        elif event == 'order.paid':
+            logger.info(f"Order paid webhook received: {payload}")
+            # Magic checkout success handling can be done here if needed
+        elif event == 'checkout.abandoned':
+            logger.info(f"Abandoned checkout webhook received: {payload}")
+            # Track abandoned carts for retargeting here
+                
         return JsonResponse({"status": "ok"})
     except Exception as e:
         logger.error(f"Error processing webhook: {str(e)}")
         return JsonResponse({"error": str(e)}, status=500)
+
+def contact_us(request):
+    return render(request, 'store/contact_us.html')
+
+def about_us(request):
+    return render(request, 'store/about_us.html')
+
+def privacy_policy(request):
+    return render(request, 'store/privacy_policy.html')
+
+def terms_conditions(request):
+    return render(request, 'store/terms_conditions.html')
+
+def refund_policy(request):
+    return render(request, 'store/refund_policy.html')
+
+def shipping_policy(request):
+    return render(request, 'store/shipping_policy.html')
