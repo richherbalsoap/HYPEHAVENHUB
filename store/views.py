@@ -1007,12 +1007,29 @@ def place_order(request):
         try:
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
             amount_in_paise = int(order.grand_total * 100)
-            
+
+            # Build line_items for Magic Checkout. WITHOUT line_items_total,
+            # Razorpay silently creates a Standard Checkout order instead of Magic Checkout.
+            rzp_line_items = []
+            for item in cart.items.all():
+                unit_price_paise = int(item.unit_price * 100)
+                rzp_line_items.append({
+                    "sku": item.variant.sku if item.variant else f"PROD-{item.product.id}",
+                    "variant_id": str(item.variant.id) if item.variant else str(item.product.id),
+                    "price": unit_price_paise,
+                    "offer_price": unit_price_paise,
+                    "quantity": item.quantity,
+                    "name": item.product.name[:250],
+                })
+            line_items_total = sum(li['offer_price'] * li['quantity'] for li in rzp_line_items)
+
             # Create Razorpay Order
             razorpay_order = client.order.create(data={
                 'amount': amount_in_paise,
                 'currency': 'INR',
                 'receipt': str(order.order_id),
+                'line_items_total': line_items_total,  # mandatory for Magic Checkout
+                'line_items': rzp_line_items,
             })
             
             payment.gateway_response = {
@@ -1030,6 +1047,8 @@ def place_order(request):
                 'razorpay_order_id': razorpay_order['id'],
                 'razorpay_key_id': settings.RAZORPAY_KEY_ID,
                 'amount': amount_in_paise,
+                'line_items_total': line_items_total,
+                'line_items': rzp_line_items,
                 'order_id': order.order_id,
                 'customer_name': customer_name,
                 'customer_email': request.user.email,
@@ -1150,11 +1169,32 @@ def razorpay_direct_checkout(request):
     try:
         client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
         amount_in_paise = int(order.grand_total * 100)
-        
+
+        # Build line_items in the format Razorpay's Orders API expects.
+        # sku/variant_id/price/offer_price/quantity/name are mandatory fields.
+        rzp_line_items = []
+        for item_data in items_to_create:
+            variant = item_data.get('variant')
+            product = item_data['product']
+            unit_price_paise = int(item_data['unit_price'] * 100)
+            rzp_line_items.append({
+                "sku": variant.sku if variant else f"PROD-{product.id}",
+                "variant_id": str(variant.id) if variant else str(product.id),
+                "price": unit_price_paise,
+                "offer_price": unit_price_paise,
+                "quantity": item_data['quantity'],
+                "name": item_data['product_name'][:250] + (" - " + item_data['variant_label'] if item_data['variant_label'] else ""),
+            })
+        line_items_total = sum(li['offer_price'] * li['quantity'] for li in rzp_line_items)
+
+        # WITHOUT line_items_total here, Razorpay creates a Standard Checkout
+        # order instead of Magic Checkout, no matter what the frontend sends.
         razorpay_order = client.order.create(data={
             'amount': amount_in_paise,
             'currency': 'INR',
             'receipt': str(order.order_id),
+            'line_items_total': line_items_total,
+            'line_items': rzp_line_items,
         })
         
         payment.gateway_response = {
@@ -1165,23 +1205,14 @@ def razorpay_direct_checkout(request):
         payment.save()
         
         customer_name = f"{user.first_name} {user.last_name}".strip() if user.username != 'guest_checkout' else ''
-        
-        rzp_line_items = []
-        for item_data in items_to_create:
-            rzp_line_items.append({
-                "name": item_data['product_name'][:250] + (" - " + item_data['variant_label'] if item_data['variant_label'] else ""),
-                "price": int(item_data['unit_price'] * 100),
-                "currency": "INR",
-                "quantity": item_data['quantity']
-            })
-            
+
         return JsonResponse({
             'success': True,
             'payment_method': 'razorpay',
             'razorpay_order_id': razorpay_order['id'],
             'razorpay_key_id': settings.RAZORPAY_KEY_ID,
             'amount': amount_in_paise,
-            'line_items_total': amount_in_paise,
+            'line_items_total': line_items_total,
             'line_items': rzp_line_items,
             'order_id': order.order_id,
             'customer_name': customer_name,
@@ -1246,15 +1277,17 @@ def verify_payment(request):
             if order.user.username == 'guest_checkout':
                 try:
                     rzp_order = client.order.fetch(razorpay_order_id)
-                    shipping_address = rzp_order.get('shipping_address') or rzp_order.get('notes', {}).get('shipping_address')
+                    customer_details = rzp_order.get('customer_details', {}) or {}
+                    shipping_address = customer_details.get('shipping_address')
+                    contact = customer_details.get('contact', '')
+                    email = customer_details.get('email', 'guest@hypehavenhub.com')
+
                     if not shipping_address:
+                        # Fallback: some payment methods only populate this on the payment object
                         rzp_payment = client.payment.fetch(razorpay_payment_id)
                         shipping_address = rzp_payment.get('notes', {}).get('shipping_address')
-                        contact = rzp_payment.get('contact', '')
-                        email = rzp_payment.get('email', 'guest@hypehavenhub.com')
-                    else:
-                        contact = rzp_order.get('customer_details', {}).get('contact', '')
-                        email = rzp_order.get('customer_details', {}).get('email', 'guest@hypehavenhub.com')
+                        contact = contact or rzp_payment.get('contact', '')
+                        email = email or rzp_payment.get('email', 'guest@hypehavenhub.com')
 
                     if shipping_address:
                         from store.models import Address
@@ -1271,6 +1304,8 @@ def verify_payment(request):
                             }
                         )
                         order.address = address_obj
+                    else:
+                        logger.error(f"No shipping address found in Razorpay response for order {order.order_id}. Shiprocket booking will be skipped.")
                 except Exception as e:
                     logger.error(f"Error fetching Magic Checkout address: {e}")
 
