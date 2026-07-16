@@ -811,14 +811,14 @@ const setupQuickView = () => {
           
           if (cartRes.requires_login) {
             modalInstance.hide();
-            window.location.href = '/checkout/';
+            window.initiateMagicCheckout(buyDirectlyBtn);
             return;
           }
           
           if (cartRes.success) {
             updateCartBadge(cartRes.cart_count);
             modalInstance.hide();
-            window.location.href = '/checkout/';
+            window.initiateMagicCheckout(buyDirectlyBtn);
           } else {
             showToast(cartRes.message || 'Something went wrong', 'error');
           }
@@ -838,4 +838,91 @@ document.addEventListener('DOMContentLoaded', () => {
   setupProductScrollRow();
   setupQuickView();
 });
+
+/* ====== GLOBAL MAGIC CHECKOUT ====== */
+window.initiateMagicCheckout = async function(btn, productId = null, variantId = null, quantity = null) {
+  btn.style.pointerEvents = 'none';
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+  try {
+    const data = await api('/razorpay/checkout/initiate/', {
+      product_id: productId,
+      variant_id: variantId,
+      quantity: quantity
+    });
+
+    if (data.requires_login && data.redirect) {
+      window.location.href = data.redirect;
+      return;
+    }
+
+    if (data.success && data.razorpay_order_id) {
+      if (typeof Razorpay === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+
+      var options = {
+        "key": data.razorpay_key_id,
+        "amount": data.amount,
+        "currency": "INR",
+        "name": "HYPEHAVENHUB",
+        "description": "Order Payment",
+        "order_id": data.razorpay_order_id,
+        "one_click_checkout": true, // Enabled Razorpay Magic Checkout
+        "handler": async function (response) {
+          const verifyData = await api('/checkout/verify-payment/', {
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            order_id: data.order_id
+          });
+          
+          if (verifyData.success !== false) {
+            window.location.href = "/orders/?status=SUCCESS";
+          } else {
+            alert("Payment verification failed. " + (verifyData.message || ""));
+            window.location.href = "/orders/?status=FAILED";
+          }
+        },
+        "theme": { "color": "#3b8c7b" },
+        "modal": {
+          "ondismiss": function() {
+             console.log("Razorpay modal dismissed by user");
+          }
+        }
+      };
+
+      // Crucial for Magic Checkout: Do NOT send prefill if it's empty or guest
+      if (data.customer_email || data.customer_phone || data.customer_name) {
+        options.prefill = {};
+        if (data.customer_name && data.customer_name !== 'Guest User') options.prefill.name = data.customer_name;
+        if (data.customer_email && data.customer_email !== 'guest@hypehavenhub.com') options.prefill.email = data.customer_email;
+        if (data.customer_phone) options.prefill.contact = data.customer_phone;
+        if (Object.keys(options.prefill).length === 0) delete options.prefill;
+      }
+
+      var rzp1 = new Razorpay(options);
+      rzp1.on('payment.failed', function (response){
+        alert("Payment failed: " + response.error.description);
+      });
+      rzp1.open();
+    } else {
+      alert("Failed to initiate checkout: " + (data.message || "Unknown error"));
+    }
+  } catch (err) {
+    console.error("Error initiating checkout:", err);
+    alert("Something went wrong. Please try again later.");
+  } finally {
+    btn.style.pointerEvents = 'auto';
+    btn.innerHTML = originalHtml;
+  }
+};
+
 

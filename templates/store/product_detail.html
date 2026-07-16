@@ -799,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Razorpay Direct Checkout Flow
-  document.getElementById('buyNowBtn')?.addEventListener('click', async function(event) {
+  document.getElementById('buyNowBtn')?.addEventListener('click', function(event) {
     event.preventDefault();
     const btn = this;
     const productId = btn.dataset.productId;
@@ -807,100 +807,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const variantId = selectedVariantBtn ? selectedVariantBtn.dataset.variantId : btn.dataset.variantId;
     const quantity = parseInt(document.getElementById('qtyInput')?.value || 1);
 
-    btn.style.pointerEvents = 'none';
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-
-    try {
-      const response = await fetch("{% url 'razorpay_direct_checkout' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token }}"
-        },
-        body: JSON.stringify({
-          product_id: productId,
-          variant_id: variantId,
-          quantity: quantity
-        })
-      });
-      const data = await response.json();
-      
-      if (data.requires_login && data.redirect) {
-        window.location.href = data.redirect;
-        return;
-      }
-      
-      if (data.success && data.razorpay_order_id) {
-        // Load Razorpay script dynamically if not present
-        if (typeof Razorpay === 'undefined') {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-          });
-        }
-
-        var options = {
-          "key": data.razorpay_key_id,
-          "amount": data.amount,
-          "currency": "INR",
-          "name": "HYPEHAVENHUB",
-          "description": "Order Payment",
-          "order_id": data.razorpay_order_id,
-          "one_click_checkout": true, // Enabled Razorpay Magic Checkout
-          "handler": async function (response) {
-            // Verify payment
-            const verifyRes = await fetch("{% url 'verify_payment' %}", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
-              },
-              body: JSON.stringify({
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_signature: response.razorpay_signature,
-                order_id: data.order_id
-              })
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.success !== false) {
-              window.location.href = "/orders/?status=SUCCESS";
-            } else {
-              alert("Payment verification failed. " + verifyData.message);
-              window.location.href = "/orders/?status=FAILED";
-            }
-          },
-          "theme": {
-            "color": "#3b8c7b"
-          }
-        };
-
-        if (data.customer_email || data.customer_phone || data.customer_name) {
-          options.prefill = {};
-          if (data.customer_name && data.customer_name !== 'Guest User') options.prefill.name = data.customer_name;
-          if (data.customer_email && data.customer_email !== 'guest@hypehavenhub.com') options.prefill.email = data.customer_email;
-          if (data.customer_phone) options.prefill.contact = data.customer_phone;
-          if (Object.keys(options.prefill).length === 0) delete options.prefill;
-        }
-
-        var rzp1 = new Razorpay(options);
-        rzp1.on('payment.failed', function (response){
-          alert("Payment failed: " + response.error.description);
-        });
-        rzp1.open();
-      } else {
-        alert("Failed to initiate checkout: " + (data.message || "Unknown error"));
-      }
-    } catch (err) {
-      console.error("Error initiating checkout:", err);
-      alert("Something went wrong. Please try again later.");
-    } finally {
-      btn.style.pointerEvents = 'auto';
-      btn.innerHTML = originalHtml;
+    if (window.initiateMagicCheckout) {
+      window.initiateMagicCheckout(btn, productId, variantId, quantity);
+    } else {
+      alert("Checkout system is still loading. Please try again in a moment.");
     }
   });
 });

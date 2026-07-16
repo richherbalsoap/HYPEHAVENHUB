@@ -69,7 +69,7 @@
       <strong>{% get_cart_subtotal cart as c_sub %}{% format_price c_sub|floatformat:"0" %}</strong>
     </div>
     <a href="{% url 'cart' %}" class="btn btn-outline-dark w-100 mb-2" style="border-radius: 8px;">View Cart</a>
-    <a href="{% url 'checkout' %}" class="btn w-100" style="background: var(--primary); color: var(--surface); border-radius: 8px;">Checkout</a>
+    <button type="button" onclick="if(window.initiateMagicCheckout) window.initiateMagicCheckout(this); else window.location.href='{% url 'checkout' %}';" class="btn w-100" style="background: var(--primary); color: var(--surface); border-radius: 8px;">Checkout</button>
   </div>
 {% else %}
   <div class="text-center py-5">
