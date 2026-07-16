@@ -341,6 +341,8 @@ if (checkoutForm) {
               "name": "HYPEHAVENHUB",
               "description": "Premium Assorted Jhumka Box Sets",
               "order_id": data.razorpay_order_id,
+              "line_items_total": data.line_items_total,
+              "line_items": data.line_items,
               "one_click_checkout": true, // Enabled Razorpay Magic Checkout
               "handler": async function (paymentRes) {
                 console.log("Razorpay payment successful response:", paymentRes);
@@ -887,10 +889,10 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
           });
           
           if (verifyData.success !== false) {
-            window.location.href = "/orders/?status=SUCCESS";
+            window.location.href = verifyData.redirect || "/?status=SUCCESS";
           } else {
             alert("Payment verification failed. " + (verifyData.message || ""));
-            window.location.href = "/orders/?status=FAILED";
+            window.location.href = "/cart/?status=FAILED";
           }
         },
         "theme": { "color": "#3b8c7b" },
@@ -926,5 +928,3 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
     btn.innerHTML = originalHtml;
   }
 };
-
-

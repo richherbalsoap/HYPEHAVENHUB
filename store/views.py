@@ -1293,17 +1293,23 @@ def verify_payment(request):
                         from store.models import Address
                         address_obj, _ = Address.objects.get_or_create(
                             user=order.user,
-                            street_address=shipping_address.get('line1', shipping_address.get('street_address', '')),
-                            city=shipping_address.get('city', ''),
-                            state=shipping_address.get('state', ''),
-                            postal_code=shipping_address.get('zipcode', ''),
-                            country=shipping_address.get('country', 'IN'),
+                            address_line1=shipping_address.get('line1', shipping_address.get('street_address', ''))[:255],
+                            city=shipping_address.get('city', '')[:100],
+                            state=shipping_address.get('state', '')[:100],
+                            pincode=shipping_address.get('zipcode', '')[:10],
                             defaults={
-                                'name': shipping_address.get('name', 'Guest User'),
-                                'phone_number': contact
+                                'full_name': shipping_address.get('name', 'Guest User')[:100],
+                                'phone': contact[:15],
+                                'address_line2': shipping_address.get('line2', '')[:255]
                             }
                         )
                         order.address = address_obj
+                        
+                        # Dynamically inject real details so Shiprocket doesn't get 'guest_checkout' default info
+                        order.user.email = email
+                        parts = shipping_address.get('name', 'Guest User').split(' ', 1)
+                        order.user.first_name = parts[0][:30]
+                        order.user.last_name = parts[1][:30] if len(parts) > 1 else ""
                     else:
                         logger.error(f"No shipping address found in Razorpay response for order {order.order_id}. Shiprocket booking will be skipped.")
                 except Exception as e:
@@ -1340,13 +1346,14 @@ def verify_payment(request):
             cart.save()
 
             # Create notification
-            Notification.objects.create(
-                user=request.user,
-                type='order',
-                title='Order Paid & Placed!',
-                message=f'Your payment for order #{order.order_id} has been verified successfully.',
-                link=f'/orders/{order.order_id}/'
-            )
+            if request.user.is_authenticated:
+                Notification.objects.create(
+                    user=request.user,
+                    type='order',
+                    title='Order Paid & Placed!',
+                    message=f'Your payment for order #{order.order_id} has been verified successfully.',
+                    link=f'/orders/{order.order_id}/'
+                )
 
         # Send billing notifications
         email_sent = send_order_bill_email(order)
@@ -1363,10 +1370,12 @@ def verify_payment(request):
         except Exception as e:
             logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
 
+        redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else '/?status=SUCCESS'
+
         return JsonResponse({
             'success': True,
             'order_id': order.order_id,
-            'redirect': f'/orders/{order.order_id}/',
+            'redirect': redirect_url,
             'shipment_id': shipment_id,
             'email_sent': email_sent,
             'sms_sent': sms_sent

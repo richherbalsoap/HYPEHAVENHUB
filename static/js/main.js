@@ -889,10 +889,10 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
           });
           
           if (verifyData.success !== false) {
-            window.location.href = "/orders/?status=SUCCESS";
+            window.location.href = verifyData.redirect || "/?status=SUCCESS";
           } else {
             alert("Payment verification failed. " + (verifyData.message || ""));
-            window.location.href = "/orders/?status=FAILED";
+            window.location.href = "/cart/?status=FAILED";
           }
         },
         "theme": { "color": "#3b8c7b" },
