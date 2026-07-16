@@ -27,3 +27,4 @@ whitenoise
 celery
 redis
 
+django-allauth>=0.61.1

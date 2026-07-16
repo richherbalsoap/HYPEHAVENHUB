@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order Successful - HYPEHAVENHUB{% endblock %}
+{% block content %}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--surface) 0%, var(--surface-container) 100%);">
+    <div style="text-align: center; background: var(--surface-container-lowest); padding: 50px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+        
+        <!-- Animated Checkmark -->
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: #4caf50; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; animation: scaleUp 0.5s ease-out 0.2s both;">
+            <span class="material-symbols-outlined" style="font-size: 60px; color: white; animation: checkmark 0.4s ease-out 0.6s both;">check</span>
+        </div>
+
+        <h2 style="font-family: 'Playfair Display', serif; color: var(--primary); font-size: 2.2rem; font-weight: 700; margin-bottom: 10px;">Order Confirmed!</h2>
+        <p style="font-family: 'Montserrat', sans-serif; color: var(--on-surface-variant); font-size: 1.1rem; margin-bottom: 25px;">Your magic checkout was successful.</p>
+        
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div class="spinner-border" style="width: 1.5rem; height: 1.5rem; color: var(--primary); margin-bottom: 15px;" role="status"></div>
+            <p style="font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--outline);">Redirecting you to track your order...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes scaleUp {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+@keyframes checkmark {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<script>
+    setTimeout(function() {
+        window.location.href = "{% url 'login' %}?next=/orders/{{ order_id }}/";
+    }, 3500); // Wait 3.5 seconds before redirecting
+</script>
+{% endblock %}

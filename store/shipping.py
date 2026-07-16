@@ -46,7 +46,7 @@ class ShiprocketService:
         token = cls._get_token()
         if not token:
             logger.warning(f"Skipping Shiprocket booking for order {order.order_id} - no valid API token.")
-            return None
+            return None, "No valid API token configured."
 
         # Build address details
         address = order.address
@@ -166,9 +166,12 @@ class ShiprocketService:
                 res_data = response.json()
                 shipment_id = res_data.get("shipment_id")
                 logger.info(f"Shiprocket order created successfully. Shipment ID: {shipment_id}")
-                return shipment_id
+                return shipment_id, None
             else:
+                error_msg = response.text[:200]
                 logger.error(f"Shiprocket order creation failed: {response.text}")
+                return None, error_msg
         except Exception as e:
+            error_msg = str(e)[:200]
             logger.error(f"Error booking Shiprocket delivery: {str(e)}")
-        return None
+            return None, error_msg

@@ -1305,6 +1305,9 @@ def verify_payment(request):
                         )
                         order.address = address_obj
                         
+                        # Save the guest email permanently to link to a Google account later
+                        order.guest_email = email
+                        
                         # Dynamically inject real details so Shiprocket doesn't get 'guest_checkout' default info
                         order.user.email = email
                         parts = shipping_address.get('name', 'Guest User').split(' ', 1)
@@ -1363,14 +1366,21 @@ def verify_payment(request):
         shipment_id = None
         try:
             from .shipping import ShiprocketService
-            shipment_id = ShiprocketService.create_shipment(order)
+            shipment_id, error_msg = ShiprocketService.create_shipment(order)
             if shipment_id:
                 order.shipping_tracking_id = str(shipment_id)
                 order.save()
+            else:
+                from .models import OrderTracking
+                OrderTracking.objects.create(
+                    order=order,
+                    status='shiprocket_failed',
+                    description=f'Shiprocket Sync Failed: {error_msg}'
+                )
         except Exception as e:
             logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
 
-        redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else '/?status=SUCCESS'
+        redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else f'/order-success/{order.order_id}/'
 
         return JsonResponse({
             'success': True,
@@ -2086,3 +2096,6 @@ def refund_policy(request):
 
 def shipping_policy(request):
     return render(request, 'store/shipping_policy.html')
+
+def order_success_animation(request, order_id):
+    return render(request, 'store/order_success.html', {'order_id': order_id})

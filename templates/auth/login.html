@@ -13,53 +13,12 @@
         <p class="glamour-form-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 30px;">Sign in to discover curated Indian luxury</p>
       </div>
 
-      <form method="POST" autocomplete="off" style="font-family: 'Montserrat', sans-serif;">
-        {% csrf_token %}
-        <input type="text" name="fake_username" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute; left:-9999px; opacity:0; width:1px; height:1px;">
-        <input type="password" name="fake_password" autocomplete="new-password" tabindex="-1" aria-hidden="true" style="position:absolute; left:-9999px; opacity:0; width:1px; height:1px;">
-        
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger mb-4 p-3 d-flex align-items-center" style="border-radius: 12px; font-size: 14px; background-color: var(--error-container); border: 1px solid var(--error); color: var(--on-error-container);">
-          <span class="material-symbols-outlined me-2" style="font-size: 20px;">error</span>
-          <div>
-            {% for err in form.non_field_errors %}{{ err }}{% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-        <div class="mb-3">
-          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">Email Address</label>
-          <div class="input-group" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); transition: border-color 0.2s;">
-            <span class="input-group-text" style="background: var(--surface-container-lowest); border: none; color: var(--outline);"><span class="material-symbols-outlined" style="font-size: 20px;">mail</span></span>
-            <input type="email" id="login-email" name="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" placeholder="you@example.com" value="{{ form.email.value|default:'' }}" required style="border: none; padding: 12px 14px 12px 0; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);" onfocus="this.parentElement.style.borderColor='var(--primary)'" onblur="this.parentElement.style.borderColor='var(--outline-variant)'">
-          </div>
-          {% for err in form.email.errors %}
-          <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <div class="mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant); margin-bottom: 0;">Password</label>
-            <a href="{% url 'forgot_password' %}" class="small text-decoration-none" style="color: var(--primary); font-weight: 600; font-size: 12px;">Forgot password?</a>
-          </div>
-          <div class="input-group" id="password-group" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); transition: border-color 0.2s;">
-            <span class="input-group-text" style="background: var(--surface-container-lowest); border: none; color: var(--outline);"><span class="material-symbols-outlined" style="font-size: 20px;">lock</span></span>
-            <input type="password" id="login-password" name="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" placeholder="Your secret password" required style="border: none; padding: 12px 14px 12px 0; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);" onfocus="this.parentElement.style.borderColor='var(--primary)'" onblur="this.parentElement.style.borderColor='var(--outline-variant)'">
-            <button class="btn" type="button" id="togglePassword" style="background: var(--surface-container-lowest); border: none; color: var(--outline); padding: 0 16px;" title="Toggle Password Visibility">
-              <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">visibility</span>
-            </button>
-          </div>
-          {% for err in form.password.errors %}
-          <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <button type="submit" class="btn-artisan-primary" style="width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 13px; background: var(--primary); border: none; color: var(--on-primary); box-shadow: 0 4px 12px rgba(42, 0, 2, 0.2); transition: all 0.2s;">Sign In</button>
-      </form>
-
-      <div class="text-center mt-4" style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: var(--on-surface-variant);">
-        Don't have an account? <a href="{% url 'signup' %}" class="fw-600 text-decoration-none" style="color: var(--primary); font-weight: 600;">Create account</a>
+      {% load socialaccount %}
+      <div class="text-center mt-3 mb-4">
+        <a href="{% provider_login_url 'google' %}?next={{ request.GET.next|default:'' }}" class="btn-artisan-primary d-flex align-items-center justify-content-center mx-auto" style="width: 100%; max-width: 300px; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 15px; background: white; border: 1px solid var(--outline-variant); color: #3c4043; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-decoration: none; transition: all 0.2s;">
+          <img src="https://developers.google.com/identity/images/g-logo.png" style="width: 20px; margin-right: 12px;" alt="Google Logo">
+          Continue with Google
+        </a>
       </div>
     </div>
   </div>

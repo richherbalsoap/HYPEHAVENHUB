@@ -13,87 +13,13 @@
         <p class="glamour-form-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 30px;">Join HYPEHAVENHUB to explore exclusive artisan designs</p>
       </div>
 
-      <form method="POST" style="font-family: 'Montserrat', sans-serif;">
-        {% csrf_token %}
-        
-        {% if form.non_field_errors %}
-        <div class="alert alert-danger mb-4 p-3 d-flex align-items-center" style="border-radius: 12px; font-size: 14px; background-color: var(--error-container); border: 1px solid var(--error); color: var(--on-error-container);">
-          <span class="material-symbols-outlined me-2" style="font-size: 20px;">error</span>
-          <div>
-            {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">First Name</label>
-            <input type="text" name="first_name" class="form-control {% if form.first_name.errors %}is-invalid{% endif %}" placeholder="First Name" value="{{ form.first_name.value|default:'' }}" required style="border-radius: 8px; border: 1px solid var(--outline-variant); padding: 12px 16px; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);">
-            {% for err in form.first_name.errors %}
-            <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-            {% endfor %}
-          </div>
-          <div class="col-sm-6">
-            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">Last Name</label>
-            <input type="text" name="last_name" class="form-control {% if form.last_name.errors %}is-invalid{% endif %}" placeholder="Last Name" value="{{ form.last_name.value|default:'' }}" required style="border-radius: 8px; border: 1px solid var(--outline-variant); padding: 12px 16px; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);">
-            {% for err in form.last_name.errors %}
-            <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="mt-3">
-          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">Email Address</label>
-          <div class="input-group" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); transition: border-color 0.2s;">
-            <span class="input-group-text" style="background: var(--surface-container-lowest); border: none; color: var(--outline);"><span class="material-symbols-outlined" style="font-size: 20px;">mail</span></span>
-            <input type="email" name="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" placeholder="you@example.com" value="{{ form.email.value|default:'' }}" required style="border: none; padding: 12px 14px 12px 0; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);" onfocus="this.parentElement.style.borderColor='var(--primary)'" onblur="this.parentElement.style.borderColor='var(--outline-variant)'">
-          </div>
-          {% for err in form.email.errors %}
-          <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <div class="mt-3">
-          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">Phone Number</label>
-          <div class="input-group" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); transition: border-color 0.2s;">
-            <span class="input-group-text" style="background: var(--surface-container-lowest); border: none; color: var(--outline);"><span class="material-symbols-outlined" style="font-size: 20px;">phone</span></span>
-            <input type="text" name="phone" class="form-control {% if form.phone.errors %}is-invalid{% endif %}" placeholder="+91 00000 00000" value="{{ form.phone.value|default:'' }}" required style="border: none; padding: 12px 14px 12px 0; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);" onfocus="this.parentElement.style.borderColor='var(--primary)'" onblur="this.parentElement.style.borderColor='var(--outline-variant)'">
-          </div>
-          {% for err in form.phone.errors %}
-          <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <div class="mt-3">
-          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">Password</label>
-          <div class="input-group" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); transition: border-color 0.2s;">
-            <span class="input-group-text" style="background: var(--surface-container-lowest); border: none; color: var(--outline);"><span class="material-symbols-outlined" style="font-size: 20px;">lock</span></span>
-            <input type="password" id="signup-password" name="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" placeholder="Min. 8 characters" required style="border: none; padding: 12px 14px 12px 0; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);" onfocus="this.parentElement.style.borderColor='var(--primary)'" onblur="this.parentElement.style.borderColor='var(--outline-variant)'">
-            <button class="btn" type="button" id="toggleSignupPassword" style="background: var(--surface-container-lowest); border: none; color: var(--outline); padding: 0 16px;">
-              <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">visibility</span>
-            </button>
-          </div>
-          {% for err in form.password.errors %}
-          <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <div class="mt-3">
-          <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--on-surface-variant);">Confirm Password</label>
-          <div class="input-group" style="border-radius: 8px; overflow: hidden; border: 1px solid var(--outline-variant); transition: border-color 0.2s;">
-            <span class="input-group-text" style="background: var(--surface-container-lowest); border: none; color: var(--outline);"><span class="material-symbols-outlined" style="font-size: 20px;">lock</span></span>
-            <input type="password" id="signup-confirm-password" name="confirm_password" class="form-control {% if form.confirm_password.errors %}is-invalid{% endif %}" placeholder="Repeat password" required style="border: none; padding: 12px 14px 12px 0; font-size: 14px; background: var(--surface-container-lowest); color: var(--on-surface);" onfocus="this.parentElement.style.borderColor='var(--primary)'" onblur="this.parentElement.style.borderColor='var(--outline-variant)'">
-            <button class="btn" type="button" id="toggleConfirmPassword" style="background: var(--surface-container-lowest); border: none; color: var(--outline); padding: 0 16px;">
-              <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">visibility</span>
-            </button>
-          </div>
-          {% for err in form.confirm_password.errors %}
-          <div class="text-danger mt-1" style="font-size: 12px; font-weight: 500;">{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <button type="submit" class="btn-artisan-primary mt-4" style="width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; font-size: 13px; background: var(--primary); border: none; color: var(--on-primary); box-shadow: 0 4px 12px rgba(42, 0, 2, 0.2); transition: all 0.2s;">Create Account</button>
-      </form>
+      {% load socialaccount %}
+      <div class="text-center mt-3 mb-4">
+        <a href="{% provider_login_url 'google' %}?next={{ request.GET.next|default:'' }}" class="btn-artisan-primary d-flex align-items-center justify-content-center mx-auto" style="width: 100%; max-width: 300px; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 15px; background: white; border: 1px solid var(--outline-variant); color: #3c4043; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-decoration: none; transition: all 0.2s;">
+          <img src="https://developers.google.com/identity/images/g-logo.png" style="width: 20px; margin-right: 12px;" alt="Google Logo">
+          Continue with Google
+        </a>
+      </div>
 
       <div class="text-center mt-4" style="font-family: 'Montserrat', sans-serif; font-size: 14px; color: var(--on-surface-variant);">
         Already have an account? <a href="{% url 'login' %}" class="fw-600 text-decoration-none" style="color: var(--primary); font-weight: 600;">Sign in</a>
