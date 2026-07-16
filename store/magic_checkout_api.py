@@ -13,65 +13,109 @@ logger = logging.getLogger(__name__)
 def shipping_info(request):
     """
     Razorpay Magic Checkout Shipping API
-    Calculates shipping and COD fees based on the provided address.
+    Request shape sent by Razorpay:
+    {
+      "order_id": "...", "razorpay_order_id": "...", "email": "...", "contact": "...",
+      "addresses": [{"id": "0", "zipcode": "560060", "state_code": "KA", "country": "IN"}]
+    }
+    Required response shape:
+    {
+      "addresses": [
+        {
+          "id": "0", "zipcode": "560060", "country": "IN",
+          "shipping_methods": [
+            {"id": "standard", "description": "...", "name": "...",
+             "serviceable": true, "shipping_fee": 0, "cod": true, "cod_fee": 0}
+          ]
+        }
+      ]
+    }
     """
     try:
         data = json.loads(request.body)
-        shipping_address = data.get('customer_details', {}).get('shipping_address', {})
-        country_code = shipping_address.get('country', 'IN')
-        
-        # Default fallback fees (in paise)
-        shipping_fee = 0
-        cod_fee = 0
-        shipping_serviceable = True
-        cod_serviceable = True
+        addresses = data.get('addresses', [])
 
-        # Custom logic based on country
-        if country_code:
+        response_addresses = []
+        for addr in addresses:
+            country_code = (addr.get('country') or 'IN').upper()
+
+            shipping_fee = 0
+            cod_available = True
+            cod_fee = 0
+            serviceable = True
+
             country = CountrySetting.objects.filter(code__iexact=country_code).first()
             if country:
-                shipping_fee = int(country.shipping_charge * 100) # Convert to paise
-                # Assuming COD is only available in India or specific countries
-                if country_code.upper() != 'IN':
-                    cod_serviceable = False
+                shipping_fee = int(country.shipping_charge * 100)  # paise
+            if country_code != 'IN':
+                cod_available = False
 
-        response_data = {
-            "shipping_fee": shipping_fee,
-            "cod_fee": cod_fee,
-            "shipping_serviceable": shipping_serviceable,
-            "cod_serviceable": cod_serviceable
-        }
-        return JsonResponse(response_data)
+            response_addresses.append({
+                "id": addr.get('id', '0'),
+                "zipcode": addr.get('zipcode', ''),
+                "country": country_code,
+                "shipping_methods": [
+                    {
+                        "id": "standard",
+                        "description": "Standard Delivery",
+                        "name": "Standard Delivery",
+                        "serviceable": serviceable,
+                        "shipping_fee": shipping_fee,
+                        "cod": cod_available,
+                        "cod_fee": cod_fee
+                    }
+                ]
+            })
+
+        return JsonResponse({"addresses": response_addresses})
     except Exception as e:
         logger.error(f"Error in magic checkout shipping info: {str(e)}")
-        # Fallback response
+        # Safe fallback: mark serviceable with no extra charge so checkout doesn't hard-block
         return JsonResponse({
-            "shipping_fee": 0,
-            "cod_fee": 0,
-            "shipping_serviceable": True,
-            "cod_serviceable": True
+            "addresses": [
+                {
+                    "id": "0",
+                    "zipcode": "",
+                    "country": "IN",
+                    "shipping_methods": [
+                        {
+                            "id": "standard",
+                            "description": "Standard Delivery",
+                            "name": "Standard Delivery",
+                            "serviceable": True,
+                            "shipping_fee": 0,
+                            "cod": True,
+                            "cod_fee": 0
+                        }
+                    ]
+                }
+            ]
         })
 
 
 @csrf_exempt
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def get_promotions(request):
     """
     Razorpay Magic Checkout Get Promotions API
-    Returns a list of active coupons.
+    Razorpay calls this via POST with {order_id, contact, email}.
+    Required response: {"promotions": [{"code": "...", "summary": "...", "description": "..."}]}
     """
     try:
         coupons = Coupon.objects.filter(active=True)
         promotions = []
         for coupon in coupons:
+            summary = (
+                f"{coupon.discount_percent}% off"
+                if coupon.discount_type == 'percentage'
+                else f"Flat ₹{coupon.discount_amount} off"
+            )
             promotions.append({
                 "code": coupon.code,
-                "description": f"{coupon.discount_percent}% off" if coupon.discount_type == 'percentage' else f"Flat ₹{coupon.discount_amount} off",
-                "type": coupon.discount_type,
-                "value": float(coupon.discount_percent) if coupon.discount_type == 'percentage' else float(coupon.discount_amount),
-                "min_order_value": float(coupon.min_order_amount)
+                "summary": summary,
+                "description": f"{summary} on orders above ₹{coupon.min_order_amount}"
             })
-            
+
         return JsonResponse({"promotions": promotions})
     except Exception as e:
         logger.error(f"Error in magic checkout get promotions: {str(e)}")
@@ -83,33 +127,51 @@ def get_promotions(request):
 def apply_promotion(request):
     """
     Razorpay Magic Checkout Apply Promotion API
-    Validates the coupon code and returns the discount amount.
+    Razorpay sends: {"order_id": "...", "contact": "...", "email": "...", "code": "500OFF"}
+    Required success response:
+    {
+      "promotion": {
+        "reference_id": "...", "code": "...", "type": "coupon",
+        "value": <int, paise>, "value_type": "fixed_amount"|"percentage",
+        "description": "..."
+      }
+    }
     """
     try:
         data = json.loads(request.body)
-        coupon_code = data.get('promotion_code')
-        order_amount = data.get('order_amount', 0) / 100  # Razorpay sends amount in paise
-        
+        coupon_code = data.get('code') or data.get('promotion_code')
+        order_amount_paise = data.get('order_amount', 0)
+        order_amount = order_amount_paise / 100 if order_amount_paise else 0
+
         if not coupon_code:
-            return JsonResponse({"is_valid": False, "error_message": "Coupon code is required"})
-            
+            return JsonResponse({"error": {"description": "Coupon code is required"}}, status=400)
+
         coupon = Coupon.objects.filter(code__iexact=coupon_code, active=True).first()
         if not coupon:
-            return JsonResponse({"is_valid": False, "error_message": "Invalid or expired coupon"})
-            
-        if order_amount < coupon.min_order_amount:
-            return JsonResponse({"is_valid": False, "error_message": f"Minimum order amount is ₹{coupon.min_order_amount}"})
-            
-        discount_amount = 0
+            return JsonResponse({"error": {"description": "Invalid or expired coupon"}}, status=400)
+
+        if order_amount and order_amount < coupon.min_order_amount:
+            return JsonResponse({
+                "error": {"description": f"Minimum order amount is ₹{coupon.min_order_amount}"}
+            }, status=400)
+
         if coupon.discount_type == 'percentage':
-            discount_amount = (order_amount * float(coupon.discount_percent)) / 100
+            value = int(coupon.discount_percent)  # percentage points, e.g. 10 for 10%
+            value_type = "percentage"
         else:
-            discount_amount = float(coupon.discount_amount)
-            
+            value = int(coupon.discount_amount * 100)  # paise
+            value_type = "fixed_amount"
+
         return JsonResponse({
-            "is_valid": True,
-            "discount_amount": int(discount_amount * 100) # Convert to paise
+            "promotion": {
+                "reference_id": f"coupon_{coupon.id}",
+                "code": coupon.code,
+                "type": "coupon",
+                "value": value,
+                "value_type": value_type,
+                "description": f"Discount applied: {coupon.code}"
+            }
         })
     except Exception as e:
         logger.error(f"Error in magic checkout apply promotion: {str(e)}")
-        return JsonResponse({"is_valid": False, "error_message": "Internal server error"})
+        return JsonResponse({"error": {"description": "Internal server error"}}, status=500)
