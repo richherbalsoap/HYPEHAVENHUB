@@ -875,6 +875,8 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
         "name": "HYPEHAVENHUB",
         "description": "Order Payment",
         "order_id": data.razorpay_order_id,
+        "line_items_total": data.line_items_total,
+        "line_items": data.line_items,
         "one_click_checkout": true, // Enabled Razorpay Magic Checkout
         "handler": async function (response) {
           const verifyData = await api('/checkout/verify-payment/', {

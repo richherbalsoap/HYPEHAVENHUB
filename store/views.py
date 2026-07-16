@@ -1166,12 +1166,23 @@ def razorpay_direct_checkout(request):
         
         customer_name = f"{user.first_name} {user.last_name}".strip() if user.username != 'guest_checkout' else ''
         
+        rzp_line_items = []
+        for item_data in items_to_create:
+            rzp_line_items.append({
+                "name": item_data['product_name'][:250] + (" - " + item_data['variant_label'] if item_data['variant_label'] else ""),
+                "price": int(item_data['unit_price'] * 100),
+                "currency": "INR",
+                "quantity": item_data['quantity']
+            })
+            
         return JsonResponse({
             'success': True,
             'payment_method': 'razorpay',
             'razorpay_order_id': razorpay_order['id'],
             'razorpay_key_id': settings.RAZORPAY_KEY_ID,
             'amount': amount_in_paise,
+            'line_items_total': amount_in_paise,
+            'line_items': rzp_line_items,
             'order_id': order.order_id,
             'customer_name': customer_name,
             'customer_email': user.email if user.username != 'guest_checkout' else '',
