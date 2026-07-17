@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.views.static import serve
 
 urlpatterns = [
-    path('django-admin/', admin.site.urls),
+    # path('django-admin/', admin.site.urls), # Disabled as per user request to only use custom admin
     path('accounts/', include('allauth.urls')),
     path('', include('store.urls')),
 ]

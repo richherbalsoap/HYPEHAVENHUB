@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login - HYPEHAVENHUB{% endblock %}
+{% block content %}
+<div class="auth-bg" style="background: linear-gradient(135deg, var(--surface) 0%, var(--surface-container) 100%); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 15px;">
+  <div class="container d-flex justify-content-center">
+    <div class="glamour-form-card" style="background: var(--surface-container-lowest); backdrop-filter: blur(10px); border: 1px solid var(--outline-variant); border-radius: 16px; box-shadow: 0 15px 35px rgba(42, 0, 2, 0.05); padding: 45px 35px; width: 100%; max-width: 480px; transition: all 0.3s ease; animation: fadeInUp 0.6s ease-out;">
+      
+      <div class="text-center mb-4">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: var(--primary); border-radius: 50%; color: var(--on-primary); margin-bottom: 16px; box-shadow: 0 8px 20px rgba(74, 14, 14, 0.15);">
+          <span class="material-symbols-outlined" style="font-size: 32px;">shield_person</span>
+        </div>
+        <h2 class="glamour-form-title" style="font-family: 'Playfair Display', serif; font-weight: 700; color: var(--primary); font-size: 2.2rem; margin-bottom: 6px;">Admin Login</h2>
+        <p class="glamour-form-subtitle" style="font-family: 'Montserrat', sans-serif; font-size: 0.9rem; color: var(--on-surface-variant); margin-bottom: 30px;">Enter your credentials to access the dashboard</p>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'warning' }}" style="border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="POST" action="{% url 'custom_admin_login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <div class="mb-4">
+          <label for="admin-email" class="form-label" style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 0.85rem; color: var(--on-surface); text-transform: uppercase; letter-spacing: 0.5px;">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text" style="background: transparent; border-right: none; border-color: var(--outline-variant); color: var(--on-surface-variant);"><span class="material-symbols-outlined" style="font-size: 20px;">mail</span></span>
+            <input type="email" class="form-control" id="admin-email" name="email" required placeholder="admin@hypehavenhub.in" style="border-left: none; border-color: var(--outline-variant); background: transparent; padding: 12px; font-size: 1rem; color: var(--on-surface);">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="admin-password" class="form-label" style="font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 0.85rem; color: var(--on-surface); text-transform: uppercase; letter-spacing: 0.5px;">Password</label>
+          <div class="input-group">
+            <span class="input-group-text" style="background: transparent; border-right: none; border-color: var(--outline-variant); color: var(--on-surface-variant);"><span class="material-symbols-outlined" style="font-size: 20px;">lock</span></span>
+            <input type="password" class="form-control" id="admin-password" name="password" required placeholder="••••••••" style="border-left: none; border-color: var(--outline-variant); background: transparent; padding: 12px; font-size: 1rem; color: var(--on-surface);">
+            <button class="btn btn-outline-secondary" type="button" id="toggleAdminPassword" style="border-color: var(--outline-variant); color: var(--on-surface-variant);"><span class="material-symbols-outlined" style="font-size: 20px;">visibility_off</span></button>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-2">
+          <button type="submit" class="btn-artisan-primary w-100" style="padding: 14px; border-radius: 8px; font-weight: 600; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;">Sign In to Dashboard</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.glamour-form-card:hover {
+  box-shadow: 0 20px 45px rgba(42, 0, 2, 0.08);
+}
+.form-control:focus {
+  box-shadow: none;
+  border-color: var(--primary);
+}
+.input-group-text, .form-control {
+  border-radius: 8px;
+}
+.input-group .form-control:focus + .btn, .input-group:focus-within .input-group-text, .input-group:focus-within .btn {
+  border-color: var(--primary);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggleBtn = document.getElementById('toggleAdminPassword');
+  const passwordInput = document.getElementById('admin-password');
+  
+  if (toggleBtn && passwordInput) {
+    toggleBtn.addEventListener('click', function () {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.querySelector('span').textContent = type === 'password' ? 'visibility' : 'visibility_off';
+    });
+  }
+});
+</script>
+{% endblock %}
