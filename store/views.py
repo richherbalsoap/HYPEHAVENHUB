@@ -1285,7 +1285,7 @@ def verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
-            if order.user.username == 'guest_checkout':
+            if order.address is None:
                 try:
                     rzp_order = client.order.fetch(razorpay_order_id)
                     customer_details = rzp_order.get('customer_details', {}) or {}
@@ -1333,14 +1333,15 @@ def verify_payment(request):
                         )
                         order.address = address_obj
                         
-                        # Save the guest email permanently to link to a Google account later
-                        order.guest_email = email
-                        
-                        # Dynamically inject real details so Shiprocket doesn't get 'guest_checkout' default info
-                        order.user.email = email
-                        parts = shipping_address.get('name', 'Guest User').split(' ', 1)
-                        order.user.first_name = parts[0][:30]
-                        order.user.last_name = parts[1][:30] if len(parts) > 1 else ""
+                        if order.user.username == 'guest_checkout':
+                            # Save the guest email permanently to link to a Google account later
+                            order.guest_email = email
+                            
+                            # Dynamically inject real details so Shiprocket doesn't get 'guest_checkout' default info
+                            order.user.email = email
+                            parts = shipping_address.get('name', 'Guest User').split(' ', 1)
+                            order.user.first_name = parts[0][:30]
+                            order.user.last_name = parts[1][:30] if len(parts) > 1 else ""
                     else:
                         logger.error(f"No shipping address found in Razorpay response for order {order.order_id}. Shiprocket booking will be skipped.")
                 except Exception as e:
