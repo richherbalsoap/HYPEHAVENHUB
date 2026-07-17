@@ -495,6 +495,17 @@ def signup_view(request):
             user.otp_created_at = timezone.now()
             user.save()
             
+            try:
+                from allauth.account.models import EmailAddress
+                EmailAddress.objects.create(
+                    user=user,
+                    email=user.email,
+                    primary=True,
+                    verified=False
+                )
+            except Exception as e:
+                logger.error(f"Failed to create allauth EmailAddress: {e}")
+            
             session_country_id = request.session.get('selected_country_id')
             if session_country_id:
                 if not CountrySetting.objects.filter(id=session_country_id).exists():
