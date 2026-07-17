@@ -50,6 +50,10 @@ class ShiprocketService:
 
         # Build address details
         address = order.address
+        if not address:
+            logger.warning(f"Skipping Shiprocket booking for order {order.order_id} - missing shipping address.")
+            return None, "Order is missing shipping address."
+            
         customer_name = f"{order.user.first_name} {order.user.last_name}".strip() or order.user.email
 
         # Determine billing country dynamically from user profile, default to "India"
@@ -131,6 +135,7 @@ class ShiprocketService:
             "order_id": order.order_id,
             "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
             "pickup_location": getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary'),
+            "channel_id": getattr(settings, 'SHIPROCKET_CHANNEL_ID', ''),
             "billing_customer_name": customer_name,
             "billing_last_name": "",
             "billing_address": address.address_line1,
