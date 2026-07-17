@@ -903,3 +903,17 @@ def admin_country_delete(request, pk):
         messages.success(request, 'Country removed.')
     return redirect('admin_countries')
 
+
+@login_required
+@admin_required
+def admin_shiprocket_test(request):
+    """
+    Read-only Shiprocket diagnostic page. Does NOT place any order.
+    Checks:
+      1. Are the env vars actually configured on this deployment?
+      2. Does login/auth against Shiprocket succeed?
+      3. Does the configured pickup location name exist on the account?
+    """
+    from .shipping import ShiprocketService
+    result = ShiprocketService.test_connection()
+    return render(request, 'admin/shiprocket_test.html', {'result': result})
