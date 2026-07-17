@@ -1371,7 +1371,6 @@ def verify_payment(request):
                 order.shipping_tracking_id = str(shipment_id)
                 order.save()
             else:
-                from .models import OrderTracking
                 OrderTracking.objects.create(
                     order=order,
                     status='shiprocket_failed',
