@@ -183,8 +183,8 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': 'dummy-client-id.apps.googleusercontent.com',
-            'secret': 'dummy-secret',
+            'client_id': config('GOOGLE_CLIENT_ID', default=''),
+            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
             'key': ''
         },
         'SCOPE': [
