@@ -11,19 +11,37 @@ class ShiprocketService:
     BASE_URL = "https://apiv2.shiprocket.in/v1/external"
 
     @classmethod
-    def _get_token(cls):
+    def _get_token(cls, return_error=False):
         """
         Authenticate with Shiprocket and retrieve JWT token.
+
+        NOTE: Shiprocket's v1 external API (the one this whole file talks to)
+        does NOT support a static "API key" as a Bearer token. The only way
+        to get a valid token is by logging in with an email + password
+        (either your main account, or a dedicated "API User" created under
+        Shiprocket > Settings > API in your dashboard) against /auth/login.
+        SHIPROCKET_API_KEY is kept here only for backwards-compatibility in
+        case Shiprocket ever ships real API keys for this endpoint - if it's
+        not a real JWT, using it directly will make every request fail with
+        401 Unauthorized, and that failure will look exactly like "nothing
+        happens" from the website's point of view.
         """
-        api_key = getattr(settings, 'SHIPROCKET_API_KEY', '')
+        api_key = (getattr(settings, 'SHIPROCKET_API_KEY', '') or '').strip()
+        email = (getattr(settings, 'SHIPROCKET_EMAIL', '') or '').strip()
+        password = (getattr(settings, 'SHIPROCKET_PASSWORD', '') or '').strip()
+
         if api_key:
+            if return_error:
+                return api_key, None
             return api_key
-            
-        email = getattr(settings, 'SHIPROCKET_EMAIL', '')
-        password = getattr(settings, 'SHIPROCKET_PASSWORD', '')
 
         if not email or not password or "example.com" in email:
-            logger.warning("Shiprocket credentials are not configured or still placeholders.")
+            msg = ("Shiprocket credentials are not configured. Set SHIPROCKET_EMAIL and "
+                   "SHIPROCKET_PASSWORD (your Shiprocket API User email/password) in your "
+                   "environment variables.")
+            logger.warning(msg)
+            if return_error:
+                return None, msg
             return None
 
         try:
@@ -31,11 +49,26 @@ class ShiprocketService:
             payload = {"email": email, "password": password}
             response = requests.post(url, json=payload, timeout=10)
             if response.status_code == 200:
-                return response.json().get("token")
+                token = response.json().get("token")
+                if not token:
+                    msg = f"Shiprocket login succeeded but no token in response: {response.text[:200]}"
+                    logger.error(msg)
+                    if return_error:
+                        return None, msg
+                    return None
+                if return_error:
+                    return token, None
+                return token
             else:
-                logger.error(f"Shiprocket auth failed: {response.text}")
+                msg = f"Shiprocket auth failed ({response.status_code}): {response.text[:300]}"
+                logger.error(msg)
+                if return_error:
+                    return None, msg
         except Exception as e:
-            logger.error(f"Error authenticating with Shiprocket: {str(e)}")
+            msg = f"Error authenticating with Shiprocket: {str(e)}"
+            logger.error(msg)
+            if return_error:
+                return None, msg
         return None
 
     @classmethod
@@ -131,11 +164,13 @@ class ShiprocketService:
             if not pincode_digits:
                 pincode_digits = '90210' # default fallback zip
 
+        pickup_location = (getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary') or 'Primary').strip()
+        channel_id = (getattr(settings, 'SHIPROCKET_CHANNEL_ID', '') or '').strip()
+
         payload = {
             "order_id": order.order_id,
             "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
-            "pickup_location": getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary'),
-            "channel_id": getattr(settings, 'SHIPROCKET_CHANNEL_ID', ''),
+            "pickup_location": pickup_location,
             "billing_customer_name": customer_name,
             "billing_last_name": "",
             "billing_address": address.address_line1,
@@ -156,6 +191,11 @@ class ShiprocketService:
             "weight": weight
         }
 
+        # Only send channel_id if actually configured. Sending an empty string
+        # here makes Shiprocket reject the whole order on some accounts.
+        if channel_id:
+            payload["channel_id"] = channel_id
+
         # Add comment/customs declaration for international sample shipment
         if is_international:
             payload["comment"] = "SAMPLE ONLY - IMITATION JEWELRY (NON-PRECIOUS METAL). NO COMMERCIAL VALUE. FOR CUSTOMS CLEARANCE."
@@ -173,10 +213,56 @@ class ShiprocketService:
                 logger.info(f"Shiprocket order created successfully. Shipment ID: {shipment_id}")
                 return shipment_id, None
             else:
-                error_msg = response.text[:200]
+                error_msg = response.text[:500]
                 logger.error(f"Shiprocket order creation failed: {response.text}")
                 return None, error_msg
         except Exception as e:
-            error_msg = str(e)[:200]
+            error_msg = str(e)[:500]
             logger.error(f"Error booking Shiprocket delivery: {str(e)}")
             return None, error_msg
+
+    @classmethod
+    def test_connection(cls):
+        """
+        Read-only diagnostic check. Does NOT create any order in Shiprocket.
+        Returns a dict describing exactly what is configured, whether login
+        works, and (if login works) which pickup location nicknames exist on
+        the account - so a mismatched SHIPROCKET_PICKUP_LOCATION can be
+        spotted immediately instead of guessed at.
+        """
+        result = {
+            'api_key_configured': bool((getattr(settings, 'SHIPROCKET_API_KEY', '') or '').strip()),
+            'email_configured': bool((getattr(settings, 'SHIPROCKET_EMAIL', '') or '').strip()),
+            'password_configured': bool((getattr(settings, 'SHIPROCKET_PASSWORD', '') or '').strip()),
+            'channel_id_configured': bool((getattr(settings, 'SHIPROCKET_CHANNEL_ID', '') or '').strip()),
+            'configured_pickup_location': (getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary') or 'Primary').strip(),
+            'auth_success': False,
+            'auth_error': None,
+            'pickup_locations_on_account': [],
+            'pickup_location_match': None,
+            'pickup_fetch_error': None,
+        }
+
+        token, auth_error = cls._get_token(return_error=True)
+        result['auth_error'] = auth_error
+        result['auth_success'] = bool(token)
+
+        if not token:
+            return result
+
+        try:
+            url = f"{cls.BASE_URL}/settings/company/pickup"
+            headers = {"Authorization": f"Bearer {token}"}
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                addresses = (data.get("data", {}) or {}).get("shipping_address", []) or []
+                names = [a.get("pickup_location") for a in addresses if a.get("pickup_location")]
+                result['pickup_locations_on_account'] = names
+                result['pickup_location_match'] = result['configured_pickup_location'] in names
+            else:
+                result['pickup_fetch_error'] = response.text[:500]
+        except Exception as e:
+            result['pickup_fetch_error'] = str(e)[:500]
+
+        return result
