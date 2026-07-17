@@ -25,13 +25,41 @@ from .forms import (
 from functools import wraps
 from django.urls import reverse
 import urllib.parse
+from django.contrib.auth import authenticate, login as auth_login
+
+def custom_admin_login(request):
+    """Custom login page for admin panel (Email/Password only)"""
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('admin_dashboard')
+        
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        next_url = request.POST.get('next', 'admin_dashboard')
+        
+        if not email or not password:
+            messages.error(request, "Please enter both email and password.")
+        else:
+            user = authenticate(request, email=email, password=password)
+            if user is not None:
+                if user.is_staff or user.is_superuser:
+                    auth_login(request, user)
+                    if next_url and next_url.startswith('/'):
+                        return redirect(next_url)
+                    return redirect('admin_dashboard')
+                else:
+                    messages.error(request, "You are not authorized to access the admin panel.")
+            else:
+                messages.error(request, "Invalid email or password.")
+                
+    return render(request, 'admin/admin_login.html', {'next': request.GET.get('next', '')})
 
 def admin_required(function):
     """Decorator to check if user is admin"""
     @wraps(function)
     def wrap(request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_staff:
-            login_url = reverse('admin:login')
+            login_url = reverse('custom_admin_login')
             next_url = urllib.parse.quote(request.get_full_path())
             return redirect(f"{login_url}?next={next_url}")
         return function(request, *args, **kwargs)

@@ -74,6 +74,7 @@ urlpatterns = [
 
     # Admin Panel
     path('admin/', RedirectView.as_view(pattern_name='admin_dashboard', permanent=False), name='admin_root'),
+    path('admin/login/', admin_views.custom_admin_login, name='custom_admin_login'),
     path('admin/dashboard/', admin_views.admin_dashboard, name='admin_dashboard'),
     
     # Custom Admin: Site Settings & Hero Panels
