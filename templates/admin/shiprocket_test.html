@@ -1,0 +1,113 @@
+{% extends 'admin/custom_base.html' %}
+
+{% block title %}Shiprocket Test{% endblock %}
+
+{% block content %}
+<div class="admin-section-title">
+    <div>
+        <div class="eyebrow">Diagnostics</div>
+        <h5>Shiprocket Connection Test</h5>
+    </div>
+</div>
+
+<div class="admin-card mb-4" style="padding: 20px;">
+    <p class="text-muted mb-3">
+        This page is read-only &mdash; it does NOT create any real order in Shiprocket.
+        It just checks whether your credentials work and whether the pickup location
+        name matches what's actually set up on your Shiprocket account. Refresh this
+        page any time to re-test.
+    </p>
+
+    <h6 class="mb-2">1. Environment Variables</h6>
+    <table class="table table-sm mb-4">
+        <tbody>
+            <tr>
+                <td>SHIPROCKET_API_KEY set?</td>
+                <td>
+                    {% if result.api_key_configured %}
+                        <span class="badge bg-warning text-dark">Yes &mdash; being used directly as Bearer token</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Not set</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>SHIPROCKET_EMAIL set?</td>
+                <td>{% if result.email_configured %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">Missing</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>SHIPROCKET_PASSWORD set?</td>
+                <td>{% if result.password_configured %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">Missing</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>SHIPROCKET_CHANNEL_ID set?</td>
+                <td>{% if result.channel_id_configured %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">Not set (fine, it's optional)</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <td>Configured pickup location name</td>
+                <td><code>{{ result.configured_pickup_location }}</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    {% if result.api_key_configured %}
+    <div class="alert alert-warning">
+        <strong>Heads up:</strong> SHIPROCKET_API_KEY is set, so it's being sent directly as the
+        Bearer token. Shiprocket's order API does <u>not</u> issue static API keys &mdash;
+        the only valid token comes from logging in with an email + password
+        (create one under Shiprocket Dashboard &rarr; Settings &rarr; API &rarr; "API User").
+        If this variable contains anything other than a real login-generated JWT, every
+        request will fail with 401 Unauthorized. Recommended: remove SHIPROCKET_API_KEY
+        from your environment and use SHIPROCKET_EMAIL + SHIPROCKET_PASSWORD instead.
+    </div>
+    {% endif %}
+
+    <h6 class="mb-2">2. Login / Auth Test</h6>
+    {% if result.auth_success %}
+        <div class="alert alert-success">Login successful &mdash; a valid token was obtained.</div>
+    {% else %}
+        <div class="alert alert-danger">
+            <strong>Login failed.</strong><br>
+            {{ result.auth_error|default:"Unknown error." }}
+        </div>
+    {% endif %}
+
+    {% if result.auth_success %}
+    <h6 class="mb-2">3. Pickup Location Check</h6>
+        {% if result.pickup_fetch_error %}
+            <div class="alert alert-danger">
+                Could not fetch pickup locations from Shiprocket: {{ result.pickup_fetch_error }}
+            </div>
+        {% elif result.pickup_location_match %}
+            <div class="alert alert-success">
+                Pickup location "<strong>{{ result.configured_pickup_location }}</strong>" matches
+                a pickup address on your Shiprocket account. Orders should go through.
+            </div>
+        {% else %}
+            <div class="alert alert-danger">
+                <strong>Mismatch found.</strong> Your SHIPROCKET_PICKUP_LOCATION is set to
+                "<strong>{{ result.configured_pickup_location }}</strong>", but that name does not
+                exist on your Shiprocket account. This alone will make every order fail silently.
+                <br><br>
+                Pickup location nicknames actually on your account:
+                <ul class="mb-0">
+                    {% for name in result.pickup_locations_on_account %}
+                        <li><code>{{ name }}</code></li>
+                    {% empty %}
+                        <li><em>No pickup locations found &mdash; add one under Shiprocket Dashboard &rarr; Settings &rarr; Pickup Addresses.</em></li>
+                    {% endfor %}
+                </ul>
+                <br>
+                Set <code>SHIPROCKET_PICKUP_LOCATION</code> in Vercel to exactly match one of the names above (case-sensitive), then redeploy.
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <hr>
+    <p class="text-muted mb-0" style="font-size: 13px;">
+        Also check: Admin &rarr; Orders &rarr; open any recent paid order &rarr; "Order Tracking History"
+        section. If Shiprocket booking failed for that specific order, you'll see a
+        "Shiprocket Sync Failed: ..." entry there with the exact reason.
+    </p>
+</div>
+{% endblock %}
