@@ -22,17 +22,20 @@ from .forms import (
 )
 
 
+from functools import wraps
+from django.urls import reverse
+import urllib.parse
+
 def admin_required(function):
     """Decorator to check if user is admin"""
+    @wraps(function)
     def wrap(request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_staff:
-            messages.error(request, 'Admin access required')
-            return redirect('login')
+            login_url = reverse('admin:login')
+            next_url = urllib.parse.quote(request.get_full_path())
+            return redirect(f"{login_url}?next={next_url}")
         return function(request, *args, **kwargs)
     return wrap
-
-
-@login_required
 @admin_required
 def admin_dashboard(request):
     """Admin dashboard with statistics"""
@@ -86,9 +89,6 @@ def admin_dashboard(request):
         'today_revenue': today_revenue,
     }
     return render(request, 'admin/dashboard.html', context)
-
-
-@login_required
 @admin_required
 def admin_products(request):
     """Manage products"""
@@ -117,9 +117,6 @@ def admin_products(request):
         'search_query': search_query,
     }
     return render(request, 'admin/products_list.html', context)
-
-
-@login_required
 @admin_required
 def admin_product_create(request):
     """Create new product"""
@@ -217,9 +214,6 @@ def admin_product_create(request):
 
     context = {'form': form, 'title': 'Add New Product'}
     return render(request, 'admin/product_form.html', context)
-
-
-@login_required
 @admin_required
 def admin_product_edit(request, pk):
     """Edit product"""
@@ -318,9 +312,6 @@ def admin_product_edit(request, pk):
 
     context = {'form': form, 'title': 'Edit Product', 'product': product}
     return render(request, 'admin/product_form.html', context)
-
-
-@login_required
 @admin_required
 def admin_product_delete(request, pk):
     """Delete product"""
@@ -332,9 +323,6 @@ def admin_product_delete(request, pk):
 
     context = {'product': product}
     return render(request, 'admin/product_confirm_delete.html', context)
-
-
-@login_required
 @admin_required
 def admin_product_image_delete(request, pk):
     """Delete a product image"""
@@ -342,18 +330,12 @@ def admin_product_image_delete(request, pk):
     product_pk = image.product.pk
     image.delete()
     return JsonResponse({'success': True, 'message': 'Image deleted successfully'})
-
-
-@login_required
 @admin_required
 def admin_product_aplus_image_delete(request, pk):
     """Delete a product A+ image"""
     image = get_object_or_404(ProductAplusImage, pk=pk)
     image.delete()
     return JsonResponse({'success': True, 'message': 'A+ Image deleted successfully'})
-
-
-@login_required
 @admin_required
 def admin_product_prices(request, pk):
     """Manage country specific prices for a product"""
@@ -388,9 +370,6 @@ def admin_product_prices(request, pk):
         'title': f'Manage Prices: {product.name}'
     }
     return render(request, 'admin/product_prices.html', context)
-
-
-@login_required
 @admin_required
 def admin_orders(request):
     """View all orders"""
@@ -437,8 +416,6 @@ from django.http import JsonResponse
 import boto3
 import uuid
 import os
-
-@login_required
 @admin_required
 def get_presigned_url(request):
     """
@@ -492,9 +469,6 @@ def get_presigned_url(request):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-
-@login_required
 @admin_required
 def admin_order_detail(request, order_id):
     """View and update a customer's full order lifecycle."""
@@ -567,9 +541,6 @@ def admin_order_detail(request, order_id):
         'form': form,
     }
     return render(request, 'admin/order_detail.html', context)
-
-
-@login_required
 @admin_required
 def admin_complaints(request):
     """Manage complaints"""
@@ -599,9 +570,6 @@ def admin_complaints(request):
         'selected_priority': priority,
     }
     return render(request, 'admin/complaints_list.html', context)
-
-
-@login_required
 @admin_required
 def admin_complaint_detail(request, complaint_id):
     """View and respond to complaint"""
@@ -627,9 +595,6 @@ def admin_complaint_detail(request, complaint_id):
         'form': form,
     }
     return render(request, 'admin/complaint_detail.html', context)
-
-
-@login_required
 @admin_required
 def admin_reports(request):
     """Analytics and reports"""
@@ -699,9 +664,6 @@ def admin_reports(request):
         'days': days,
     }
     return render(request, 'admin/reports.html', context)
-
-
-@login_required
 def submit_complaint(request):
     """User complaint submission"""
     if request.method == 'POST':
@@ -723,9 +685,6 @@ def submit_complaint(request):
         'user_orders': user_orders,
     }
     return render(request, 'store/user_complaints.html', context)
-
-
-@login_required
 @admin_required
 def admin_site_settings(request):
     """Manage global site settings like announcement text"""
@@ -740,17 +699,11 @@ def admin_site_settings(request):
         form = SiteSettingForm(instance=setting)
     
     return render(request, 'admin/site_settings.html', {'form': form})
-
-
-@login_required
 @admin_required
 def admin_hero_panels(request):
     """List all hero panels"""
     panels = HeroPanel.objects.all()
     return render(request, 'admin/hero_panels.html', {'panels': panels})
-
-
-@login_required
 @admin_required
 def admin_hero_panel_create(request):
     """Create a new hero panel"""
@@ -764,9 +717,6 @@ def admin_hero_panel_create(request):
         form = HeroPanelForm()
     
     return render(request, 'admin/hero_panel_form.html', {'form': form, 'is_edit': False})
-
-
-@login_required
 @admin_required
 def admin_hero_panel_edit(request, pk):
     """Edit an existing hero panel"""
@@ -781,9 +731,6 @@ def admin_hero_panel_edit(request, pk):
         form = HeroPanelForm(instance=panel)
     
     return render(request, 'admin/hero_panel_form.html', {'form': form, 'panel': panel, 'is_edit': True})
-
-
-@login_required
 @admin_required
 def admin_hero_panel_delete(request, pk):
     """Delete a hero panel"""
@@ -792,17 +739,11 @@ def admin_hero_panel_delete(request, pk):
         panel.delete()
         messages.success(request, 'Hero panel deleted successfully.')
         return redirect('admin_hero_panels')
-
-
-@login_required
 def complaint_detail(request, complaint_id):
     """View complaint status"""
     complaint = get_object_or_404(Complaint, complaint_id=complaint_id, user=request.user)
     context = {'complaint': complaint}
     return render(request, 'store/complaint_detail.html', context)
-
-
-@login_required
 def user_complaints(request):
     """List user's complaints"""
     complaints = Complaint.objects.filter(user=request.user).order_by('-created_at')
@@ -815,8 +756,6 @@ def user_complaints(request):
     
     context = {'complaints': complaints}
     return render(request, 'store/complaints_list.html', context)
-
-@login_required
 def admin_countries(request):
     """List all country settings"""
     if not request.user.is_staff:
@@ -828,8 +767,6 @@ def admin_countries(request):
         'countries': countries,
         'title': 'Currency Settings'
     })
-
-@login_required
 def admin_country_create(request):
     """Create new country setting"""
     if not request.user.is_staff:
@@ -861,8 +798,6 @@ def admin_country_create(request):
         'title': 'Add Currency Setting',
         'language_choices': LANGUAGE_CHOICES,
     })
-
-@login_required
 def admin_country_edit(request, pk):
     """Edit country setting"""
     if not request.user.is_staff:
@@ -890,8 +825,6 @@ def admin_country_edit(request, pk):
         'title': f'Edit {country.currency_code}',
         'language_choices': LANGUAGE_CHOICES,
     })
-
-@login_required
 def admin_country_delete(request, pk):
     """Delete country setting"""
     if not request.user.is_staff:
@@ -902,9 +835,6 @@ def admin_country_delete(request, pk):
         country.delete()
         messages.success(request, 'Country removed.')
     return redirect('admin_countries')
-
-
-@login_required
 @admin_required
 def admin_shiprocket_test(request):
     """
