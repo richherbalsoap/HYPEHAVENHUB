@@ -1028,6 +1028,10 @@
                    href="{% url 'admin_reports' %}">
                     <i class="fas fa-chart-line nav-icon"></i> Reports
                 </a>
+                <a class="nav-link {% if request.resolver_match.url_name == 'admin_shiprocket_test' %}active{% endif %}"
+                   href="{% url 'admin_shiprocket_test' %}">
+                    <i class="fas fa-truck-fast nav-icon"></i> Shiprocket Test
+                </a>
             </nav>
 
             <div class="sidebar-footer">
