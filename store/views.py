@@ -1285,11 +1285,28 @@ def verify_payment(request):
                     if not shipping_address:
                         # Fallback: some payment methods only populate this on the payment object
                         rzp_payment = client.payment.fetch(razorpay_payment_id)
-                        shipping_address = rzp_payment.get('notes', {}).get('shipping_address')
+                        notes = rzp_payment.get('notes', {})
+                        shipping_address = notes.get('shipping_address')
+                        
+                        if isinstance(shipping_address, str):
+                            try:
+                                shipping_address = json.loads(shipping_address)
+                            except:
+                                shipping_address = None
+                                
+                        if not isinstance(shipping_address, dict) and notes.get('shipping_address_line1'):
+                            shipping_address = {
+                                'line1': notes.get('shipping_address_line1', ''),
+                                'city': notes.get('shipping_address_city', ''),
+                                'state': notes.get('shipping_address_state', ''),
+                                'zipcode': notes.get('shipping_address_zipcode', ''),
+                                'name': notes.get('shipping_name', 'Guest User')
+                            }
+
                         contact = contact or rzp_payment.get('contact', '')
                         email = email or rzp_payment.get('email', 'guest@hypehavenhub.com')
 
-                    if shipping_address:
+                    if shipping_address and isinstance(shipping_address, dict):
                         from store.models import Address
                         address_obj, _ = Address.objects.get_or_create(
                             user=order.user,
@@ -1370,7 +1387,7 @@ def verify_payment(request):
             if shipment_id:
                 order.shipping_tracking_id = str(shipment_id)
                 order.save()
-            else:
+            elif error_msg:
                 OrderTracking.objects.create(
                     order=order,
                     status='shiprocket_failed',
@@ -1379,7 +1396,7 @@ def verify_payment(request):
         except Exception as e:
             logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
 
-        redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else f'/order-success/{order.order_id}/'
+        redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else f'/accounts/google/login/?next=/orders/{order.order_id}/assign/'
 
         return JsonResponse({
             'success': True,
@@ -2080,6 +2097,38 @@ def razorpay_webhook(request):
 
 def contact_us(request):
     return render(request, 'store/contact_us.html')
+
+@login_required
+def assign_guest_order(request, order_id):
+    """
+    After a guest user completes payment and is redirected to login,
+    this view links the guest order to their new authenticated account.
+    """
+    try:
+        from django.shortcuts import get_object_or_404, redirect
+        from django.contrib import messages
+        order = get_object_or_404(Order, order_id=order_id)
+        
+        # Only reassign if it currently belongs to guest_checkout
+        if order.user.username == 'guest_checkout':
+            order.user = request.user
+            # Update address user reference if it exists
+            if order.address and order.address.user.username == 'guest_checkout':
+                order.address.user = request.user
+                order.address.save()
+            order.save()
+            
+            OrderTracking.objects.create(
+                order=order,
+                status='account_linked',
+                description=f'Order linked to registered account {request.user.email}.'
+            )
+            messages.success(request, f"Order {order_id} has been successfully linked to your account.")
+            
+        return redirect('order_detail', order_id=order_id)
+    except Exception as e:
+        logger.error(f"Error assigning guest order {order_id}: {str(e)}")
+        return redirect('order_detail', order_id=order_id)
 
 def about_us(request):
     return render(request, 'store/about_us.html')
