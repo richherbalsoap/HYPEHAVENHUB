@@ -20,4 +20,5 @@ dependencies = [
     "razorpay>=2.0.1",
     "requests>=2.34.2",
     "vercel-blob>=0.4.2",
+    "django-allauth[socialaccount]>=0.61.1",
 ]
