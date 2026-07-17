@@ -96,6 +96,7 @@ urlpatterns = [
     path('admin/complaints/', admin_views.admin_complaints, name='admin_complaints'),
     path('admin/complaints/<str:complaint_id>/', admin_views.admin_complaint_detail, name='admin_complaint_detail'),
     path('admin/reports/', admin_views.admin_reports, name='admin_reports'),
+    path('admin/shiprocket-test/', admin_views.admin_shiprocket_test, name='admin_shiprocket_test'),
     path('admin/countries/', admin_views.admin_countries, name='admin_countries'),
     path('admin/countries/create/', admin_views.admin_country_create, name='admin_country_create'),
     path('admin/countries/<int:pk>/edit/', admin_views.admin_country_edit, name='admin_country_edit'),
