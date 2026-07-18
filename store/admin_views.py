@@ -71,18 +71,21 @@ def admin_dashboard(request):
     stats, created = AdminDashboardStats.objects.get_or_create(date=today)
     
     # Calculate statistics
-    total_orders = Order.objects.count()
-    total_revenue = Order.objects.aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    # Only count successful orders for revenue/sales stats (exclude cancelled/failed test data)
+    valid_orders = Order.objects.exclude(status__in=['cancelled', 'returned'])
+    
+    total_orders = valid_orders.count()
+    total_revenue = valid_orders.aggregate(Sum('grand_total'))['grand_total__sum'] or 0
     total_users = User.objects.filter(is_staff=False).count()
-    new_orders_today = Order.objects.filter(created_at__date=today).count()
+    new_orders_today = valid_orders.filter(created_at__date=today).count()
     total_products = Product.objects.count()
     returned_orders = Order.objects.filter(status='returned').count()
     total_complaints = Complaint.objects.count()
     open_complaints = Complaint.objects.filter(status__in=['open', 'in_progress']).count()
-    pending_orders = Order.objects.filter(status__in=['pending', 'confirmed', 'processing']).count()
+    pending_orders = valid_orders.filter(status__in=['pending', 'confirmed', 'processing']).count()
     paid_orders = Payment.objects.filter(status='success').count()
     unpaid_orders = Payment.objects.filter(status='pending').count()
-    today_revenue = Order.objects.filter(created_at__date=today).aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    today_revenue = valid_orders.filter(created_at__date=today).aggregate(Sum('grand_total'))['grand_total__sum'] or 0
     
     # Update stats
     stats.total_orders = total_orders
@@ -635,15 +638,16 @@ def admin_reports(request):
     
     start_date = timezone.now().date() - timedelta(days=days)
     
-    # Sales data
-    orders = Order.objects.filter(created_at__date__gte=start_date)
+    # Sales data (Exclude cancelled/failed test orders)
+    orders = Order.objects.filter(created_at__date__gte=start_date).exclude(status__in=['cancelled', 'returned'])
     total_sales = orders.aggregate(Sum('grand_total'))['grand_total__sum'] or 0
     total_orders = orders.count()
     avg_order_value = total_sales / total_orders if total_orders > 0 else 0
     
     # Product performance
     product_sales = OrderItem.objects.filter(
-        order__created_at__date__gte=start_date
+        order__created_at__date__gte=start_date,
+        order__status__in=['pending', 'confirmed', 'processing', 'shipped', 'delivered']
     ).values('product__name').annotate(
         total_sold=Sum('quantity'),
         total_revenue=Sum('total_price')
@@ -658,7 +662,8 @@ def admin_reports(request):
     
     # Category performance
     category_sales = OrderItem.objects.filter(
-        order__created_at__date__gte=start_date
+        order__created_at__date__gte=start_date,
+        order__status__in=['pending', 'confirmed', 'processing', 'shipped', 'delivered']
     ).values('product__category__name').annotate(
         total_sold=Sum('quantity'),
         total_revenue=Sum('total_price')
@@ -667,7 +672,7 @@ def admin_reports(request):
     # Daily sales trend
     daily_sales_query = Order.objects.filter(
         created_at__date__gte=start_date
-    ).extra(
+    ).exclude(status__in=['cancelled', 'returned']).extra(
         select={'date': 'DATE(created_at)'}
     ).values('date').annotate(
         revenue=Sum('grand_total'),
