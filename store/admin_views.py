@@ -65,6 +65,19 @@ def admin_required(function):
         return function(request, *args, **kwargs)
     return wrap
 @admin_required
+def admin_clear_fake_data(request):
+    if request.method == 'POST':
+        # Delete all fake data
+        AdminDashboardStats.objects.all().delete()
+        Complaint.objects.all().delete()
+        OrderTracking.objects.all().delete()
+        OrderItem.objects.all().delete()
+        Payment.objects.all().delete()
+        Order.objects.all().delete()
+        messages.success(request, 'All fake data has been cleared.')
+    return redirect('admin_dashboard')
+
+@admin_required
 def admin_dashboard(request):
     """Admin dashboard with statistics"""
     today = timezone.now().date()

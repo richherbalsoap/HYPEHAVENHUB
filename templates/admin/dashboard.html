@@ -11,6 +11,10 @@
         <span style="color: var(--admin-muted);">Here's what's happening with your store today. Let's make it a great day!</span>
     </div>
     <div class="ms-auto d-none d-md-flex gap-2">
+        <form method="POST" action="{% url 'admin_clear_fake_data' %}" onsubmit="return confirm('Are you sure you want to delete all orders, payments, and stats to reset the dashboard? This cannot be undone and is intended for cleaning up fake data.')" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Reset Fake Data</button>
+        </form>
         <a href="{% url 'admin_product_create' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Product</a>
         <a href="{% url 'admin_reports' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-chart-line"></i> Reports</a>
     </div>
