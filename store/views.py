@@ -787,12 +787,18 @@ def add_to_cart(request):
     data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
-    quantity = int(data.get('quantity', 1))
+    try:
+        quantity = int(data.get('quantity') or 1)
+    except (ValueError, TypeError):
+        quantity = 1
 
-    product = get_object_or_404(Product, id=product_id, is_active=True)
-    variant = None
-    if variant_id:
-        variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+    try:
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        variant = None
+        if variant_id:
+            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+    except (ValueError, TypeError):
+        return JsonResponse({'success': False, 'message': 'Invalid product or variant ID.'})
 
     cart = get_or_create_cart(request)
     ci, created = CartItem.objects.get_or_create(
@@ -1097,7 +1103,11 @@ def razorpay_direct_checkout(request):
         
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
-    quantity = int(data.get('quantity', 1))
+    
+    try:
+        quantity = int(data.get('quantity') or 1)
+    except (ValueError, TypeError):
+        quantity = 1
 
     subtotal = Decimal('0.00')
     discount_amount = Decimal('0.00')
@@ -1106,15 +1116,18 @@ def razorpay_direct_checkout(request):
     items_to_create = []
 
     if product_id:
-        # Buy Now flow
-        product = get_object_or_404(Product, id=product_id, is_active=True)
-        variant = None
-        if variant_id:
-            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
-        
-        unit_price = product.selling_price
-        if variant:
-            unit_price += variant.additional_price
+        try:
+            # Buy Now flow
+            product = get_object_or_404(Product, id=product_id, is_active=True)
+            variant = None
+            if variant_id:
+                variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+            
+            unit_price = product.selling_price
+            if variant:
+                unit_price += variant.additional_price
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'message': 'Invalid product or variant ID.'})
         
         total_price = unit_price * quantity
         subtotal = total_price
@@ -1876,13 +1889,19 @@ def shiprocket_initiate_checkout(request):
     
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
-    quantity = int(data.get('quantity', 1))
+    try:
+        quantity = int(data.get('quantity') or 1)
+    except (ValueError, TypeError):
+        quantity = 1
     
     if product_id:
-        product = get_object_or_404(Product, id=product_id, is_active=True)
-        variant = None
-        if variant_id:
-            variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        try:
+            product = get_object_or_404(Product, id=product_id, is_active=True)
+            variant = None
+            if variant_id:
+                variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'message': 'Invalid product or variant ID.'})
         v_id = str(variant.id) if variant else f"prod-{product.id}"
         items.append({
             "variant_id": v_id,
