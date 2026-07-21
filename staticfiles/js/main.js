@@ -86,6 +86,14 @@ document.addEventListener('click', async (e) => {
   if (data.requires_login) return;
 
   if (data.success) {
+    if (typeof posthog !== 'undefined') {
+      posthog.capture('add_to_cart', {
+        product_id: productId,
+        variant_id: variantId,
+        quantity: qty,
+        cart_count: data.cart_count
+      });
+    }
     updateCartBadge(data.cart_count);
     showToast(data.message || 'Added to cart!');
     if (typeof openCartDrawer === 'function') openCartDrawer();
@@ -860,6 +868,16 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
     }
 
     if (data.success && data.razorpay_order_id) {
+      if (typeof posthog !== 'undefined') {
+        posthog.capture('checkout_initiated', {
+          order_id: data.order_id,
+          amount: data.amount,
+          razorpay_order_id: data.razorpay_order_id,
+          product_id: productId,
+          variant_id: variantId,
+          quantity: quantity
+        });
+      }
       if (typeof Razorpay === 'undefined') {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');

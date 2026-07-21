@@ -564,6 +564,23 @@ def verify_otp_view(request):
                     user.backend = 'django.contrib.auth.backends.ModelBackend'
                     login(request, user)
                     merge_anonymous_cart(request, user)
+                    
+                    # PostHog User Identification and Event Capture
+                    if getattr(settings, 'POSTHOG_API_KEY', None):
+                        try:
+                            import posthog
+                            posthog.identify(user.email, {
+                                'email': user.email,
+                                'first_name': user.first_name,
+                                'last_name': user.last_name,
+                                'phone': user.phone,
+                            })
+                            posthog.capture(user.email, 'user_signed_up', {
+                                'email': user.email,
+                            })
+                        except Exception as ph_err:
+                            logger.error(f"Failed to identify/capture user signup in PostHog: {ph_err}")
+
                     messages.success(request, 'Email verified successfully. You are now logged in.')
                     return redirect('home')
             else:
@@ -593,6 +610,23 @@ def login_view(request):
         user = form.cleaned_data['user']
         login(request, user)
         merge_anonymous_cart(request, user)
+
+        # PostHog User Identification and Event Capture
+        if getattr(settings, 'POSTHOG_API_KEY', None):
+            try:
+                import posthog
+                posthog.identify(user.email, {
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'phone': user.phone,
+                })
+                posthog.capture(user.email, 'user_logged_in', {
+                    'email': user.email,
+                })
+            except Exception as ph_err:
+                logger.error(f"Failed to identify/capture user login in PostHog: {ph_err}")
+
         next_url = request.GET.get('next', '')
         messages.success(request, f'Welcome back, {user.first_name or user.email}!')
         if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
@@ -1228,6 +1262,19 @@ def razorpay_direct_checkout(request):
         }
         payment.save()
         
+        # PostHog Checkout Initiated Backend Event
+        if getattr(settings, 'POSTHOG_API_KEY', None):
+            try:
+                import posthog
+                posthog.capture(user.email, 'checkout_initiated_backend', {
+                    'order_id': order.order_id,
+                    'razorpay_order_id': razorpay_order['id'],
+                    'grand_total': float(order.grand_total),
+                    'quantity_total': sum(item['quantity'] for item in items_to_create),
+                })
+            except Exception as ph_err:
+                logger.error(f"Failed to capture checkout initiation in PostHog: {ph_err}")
+
         customer_name = f"{user.first_name} {user.last_name}".strip() if user.username != 'guest_checkout' else ''
 
         return JsonResponse({
@@ -1420,6 +1467,22 @@ def verify_payment(request):
                 )
         except Exception as e:
             logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
+
+        # PostHog Purchase Event Capture in Views
+        if getattr(settings, 'POSTHOG_API_KEY', None):
+            try:
+                import posthog
+                posthog.capture(order.user.email, 'purchase_backend', {
+                    'order_id': order.order_id,
+                    'grand_total': float(order.grand_total),
+                    'subtotal': float(order.subtotal),
+                    'discount_amount': float(order.discount_amount),
+                    'delivery_charge': float(order.delivery_charge),
+                    'payment_method': 'razorpay',
+                    'shipment_id': shipment_id,
+                })
+            except Exception as ph_err:
+                logger.error(f"Failed to capture backend purchase event in PostHog: {ph_err}")
 
         redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else f'/accounts/google/login/?next=/orders/{order.order_id}/assign/'
 
@@ -2177,4 +2240,7 @@ def shipping_policy(request):
     return render(request, 'store/shipping_policy.html')
 
 def order_success_animation(request, order_id):
-    return render(request, 'store/order_success.html', {'order_id': order_id})
+    from store.models import Order
+    from django.shortcuts import get_object_or_404
+    order = get_object_or_404(Order, order_id=order_id)
+    return render(request, 'store/order_success.html', {'order': order, 'order_id': order_id})

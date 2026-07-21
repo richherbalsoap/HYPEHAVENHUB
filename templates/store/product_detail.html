@@ -870,6 +870,16 @@ function hideReviewDetails() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Track Product Viewed in PostHog
+  if (typeof posthog !== 'undefined') {
+    posthog.capture('product_viewed', {
+      product_id: '{{ product.id }}',
+      product_name: '{{ product.name|escapejs }}',
+      product_price: {{ product.selling_price }},
+      product_category: '{{ product.category.name|escapejs }}'
+    });
+  }
+
   const modalStars = document.querySelectorAll('.star-wrapper');
   const ratingInputModal = document.getElementById('ratingInputModal');
   

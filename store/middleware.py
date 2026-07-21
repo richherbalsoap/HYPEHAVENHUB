@@ -74,6 +74,26 @@ class ExceptionHandlingMiddleware(MiddlewareMixin):
     Intercepts custom exceptions and formats responses cleanly for users or APIs.
     """
     def process_exception(self, request, exception):
+        # Track exception in PostHog
+        try:
+            from django.conf import settings
+            if getattr(settings, 'POSTHOG_API_KEY', None):
+                import posthog
+                distinct_id = 'anonymous'
+                if hasattr(request, 'user') and request.user and request.user.is_authenticated:
+                    distinct_id = request.user.email
+                elif hasattr(request, 'session') and request.session and request.session.session_key:
+                    distinct_id = request.session.session_key
+                
+                posthog.capture(distinct_id, '$exception', {
+                    'error_message': str(exception),
+                    'error_type': exception.__class__.__name__,
+                    'path': request.path,
+                    'method': request.method,
+                })
+        except Exception as posthog_err:
+            logger.error(f"Failed to capture exception in PostHog: {posthog_err}")
+
         if isinstance(exception, AtelierException):
             logger.warning(f"Application error: {exception.message} (Code: {exception.code})")
             

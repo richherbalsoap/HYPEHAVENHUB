@@ -37,6 +37,31 @@
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof posthog !== 'undefined') {
+            posthog.capture('purchase', {
+                order_id: '{{ order.order_id }}',
+                grand_total: {{ order.grand_total }},
+                subtotal: {{ order.subtotal }},
+                discount_amount: {{ order.discount_amount }},
+                delivery_charge: {{ order.delivery_charge }},
+                items: [
+                    {% for item in order.items.all %}
+                    {
+                        product_id: '{{ item.product.id }}',
+                        product_name: '{{ item.product_name|escapejs }}',
+                        variant_id: '{{ item.variant.id|default:"" }}',
+                        variant_label: '{{ item.variant_label|escapejs }}',
+                        quantity: {{ item.quantity }},
+                        unit_price: {{ item.unit_price }},
+                        total_price: {{ item.total_price }}
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            });
+        }
+    });
+
     setTimeout(function() {
         window.location.href = "{% url 'login' %}?next=/orders/{{ order_id }}/";
     }, 3500); // Wait 3.5 seconds before redirecting

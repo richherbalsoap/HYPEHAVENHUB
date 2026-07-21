@@ -109,6 +109,7 @@ TEMPLATES = [
                 'store.context_processors.company_dashboard_access',
                 'store.context_processors.global_country_context',
                 'store.context_processors.site_settings',
+                'store.context_processors.posthog_settings',
             ],
         },
     },
@@ -281,6 +282,18 @@ SESSION_SAVE_EVERY_REQUEST = True
 LOGIN_URL = '/auth/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# PostHog Configuration
+POSTHOG_API_KEY = config('POSTHOG_API_KEY', default='')
+POSTHOG_HOST = config('POSTHOG_HOST', default='https://us.i.posthog.com')
+
+if POSTHOG_API_KEY:
+    try:
+        import posthog
+        posthog.project_api_key = POSTHOG_API_KEY
+        posthog.host = POSTHOG_HOST
+    except ImportError:
+        pass
 
 # Razorpay Configuration
 RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID', default='')
