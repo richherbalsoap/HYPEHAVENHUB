@@ -163,8 +163,14 @@ def admin_products(request):
     return render(request, 'admin/products_list.html', context)
 @admin_required
 def admin_product_create(request):
-    """Create new product"""
+    """Create new product(s) in catalog"""
     if request.method == 'POST':
+        # First check if multi-product catalog was submitted
+        created_count = _process_multi_catalog_creation(request)
+        if created_count > 0:
+            messages.success(request, f'{created_count} Catalog Products created successfully!')
+            return redirect('admin_products')
+
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
@@ -260,6 +266,117 @@ def admin_product_create(request):
 
     context = {'form': form, 'title': 'Add New Product'}
     return render(request, 'admin/product_form.html', context)
+
+
+def _process_multi_catalog_creation(request):
+    catalog_indices = request.POST.getlist('catalog_indices[]')
+    if not catalog_indices:
+        return 0
+        
+    created_count = 0
+    copy_shared = request.POST.get('copy_shared_details') in ['true', 'on', '1']
+    
+    # Base fallback values from first item or form
+    first_cat_id = request.POST.get('category_0') or request.POST.get('category')
+    first_brand_id = request.POST.get('brand_0') or request.POST.get('brand')
+    first_desc = request.POST.get('description_0') or request.POST.get('description', '')
+    first_video = request.POST.get('uploaded_video_url_0') or request.POST.get('uploaded_video_url', '')
+    
+    for idx in catalog_indices:
+        name = request.POST.get(f'name_{idx}', '').strip()
+        if not name and idx == '0':
+            name = request.POST.get('name', '').strip()
+        if not name:
+            continue
+            
+        base_price_str = request.POST.get(f'base_price_{idx}') or request.POST.get('base_price', '0')
+        discount_str = request.POST.get(f'discount_percent_{idx}') or request.POST.get('discount_percent', '0')
+        
+        try:
+            base_price = float(base_price_str)
+        except ValueError:
+            base_price = 0.0
+            
+        try:
+            discount_percent = float(discount_str)
+        except ValueError:
+            discount_percent = 0.0
+            
+        cat_id = request.POST.get(f'category_{idx}') or (first_cat_id if copy_shared else None)
+        brand_id = request.POST.get(f'brand_{idx}') or (first_brand_id if copy_shared else None)
+        desc = request.POST.get(f'description_{idx}') or (first_desc if copy_shared else '')
+        
+        category = Category.objects.filter(id=cat_id).first() if cat_id else Category.objects.first()
+        brand = Brand.objects.filter(id=brand_id).first() if brand_id else Brand.objects.get_or_create(name='HypeHavenHub')[0]
+        
+        weight = request.POST.get(f'weight_{idx}', '')
+        material = request.POST.get(f'material_{idx}', '')
+        finish = request.POST.get(f'finish_{idx}', '')
+        warranty = request.POST.get(f'warranty_{idx}', '')
+        
+        product = Product.objects.create(
+            name=name,
+            category=category,
+            brand=brand,
+            description=desc or name,
+            base_price=base_price,
+            discount_percent=discount_percent,
+            weight=weight,
+            material=material,
+            finish=finish,
+            warranty=warranty,
+            is_active=True
+        )
+        
+        # Save video URL
+        v_url = request.POST.get(f'uploaded_video_url_{idx}') or (first_video if copy_shared else '')
+        if v_url:
+            product.video_url = v_url
+            product.save()
+            
+        # Save Images
+        is_first = True
+        for key in request.POST:
+            if key.startswith(f'uploaded_image_url_{idx}_'):
+                url = request.POST[key]
+                if url:
+                    ProductImage.objects.create(
+                        product=product,
+                        image_url=url,
+                        is_primary=is_first
+                    )
+                    is_first = False
+                    
+        # Save Product Variants
+        shade_names = request.POST.getlist(f'variant_shade_name_{idx}[]')
+        add_prices = request.POST.getlist(f'variant_additional_price_{idx}[]')
+        stocks = request.POST.getlist(f'variant_stock_{idx}[]')
+        
+        for s_i in range(len(shade_names)):
+            s_name = shade_names[s_i].strip()
+            if not s_name:
+                continue
+            try:
+                add_p = float(add_prices[s_i]) if s_i < len(add_prices) and add_prices[s_i] else 0.0
+            except ValueError:
+                add_p = 0.0
+            try:
+                stk = int(stocks[s_i]) if s_i < len(stocks) and stocks[s_i] else 10
+            except ValueError:
+                stk = 10
+            v_img = request.POST.get(f'uploaded_variant_image_url_{idx}_{s_i}', '')
+            
+            ProductVariant.objects.create(
+                product=product,
+                shade_name=s_name,
+                additional_price=add_p,
+                stock=stk,
+                image_url=v_img
+            )
+            
+        created_count += 1
+        
+    return created_count
 @admin_required
 def admin_product_edit(request, pk):
     """Edit product"""

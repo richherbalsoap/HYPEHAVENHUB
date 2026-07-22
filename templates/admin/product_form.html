@@ -2,436 +2,612 @@
 
 {% block page_title %}{{ title }}{% endblock %}
 
-{% block content %}
-<div class="admin-section-title">
-    <div>
-        <div class="eyebrow">Inventory</div>
-        <h5>{{ title }}</h5>
-    </div>
-    <a href="{% url 'admin_products' %}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left"></i> Back to Products
-    </a>
-</div>
-
-<form id="product-form" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    <div class="row g-4">
-        <!-- Main Info -->
-        <div class="col-xl-8">
-            <div class="admin-card mb-4">
-                <div class="admin-card-header">
-                    <div>
-                        <div class="eyebrow">Basic Info</div>
-                        <h6>Product Details</h6>
-                    </div>
-                </div>
-                
-                <div class="row g-3">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Product Name <span class="text-danger">*</span></label>
-                        {{ form.name }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Category <span class="text-danger">*</span></label>
-                        {{ form.category }}
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Short Description</label>
-                        {{ form.short_description }}
-                    </div>
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Full Description <span class="text-danger">*</span></label>
-                        {{ form.description }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pricing & Specs -->
-            <div class="admin-card mb-4">
-                <div class="admin-card-header">
-                    <div>
-                        <div class="eyebrow">Details</div>
-                        <h6>Pricing & Specifications</h6>
-                    </div>
-                </div>
-                
-                <div class="row g-3">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Base Price (₹) <span class="text-danger">*</span></label>
-                        {{ form.base_price }}
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Discount %</label>
-                        {{ form.discount_percent }}
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Brand</label>
-                        {{ form.brand }}
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Weight</label>
-                        {{ form.weight }}
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Material</label>
-                        {{ form.material }}
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Finish</label>
-                        {{ form.finish }}
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label class="form-label">Warranty</label>
-                        {{ form.warranty }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Ingredients</label>
-                        {{ form.ingredients }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">How to Use</label>
-                        {{ form.how_to_use }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Media Uploads -->
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <div>
-                        <div class="eyebrow">Media</div>
-                        <h6>Images & Video</h6>
-                    </div>
-                </div>
-
-                <!-- Product Images -->
-                <div class="mb-4 pb-4" style="border-bottom: 1px solid var(--admin-border-light);">
-                    <label class="form-label d-block">Upload Product Images</label>
-                    <div class="form-text text-muted mb-3"><i class="fas fa-info-circle" style="margin-right: 4px;"></i>Add multiple photos. Click the '+' button to add another photo.</div>
-                    
-                    <div id="dynamic-image-container" class="d-flex flex-wrap gap-3">
-                        <div class="image-upload-box" id="upload-box-0">
-                            <input type="file" name="dynamic_image_0" class="file-input" accept="image/*" onchange="previewImage(this, 0)">
-                            <div class="upload-content text-center" id="upload-content-0">
-                                <i class="fas fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
-                                <div class="small fw-semibold">Choose Photo</div>
-                            </div>
-                            <img id="preview-0" class="image-preview" src="" style="display:none;">
-                        </div>
-                        
-                        <button type="button" class="btn image-add-btn" id="add-more-photos" onclick="addPhotoBox()">
-                            <i class="fas fa-plus fa-2x"></i>
-                            <div class="small fw-semibold mt-2">Add Photo</div>
-                        </button>
-                    </div>
-
-                    {% if product and product.images.all %}
-                    <div class="mt-4 p-4 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
-                        <label class="form-label text-primary"><i class="fas fa-images" style="margin-right: 4px;"></i>Currently Uploaded Images</label>
-                        <div class="row g-3 mt-1">
-                            {% for img in product.images.all %}
-                            <div class="col-6 col-md-3 col-lg-2 position-relative img-thumb-container" id="img-thumb-{{ img.id }}">
-                                <img src="{{ img.url }}" class="img-thumbnail w-100 h-100 object-fit-cover shadow-sm border-0" style="aspect-ratio: 1; border-radius: 10px;">
-                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 delete-img-btn shadow" data-id="{{ img.id }}" style="padding: 4px 8px; border-radius: 6px;">
-                                    <i class="fas fa-trash-can"></i>
-                                </button>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-
-
-                <!-- Product Video -->
-                <div>
-                    <label class="form-label d-block text-danger fw-bold"><i class="fas fa-video me-2"></i>Product Video</label>
-                    <div class="form-text text-muted mb-3">Upload a promotional or instructional video.</div>
-                    <div class="d-flex flex-wrap gap-4 align-items-start">
-                        <div class="video-upload-box" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.05);">
-                            <input type="file" name="video_upload" class="file-input" accept="video/*" onchange="previewVideo(this)">
-                            <div class="upload-content text-center" id="video-content">
-                                <i class="fas fa-film fa-2x mb-2 text-danger"></i>
-                                <div class="small fw-semibold text-danger">Choose Video</div>
-                            </div>
-                            <video id="video-preview" class="image-preview" src="" style="display:none; border-radius: 10px;" controls></video>
-                        </div>
-
-                        {% if product and product.video_url %}
-                        <div id="video-container-box" class="p-3 rounded flex-grow-1" style="background: var(--admin-surface-hover); border: 1px dashed var(--admin-border); max-width: 450px;">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label text-danger small mb-0"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Currently Uploaded Video</label>
-                                <button type="button" class="btn btn-danger btn-sm delete-video-btn" data-id="{{ product.id }}" style="padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">
-                                    <i class="fas fa-trash-can me-1"></i> Delete Video
-                                </button>
-                            </div>
-                            <video src="{{ product.video_url }}" controls class="shadow-sm w-100" style="max-height: 200px; border-radius: 10px; border: 1px solid var(--admin-border); background: black;"></video>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Catalogues & Color/Style Variants -->
-            <div class="admin-card mt-4">
-                <div class="admin-card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="eyebrow">Inventory & Style</div>
-                        <h6>Product Catalogues (Color / Style Variants)</h6>
-                    </div>
-                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" onclick="addVariantRow()">
-                        <i class="fas fa-plus me-1"></i> Add Catalogue Variant
-                    </button>
-                </div>
-                <div class="form-text text-muted mb-3">
-                    <i class="fas fa-info-circle me-1"></i> Add color/shade catalogues (e.g. Pink, Royal Blue, Green) with photos, price, and stock. These will display as a Flipkart-style color selector on the website.
-                </div>
-
-                <div id="variants-container" class="d-flex flex-column gap-3">
-                    {% if product and product.variants.all %}
-                        {% for variant in product.variants.all %}
-                        <div class="variant-row-card p-3 rounded position-relative" id="variant-row-{{ variant.id }}" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
-                            <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
-                            <div class="row g-3 align-items-center">
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-semibold">Color / Shade Name</label>
-                                    <input type="text" name="variant_shade_name[]" class="form-control form-control-sm" value="{{ variant.shade_name }}" placeholder="e.g. Pink, Multicolor">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label small fw-semibold">Extra Price (₹)</label>
-                                    <input type="number" step="0.01" name="variant_additional_price[]" class="form-control form-control-sm" value="{{ variant.additional_price }}" placeholder="0.00">
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label small fw-semibold">Stock Qty</label>
-                                    <input type="number" name="variant_stock[]" class="form-control form-control-sm" value="{{ variant.stock }}" placeholder="10">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small fw-semibold d-block">Variant Photo</label>
-                                    <div class="d-flex align-items-center gap-2">
-                                        {% if variant.display_image_url %}
-                                        <img src="{{ variant.display_image_url }}" class="rounded shadow-sm" style="width: 40px; height: 40px; object-fit: cover;">
-                                        {% endif %}
-                                        <input type="file" name="variant_image_{{ forloop.counter0 }}" data-variant-index="{{ forloop.counter0 }}" class="form-control form-control-sm variant-file-input" accept="image/*">
-                                    </div>
-                                </div>
-                                <div class="col-md-1 text-end">
-                                    <button type="button" class="btn btn-outline-danger btn-sm delete-variant-btn" data-id="{{ variant.id }}" style="border-radius: 6px;">
-                                        <i class="fas fa-trash-can"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Sidebar (Status & Flags) -->
-        <div class="col-xl-4">
-            <div class="admin-card sticky-panel">
-                <div class="admin-card-header">
-                    <div>
-                        <div class="eyebrow">Status</div>
-                        <h6>Product Flags</h6>
-                    </div>
-                </div>
-
-                <div class="d-flex flex-column gap-3 mb-4">
-                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
-                        {{ form.is_active }}
-                        <label class="form-check-label ms-2 fw-semibold" for="{{ form.is_active.id_for_label }}">
-                            Is Active
-                            <span class="d-block text-muted small fw-normal">Show this product on the storefront</span>
-                        </label>
-                    </div>
-                    
-                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
-                        {{ form.is_featured }}
-                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-purple);" for="{{ form.is_featured.id_for_label }}">
-                            <i class="fas fa-star" style="margin-right: 4px;"></i> Trending Product
-                            <span class="d-block text-muted small fw-normal">Mark as trending product</span>
-                        </label>
-                    </div>
-
-                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
-                        {{ form.is_new_arrival }}
-                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-blue);" for="{{ form.is_new_arrival.id_for_label }}">
-                            <i class="fas fa-certificate" style="margin-right: 4px;"></i> New Launch
-                            <span class="d-block text-muted small fw-normal">Mark as new launch</span>
-                        </label>
-                    </div>
-
-                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
-                        {{ form.is_bestseller }}
-                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-amber);" for="{{ form.is_bestseller.id_for_label }}">
-                            <i class="fas fa-fire" style="margin-right: 4px;"></i> Best Seller
-                            <span class="d-block text-muted small fw-normal">Mark as best seller</span>
-                        </label>
-                    </div>
-                </div>
-
-                {% if form.non_field_errors %}
-                <div class="alert alert-danger shadow-sm border-0 mb-4">
-                    <i class="fas fa-triangle-exclamation me-2"></i>{{ form.non_field_errors }}
-                </div>
-                {% endif %}
-
-                <button type="submit" id="submit-btn" class="btn btn-primary w-100 py-3 d-inline-flex align-items-center justify-content-center" style="font-size: 15px;">
-                    <i class="fas fa-save me-2" id="submit-icon"></i> 
-                    <span class="spinner-border spinner-border-sm me-2 d-none" id="submit-spinner" role="status"></span>
-                    <span id="submit-text">Save Product</span>
-                </button>
-            </div>
-        </div>
-    </div>
-</form>
-{% endblock %}
-
-{% block extra_css %}
+{% block extra_head %}
 <style>
-    /* Styling for form elements to match new design */
-    #product-form .form-check-input {
-        width: 40px;
-        height: 20px;
-        margin-top: 0.1em;
-        cursor: pointer;
+    :root {
+        --meesho-purple: #673ab7;
+        --meesho-purple-dark: #5825b2;
+        --meesho-purple-light: #f3e8ff;
+        --meesho-purple-border: #d8b4fe;
     }
-    #product-form .form-check-input:checked {
-        background-color: var(--admin-primary);
-        border-color: var(--admin-primary);
-    }
-    #product-form .form-check-label { cursor: pointer; }
-
-    /* Dynamic Uploader CSS */
-    .image-upload-box, .video-upload-box, .image-add-btn {
-        width: 150px;
-        height: 150px;
+    
+    .meesho-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        border: 2px dashed var(--admin-primary);
-        background: var(--admin-surface-hover);
-        position: relative;
-        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    
+    .meesho-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .meesho-tab-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 18px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
         cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #475569;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    
+    .meesho-tab-item.active {
+        background: var(--meesho-purple-light);
+        border-color: var(--meesho-purple);
+        color: var(--meesho-purple-dark);
+        box-shadow: 0 2px 4px rgba(103, 58, 183, 0.15);
+    }
+    
+    .meesho-tab-item:hover:not(.active) {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
+    
+    .meesho-tab-thumb {
+        width: 34px;
+        height: 34px;
+        border-radius: 6px;
+        object-fit: cover;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #64748b;
+    }
+    
+    .meesho-add-tab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 18px;
+        background: #ffffff;
+        border: 2px dashed var(--meesho-purple);
+        border-radius: 10px;
+        color: var(--meesho-purple);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .meesho-add-tab-btn:hover {
+        background: var(--meesho-purple-light);
+    }
+
+    .photo-tile-box {
+        width: 110px;
+        height: 110px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        transition: all var(--transition-base);
-        color: var(--admin-primary);
-    }
-    .image-upload-box:hover, .video-upload-box:hover, .image-add-btn:hover {
-        background: var(--admin-primary-light);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-sm);
-    }
-    .video-upload-box {
-        width: 200px;
-        border-color: var(--admin-red);
-        color: var(--admin-red);
-    }
-    .image-add-btn {
-        border-style: dotted;
-        color: var(--admin-muted);
-        border-color: var(--admin-muted);
-        background: transparent;
-    }
-    .image-add-btn:hover {
-        color: var(--admin-primary);
-        border-color: var(--admin-primary);
-    }
-    .file-input {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
         cursor: pointer;
-        z-index: 2;
+        position: relative;
+        background: #fafafa;
+        transition: all 0.2s ease;
+        overflow: hidden;
     }
-    .image-preview {
-        position: absolute;
-        top: 0;
-        left: 0;
+
+    .photo-tile-box:hover {
+        border-color: var(--meesho-purple);
+        background: var(--meesho-purple-light);
+    }
+
+    .photo-tile-box img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        z-index: 1;
-        border-radius: 10px;
+        position: absolute;
+        top: 0; left: 0;
     }
-    .upload-content {
-        z-index: 0;
-        pointer-events: none;
+    
+    .btn-meesho-primary {
+        background: var(--meesho-purple);
+        color: #ffffff;
+        font-weight: 600;
+        padding: 10px 24px;
+        border-radius: 10px;
+        border: none;
+        transition: all 0.2s ease;
+    }
+
+    .btn-meesho-primary:hover {
+        background: var(--meesho-purple-dark);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(88, 37, 178, 0.25);
     }
 </style>
 {% endblock %}
 
+{% block content %}
+<!-- Meesho Header & Stepper -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div class="d-flex align-items-center gap-3">
+        <h4 class="fw-bold mb-0" style="color: #1e293b;"><i class="fas fa-boxes-packing text-primary me-2"></i>Catalog Creation</h4>
+        <span class="badge bg-purple text-white px-3 py-2 rounded-pill" style="background: var(--meesho-purple); font-weight:600;">Meesho Supplier Panel Mode</span>
+    </div>
+    <a href="{% url 'admin_products' %}" class="btn btn-outline-secondary rounded-pill px-3">
+        <i class="fas fa-arrow-left me-1"></i> Back to Products
+    </a>
+</div>
+
+<!-- Stepper Progress Bar -->
+<div class="meesho-card py-3 px-4 mb-4">
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+        <div class="d-flex align-items-center gap-2 text-success fw-semibold">
+            <i class="fas fa-check-circle fs-5"></i> <span>1. Select Category</span>
+        </div>
+        <div style="height: 2px; width: 40px; background: #cbd5e1;" class="d-none d-sm-block"></div>
+        <div class="d-flex align-items-center gap-2 px-3 py-1.5 rounded-pill text-white fw-semibold" style="background: var(--meesho-purple);">
+            <i class="fas fa-box-open"></i> <span>2. Add Product Details</span>
+        </div>
+    </div>
+</div>
+
+<form id="product-form" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <!-- Multi-Product Catalog Tab Bar -->
+    <div class="meesho-card mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div class="fw-bold text-dark fs-6"><i class="fas fa-layer-group text-primary me-2"></i>Catalog Products</div>
+            <div class="text-muted small">Click <strong>+ Add Product</strong> to list multiple catalog items at once!</div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 flex-wrap" id="catalog-tabs-container">
+            <div class="meesho-tab-item active" data-catalog-idx="0" onclick="switchCatalogTab('0')">
+                <div class="meesho-tab-thumb" id="tab-thumb-0"><i class="fas fa-image"></i></div>
+                <span id="tab-label-0">Product 1</span>
+            </div>
+
+            <button type="button" class="meesho-add-tab-btn" onclick="addNewCatalogProduct()">
+                <i class="fas fa-plus"></i> Add Product
+            </button>
+        </div>
+    </div>
+
+    <!-- Copy Shared Details Banner -->
+    <div class="p-3 mb-4 rounded-3 d-flex align-items-start gap-3" style="background: var(--meesho-purple-light); border: 1px solid var(--meesho-purple-border);">
+        <input type="checkbox" id="copy_shared_details" name="copy_shared_details" class="form-check-input mt-1" style="width: 20px; height: 20px; cursor: pointer;" checked>
+        <div>
+            <label for="copy_shared_details" class="fw-bold mb-1 d-block" style="color: var(--meesho-purple-dark); cursor: pointer;">
+                <i class="fas fa-clone me-1"></i> Copy input details to all products in catalog
+            </label>
+            <div class="small" style="color: #6b21a8;">
+                If you want to change specific fields for a particular product like Color, Fabric, Weight etc., you can change it by selecting that product tab above.
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Form Container -->
+        <div class="col-xl-8">
+            <div id="catalog-products-forms-wrapper">
+
+                <!-- Product 0 Container -->
+                <div class="catalog-product-form-block" id="catalog-block-0" data-idx="0">
+                    <input type="hidden" name="catalog_indices[]" value="0">
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-dark mb-0">Product 1 Details</h5>
+                        <button type="button" class="btn btn-link text-danger text-decoration-none small fw-semibold" onclick="removeCatalogProduct('0')" style="display:none;" id="delete-tab-btn-0">
+                            <i class="fas fa-trash-can me-1"></i> Delete this product from catalog
+                        </button>
+                    </div>
+
+                    <!-- Basic Details Card -->
+                    <div class="meesho-card">
+                        <div class="meesho-card-title"><i class="fas fa-info-circle text-primary"></i>Basic Product Details</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Product Title / Name <span class="text-danger">*</span></label>
+                                <input type="text" name="name_0" class="form-control catalog-name-input" data-idx="0" required placeholder="e.g. Traditional Gold Plated Pearl Earrings" value="{{ form.name.value|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Base Price (₹) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" name="base_price_0" class="form-control" required placeholder="299.00" value="{{ form.base_price.value|default:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Discount %</label>
+                                <input type="number" step="0.01" name="discount_percent_0" class="form-control" placeholder="10.00" value="{{ form.discount_percent.value|default:'0' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Brand</label>
+                                {{ form.brand }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Full Description <span class="text-danger">*</span></label>
+                                <textarea name="description_0" class="form-control" rows="3" required placeholder="Enter complete product description...">{{ form.description.value|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Images Card (Meesho Photo Tiles) -->
+                    <div class="meesho-card">
+                        <div class="meesho-card-title"><i class="fas fa-images text-primary"></i>Product Images</div>
+                        <div class="form-text text-muted mb-3"><i class="fas fa-circle-info me-1"></i>Click any photo box below to select photo. First photo will be the main front image on the website.</div>
+                        
+                        <div class="d-flex flex-wrap gap-3" id="photo-tiles-container-0">
+                            <!-- Photo Tile 0 -->
+                            <div class="photo-tile-box" onclick="triggerFileInput('0', 0)" id="tile-box-0-0">
+                                <input type="file" name="image_0_0" class="file-input d-none" accept="image/*" onchange="handleTilePhotoSelect(this, '0', 0)">
+                                <div class="text-center text-muted" id="tile-content-0-0">
+                                    <i class="fas fa-camera fa-lg mb-1 text-primary"></i>
+                                    <div style="font-size: 11px;" class="fw-semibold">Front View *</div>
+                                </div>
+                                <img id="tile-img-0-0" src="" style="display:none;">
+                            </div>
+
+                            <!-- Photo Tile 1 -->
+                            <div class="photo-tile-box" onclick="triggerFileInput('0', 1)" id="tile-box-0-1">
+                                <input type="file" name="image_0_1" class="file-input d-none" accept="image/*" onchange="handleTilePhotoSelect(this, '0', 1)">
+                                <div class="text-center text-muted" id="tile-content-0-1">
+                                    <i class="fas fa-camera fa-lg mb-1 text-secondary"></i>
+                                    <div style="font-size: 11px;">Back View</div>
+                                </div>
+                                <img id="tile-img-0-1" src="" style="display:none;">
+                            </div>
+
+                            <!-- Photo Tile 2 -->
+                            <div class="photo-tile-box" onclick="triggerFileInput('0', 2)" id="tile-box-0-2">
+                                <input type="file" name="image_0_2" class="file-input d-none" accept="image/*" onchange="handleTilePhotoSelect(this, '0', 2)">
+                                <div class="text-center text-muted" id="tile-content-0-2">
+                                    <i class="fas fa-camera fa-lg mb-1 text-secondary"></i>
+                                    <div style="font-size: 11px;">Side View</div>
+                                </div>
+                                <img id="tile-img-0-2" src="" style="display:none;">
+                            </div>
+                        </div>
+
+                        {% if product and product.images.all %}
+                        <div class="mt-4 p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                            <label class="form-label text-primary small fw-bold mb-2"><i class="fas fa-images me-1"></i>Currently Uploaded Product Images</label>
+                            <div class="row g-3">
+                                {% for img in product.images.all %}
+                                <div class="col-6 col-md-3 position-relative" id="img-thumb-{{ img.id }}">
+                                    <img src="{{ img.url }}" class="img-thumbnail w-100 object-fit-cover shadow-sm" style="aspect-ratio: 1; border-radius: 8px;">
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 delete-img-btn" data-id="{{ img.id }}" style="padding: 2px 6px;">
+                                        <i class="fas fa-trash-can"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Color & Size Variations Card -->
+                    <div class="meesho-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="meesho-card-title mb-0"><i class="fas fa-palette text-primary"></i>Color & Size Variants (Catalogues)</div>
+                            <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" onclick="addVariantToCatalog('0')">
+                                <i class="fas fa-plus me-1"></i> Add Variant
+                            </button>
+                        </div>
+                        <div class="form-text text-muted mb-3">Add different color/shade variations (e.g. Pink, Royal Blue, Green) with photos, price, and stock for this product.</div>
+
+                        <div id="variants-container-0" class="d-flex flex-column gap-3">
+                            {% if product and product.variants.all %}
+                                {% for variant in product.variants.all %}
+                                <div class="variant-row-card p-3 rounded position-relative" id="variant-row-{{ variant.id }}" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                                    <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
+                                    <div class="row g-3 align-items-center">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Color / Shade Name</label>
+                                            <input type="text" name="variant_shade_name_0[]" class="form-control form-control-sm" value="{{ variant.shade_name }}" placeholder="e.g. Pink, Multicolor">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-semibold">Extra Price (₹)</label>
+                                            <input type="number" step="0.01" name="variant_additional_price_0[]" class="form-control form-control-sm" value="{{ variant.additional_price }}" placeholder="0.00">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-semibold">Stock Qty</label>
+                                            <input type="number" name="variant_stock_0[]" class="form-control form-control-sm" value="{{ variant.stock }}" placeholder="10">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold d-block">Variant Photo</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                {% if variant.display_image_url %}
+                                                <img src="{{ variant.display_image_url }}" class="rounded shadow-sm" style="width: 36px; height: 36px; object-fit: cover;">
+                                                {% endif %}
+                                                <input type="file" name="variant_image_0_{{ forloop.counter0 }}" data-variant-index="{{ forloop.counter0 }}" class="form-control form-control-sm variant-file-input" accept="image/*">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 text-end">
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-variant-btn" data-id="{{ variant.id }}">
+                                                <i class="fas fa-trash-can"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Product Video Card -->
+                    <div class="meesho-card">
+                        <div class="meesho-card-title"><i class="fas fa-video text-danger"></i>Product Video</div>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-6">
+                                <input type="file" name="video_upload_0" class="form-control" accept="video/*">
+                            </div>
+                            {% if product and product.video_url %}
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2 p-2 rounded" style="background: #f8fafc; border: 1px solid #cbd5e1;">
+                                    <video src="{{ product.video_url }}" style="height: 50px; border-radius: 6px; background: #000;" controls></video>
+                                    <button type="button" class="btn btn-danger btn-sm delete-video-btn" data-id="{{ product.id }}">Delete Video</button>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Product Specs Card -->
+                    <div class="meesho-card">
+                        <div class="meesho-card-title"><i class="fas fa-sliders text-primary"></i>Specifications</div>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Net Weight (gms)</label>
+                                <input type="text" name="weight_0" class="form-control form-control-sm" placeholder="e.g. 50gms" value="{{ form.weight.value|default:'' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Material</label>
+                                <input type="text" name="material_0" class="form-control form-control-sm" placeholder="e.g. Gold Plated" value="{{ form.material.value|default:'' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Finish</label>
+                                <input type="text" name="finish_0" class="form-control form-control-sm" placeholder="e.g. Glossy" value="{{ form.finish.value|default:'' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold">Warranty</label>
+                                <input type="text" name="warranty_0" class="form-control form-control-sm" placeholder="e.g. 1 Year" value="{{ form.warranty.value|default:'' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar (Meesho Guidelines & Quick Action) -->
+        <div class="col-xl-4">
+            <div class="sticky-top" style="top: 24px;">
+                <!-- Meesho Quality Guidelines Banner -->
+                <div class="p-3 mb-4 rounded-3" style="background: #fef9c3; border: 1px solid #fde047;">
+                    <div class="fw-bold mb-2 text-warning-emphasis d-flex align-items-center gap-2">
+                        <i class="fas fa-circle-info fs-5 text-warning"></i> Follow guidelines to reduce quality check failure
+                    </div>
+                    <ul class="small mb-0 text-dark ps-3" style="line-height: 1.6;">
+                        <li>Primary image must be clear front view without watermark.</li>
+                        <li>Add solo product images without any heavy background props.</li>
+                        <li>Fill correct price, discount, and stock for all variants.</li>
+                    </ul>
+                </div>
+
+                <!-- Submit Card -->
+                <div class="meesho-card text-center">
+                    <button type="submit" class="btn btn-meesho-primary w-100 py-3 fs-6 d-flex align-items-center justify-content-center gap-2 shadow" id="submit-btn">
+                        <i class="fas fa-cloud-arrow-up" id="submit-icon"></i>
+                        <span class="spinner-border spinner-border-sm d-none" id="submit-spinner"></span>
+                        <span id="submit-text">Submit Catalog</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
 {% block extra_js %}
 <script>
-let photoCount = 0;
+let catalogCount = 1;
+let currentActiveCatalogIdx = '0';
 
-function addPhotoBox() {
-    photoCount++;
-    const container = document.getElementById('dynamic-image-container');
-    const addBtn = document.getElementById('add-more-photos');
-    
-    const newBox = document.createElement('div');
-    newBox.className = 'image-upload-box';
-    newBox.id = `upload-box-${photoCount}`;
-    newBox.innerHTML = `
-        <input type="file" name="dynamic_image_${photoCount}" class="file-input" accept="image/*" onchange="previewImage(this, ${photoCount})">
-        <div class="upload-content text-center" id="upload-content-${photoCount}">
-            <i class="fas fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
-            <div class="small fw-semibold">Choose Photo</div>
-        </div>
-        <img id="preview-${photoCount}" class="image-preview" src="" style="display:none;">
-    `;
-    
-    container.insertBefore(newBox, addBtn);
+function triggerFileInput(catIdx, tileIdx) {
+    const input = document.querySelector(`input[name="image_${catIdx}_${tileIdx}"]`);
+    if (input) input.click();
 }
 
-function previewImage(input, index) {
+function handleTilePhotoSelect(input, catIdx, tileIdx) {
     if (input.files && input.files[0]) {
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById(`preview-${index}`).style.display = 'block';
-            document.getElementById(`preview-${index}`).src = e.target.result;
-            document.getElementById(`upload-content-${index}`).style.display = 'none';
-        }
+            const img = document.getElementById(`tile-img-${catIdx}-${tileIdx}`);
+            const content = document.getElementById(`tile-content-${catIdx}-${tileIdx}`);
+            if (img && content) {
+                img.src = e.target.result;
+                img.style.display = 'block';
+                content.style.display = 'none';
+            }
+            // If it's the primary front image (tile 0), update the tab thumbnail preview!
+            if (tileIdx === 0) {
+                const tabThumb = document.getElementById(`tab-thumb-${catIdx}`);
+                if (tabThumb) {
+                    tabThumb.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">`;
+                }
+            }
+        };
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-let variantCount = document.querySelectorAll('.variant-row-card').length;
+function switchCatalogTab(targetIdx) {
+    currentActiveCatalogIdx = targetIdx;
+    document.querySelectorAll('.meesho-tab-item').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.catalogIdx === targetIdx) tab.classList.add('active');
+    });
+    document.querySelectorAll('.catalog-product-form-block').forEach(block => {
+        block.style.display = 'none';
+        if (block.dataset.idx === targetIdx) block.style.display = 'block';
+    });
+}
 
-function addVariantRow() {
-    variantCount++;
-    const container = document.getElementById('variants-container');
+function addNewCatalogProduct() {
+    catalogCount++;
+    const newIdx = String(catalogCount - 1);
+    
+    // Add tab button
+    const tabsContainer = document.getElementById('catalog-tabs-container');
+    const addBtn = tabsContainer.querySelector('.meesho-add-tab-btn');
+    
+    const newTab = document.createElement('div');
+    newTab.className = 'meesho-tab-item';
+    newTab.dataset.catalogIdx = newIdx;
+    newTab.setAttribute('onclick', `switchCatalogTab('${newIdx}')`);
+    newTab.innerHTML = `
+        <div class="meesho-tab-thumb" id="tab-thumb-${newIdx}"><i class="fas fa-image"></i></div>
+        <span id="tab-label-${newIdx}">Product ${catalogCount}</span>
+    `;
+    tabsContainer.insertBefore(newTab, addBtn);
+
+    // Clone form block from block 0
+    const wrapper = document.getElementById('catalog-products-forms-wrapper');
+    const block0 = document.getElementById('catalog-block-0');
+    const newBlock = block0.cloneNode(true);
+    
+    newBlock.id = `catalog-block-${newIdx}`;
+    newBlock.dataset.idx = newIdx;
+    
+    // Update IDs and names inside new block
+    newBlock.querySelector('h5').textContent = `Product ${catalogCount} Details`;
+    const deleteBtn = newBlock.querySelector(`#delete-tab-btn-0`);
+    if (deleteBtn) {
+        deleteBtn.id = `delete-tab-btn-${newIdx}`;
+        deleteBtn.style.display = 'inline-block';
+        deleteBtn.setAttribute('onclick', `removeCatalogProduct('${newIdx}')`);
+    }
+
+    newBlock.querySelector('input[name="catalog_indices[]"]').value = newIdx;
+    
+    // Update input names for new index
+    const nameInput = newBlock.querySelector('input[name="name_0"]');
+    if (nameInput) {
+        nameInput.name = `name_${newIdx}`;
+        nameInput.value = '';
+        nameInput.dataset.idx = newIdx;
+        nameInput.addEventListener('input', function() {
+            const label = document.getElementById(`tab-label-${newIdx}`);
+            if (label) label.textContent = this.value.trim() || `Product ${Number(newIdx)+1}`;
+        });
+    }
+
+    const priceInput = newBlock.querySelector('input[name="base_price_0"]');
+    if (priceInput) { priceInput.name = `base_price_${newIdx}`; priceInput.value = ''; }
+
+    const discInput = newBlock.querySelector('input[name="discount_percent_0"]');
+    if (discInput) { discInput.name = `discount_percent_${newIdx}`; discInput.value = '0'; }
+
+    const descInput = newBlock.querySelector('textarea[name="description_0"]');
+    if (descInput) { descInput.name = `description_${newIdx}`; descInput.value = ''; }
+
+    // Update Photo tiles
+    const photoContainer = newBlock.querySelector('#photo-tiles-container-0');
+    if (photoContainer) {
+        photoContainer.id = `photo-tiles-container-${newIdx}`;
+        photoContainer.innerHTML = `
+            <div class="photo-tile-box" onclick="triggerFileInput('${newIdx}', 0)" id="tile-box-${newIdx}-0">
+                <input type="file" name="image_${newIdx}_0" class="file-input d-none" accept="image/*" onchange="handleTilePhotoSelect(this, '${newIdx}', 0)">
+                <div class="text-center text-muted" id="tile-content-${newIdx}-0">
+                    <i class="fas fa-camera fa-lg mb-1 text-primary"></i>
+                    <div style="font-size: 11px;" class="fw-semibold">Front View *</div>
+                </div>
+                <img id="tile-img-${newIdx}-0" src="" style="display:none;">
+            </div>
+            <div class="photo-tile-box" onclick="triggerFileInput('${newIdx}', 1)" id="tile-box-${newIdx}-1">
+                <input type="file" name="image_${newIdx}_1" class="file-input d-none" accept="image/*" onchange="handleTilePhotoSelect(this, '${newIdx}', 1)">
+                <div class="text-center text-muted" id="tile-content-${newIdx}-1">
+                    <i class="fas fa-camera fa-lg mb-1 text-secondary"></i>
+                    <div style="font-size: 11px;">Back View</div>
+                </div>
+                <img id="tile-img-${newIdx}-1" src="" style="display:none;">
+            </div>
+            <div class="photo-tile-box" onclick="triggerFileInput('${newIdx}', 2)" id="tile-box-${newIdx}-2">
+                <input type="file" name="image_${newIdx}_2" class="file-input d-none" accept="image/*" onchange="handleTilePhotoSelect(this, '${newIdx}', 2)">
+                <div class="text-center text-muted" id="tile-content-${newIdx}-2">
+                    <i class="fas fa-camera fa-lg mb-1 text-secondary"></i>
+                    <div style="font-size: 11px;">Side View</div>
+                </div>
+                <img id="tile-img-${newIdx}-2" src="" style="display:none;">
+            </div>
+        `;
+    }
+
+    // Update variants container
+    const varContainer = newBlock.querySelector('#variants-container-0');
+    if (varContainer) {
+        varContainer.id = `variants-container-${newIdx}`;
+        varContainer.innerHTML = '';
+    }
+
+    const addVarBtn = newBlock.querySelector('button[onclick*="addVariantToCatalog"]');
+    if (addVarBtn) addVarBtn.setAttribute('onclick', `addVariantToCatalog('${newIdx}')`);
+
+    wrapper.appendChild(newBlock);
+    switchCatalogTab(newIdx);
+}
+
+function removeCatalogProduct(idx) {
+    if (confirm("Are you sure you want to remove this product from the catalog?")) {
+        const tab = document.querySelector(`.meesho-tab-item[data-catalog-idx="${idx}"]`);
+        const block = document.getElementById(`catalog-block-${idx}`);
+        if (tab) tab.remove();
+        if (block) block.remove();
+        switchCatalogTab('0');
+    }
+}
+
+function addVariantToCatalog(catIdx) {
+    const container = document.getElementById(`variants-container-${catIdx}`);
+    if (!container) return;
+    const vCount = container.children.length;
     const newCard = document.createElement('div');
     newCard.className = 'variant-row-card p-3 rounded position-relative';
-    newCard.id = `variant-row-new-${variantCount}`;
     newCard.style.cssText = 'background: var(--admin-surface-hover); border: 1px solid var(--admin-border);';
     newCard.innerHTML = `
-        <input type="hidden" name="variant_id[]" value="">
         <div class="row g-3 align-items-center">
             <div class="col-md-3">
                 <label class="form-label small fw-semibold">Color / Shade Name</label>
-                <input type="text" name="variant_shade_name[]" class="form-control form-control-sm" placeholder="e.g. Pink, Multicolor">
+                <input type="text" name="variant_shade_name_${catIdx}[]" class="form-control form-control-sm" placeholder="e.g. Pink, Multicolor">
             </div>
             <div class="col-md-2">
                 <label class="form-label small fw-semibold">Extra Price (₹)</label>
-                <input type="number" step="0.01" name="variant_additional_price[]" class="form-control form-control-sm" placeholder="0.00">
+                <input type="number" step="0.01" name="variant_additional_price_${catIdx}[]" class="form-control form-control-sm" placeholder="0.00">
             </div>
             <div class="col-md-2">
                 <label class="form-label small fw-semibold">Stock Qty</label>
-                <input type="number" name="variant_stock[]" class="form-control form-control-sm" value="10" placeholder="10">
+                <input type="number" name="variant_stock_${catIdx}[]" class="form-control form-control-sm" value="10" placeholder="10">
             </div>
             <div class="col-md-4">
                 <label class="form-label small fw-semibold d-block">Variant Photo</label>
-                <input type="file" name="variant_image_${variantCount}" data-variant-index="${variantCount}" class="form-control form-control-sm variant-file-input" accept="image/*">
+                <input type="file" name="variant_image_${catIdx}_${vCount}" data-cat-idx="${catIdx}" data-var-idx="${vCount}" class="form-control form-control-sm variant-file-input" accept="image/*">
             </div>
             <div class="col-md-1 text-end">
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.variant-row-card').remove()" style="border-radius: 6px;">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.variant-row-card').remove()">
                     <i class="fas fa-trash-can"></i>
                 </button>
             </div>
@@ -440,42 +616,31 @@ function addVariantRow() {
     container.appendChild(newCard);
 }
 
-function previewVideo(input) {
-    if (input.files && input.files[0]) {
-        var url = URL.createObjectURL(input.files[0]);
-        var video = document.getElementById('video-preview');
-        video.src = url;
-        video.style.display = 'block';
-        document.getElementById('video-content').style.display = 'none';
-    }
-}
-
 async function uploadToR2(file, folder) {
-    // 1. Get presigned URL
     const urlRes = await fetch(`/admin/get-presigned-url/?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type)}&folder=${folder}`);
     const urlData = await urlRes.json();
-    
-    if (!urlData.success) {
-        throw new Error(urlData.error || "Failed to get upload URL");
-    }
+    if (!urlData.success) throw new Error(urlData.error || "Failed to get upload URL");
 
-    // 2. Upload file directly to R2
     const uploadRes = await fetch(urlData.presigned_url, {
         method: 'PUT',
         body: file,
-        headers: {
-            'Content-Type': file.type
-        }
+        headers: { 'Content-Type': file.type }
     });
 
-    if (!uploadRes.ok) {
-        throw new Error(`Upload failed with status ${uploadRes.status}`);
-    }
-
+    if (!uploadRes.ok) throw new Error(`Upload failed with status ${uploadRes.status}`);
     return urlData.public_url;
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Name input listener for Tab 0 title
+    const nameInput0 = document.querySelector('input[name="name_0"]');
+    if (nameInput0) {
+        nameInput0.addEventListener('input', function() {
+            const label = document.getElementById('tab-label-0');
+            if (label) label.textContent = this.value.trim() || 'Product 1';
+        });
+    }
+
     const form = document.getElementById("product-form");
     const submitBtn = document.getElementById("submit-btn");
     const submitIcon = document.getElementById("submit-icon");
@@ -486,14 +651,12 @@ document.addEventListener("DOMContentLoaded", function() {
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
             
-            // UI Loading state
             submitBtn.disabled = true;
             submitIcon.classList.add("d-none");
             submitSpinner.classList.remove("d-none");
-            submitText.textContent = "Uploading Media... Please wait.";
+            submitText.textContent = "Uploading Media & Saving Catalog...";
 
             try {
-                // Find all file inputs
                 const fileInputs = form.querySelectorAll("input[type='file']");
                 
                 for (let i = 0; i < fileInputs.length; i++) {
@@ -501,161 +664,50 @@ document.addEventListener("DOMContentLoaded", function() {
                     if (input.files && input.files.length > 0) {
                         const file = input.files[0];
                         const isVideo = input.accept && input.accept.includes('video');
-                        const isVariant = input.classList.contains('variant-file-input') || (input.name && input.name.startsWith('variant_image_'));
+                        const isVariant = input.classList.contains('variant-file-input');
                         
                         let folder = 'products';
                         if (isVideo) folder = 'videos';
                         else if (isVariant) folder = 'variants';
                         
-                        // Upload directly to R2
                         const publicUrl = await uploadToR2(file, folder);
                         
-                        // Add hidden input with the final URL
                         const hiddenInput = document.createElement('input');
                         hiddenInput.type = 'hidden';
-                        if (isVideo) {
-                            hiddenInput.name = 'uploaded_video_url';
-                        } else if (isVariant) {
-                            const vIdx = input.dataset.variantIndex || i;
-                            hiddenInput.name = 'uploaded_variant_image_url_' + vIdx;
+                        
+                        if (isVariant) {
+                            const cIdx = input.dataset.catIdx || '0';
+                            const vIdx = input.dataset.varIdx || i;
+                            hiddenInput.name = `uploaded_variant_image_url_${cIdx}_${vIdx}`;
+                        } else if (isVideo) {
+                            hiddenInput.name = 'uploaded_video_url_0';
                         } else {
-                            hiddenInput.name = 'uploaded_image_url_' + i;
+                            const parts = input.name.split('_');
+                            if (parts.length >= 3) {
+                                hiddenInput.name = `uploaded_image_url_${parts[1]}_${parts[2]}`;
+                            } else {
+                                hiddenInput.name = `uploaded_image_url_0_${i}`;
+                            }
                         }
                         hiddenInput.value = publicUrl;
                         form.appendChild(hiddenInput);
-                        
-                        // Remove name from file input so it's NOT sent to Vercel
                         input.removeAttribute('name');
                     }
                 }
                 
-                submitText.textContent = "Saving Product...";
-                // Submit the form normally now that files are bypassed
                 form.submit();
 
             } catch (err) {
                 console.error("Upload error:", err);
                 alert("Media upload failed: " + err.message);
                 
-                // Reset UI
                 submitBtn.disabled = false;
                 submitIcon.classList.remove("d-none");
                 submitSpinner.classList.add("d-none");
-                submitText.textContent = "Save Product";
+                submitText.textContent = "Submit Catalog";
             }
         });
     }
-
-    // Existing Delete image logic
-    const deleteButtons = document.querySelectorAll(".delete-img-btn");
-    
-    deleteButtons.forEach(button => {
-        button.addEventListener("click", function(e) {
-            e.preventDefault();
-            const imageId = this.getAttribute("data-id");
-            if (!imageId) return;
-            
-            if (confirm("Are you sure you want to delete this image?")) {
-                const url = `/admin/products/images/${imageId}/delete/`;
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const container = document.getElementById(`img-thumb-${imageId}`);
-                        if (container) {
-                            container.remove();
-                        }
-                    } else {
-                        alert("Failed to delete image: " + (data.message || "Unknown error"));
-                    }
-                })
-                .catch(error => {
-                    console.error("Error deleting image:", error);
-                    alert("An error occurred. Please try again.");
-                });
-            }
-        });
-    });
-
-    // Delete video logic
-    const deleteVideoBtn = document.querySelector(".delete-video-btn");
-    if (deleteVideoBtn) {
-        deleteVideoBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            const productId = this.getAttribute("data-id");
-            if (!productId) return;
-            
-            if (confirm("Are you sure you want to delete this video?")) {
-                const url = `/admin/products/${productId}/delete-video/`;
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const container = document.getElementById('video-container-box');
-                        if (container) {
-                            container.remove();
-                        }
-                    } else {
-                        alert("Failed to delete video: " + (data.message || "Unknown error"));
-                    }
-                })
-                .catch(error => {
-                    console.error("Error deleting video:", error);
-                    alert("An error occurred. Please try again.");
-                });
-            }
-        });
-    }
-
-    // Delete variant logic
-    document.querySelectorAll(".delete-variant-btn").forEach(button => {
-        button.addEventListener("click", function(e) {
-            e.preventDefault();
-            const variantId = this.getAttribute("data-id");
-            if (!variantId) return;
-            
-            if (confirm("Are you sure you want to delete this catalogue variant?")) {
-                const url = `/admin/products/variants/${variantId}/delete/`;
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const row = document.getElementById(`variant-row-${variantId}`);
-                        if (row) {
-                            row.remove();
-                        }
-                    } else {
-                        alert("Failed to delete variant: " + (data.message || "Unknown error"));
-                    }
-                })
-                .catch(error => {
-                    console.error("Error deleting variant:", error);
-                    alert("An error occurred. Please try again.");
-                });
-            }
-        });
-    });
 });
 </script>
 {% endblock %}

@@ -79,4 +79,23 @@ class AdminProductVariantTest(TestCase):
         self.assertTrue(response.json()['success'])
         self.assertFalse(ProductVariant.objects.filter(pk=variant.pk).exists())
 
+    def test_multi_catalog_creation(self):
+        self.client.login(email='admin_var@example.com', password='adminpassword')
+        url = reverse('admin_product_create')
+        post_data = {
+            'catalog_indices[]': ['0', '1'],
+            'copy_shared_details': 'on',
+            'name_0': 'Meesho Catalog Product 1',
+            'base_price_0': '199.00',
+            'description_0': 'Shared Catalog Description',
+            'name_1': 'Meesho Catalog Product 2',
+            'base_price_1': '299.00',
+            'description_1': 'Shared Catalog Description',
+        }
+        response = self.client.post(url, post_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Product.objects.filter(name='Meesho Catalog Product 1').exists())
+        self.assertTrue(Product.objects.filter(name='Meesho Catalog Product 2').exists())
+
+
 
