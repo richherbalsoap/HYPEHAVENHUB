@@ -159,9 +159,14 @@
                         </div>
 
                         {% if product and product.video_url %}
-                        <div class="p-3 rounded flex-grow-1" style="background: var(--admin-surface-hover); border: 1px dashed var(--admin-border);">
-                            <label class="form-label text-danger small mb-2"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Currently Uploaded Video</label>
-                            <video src="{{ product.video_url }}" controls class="shadow-sm w-100" style="max-height: 200px; max-width: 400px; border-radius: 10px; border: 1px solid var(--admin-border); background: black;"></video>
+                        <div id="video-container-box" class="p-3 rounded flex-grow-1" style="background: var(--admin-surface-hover); border: 1px dashed var(--admin-border); max-width: 450px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label text-danger small mb-0"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Currently Uploaded Video</label>
+                                <button type="button" class="btn btn-danger btn-sm delete-video-btn" data-id="{{ product.id }}" style="padding: 2px 8px; border-radius: 6px; font-size: 0.75rem;">
+                                    <i class="fas fa-trash-can me-1"></i> Delete Video
+                                </button>
+                            </div>
+                            <video src="{{ product.video_url }}" controls class="shadow-sm w-100" style="max-height: 200px; border-radius: 10px; border: 1px solid var(--admin-border); background: black;"></video>
                         </div>
                         {% endif %}
                     </div>
@@ -479,6 +484,43 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
+
+    // Delete video logic
+    const deleteVideoBtn = document.querySelector(".delete-video-btn");
+    if (deleteVideoBtn) {
+        deleteVideoBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            const productId = this.getAttribute("data-id");
+            if (!productId) return;
+            
+            if (confirm("Are you sure you want to delete this video?")) {
+                const url = `/admin/products/${productId}/delete-video/`;
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const container = document.getElementById('video-container-box');
+                        if (container) {
+                            container.remove();
+                        }
+                    } else {
+                        alert("Failed to delete video: " + (data.message || "Unknown error"));
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting video:", error);
+                    alert("An error occurred. Please try again.");
+                });
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

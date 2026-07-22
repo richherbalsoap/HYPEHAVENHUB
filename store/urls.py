@@ -92,6 +92,7 @@ urlpatterns = [
     path('admin/products/<int:pk>/prices/', admin_views.admin_product_prices, name='admin_product_prices'),
     path('admin/products/images/<int:pk>/delete/', admin_views.admin_product_image_delete, name='admin_product_image_delete'),
     path('admin/products/aplus_images/<int:pk>/delete/', admin_views.admin_product_aplus_image_delete, name='admin_product_aplus_image_delete'),
+    path('admin/products/<int:pk>/delete-video/', admin_views.admin_product_delete_video, name='admin_product_delete_video'),
     path('admin/products/<int:pk>/delete/', admin_views.admin_product_delete, name='admin_product_delete'),
     path('admin/orders/', admin_views.admin_orders, name='admin_orders'),
     path('admin/orders/<str:order_id>/', admin_views.admin_order_detail, name='admin_order_detail'),

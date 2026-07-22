@@ -381,6 +381,13 @@ def admin_product_aplus_image_delete(request, pk):
     image.delete()
     return JsonResponse({'success': True, 'message': 'A+ Image deleted successfully'})
 @admin_required
+def admin_product_delete_video(request, pk):
+    """Delete a product's video (clear video_url)"""
+    product = get_object_or_404(Product, pk=pk)
+    product.video_url = ''
+    product.save()
+    return JsonResponse({'success': True, 'message': 'Video deleted successfully'})
+@admin_required
 def admin_product_prices(request, pk):
     """Manage country specific prices for a product"""
     product = get_object_or_404(Product, pk=pk)
