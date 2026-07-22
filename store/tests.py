@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import User, Product
+from .models import User, Product, ProductVariant
 
 class AdminProductVideoDeleteTest(TestCase):
     def setUp(self):
@@ -39,4 +39,44 @@ class AdminProductVideoDeleteTest(TestCase):
         # Verify video_url is empty in the database
         self.product.refresh_from_db()
         self.assertEqual(self.product.video_url, '')
+
+
+class AdminProductVariantTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.admin_user = User.objects.create_user(
+            username='admin_var@example.com',
+            email='admin_var@example.com',
+            password='adminpassword',
+            is_staff=True,
+            is_superuser=True
+        )
+        self.product = Product.objects.create(
+            name='Test Earring Product',
+            description='Beautiful artificial jewellery earrings',
+            base_price=299.00
+        )
+
+    def test_create_and_delete_variant(self):
+        self.client.login(email='admin_var@example.com', password='adminpassword')
+        
+        # Create a variant directly
+        variant = ProductVariant.objects.create(
+            product=self.product,
+            shade_name='Pink, Multicolor',
+            additional_price=20.00,
+            stock=15,
+            image_url='https://example.com/pink-earring.jpg'
+        )
+        
+        self.assertEqual(variant.shade_name, 'Pink, Multicolor')
+        self.assertEqual(variant.display_image_url, 'https://example.com/pink-earring.jpg')
+        
+        # Test AJAX delete endpoint
+        url = reverse('admin_variant_delete', args=[variant.pk])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['success'])
+        self.assertFalse(ProductVariant.objects.filter(pk=variant.pk).exists())
+
 

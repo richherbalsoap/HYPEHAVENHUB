@@ -103,26 +103,40 @@
       </div>
       {% endif %}
 
-      <!-- Variants -->
+      <!-- Flipkart-Style Variants (Color / Catalogue Selector) -->
       {% if variants %}
-      <div class="mb-4">
-        <div class="variant-label">Choose Style / Size:</div>
-        <div class="variant-options">
+      <div class="mb-4 flipkart-variant-section">
+        <div class="mb-2 fw-semibold" style="font-size: 15px; color: var(--on-surface);">
+          Selected Color: <span id="selectedColorName" class="fw-bold" style="color: var(--primary);">{{ variants.first.shade_name|default:variants.first.label }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center variant-options">
           {% for v in variants %}
-          <button class="variant-btn {% if forloop.first %}selected{% endif %} {% if not v.is_in_stock %}out-stock{% endif %}"
-                  data-variant-id="{{ v.id }}"
-                  title="{{ v.label }}">
-            {% if v.color_code %}
-              <span class="variant-swatch" style="background: {{ v.color_code }};"></span>
+          <div class="variant-thumb-box {% if forloop.first %}selected active{% endif %} {% if not v.is_in_stock %}out-stock{% endif %}"
+               data-variant-id="{{ v.id }}"
+               data-shade-name="{{ v.shade_name|default:v.label }}"
+               data-image-url="{{ v.display_image_url }}"
+               data-stock="{{ v.stock }}"
+               data-additional-price="{{ v.additional_price }}"
+               title="{{ v.shade_name|default:v.label }}"
+               style="width: 64px; height: 64px; border: 2px solid {% if forloop.first %}var(--primary, #2563eb){% else %}var(--outline-variant, #cbd5e1){% endif %}; border-radius: 8px; padding: 2px; cursor: pointer; background: #fff; position: relative; transition: all 0.2s ease;">
+            {% if v.display_image_url %}
+              <img src="{{ v.display_image_url }}" alt="{{ v.shade_name|default:v.label }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+            {% elif v.color_code %}
+              <span class="w-100 h-100 d-block rounded" style="background: {{ v.color_code }}; border-radius: 6px;"></span>
+            {% else %}
+              <div class="w-100 h-100 d-flex align-items-center justify-content-center text-center small fw-semibold text-dark p-1" style="font-size: 10px; line-height: 1.1;">
+                {{ v.label }}
+              </div>
             {% endif %}
-            {{ v.label }}
-            {% if not v.is_in_stock %}<small>(OOS)</small>{% endif %}
-          </button>
+            {% if not v.is_in_stock %}
+              <span class="position-absolute top-0 start-0 w-100 h-100 rounded" style="background: rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:#dc2626;">OOS</span>
+            {% endif %}
+          </div>
           {% endfor %}
         </div>
         <div class="mt-2">
-          <span class="badge bg-success" id="stockStatus" style="font-size: 13px;">
-            In Stock ({{ variants.first.stock }})
+          <span class="badge {% if variants.first.is_in_stock %}bg-success{% else %}bg-danger{% endif %}" id="stockStatus" style="font-size: 13px;">
+            {% if variants.first.is_in_stock %}In Stock ({{ variants.first.stock }}){% else %}Out of Stock{% endif %}
           </span>
         </div>
       </div>
@@ -796,6 +810,56 @@ document.addEventListener('DOMContentLoaded', () => {
         mainImg.src = thumb.dataset.src;
       }
     });
+  // Flipkart Variant Selection Logic
+  document.querySelectorAll('.variant-thumb-box, .variant-btn').forEach(box => {
+    box.addEventListener('click', function() {
+      document.querySelectorAll('.variant-thumb-box, .variant-btn').forEach(b => {
+        b.classList.remove('selected', 'active');
+        b.style.borderColor = 'var(--outline-variant, #cbd5e1)';
+      });
+      this.classList.add('selected', 'active');
+      this.style.borderColor = 'var(--primary, #2563eb)';
+
+      const shadeName = this.dataset.shadeName;
+      if (shadeName) {
+        const nameEl = document.getElementById('selectedColorName');
+        if (nameEl) nameEl.textContent = shadeName;
+      }
+
+      const imgUrl = this.dataset.imageUrl;
+      if (imgUrl) {
+        const mainImg = document.getElementById('mainGalleryImage');
+        const mainVideo = document.getElementById('mainGalleryVideo');
+        if (mainVideo) {
+          mainVideo.style.display = 'none';
+          mainVideo.pause();
+        }
+        if (mainImg) {
+          mainImg.style.display = 'block';
+          mainImg.src = imgUrl;
+        }
+      }
+
+      const variantId = this.dataset.variantId;
+      if (variantId) {
+        const addCartBtn = document.querySelector('.btn-add-cart');
+        if (addCartBtn) addCartBtn.dataset.variantId = variantId;
+        const buyBtn = document.getElementById('buyNowBtn');
+        if (buyBtn) buyBtn.dataset.variantId = variantId;
+      }
+
+      const stock = this.dataset.stock;
+      const stockStatus = document.getElementById('stockStatus');
+      if (stockStatus && stock !== undefined) {
+        if (parseInt(stock) > 0) {
+          stockStatus.className = 'badge bg-success';
+          stockStatus.textContent = `In Stock (${stock})`;
+        } else {
+          stockStatus.className = 'badge bg-danger';
+          stockStatus.textContent = 'Out of Stock';
+        }
+      }
+    });
   });
 
   // Razorpay Direct Checkout Flow
@@ -803,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
     event.preventDefault();
     const btn = this;
     const productId = btn.dataset.productId;
-    const selectedVariantBtn = document.querySelector('.variant-btn.selected');
+    const selectedVariantBtn = document.querySelector('.variant-thumb-box.selected, .variant-btn.selected');
     const variantId = selectedVariantBtn ? selectedVariantBtn.dataset.variantId : btn.dataset.variantId;
     const quantity = parseInt(document.getElementById('qtyInput')?.value || 1);
 

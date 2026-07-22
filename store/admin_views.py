@@ -14,7 +14,7 @@ from datetime import timedelta
 from django.conf import settings
 
 from .models import (
-    User, Product, Order, Complaint, Category, Brand,
+    User, Product, ProductVariant, Order, Complaint, Category, Brand,
     AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage, SiteSetting, HeroPanel
 )
 from .forms import (
@@ -251,6 +251,8 @@ def admin_product_create(request):
                 except Exception as e:
                     messages.error(request, f"A+ Image upload failed: {e}")
 
+            _save_product_variants(product, request)
+
             messages.success(request, 'Product created successfully!')
             return redirect('admin_products')
     else:
@@ -349,6 +351,8 @@ def admin_product_edit(request, pk):
                 except Exception as e:
                     messages.error(request, f"A+ Image upload failed: {e}")
 
+            _save_product_variants(product, request)
+
             messages.success(request, 'Product updated successfully!')
             return redirect('admin_products')
     else:
@@ -356,6 +360,77 @@ def admin_product_edit(request, pk):
 
     context = {'form': form, 'title': 'Edit Product', 'product': product}
     return render(request, 'admin/product_form.html', context)
+
+
+def _save_product_variants(product, request):
+    shade_names = request.POST.getlist('variant_shade_name[]')
+    additional_prices = request.POST.getlist('variant_additional_price[]')
+    stocks = request.POST.getlist('variant_stock[]')
+    variant_ids = request.POST.getlist('variant_id[]')
+    
+    for i in range(len(shade_names)):
+        shade = shade_names[i].strip()
+        if not shade:
+            continue
+        
+        try:
+            add_price = float(additional_prices[i]) if i < len(additional_prices) and additional_prices[i] else 0.0
+        except ValueError:
+            add_price = 0.0
+            
+        try:
+            stk = int(stocks[i]) if i < len(stocks) and stocks[i] else 0
+        except ValueError:
+            stk = 0
+            
+        v_id = variant_ids[i] if i < len(variant_ids) else ''
+        
+        uploaded_url_key = f'uploaded_variant_image_url_{i}'
+        file_key = f'variant_image_{i}'
+        
+        variant_image_url = request.POST.get(uploaded_url_key, '')
+        
+        if v_id:
+            variant = ProductVariant.objects.filter(pk=v_id, product=product).first()
+            if variant:
+                variant.shade_name = shade
+                variant.additional_price = add_price
+                variant.stock = stk
+                if variant_image_url:
+                    variant.image_url = variant_image_url
+                elif file_key in request.FILES:
+                    from .storage import upload_file
+                    try:
+                        variant.image_url = upload_file(request.FILES[file_key], folder="variants")
+                    except Exception:
+                        pass
+                variant.save()
+                continue
+
+        # Create new variant
+        var_obj = ProductVariant(
+            product=product,
+            shade_name=shade,
+            additional_price=add_price,
+            stock=stk,
+            image_url=variant_image_url
+        )
+        if not variant_image_url and file_key in request.FILES:
+            from .storage import upload_file
+            try:
+                var_obj.image_url = upload_file(request.FILES[file_key], folder="variants")
+            except Exception:
+                pass
+        var_obj.save()
+
+
+@admin_required
+def admin_variant_delete(request, pk):
+    """Delete a product variant"""
+    variant = get_object_or_404(ProductVariant, pk=pk)
+    variant.delete()
+    return JsonResponse({'success': True, 'message': 'Variant deleted successfully'})
+
 @admin_required
 def admin_product_delete(request, pk):
     """Delete product"""

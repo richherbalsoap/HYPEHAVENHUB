@@ -370,7 +370,19 @@ class ProductVariant(models.Model):
     stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     image = models.ImageField(upload_to='variants/', null=True, blank=True)
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob / R2 storage URL")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def display_image_url(self):
+        if self.image_url:
+            return self.image_url
+        if self.image:
+            try:
+                return self.image.url
+            except Exception:
+                pass
+        return ""
 
     def save(self, *args, **kwargs):
         if not self.sku:
