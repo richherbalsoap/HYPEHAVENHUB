@@ -5,6 +5,7 @@ from . import admin_views
 from . import magic_checkout_api
 
 urlpatterns = [
+    path('favicon.ico', RedirectView.as_view(url='/static/images/logo-golden-hh.jpg', permanent=True)),
     # Home & Products
     path('', views.home, name='home'),
     path('products/', views.product_list, name='product_list'),
