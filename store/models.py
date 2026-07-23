@@ -534,6 +534,17 @@ class Order(models.Model):
     def is_returnable(self):
         return False
 
+    @property
+    def shiprocket_tracking_url(self):
+        """
+        Returns Shiprocket Brand Boost Live Tracking URL for this order.
+        Format: https://hypehavenhub.shiprocket.co/tracking/<tracking_id_or_order_id>
+        """
+        from django.conf import settings
+        subdomain = getattr(settings, 'SHIPROCKET_BRAND_SUBDOMAIN', 'hypehavenhub') or 'hypehavenhub'
+        tracking_code = str(self.shipping_tracking_id or self.order_id).strip()
+        return f"https://{subdomain}.shiprocket.co/tracking/{tracking_code}"
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')

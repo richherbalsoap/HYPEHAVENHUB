@@ -27,6 +27,9 @@
           {% else %}background: var(--surface-container); color: var(--primary);{% endif %}">
           {{ order.get_status_display }}
         </span>
+        <a href="{{ order.shiprocket_tracking_url }}" target="_blank" class="btn btn-sm btn-outline-primary fw-600 me-1" style="font-size: 12px;">
+          <span class="material-symbols-outlined me-1" style="font-size: 14px; vertical-align: middle;">local_shipping</span>Track
+        </a>
         <a href="{% url 'order_detail' order.order_id %}" class="btn btn-sm btn-artisan-outline" style="font-size: 12px;">View Details</a>
       </div>
     </div>

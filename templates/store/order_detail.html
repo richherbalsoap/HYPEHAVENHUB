@@ -8,9 +8,12 @@
       <h2 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 4px;">Order #{{ order.order_id }}</h2>
       <div class="text-muted small">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</div>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+      <a href="{{ order.shiprocket_tracking_url }}" target="_blank" class="btn btn-sm btn-primary fw-bold shadow-sm">
+        <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">local_shipping</span> Live Courier Tracking
+      </a>
       {% if order.is_cancellable %}
-      <button class="btn btn-sm btn-outline-danger" data-cancel-order="{{ order.order_id }}">
+      <button class="btn btn-sm btn-outline-danger" data-cancel-order="{{ order.order_id }}" title="Cancel allowed before courier pickup">
         <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">close</span> Cancel Order
       </button>
       {% endif %}
