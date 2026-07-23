@@ -234,6 +234,55 @@ class ShiprocketService:
             return None, error_msg
 
     @classmethod
+    def cancel_shipment(cls, order):
+        """
+        Cancels an order/shipment in Shiprocket via API.
+        POST /orders/cancel with payload {"ids": [order_id or shipment_id]}
+        """
+        token = cls._get_token()
+        if not token:
+            logger.warning(f"Skipping Shiprocket cancellation for order {order.order_id} - no valid API token.")
+            return False, "No valid API token configured."
+
+        ids_to_cancel = []
+        if getattr(order, 'shipping_tracking_id', None):
+            tracking_id = str(order.shipping_tracking_id).strip()
+            if tracking_id.isdigit():
+                ids_to_cancel.append(int(tracking_id))
+            elif tracking_id:
+                ids_to_cancel.append(tracking_id)
+
+        if order.order_id and order.order_id not in ids_to_cancel:
+            ids_to_cancel.append(order.order_id)
+
+        if not ids_to_cancel:
+            return False, "No tracking or order ID available to cancel."
+
+        try:
+            url = f"{cls.BASE_URL}/orders/cancel"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}"
+            }
+            payload = {"ids": ids_to_cancel}
+            logger.info(f"Triggering Shiprocket order cancellation for order {order.order_id}: {payload}")
+            response = requests.post(url, json=payload, headers=headers, timeout=15)
+            
+            if response.status_code in [200, 201]:
+                res_data = response.json()
+                logger.info(f"Shiprocket cancellation succeeded for order {order.order_id}: {res_data}")
+                msg = res_data.get("message") or res_data.get("data") or "Order cancelled successfully in Shiprocket."
+                return True, str(msg)
+            else:
+                error_msg = f"HTTP {response.status_code}: {response.text[:300]}"
+                logger.error(f"Shiprocket order cancellation failed for {order.order_id}: {error_msg}")
+                return False, error_msg
+        except Exception as e:
+            error_msg = str(e)[:300]
+            logger.error(f"Error cancelling order in Shiprocket ({order.order_id}): {error_msg}")
+            return False, error_msg
+
+    @classmethod
     def verify_pincode_city(cls, pincode, city, state=None):
         """
         Validates if pincode matches city/district using Postal Pincode API.

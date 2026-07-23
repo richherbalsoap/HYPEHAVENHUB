@@ -759,9 +759,16 @@ def admin_order_detail(request, order_id):
                     description=f"Payment marked as {payment.get_status_display()}.",
                 )
 
-            # Auto-refund if admin marks as cancelled or returned
+            # Auto-refund & Shiprocket cancel if admin marks as cancelled or returned
             if order.status in ['cancelled', 'returned'] and old_status not in ['cancelled', 'returned']:
                 from .utils import process_razorpay_refund
+                from .shipping import ShiprocketService
+                
+                try:
+                    ShiprocketService.cancel_shipment(order)
+                except Exception as sr_err:
+                    messages.warning(request, f"Shiprocket cancellation warning: {sr_err}")
+
                 refund_status, refund_msg = process_razorpay_refund(order, f"Admin marked order as {order.status}")
                 if refund_status == "processed":
                     messages.success(request, f"Order updated and {refund_msg}")

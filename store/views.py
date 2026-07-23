@@ -1608,10 +1608,27 @@ def cancel_order(request, order_id):
             from .utils import process_razorpay_refund
             refund_status, refund_msg = process_razorpay_refund(order, "Customer cancelled order")
             
+            # Trigger automatic Shiprocket cancellation via API
+            sr_cancelled = False
+            sr_cancel_msg = ""
+            try:
+                from .shipping import ShiprocketService
+                sr_cancelled, sr_cancel_msg = ShiprocketService.cancel_shipment(order)
+            except Exception as sr_err:
+                logger.error(f"Failed to cancel Shiprocket shipment for order {order.order_id}: {sr_err}")
+                sr_cancel_msg = str(sr_err)
+
             # Cancel order and tracking log
             order.status = 'cancelled'
             order.save()
-            OrderTracking.objects.create(order=order, status='cancelled', description='Order cancelled by customer.')
+            
+            tracking_desc = 'Order cancelled by customer.'
+            if sr_cancelled:
+                tracking_desc += f' Auto-cancelled on Shiprocket ({sr_cancel_msg}).'
+            elif sr_cancel_msg:
+                tracking_desc += f' Shiprocket status: {sr_cancel_msg}.'
+                
+            OrderTracking.objects.create(order=order, status='cancelled', description=tracking_desc)
             
             # Construct notification message
             notif_message = f'Your order #{order.order_id} has been cancelled.'
