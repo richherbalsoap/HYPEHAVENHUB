@@ -23,7 +23,17 @@
         <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">arrow_back</span> Back
       </a>
     </div>
+  {% if order.status == 'shiprocket_failed' %}
+  <div class="alert alert-warning d-flex align-items-start gap-3 mb-4 p-3 rounded-3 shadow-sm border-warning" style="background: rgba(255, 193, 7, 0.1);">
+    <span class="material-symbols-outlined text-warning fs-3 flex-shrink-0">warning</span>
+    <div>
+      <h6 class="fw-bold mb-1 text-warning-emphasis">Shipment Booking Attention Required</h6>
+      <p class="mb-0 small text-body-secondary">
+        Payment of <strong>₹{{ order.grand_total }}</strong> was received successfully! However, automated courier dispatch encountered an issue with address details (e.g. City/Pincode mismatch). Our delivery team has been notified to verify your address and dispatch your order.
+      </p>
+    </div>
   </div>
+  {% endif %}
 
   <div class="row g-4">
     <div class="col-lg-8">

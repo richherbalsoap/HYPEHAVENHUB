@@ -213,13 +213,61 @@ class ShiprocketService:
                 logger.info(f"Shiprocket order created successfully. Shipment ID: {shipment_id}")
                 return shipment_id, None
             else:
-                error_msg = response.text[:500]
-                logger.error(f"Shiprocket order creation failed: {response.text}")
+                error_msg = f"HTTP {response.status_code}"
+                try:
+                    res_json = response.json()
+                    if isinstance(res_json, dict):
+                        msg = res_json.get("message") or res_json.get("error")
+                        errors = res_json.get("errors")
+                        if msg:
+                            error_msg = str(msg)
+                        if errors:
+                            error_msg += f" Details: {errors}"
+                except Exception:
+                    error_msg = response.text[:300]
+
+                logger.error(f"Shiprocket order creation failed for order {order.order_id}: {error_msg}")
                 return None, error_msg
         except Exception as e:
-            error_msg = str(e)[:500]
+            error_msg = str(e)[:300]
             logger.error(f"Error booking Shiprocket delivery: {str(e)}")
             return None, error_msg
+
+    @classmethod
+    def verify_pincode_city(cls, pincode, city, state=None):
+        """
+        Validates if pincode matches city/district using Postal Pincode API.
+        Returns tuple: (is_valid, official_district, official_state, message)
+        """
+        pincode = str(pincode).strip()
+        city = str(city).strip()
+        if not pincode or len(pincode) < 6:
+            return False, None, None, "Invalid pincode length (must be 6 digits)."
+
+        try:
+            url = f"https://api.postalpincode.in/pincode/{pincode}"
+            headers = {'User-Agent': 'Mozilla/5.0'}
+            resp = requests.get(url, headers=headers, timeout=5)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data and data[0].get('Status') == 'Success':
+                    post_offices = data[0].get('PostOffice', []) or []
+                    districts = {po.get('District', '').strip().lower() for po in post_offices if po.get('District')}
+                    names = {po.get('Name', '').strip().lower() for po in post_offices if po.get('Name')}
+                    off_district = post_offices[0].get('District', '') if post_offices else ''
+                    off_state = post_offices[0].get('State', '') if post_offices else ''
+
+                    city_lower = city.lower()
+                    if city_lower in districts or city_lower in names or any(d in city_lower or city_lower in d for d in districts if d):
+                        return True, off_district, off_state, "Pincode and City match."
+                    else:
+                        return False, off_district, off_state, f"Pincode {pincode} belongs to district '{off_district}' ({off_state}), which does not match city '{city}'."
+                elif data and data[0].get('Status') == 'Error':
+                    return False, None, None, f"Pincode {pincode} is not a valid Indian Postal pincode."
+        except Exception as e:
+            logger.warning(f"Postal pincode API verification skipped due to error: {e}")
+
+        return True, city, state or '', "Validation skipped."
 
     @classmethod
     def test_connection(cls):

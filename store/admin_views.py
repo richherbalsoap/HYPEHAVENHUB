@@ -784,6 +784,50 @@ def admin_order_detail(request, order_id):
         'form': form,
     }
     return render(request, 'admin/order_detail.html', context)
+
+
+@admin_required
+def admin_retry_shiprocket(request, order_id):
+    """Admin endpoint to update order address if needed and re-trigger Shiprocket shipment creation."""
+    order = get_object_or_404(Order, order_id=order_id)
+    if request.method == 'POST':
+        city = request.POST.get('city', '').strip()
+        pincode = request.POST.get('pincode', '').strip()
+        state = request.POST.get('state', '').strip()
+        address_line1 = request.POST.get('address_line1', '').strip()
+
+        if order.address:
+            if city:
+                order.address.city = city
+            if pincode:
+                order.address.pincode = pincode
+            if state:
+                order.address.state = state
+            if address_line1:
+                order.address.address_line1 = address_line1
+            order.address.save()
+
+        from .shipping import ShiprocketService
+        shipment_id, error_msg = ShiprocketService.create_shipment(order)
+        if shipment_id:
+            order.shipping_tracking_id = str(shipment_id)
+            order.status = 'confirmed'
+            order.save()
+            OrderTracking.objects.create(
+                order=order,
+                status='confirmed',
+                description=f'Shiprocket booking retry succeeded! Shipment ID: {shipment_id}'
+            )
+            messages.success(request, f'Shiprocket booking successful! Shipment ID: {shipment_id}')
+        else:
+            OrderTracking.objects.create(
+                order=order,
+                status='shiprocket_failed',
+                description=f'Shiprocket Retry Failed: {error_msg}'
+            )
+            messages.error(request, f'Shiprocket Retry Failed: {error_msg}')
+
+    return redirect('admin_order_detail', order_id=order_id)
 @admin_required
 def admin_complaints(request):
     """Manage complaints"""

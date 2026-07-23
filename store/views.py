@@ -755,6 +755,14 @@ def add_address(request):
     if request.method == 'POST' and form.is_valid():
         addr = form.save(commit=False)
         addr.user = request.user
+        
+        # Pincode vs City validation
+        from .shipping import ShiprocketService
+        is_valid, off_district, off_state, val_msg = ShiprocketService.verify_pincode_city(addr.pincode, addr.city, addr.state)
+        if not is_valid and off_district:
+            form.add_error('city', f"Pincode {addr.pincode} belongs to district '{off_district}' ({off_state}), which does not match city '{addr.city}'. Please check your pincode or city.")
+            return render(request, 'store/address_form.html', {'form': form, 'title': 'Add Address', 'next': next_url})
+
         if addr.is_default:
             Address.objects.filter(user=request.user).update(is_default=False)
         addr.save()
@@ -772,6 +780,14 @@ def edit_address(request, pk):
     next_url = request.GET.get('next') or request.POST.get('next')
     if request.method == 'POST' and form.is_valid():
         updated = form.save(commit=False)
+        
+        # Pincode vs City validation
+        from .shipping import ShiprocketService
+        is_valid, off_district, off_state, val_msg = ShiprocketService.verify_pincode_city(updated.pincode, updated.city, updated.state)
+        if not is_valid and off_district:
+            form.add_error('city', f"Pincode {updated.pincode} belongs to district '{off_district}' ({off_state}), which does not match city '{updated.city}'. Please check your pincode or city.")
+            return render(request, 'store/address_form.html', {'form': form, 'title': 'Edit Address', 'next': next_url})
+
         if updated.is_default:
             Address.objects.filter(user=request.user).exclude(pk=pk).update(is_default=False)
         updated.save()
@@ -1012,6 +1028,16 @@ def place_order(request):
         return JsonResponse({'success': False, 'message': 'Please select a delivery address.'})
 
     address = get_object_or_404(Address, id=address_id, user=request.user)
+
+    # Validate address pincode & city match before proceeding
+    from .shipping import ShiprocketService
+    is_valid, off_district, off_state, val_msg = ShiprocketService.verify_pincode_city(address.pincode, address.city, address.state)
+    if not is_valid and off_district:
+        return JsonResponse({
+            'success': False,
+            'message': f"Address Error: Pincode {address.pincode} belongs to district '{off_district}' ({off_state}), which does not match your entered city '{address.city}'. Please edit your address before placing order."
+        })
+
     cart = get_or_create_cart(request)
 
     if not cart.items.exists():
@@ -1453,20 +1479,46 @@ def verify_payment(request):
 
         # Trigger Shiprocket booking for prepaid order
         shipment_id = None
+        shiprocket_error = None
         try:
             from .shipping import ShiprocketService
             shipment_id, error_msg = ShiprocketService.create_shipment(order)
             if shipment_id:
                 order.shipping_tracking_id = str(shipment_id)
+                order.status = 'confirmed'
                 order.save()
+                OrderTracking.objects.create(
+                    order=order,
+                    status='confirmed',
+                    description=f'Shipment booked with Shiprocket (Tracking ID: {shipment_id})'
+                )
             elif error_msg:
+                shiprocket_error = error_msg
+                order.status = 'shiprocket_failed'
+                order.save()
                 OrderTracking.objects.create(
                     order=order,
                     status='shiprocket_failed',
                     description=f'Shiprocket Sync Failed: {error_msg}'
                 )
+                # Notify admin via email
+                try:
+                    from django.core.mail import send_mail
+                    admin_email = getattr(settings, 'ADMIN_EMAIL', settings.DEFAULT_FROM_EMAIL)
+                    send_mail(
+                        subject=f"⚠️ ACTION NEEDED: Shiprocket Booking Failed - Order #{order.order_id}",
+                        message=f"Payment for Order #{order.order_id} was received (₹{order.grand_total}), but Shiprocket automated booking failed.\n\nError: {error_msg}\nCustomer Email: {order.user.email}\nAddress: {order.address.address_line1 if order.address else 'N/A'}, {order.address.city if order.address else ''} ({order.address.pincode if order.address else ''})\n\nPlease visit the Admin Panel to correct the address and retry dispatch.",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[admin_email],
+                        fail_silently=True
+                    )
+                except Exception as mail_err:
+                    logger.error(f"Error sending admin email for shiprocket failure: {mail_err}")
         except Exception as e:
             logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
+            shiprocket_error = str(e)
+            order.status = 'shiprocket_failed'
+            order.save()
 
         # PostHog Purchase Event Capture in Views
         if getattr(settings, 'POSTHOG_API_KEY', None):
@@ -1480,6 +1532,7 @@ def verify_payment(request):
                     'delivery_charge': float(order.delivery_charge),
                     'payment_method': 'razorpay',
                     'shipment_id': shipment_id,
+                    'shiprocket_success': bool(shipment_id),
                 })
             except Exception as ph_err:
                 logger.error(f"Failed to capture backend purchase event in PostHog: {ph_err}")
@@ -1491,6 +1544,8 @@ def verify_payment(request):
             'order_id': order.order_id,
             'redirect': redirect_url,
             'shipment_id': shipment_id,
+            'shiprocket_success': bool(shipment_id),
+            'shiprocket_error': shiprocket_error,
             'email_sent': email_sent,
             'sms_sent': sms_sent
         })
