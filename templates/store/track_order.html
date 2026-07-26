@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Shipment - HYPEHAVENHUB{% endblock %}
+
+{% block content %}
+<div style="background-color: #f4f6f8; min-height: 85vh; padding: 50px 15px;">
+  <div class="container" style="max-width: 850px;">
+    
+    <!-- Main Tracking Card (Matches Image 2 design) -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 40px 45px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e8ecef;">
+      
+      <!-- Card Header: Icon + Title -->
+      <div class="d-flex align-items-center gap-3">
+        <!-- Shipment Package Icon with Pin Badge -->
+        <div style="position: relative; width: 46px; height: 46px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#212529" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <div style="position: absolute; top: -3px; left: -3px; background: #ffffff; border-radius: 50%; padding: 1px;">
+            <span class="material-symbols-outlined" style="font-size: 18px; color: #28a745;">location_on</span>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="mb-0 fw-bold" style="color: #212529; font-size: 20px; font-family: 'Montserrat', sans-serif;">Track status of your shipment</h4>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 25px 0 30px 0;">
+
+      <!-- Tracking Search Form -->
+      <form method="GET" action="{% url 'track_order' %}" id="trackingForm">
+        <input type="hidden" name="search_by" id="searchByHidden" value="{{ search_by|default:'order_id' }}">
+        
+        <!-- Search By Radio Group -->
+        <div class="d-flex align-items-center gap-4 mb-4" style="font-size: 15px; color: #333333;">
+          <span class="fw-bold me-2">Search By:</span>
+          <div class="form-check form-check-inline m-0">
+            <input class="form-check-input" type="radio" name="search_by_radio" id="radioOrderId" value="order_id" {% if search_by != 'awb' %}checked{% endif %} onchange="updateSearchType('order_id')">
+            <label class="form-check-label fw-bold ms-1" for="radioOrderId" style="cursor: pointer;">Order ID</label>
+          </div>
+          <div class="form-check form-check-inline m-0 ms-3">
+            <input class="form-check-input" type="radio" name="search_by_radio" id="radioAwb" value="awb" {% if search_by == 'awb' %}checked{% endif %} onchange="updateSearchType('awb')">
+            <label class="form-check-label fw-bold ms-1" for="radioAwb" style="cursor: pointer;">AWB</label>
+          </div>
+        </div>
+
+        <!-- Input Box (Pre-filled if order_id passed) -->
+        <div class="mb-4">
+          <input type="text" name="order_id" id="trackingInput" class="form-control" 
+                 placeholder="{% if search_by == 'awb' %}Enter AWB to search{% else %}Enter Order ID to search{% endif %}" 
+                 value="{{ search_query }}" 
+                 style="border-radius: 8px; border: 1px solid #ced4da; padding: 14px 18px; font-size: 15px; background: #ffffff;" 
+                 required autocomplete="off">
+        </div>
+
+        <!-- Green Submit Button -->
+        <div>
+          <button type="submit" class="btn text-white fw-bold" 
+                  style="background-color: #28a745; border-color: #28a745; border-radius: 8px; font-size: 16px; padding: 10px 42px; transition: background 0.2s;">
+            Submit
+          </button>
+        </div>
+      </form>
+
+      <!-- Tracking Results Section -->
+      {% if order %}
+      <div class="mt-5 pt-4 border-top">
+        
+        <!-- Order Overview Banner -->
+        <div class="p-4 mb-4 rounded-3" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <div class="text-muted small text-uppercase fw-bold mb-1">Order Identifier</div>
+              <h5 class="mb-0 fw-bold" style="color: var(--primary);">#{{ order.order_id }}</h5>
+              <div class="text-muted small mt-1">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</div>
+            </div>
+            
+            <div class="text-end">
+              <span class="badge 
+                {% if order.status == 'delivered' %}bg-success
+                {% elif order.status == 'cancelled' %}bg-danger
+                {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}bg-info text-dark
+                {% else %}bg-primary{% endif %} fs-6 px-3 py-2 text-capitalize">
+                Status: {{ order.get_status_display }}
+              </span>
+              {% if order.shipping_tracking_id %}
+              <div class="text-muted small mt-2"><strong>AWB / Tracking ID:</strong> {{ order.shipping_tracking_id }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipment Progress Bar -->
+        <div class="mb-5 px-2">
+          <h6 class="fw-bold mb-4">Shipment Progress</h6>
+          <div class="d-flex justify-content-between position-relative align-items-center">
+            <div class="position-absolute" style="top: 15px; left: 5%; right: 5%; height: 4px; background: #e0e0e0; z-index: 1;"></div>
+            {% for step in order_steps %}
+            <div class="text-center position-relative" style="z-index: 2; width: 16%;">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold shadow-sm"
+                   style="width: 32px; height: 32px; font-size: 13px; 
+                          background: {% if step.active %}#28a745{% else %}#ffffff{% endif %}; 
+                          color: {% if step.active %}#ffffff{% else %}#6c757d{% endif %}; 
+                          border: 2px solid {% if step.active %}#28a745{% else %}#dee2e6{% endif %};">
+                {% if step.active %}✓{% else %}{{ forloop.counter }}{% endif %}
+              </div>
+              <div class="small fw-600 mt-2 text-capitalize {% if step.active %}text-success fw-bold{% else %}text-muted{% endif %}" style="font-size: 12px;">
+                {{ step.label }}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Timeline Log Events -->
+        {% if tracking_events %}
+        <div class="mb-4">
+          <h6 class="fw-bold mb-3">Live Tracking History</h6>
+          <div class="list-group list-group-flush border rounded-3">
+            {% for event in tracking_events %}
+            <div class="list-group-item p-3 d-flex align-items-start gap-3">
+              <span class="material-symbols-outlined text-success mt-1" style="font-size: 20px;">task_alt</span>
+              <div>
+                <div class="fw-bold text-dark fs-6">{{ event.description }}</div>
+                <div class="text-muted small mt-1">{{ event.created_at|date:"d M Y, h:i A" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info small mb-4">
+          Order confirmed! Courier partner assignment and live checkpoint tracking will be updated shortly.
+        </div>
+        {% endif %}
+
+        <!-- Order Items -->
+        <div>
+          <h6 class="fw-bold mb-3">Items in this Package</h6>
+          <div class="row g-3">
+            {% for item in order.items.all %}
+            <div class="col-md-6">
+              <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light">
+                {% if item.product and item.product.display_image_url %}
+                <img src="{{ item.product.display_image_url }}" alt="{{ item.product_name }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;">
+                {% endif %}
+                <div>
+                  <div class="fw-bold text-dark small">{{ item.product_name }}</div>
+                  {% if item.variant_label %}<div class="text-muted extra-small">{{ item.variant_label }}</div>{% endif %}
+                  <div class="text-muted small">Qty: {{ item.quantity }} × ₹{{ item.unit_price }}</div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+      {% elif search_query %}
+      <!-- Error Message when query entered but not found -->
+      <div class="alert alert-warning mt-4 text-center p-4 rounded-3">
+        <span class="material-symbols-outlined text-warning mb-2" style="font-size: 36px;">search_off</span>
+        <div class="fw-bold">{{ error_message }}</div>
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+function updateSearchType(type) {
+  document.getElementById('searchByHidden').value = type;
+  const input = document.getElementById('trackingInput');
+  if (type === 'awb') {
+    input.placeholder = 'Enter AWB to search';
+  } else {
+    input.placeholder = 'Enter Order ID to search';
+  }
+}
+</script>
+{% endblock %}

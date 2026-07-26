@@ -54,6 +54,8 @@ urlpatterns = [
     path('checkout/verify-payment/', views.verify_payment, name='verify_payment'),
 
     # Orders
+    path('track-order/', views.track_order_view, name='track_order'),
+    path('track-order/<str:order_id>/', views.track_order_view, name='track_order_detail'),
     path('orders/', views.order_list, name='order_list'),
     path('order-success/<str:order_id>/', views.order_success_animation, name='order_success_animation'),
     path('orders/<str:order_id>/', views.order_detail, name='order_detail'),

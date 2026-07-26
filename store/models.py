@@ -537,13 +537,11 @@ class Order(models.Model):
     @property
     def shiprocket_tracking_url(self):
         """
-        Returns Shiprocket Brand Boost Live Tracking URL for this order.
-        Format: https://hypehavenhub.shiprocket.co/tracking/<order_id_or_awb>
+        Returns internal Track Order URL for this order.
+        Format: /track-order/?order_id=<order_id_or_awb>
         """
-        from django.conf import settings
-        subdomain = getattr(settings, 'SHIPROCKET_BRAND_SUBDOMAIN', 'hypehavenhub') or 'hypehavenhub'
-        tracking_code = str(self.order_id or self.shipping_tracking_id).strip()
-        return f"https://{subdomain}.shiprocket.co/tracking/{tracking_code}"
+        tracking_code = str(self.order_id or self.shipping_tracking_id or '').strip()
+        return f"/track-order/?order_id={tracking_code}"
 
 
 class OrderItem(models.Model):
