@@ -4,11 +4,11 @@
 {% block title %}Track Shipment - HYPEHAVENHUB{% endblock %}
 
 {% block content %}
-<div style="background-color: #f4f6f8; min-height: 85vh; padding: 50px 15px;">
-  <div class="container" style="max-width: 850px;">
+<div style="background-color: #f4f6f8; min-height: 85vh; padding: 40px 15px;">
+  <div class="container" style="max-width: 900px;">
     
-    <!-- Main Tracking Card (Matches Image 2 design) -->
-    <div style="background: #ffffff; border-radius: 12px; padding: 40px 45px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e8ecef;">
+    <!-- Main Tracking Form Card (Matches Image 2 design) -->
+    <div style="background: #ffffff; border-radius: 12px; padding: 35px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e8ecef;" class="mb-4">
       
       <!-- Card Header: Icon + Title -->
       <div class="d-flex align-items-center gap-3">
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Divider -->
-      <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 25px 0 30px 0;">
+      <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 25px 0 25px 0;">
 
       <!-- Tracking Search Form -->
       <form method="GET" action="{% url 'track_order' %}" id="trackingForm">
@@ -66,150 +66,50 @@
           </button>
         </div>
       </form>
-
-      <!-- Tracking Results Section -->
-      {% if order %}
-      <div class="mt-5 pt-4 border-top">
-        
-        <!-- Order Overview Banner -->
-        <div class="p-4 mb-4 rounded-3" style="background: #f8f9fa; border: 1px solid #e9ecef;">
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div>
-              <div class="text-muted small text-uppercase fw-bold mb-1">Order Identifier</div>
-              <h5 class="mb-0 fw-bold" style="color: var(--primary);">#{{ order.order_id }}</h5>
-              <div class="text-muted small mt-1">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</div>
-            </div>
-            
-            <div class="text-end">
-              <span class="badge 
-                {% if order.status == 'delivered' %}bg-success
-                {% elif order.status == 'cancelled' %}bg-danger
-                {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}bg-info text-dark
-                {% else %}bg-primary{% endif %} fs-6 px-3 py-2 text-capitalize">
-                Status: {{ order.get_status_display }}
-              </span>
-              {% if order.shipping_tracking_id %}
-              <div class="text-muted small mt-2"><strong>AWB / Tracking ID:</strong> {{ order.shipping_tracking_id }}</div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <!-- Shipment Progress Bar -->
-        <div class="mb-5 px-2">
-          <h6 class="fw-bold mb-4">Shipment Progress</h6>
-          <div class="d-flex justify-content-between position-relative align-items-center">
-            <div class="position-absolute" style="top: 15px; left: 5%; right: 5%; height: 4px; background: #e0e0e0; z-index: 1;"></div>
-            {% for step in order_steps %}
-            <div class="text-center position-relative" style="z-index: 2; width: 16%;">
-              <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold shadow-sm"
-                   style="width: 32px; height: 32px; font-size: 13px; 
-                          background: {% if step.active %}#28a745{% else %}#ffffff{% endif %}; 
-                          color: {% if step.active %}#ffffff{% else %}#6c757d{% endif %}; 
-                          border: 2px solid {% if step.active %}#28a745{% else %}#dee2e6{% endif %};">
-                {% if step.active %}✓{% else %}{{ forloop.counter }}{% endif %}
-              </div>
-              <div class="small fw-600 mt-2 text-capitalize {% if step.active %}text-success fw-bold{% else %}text-muted{% endif %}" style="font-size: 12px;">
-                {{ step.label }}
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <!-- Real Live Shiprocket Courier Status (from Shiprocket API) -->
-        {% if live_tracking_info %}
-        <div class="p-3 mb-4 rounded-3 text-white d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #1b2a47 0%, #2b3d63 100%);">
-          <div class="d-flex align-items-center gap-2">
-            <span class="material-symbols-outlined text-warning" style="font-size: 24px;">radar</span>
-            <div>
-              <div class="fw-bold fs-6">Courier Partner: {{ live_tracking_info.courier_name }}</div>
-              {% if live_tracking_info.etd %}<div class="small opacity-75">Estimated Delivery: {{ live_tracking_info.etd }}</div>{% endif %}
-            </div>
-          </div>
-          <div class="text-end">
-            <span class="badge bg-warning text-dark px-3 py-1.5 fw-bold text-uppercase fs-6">
-              {{ live_tracking_info.current_status }}
-            </span>
-          </div>
-        </div>
-
-        {% if live_tracking_info.scans %}
-        <div class="mb-4">
-          <h6 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2">
-            <span class="material-symbols-outlined text-success" style="font-size: 22px;">verified</span>
-            Live Courier Checkpoints (Shiprocket Live API)
-          </h6>
-          <div class="list-group list-group-flush border rounded-3">
-            {% for scan in live_tracking_info.scans %}
-            <div class="list-group-item p-3 d-flex align-items-start gap-3">
-              <span class="material-symbols-outlined text-success mt-1" style="font-size: 20px;">local_shipping</span>
-              <div>
-                <div class="fw-bold text-dark fs-6">{{ scan.description }}</div>
-                {% if scan.created_at_display %}
-                <div class="text-muted small mt-1">{{ scan.created_at_display }}</div>
-                {% endif %}
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-        {% endif %}
-
-        <!-- Timeline Log Events -->
-        {% if tracking_events %}
-        <div class="mb-4">
-          <h6 class="fw-bold mb-3">Order Log History</h6>
-          <div class="list-group list-group-flush border rounded-3">
-            {% for event in tracking_events %}
-            <div class="list-group-item p-3 d-flex align-items-start gap-3">
-              <span class="material-symbols-outlined text-success mt-1" style="font-size: 20px;">task_alt</span>
-              <div>
-                <div class="fw-bold text-dark fs-6">{{ event.description }}</div>
-                <div class="text-muted small mt-1">{{ event.created_at|date:"d M Y, h:i A" }}</div>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        {% else %}
-        <div class="alert alert-info small mb-4">
-          Order confirmed! Courier partner assignment and live checkpoint tracking will be updated shortly.
-        </div>
-        {% endif %}
-
-        <!-- Order Items -->
-        <div>
-          <h6 class="fw-bold mb-3">Items in this Package</h6>
-          <div class="row g-3">
-            {% for item in order.items.all %}
-            <div class="col-md-6">
-              <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light">
-                {% if item.product and item.product.display_image_url %}
-                <img src="{{ item.product.display_image_url }}" alt="{{ item.product_name }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;">
-                {% endif %}
-                <div>
-                  <div class="fw-bold text-dark small">{{ item.product_name }}</div>
-                  {% if item.variant_label %}<div class="text-muted extra-small">{{ item.variant_label }}</div>{% endif %}
-                  <div class="text-muted small">Qty: {{ item.quantity }} × ₹{{ item.unit_price }}</div>
-                </div>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-      </div>
-      {% elif search_query %}
-      <!-- Error Message when query entered but not found -->
-      <div class="alert alert-warning mt-4 text-center p-4 rounded-3">
-        <span class="material-symbols-outlined text-warning mb-2" style="font-size: 36px;">search_off</span>
-        <div class="fw-bold">{{ error_message }}</div>
-      </div>
-      {% endif %}
-
     </div>
+
+    <!-- Official Shiprocket Real-Time Live Tracking Portal Embedding -->
+    {% if search_query %}
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e8ecef;" class="mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+          <span class="material-symbols-outlined text-primary" style="font-size: 24px;">radar</span>
+          Shiprocket Live Courier Tracking Portal
+        </h5>
+        <a href="https://shiprocket.co/tracking/{{ search_query }}" target="_blank" class="btn btn-sm btn-primary fw-bold px-3 py-2 rounded-pill shadow-sm">
+          <span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">open_in_new</span> Open Official Shiprocket Page
+        </a>
+      </div>
+
+      <!-- Embedded Official Shiprocket Live Portal -->
+      <div style="width: 100%; height: 650px; border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6; background: #ffffff;">
+        <iframe src="https://shiprocket.co/tracking/{{ search_query }}" width="100%" height="100%" frameborder="0" style="border: none;" title="Shiprocket Official Live Tracking"></iframe>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Order Items & Summary (if Order exists in database) -->
+    {% if order %}
+    <div style="background: #ffffff; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid #e8ecef;">
+      <h6 class="fw-bold mb-3 text-dark">Order Items (#{{ order.order_id }})</h6>
+      <div class="row g-3">
+        {% for item in order.items.all %}
+        <div class="col-md-6">
+          <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light">
+            {% if item.product and item.product.display_image_url %}
+            <img src="{{ item.product.display_image_url }}" alt="{{ item.product_name }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;">
+            {% endif %}
+            <div>
+              <div class="fw-bold text-dark small">{{ item.product_name }}</div>
+              {% if item.variant_label %}<div class="text-muted extra-small">{{ item.variant_label }}</div>{% endif %}
+              <div class="text-muted small">Qty: {{ item.quantity }} × ₹{{ item.unit_price }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
 
   </div>
 </div>
