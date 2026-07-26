@@ -117,10 +117,50 @@
           </div>
         </div>
 
+        <!-- Real Live Shiprocket Courier Status (from Shiprocket API) -->
+        {% if live_tracking_info %}
+        <div class="p-3 mb-4 rounded-3 text-white d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #1b2a47 0%, #2b3d63 100%);">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-warning" style="font-size: 24px;">radar</span>
+            <div>
+              <div class="fw-bold fs-6">Courier Partner: {{ live_tracking_info.courier_name }}</div>
+              {% if live_tracking_info.etd %}<div class="small opacity-75">Estimated Delivery: {{ live_tracking_info.etd }}</div>{% endif %}
+            </div>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-warning text-dark px-3 py-1.5 fw-bold text-uppercase fs-6">
+              {{ live_tracking_info.current_status }}
+            </span>
+          </div>
+        </div>
+
+        {% if live_tracking_info.scans %}
+        <div class="mb-4">
+          <h6 class="fw-bold mb-3 text-dark d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined text-success" style="font-size: 22px;">verified</span>
+            Live Courier Checkpoints (Shiprocket Live API)
+          </h6>
+          <div class="list-group list-group-flush border rounded-3">
+            {% for scan in live_tracking_info.scans %}
+            <div class="list-group-item p-3 d-flex align-items-start gap-3">
+              <span class="material-symbols-outlined text-success mt-1" style="font-size: 20px;">local_shipping</span>
+              <div>
+                <div class="fw-bold text-dark fs-6">{{ scan.description }}</div>
+                {% if scan.created_at_display %}
+                <div class="text-muted small mt-1">{{ scan.created_at_display }}</div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
         <!-- Timeline Log Events -->
         {% if tracking_events %}
         <div class="mb-4">
-          <h6 class="fw-bold mb-3">Live Tracking History</h6>
+          <h6 class="fw-bold mb-3">Order Log History</h6>
           <div class="list-group list-group-flush border rounded-3">
             {% for event in tracking_events %}
             <div class="list-group-item p-3 d-flex align-items-start gap-3">

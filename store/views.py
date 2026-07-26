@@ -1590,6 +1590,7 @@ def track_order_view(request, order_id=None):
     search_by = request.GET.get('search_by', 'order_id')
     order = None
     tracking_events = []
+    live_tracking_info = None
     error_message = None
     order_steps = []
 
@@ -1599,7 +1600,7 @@ def track_order_view(request, order_id=None):
         ).first()
 
         if order:
-            tracking_events = order.tracking.all().order_by('-created_at')
+            tracking_events = list(order.tracking.all().order_by('-created_at'))
             all_statuses = [
                 ('pending', 'Ordered'), ('confirmed', 'Confirmed'),
                 ('processing', 'Processing'), ('shipped', 'Shipped'),
@@ -1610,14 +1611,29 @@ def track_order_view(request, order_id=None):
                 {'label': label, 'active': i <= current_idx, 'status': status}
                 for i, (status, label) in enumerate(all_statuses)
             ]
+
+            # Fetch real live tracking from Shiprocket API
+            from store.shipping import ShiprocketService
+            tracking_code = order.shipping_tracking_id or order.order_id
+            if tracking_code:
+                live_info, _ = ShiprocketService.get_live_tracking(tracking_code)
+                if live_info:
+                    live_tracking_info = live_info
         else:
-            error_message = f"No order found matching '{query}'. Please check your Order ID or AWB and try again."
+            # Fallback: query Shiprocket API directly by AWB or order_id
+            from store.shipping import ShiprocketService
+            live_info, _ = ShiprocketService.get_live_tracking(query)
+            if live_info:
+                live_tracking_info = live_info
+            else:
+                error_message = f"No shipment found for '{query}'. Please check your Order ID or AWB and try again."
 
     return render(request, 'store/track_order.html', {
         'search_query': query,
         'search_by': search_by,
         'order': order,
         'tracking_events': tracking_events,
+        'live_tracking_info': live_tracking_info,
         'order_steps': order_steps,
         'error_message': error_message,
     })

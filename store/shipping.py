@@ -363,3 +363,63 @@ class ShiprocketService:
             result['pickup_fetch_error'] = str(e)[:500]
 
         return result
+
+    @classmethod
+    def get_live_tracking(cls, tracking_id_or_order_id):
+        """
+        Fetches real-time live tracking details directly from Shiprocket API.
+        Can track by AWB number or Order ID.
+        """
+        token = cls._get_token()
+        if not token:
+            return None, "No active Shiprocket API token."
+
+        tracking_id_or_order_id = str(tracking_id_or_order_id).strip()
+        if not tracking_id_or_order_id:
+            return None, "No tracking code or order ID provided."
+
+        headers = {"Authorization": f"Bearer {token}"}
+
+        try:
+            if tracking_id_or_order_id.isdigit():
+                url = f"{cls.BASE_URL}/courier/track/awb/{tracking_id_or_order_id}"
+            else:
+                url = f"{cls.BASE_URL}/courier/track?order_id={tracking_id_or_order_id}"
+
+            response = requests.get(url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                tracking_data = data.get("tracking_data", {}) or {}
+                shipment_track = tracking_data.get("shipment_track", [])
+                
+                if isinstance(shipment_track, list) and len(shipment_track) > 0:
+                    track_info = shipment_track[0]
+                    scans = track_info.get("scans", []) or []
+                    
+                    live_events = []
+                    for scan in scans:
+                        activity = scan.get("activity") or scan.get("status") or "Package update"
+                        location = scan.get("location") or scan.get("city") or ""
+                        date_str = scan.get("date") or scan.get("updated_at") or ""
+                        desc = f"{activity}" + (f" - {location}" if location else "")
+                        live_events.append({
+                            'description': desc,
+                            'created_at_display': date_str,
+                            'location': location,
+                            'activity': activity
+                        })
+                    
+                    return {
+                        'courier_name': track_info.get('courier_name') or tracking_data.get('courier_name') or 'Shiprocket Courier',
+                        'current_status': track_info.get('current_status') or tracking_data.get('track_status') or 'Booked',
+                        'awb_code': track_info.get('awb_code') or tracking_id_or_order_id,
+                        'origin': track_info.get('origin', ''),
+                        'destination': track_info.get('destination', ''),
+                        'etd': track_info.get('etd') or tracking_data.get('etd') or '',
+                        'scans': live_events,
+                    }, None
+        except Exception as e:
+            logger.error(f"Error fetching live tracking from Shiprocket API: {e}")
+            return None, str(e)
+
+        return None, "No tracking data found on Shiprocket."
