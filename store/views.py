@@ -1586,57 +1586,13 @@ def order_detail(request, order_id):
 
 
 def track_order_view(request, order_id=None):
+    from django.conf import settings
+    subdomain = getattr(settings, 'SHIPROCKET_BRAND_SUBDOMAIN', 'hypehavenhub') or 'hypehavenhub'
     query = (order_id or request.GET.get('order_id') or request.GET.get('awb') or request.GET.get('q') or '').strip()
-    search_by = request.GET.get('search_by', 'order_id')
-    order = None
-    tracking_events = []
-    live_tracking_info = None
-    error_message = None
-    order_steps = []
-
+    
     if query:
-        order = Order.objects.filter(
-            Q(order_id__iexact=query) | Q(shipping_tracking_id__iexact=query)
-        ).first()
-
-        if order:
-            tracking_events = list(order.tracking.all().order_by('-created_at'))
-            all_statuses = [
-                ('pending', 'Ordered'), ('confirmed', 'Confirmed'),
-                ('processing', 'Processing'), ('shipped', 'Shipped'),
-                ('out_for_delivery', 'Out for Delivery'), ('delivered', 'Delivered'),
-            ]
-            current_idx = next((i for i, (s, _) in enumerate(all_statuses) if s == order.status), 0)
-            order_steps = [
-                {'label': label, 'active': i <= current_idx, 'status': status}
-                for i, (status, label) in enumerate(all_statuses)
-            ]
-
-            # Fetch real live tracking from Shiprocket API
-            from store.shipping import ShiprocketService
-            tracking_code = order.shipping_tracking_id or order.order_id
-            if tracking_code:
-                live_info, _ = ShiprocketService.get_live_tracking(tracking_code)
-                if live_info:
-                    live_tracking_info = live_info
-        else:
-            # Fallback: query Shiprocket API directly by AWB or order_id
-            from store.shipping import ShiprocketService
-            live_info, _ = ShiprocketService.get_live_tracking(query)
-            if live_info:
-                live_tracking_info = live_info
-            else:
-                error_message = f"No shipment found for '{query}'. Please check your Order ID or AWB and try again."
-
-    return render(request, 'store/track_order.html', {
-        'search_query': query,
-        'search_by': search_by,
-        'order': order,
-        'tracking_events': tracking_events,
-        'live_tracking_info': live_tracking_info,
-        'order_steps': order_steps,
-        'error_message': error_message,
-    })
+        return redirect(f"https://{subdomain}.shiprocket.co/tracking?order_id={query}")
+    return redirect(f"https://{subdomain}.shiprocket.co/tracking")
 
 
 @login_required
