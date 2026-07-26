@@ -351,6 +351,9 @@ if (checkoutForm) {
               "order_id": data.razorpay_order_id,
               "line_items_total": data.line_items_total,
               "line_items": data.line_items,
+              "theme": {
+                "color": "#2a0002"
+              },
               "one_click_checkout": true, // Enabled Razorpay Magic Checkout
               "handler": async function (paymentRes) {
                 console.log("Razorpay payment successful response:", paymentRes);
@@ -897,6 +900,9 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
         "order_id": data.razorpay_order_id,
         "line_items_total": data.line_items_total,
         "line_items": data.line_items,
+        "theme": {
+          "color": "#2a0002"
+        },
         "one_click_checkout": true, // Enabled Razorpay Magic Checkout
         "handler": async function (response) {
           const verifyData = await api('/checkout/verify-payment/', {
