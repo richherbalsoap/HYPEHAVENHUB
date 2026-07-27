@@ -6,7 +6,7 @@
 <div class="admin-section-title">
     <div>
         <h5 class="mb-1">Hero Panels</h5>
-        <div class="eyebrow">Manage homepage carousels</div>
+        <div class="eyebrow">Manage homepage animated hero cards & text</div>
     </div>
     <a href="{% url 'admin_hero_panel_create' %}" class="btn btn-primary" style="background: var(--admin-primary); border: none; border-radius: var(--radius-sm); font-weight: 500;">
         <i class="fas fa-plus me-2"></i> Add New Panel
@@ -19,7 +19,9 @@
             <thead>
                 <tr>
                     <th style="width: 80px;">Image</th>
-                    <th>Title</th>
+                    <th>Title & Label</th>
+                    <th>Text Behind Photo (Ghost Text)</th>
+                    <th>BG Color</th>
                     <th>Order</th>
                     <th>Status</th>
                     <th class="text-end">Actions</th>
@@ -29,8 +31,8 @@
                 {% for panel in panels %}
                 <tr>
                     <td>
-                        {% if panel.image %}
-                        <img src="{{ panel.image.url }}" alt="Hero Panel" class="rounded" style="width: 60px; height: 40px; object-fit: cover; border: 1px solid var(--admin-border);">
+                        {% if panel.display_image_url %}
+                        <img src="{{ panel.display_image_url }}" alt="Hero Panel" class="rounded" style="width: 60px; height: 40px; object-fit: cover; border: 1px solid var(--admin-border);">
                         {% else %}
                         <div class="rounded d-flex align-items-center justify-content-center bg-light" style="width: 60px; height: 40px; border: 1px solid var(--admin-border);">
                             <i class="fas fa-image text-muted"></i>
@@ -38,6 +40,15 @@
                         {% endif %}
                     </td>
                     <td class="fw-semibold">{{ panel.title }}</td>
+                    <td>
+                        <code style="color: #7C1F45; font-weight: 700;">{{ panel.display_word }}</code>
+                    </td>
+                    <td>
+                        <span class="d-inline-flex align-items-center gap-1 badge px-2 py-1" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border);">
+                            <span style="width: 12px; height: 12px; border-radius: 50%; background: {{ panel.bg_color|default:'#7C1F45' }}; display: inline-block;"></span>
+                            {{ panel.bg_color|default:'#7C1F45' }}
+                        </span>
+                    </td>
                     <td>
                         <span class="badge" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border);">{{ panel.order }}</span>
                     </td>
@@ -50,7 +61,7 @@
                     </td>
                     <td class="text-end">
                         <a href="{% url 'admin_hero_panel_edit' panel.id %}" class="btn btn-sm btn-light" style="border: 1px solid var(--admin-border);">
-                            <i class="fas fa-pen text-primary"></i>
+                            <i class="fas fa-pen text-primary"></i> Edit
                         </a>
                         <button type="button" class="btn btn-sm btn-light ms-1" style="border: 1px solid var(--admin-border);" data-bs-toggle="modal" data-bs-target="#deleteModal{{ panel.id }}">
                             <i class="fas fa-trash text-danger"></i>
@@ -81,7 +92,7 @@
                 </div>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">No hero panels found. Click 'Add New Panel' to create one.</td>
+                    <td colspan="7" class="text-center py-4 text-muted">No hero panels found. Click 'Add New Panel' to create one.</td>
                 </tr>
                 {% endfor %}
             </tbody>

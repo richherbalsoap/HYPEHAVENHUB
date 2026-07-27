@@ -5,8 +5,8 @@
 {% block content %}
 <div class="admin-section-title">
     <div>
-        <h5 class="mb-1">{% if is_edit %}Edit "{{ panel.title }}"{% else %}Create New Panel{% endif %}</h5>
-        <div class="eyebrow">Manage panel details</div>
+        <h5 class="mb-1">{% if is_edit %}Edit "{{ panel.title }}"{% else %}Create New Hero Panel{% endif %}</h5>
+        <div class="eyebrow">Manage hero photo, animated background text, and colors</div>
     </div>
     <a href="{% url 'admin_hero_panels' %}" class="btn btn-outline-secondary btn-sm" style="border-radius: var(--radius-sm); font-weight: 500;">
         <i class="fas fa-arrow-left me-1"></i> Back to List
@@ -14,49 +14,74 @@
 </div>
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-9">
         <form method="post" enctype="multipart/form-data" class="admin-card">
             {% csrf_token %}
             <div class="admin-card-header mb-4">
-                <h6>Panel Information</h6>
+                <h6><i class="fas fa-magic me-2 text-primary"></i>Hero Panel Details</h6>
             </div>
             
             <div class="row g-3">
                 <div class="col-md-6 mb-3">
-                    <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">Internal Title</label>
+                    <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">Title / Label</label>
                     {{ form.title }}
+                    <div class="form-text small">e.g., Ruby Stone Long Jhumka</div>
                     {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
                 </div>
                 
                 <div class="col-md-6 mb-3">
-                    <label for="{{ form.link.id_for_label }}" class="form-label fw-semibold">Click Link (URL)</label>
-                    {{ form.link }}
-                    {% if form.link.errors %}<div class="text-danger small mt-1">{{ form.link.errors.0 }}</div>{% endif %}
-                </div>
-            </div>
-            
-            <hr class="my-4" style="border-color: var(--admin-border);">
-            
-            <div class="row g-3">
-                <div class="col-12 mb-3">
-                    <label for="{{ form.image_url.id_for_label }}" class="form-label fw-semibold">Image URL (Cloudflare R2)</label>
-                    {{ form.image_url }}
-                    <div class="form-text small">Use this for Cloudflare R2 uploaded images.</div>
-                    {% if form.image_url.errors %}<div class="text-danger small mt-1">{{ form.image_url.errors.0 }}</div>{% endif %}
+                    <label for="{{ form.background_text.id_for_label }}" class="form-label fw-semibold">Text Behind Photo (Ghost Text)</label>
+                    {{ form.background_text }}
+                    <div class="form-text small">Big animated text shown behind the image (e.g. RUBY STONE LONG JHUMKA).</div>
+                    {% if form.background_text.errors %}<div class="text-danger small mt-1">{{ form.background_text.errors.0 }}</div>{% endif %}
                 </div>
             </div>
 
+            <hr class="my-4" style="border-color: var(--admin-border);">
+            
             <div class="row g-3">
-                <div class="col-md-8 mb-3">
-                    <label for="{{ form.image.id_for_label }}" class="form-label fw-semibold">Background Image</label>
-                    <input type="file" name="{{ form.image.name }}" id="{{ form.image.id_for_label }}" class="form-control" accept="image/*" {% if not is_edit %}required{% endif %}>
+                <div class="col-md-7 mb-3">
+                    <label for="{{ form.image.id_for_label }}" class="form-label fw-semibold">Upload Photo File</label>
+                    {{ form.image }}
+                    <div class="form-text small">Select photo from your device. Transparent PNG/WebP works best.</div>
                     {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors.0 }}</div>{% endif %}
                 </div>
-                {% if is_edit and panel.image %}
-                <div class="col-md-4 mb-3 d-flex align-items-end">
-                    <img src="{{ panel.image.url }}" alt="Current Image" class="img-thumbnail w-100" style="max-height: 100px; object-fit: cover; border-radius: 8px;">
+
+                <div class="col-md-5 mb-3">
+                    <label for="{{ form.image_url.id_for_label }}" class="form-label fw-semibold">OR Image URL (Optional)</label>
+                    {{ form.image_url }}
+                    <div class="form-text small">Hosted URL (Cloudflare R2, CDN, etc).</div>
+                    {% if form.image_url.errors %}<div class="text-danger small mt-1">{{ form.image_url.errors.0 }}</div>{% endif %}
+                </div>
+                
+                {% if is_edit and panel.display_image_url %}
+                <div class="col-12 mb-3">
+                    <label class="form-label fw-semibold small text-muted">Current Preview:</label>
+                    <div class="p-3 border rounded text-center" style="background: {{ panel.bg_color|default:'#222' }};">
+                        <img src="{{ panel.display_image_url }}" alt="Current Image" style="max-height: 140px; object-fit: contain;">
+                    </div>
                 </div>
                 {% endif %}
+            </div>
+            
+            <hr class="my-4" style="border-color: var(--admin-border);">
+
+            <div class="row g-3">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.bg_color.id_for_label }}" class="form-label fw-semibold">Hero Background Color</label>
+                    <div class="d-flex align-items-center gap-2">
+                        {{ form.bg_color }}
+                    </div>
+                    <div class="form-text small">Background color of hero section for this slide (e.g. #7C1F45).</div>
+                    {% if form.bg_color.errors %}<div class="text-danger small mt-1">{{ form.bg_color.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.link.id_for_label }}" class="form-label fw-semibold">Redirect Link (URL)</label>
+                    {{ form.link }}
+                    <div class="form-text small">Optional page link when user clicks on this panel.</div>
+                    {% if form.link.errors %}<div class="text-danger small mt-1">{{ form.link.errors.0 }}</div>{% endif %}
+                </div>
             </div>
             
             <hr class="my-4" style="border-color: var(--admin-border);">
@@ -65,13 +90,13 @@
                 <div class="col-md-4">
                     <label for="{{ form.order.id_for_label }}" class="form-label fw-semibold">Display Order</label>
                     {{ form.order }}
-                    <div class="form-text small">Lower numbers appear first (e.g. 0, 1, 2).</div>
+                    <div class="form-text small">Lower numbers appear first (0, 1, 2, 3...).</div>
                 </div>
                 
                 <div class="col-md-8 d-flex align-items-center mt-md-4 pt-md-2">
                     <div class="form-check form-switch p-3 rounded w-100" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
                         {{ form.is_active }}
-                        <label class="form-check-label ms-2 fw-semibold text-primary" for="{{ form.is_active.id_for_label }}">Set as Active</label>
+                        <label class="form-check-label ms-2 fw-semibold text-primary" for="{{ form.is_active.id_for_label }}">Active (Show on Homepage)</label>
                     </div>
                 </div>
             </div>

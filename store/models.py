@@ -799,8 +799,12 @@ class SiteSetting(models.Model):
 
 class HeroPanel(models.Model):
     """Model for dynamic hero slider panels"""
-    title = models.CharField(max_length=100, blank=True, help_text="Optional title for internal reference")
-    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob/Cloudflare R2 storage URL (preferred)")
+    title = models.CharField(max_length=100, blank=True, help_text="Title / Label (e.g. Ruby Stone Long Jhumka)")
+    background_text = models.CharField(max_length=200, blank=True, help_text="Text shown behind photo in hero animation (Ghost Text)")
+    image = models.ImageField(upload_to='hero_panels/', blank=True, null=True, help_text="Upload image file directly from admin")
+    image_url = models.URLField(max_length=600, blank=True, help_text="Vercel Blob/Cloudflare R2 storage URL (alternative)")
+    bg_color = models.CharField(max_length=20, default="#7C1F45", help_text="Hero section background color hex e.g. #7C1F45")
+    panel_color = models.CharField(max_length=20, default="#9A2E5B", help_text="Secondary panel color hex e.g. #9A2E5B")
     link = models.CharField(max_length=500, blank=True, help_text="Where should this panel redirect when clicked?")
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0, help_text="Order in which this panel appears")
@@ -816,7 +820,16 @@ class HeroPanel(models.Model):
 
     @property
     def display_image_url(self):
+        if self.image:
+            return self.image.url
         return self.image_url if self.image_url else ''
+
+    @property
+    def display_word(self):
+        if self.background_text:
+            return self.background_text.upper()
+        return (self.title or "").upper()
+
 
 
 class ProductQuestion(models.Model):

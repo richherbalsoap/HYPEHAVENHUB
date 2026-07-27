@@ -27,9 +27,9 @@ class SiteSettingAdmin(admin.ModelAdmin):
 
 @admin.register(HeroPanel)
 class HeroPanelAdmin(admin.ModelAdmin):
-    list_display = ('title', 'order', 'is_active', 'created_at')
+    list_display = ('title', 'background_text', 'order', 'is_active', 'created_at')
     list_editable = ('order', 'is_active')
-    search_fields = ('title',)
+    search_fields = ('title', 'background_text')
 
 from .models import ProductQuestion
 
