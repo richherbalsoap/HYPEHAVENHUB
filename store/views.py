@@ -1056,9 +1056,10 @@ def place_order(request):
         status='pending',
     )
 
-    # Create OrderItems
+    # Create OrderItems & link CustomBoxOrders if any
+    custom_selections = request.session.get('custom_box_selections', {})
     for item in cart.items.all():
-        OrderItem.objects.create(
+        order_item = OrderItem.objects.create(
             order=order,
             product=item.product,
             variant=item.variant,
@@ -1068,6 +1069,18 @@ def place_order(request):
             unit_price=item.unit_price,
             total_price=item.total_price,
         )
+
+        item_str_id = str(item.id)
+        if item_str_id in custom_selections:
+            box_info = custom_selections[item_str_id]
+            b_type = box_info.get('box_type', '12')
+            e_ids = box_info.get('earring_ids', [])
+            c_box, _ = CustomBoxOrder.objects.get_or_create(
+                order=order,
+                defaults={'box_type': b_type}
+            )
+            earring_objs = CustomEarring.objects.filter(id__in=e_ids)
+            c_box.selected_earrings.set(earring_objs)
 
     # Create Payment log
     payment = Payment.objects.create(
@@ -2352,6 +2365,92 @@ def customize_earrings(request):
         'pricing_json': json.dumps(pricing),
         'pricing': pricing,
         'razorpay_key_id': razorpay_key,
+    })
+
+
+@require_POST
+def customize_add_to_cart(request):
+    """Add a custom 12-pair or 16-pair earring box set to cart."""
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'requires_login': True,
+            'redirect': build_login_redirect_url(request, fallback='/customize/', notice='cart_required'),
+            'message': 'Please login first to add custom box to cart.',
+        }, status=401)
+
+    try:
+        data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Invalid data format.'})
+
+    box_type = data.get('box_type')
+    earring_ids = data.get('earring_ids', [])
+
+    if box_type not in ('12', '16'):
+        return JsonResponse({'success': False, 'message': 'Invalid box type.'})
+
+    expected_count = int(box_type)
+    if len(earring_ids) != expected_count:
+        return JsonResponse({'success': False, 'message': f'Please select exactly {expected_count} earrings.'})
+
+    # Validate earrings exist
+    earrings = CustomEarring.objects.filter(id__in=earring_ids, is_active=True)
+    if earrings.count() != expected_count:
+        return JsonResponse({'success': False, 'message': 'Some selected earrings are no longer available.'})
+
+    # Get pricing
+    try:
+        box_pricing = CustomBoxPricing.objects.get(box_type=box_type, is_active=True)
+        price = box_pricing.price
+    except CustomBoxPricing.DoesNotExist:
+        price = Decimal('999.00') if box_type == '12' else Decimal('1299.00')
+
+    # Get or create container category & product for Custom Box
+    category, _ = Category.objects.get_or_create(name='Custom Boxes', defaults={'slug': 'custom-boxes'})
+    product, _ = Product.objects.get_or_create(
+        slug=f'custom-{box_type}-pair-earring-box-set',
+        defaults={
+            'name': f'Custom {box_type}-Pair Earring Box Set',
+            'category': category,
+            'mrp': price,
+            'selling_price': price,
+            'description': f'Custom box set of {box_type} handpicked earring pairs.',
+            'stock': 999,
+            'is_active': True,
+        }
+    )
+    if product.selling_price != price:
+        product.selling_price = price
+        product.mrp = price
+        product.save()
+
+    # Add to cart
+    cart = get_or_create_cart(request)
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        product=product,
+        defaults={'quantity': 1}
+    )
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    # Save selection mapping in session
+    if 'custom_box_selections' not in request.session:
+        request.session['custom_box_selections'] = {}
+
+    request.session['custom_box_selections'][str(cart_item.id)] = {
+        'box_type': box_type,
+        'earring_ids': list(earring_ids),
+    }
+    request.session.modified = True
+
+    return JsonResponse({
+        'success': True,
+        'cart_count': cart.total_items,
+        'cart_item_id': cart_item.id,
+        'message': f'Custom {box_type}-Pair Earring Box added to cart!',
     })
 
 

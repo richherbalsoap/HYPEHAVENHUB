@@ -123,6 +123,7 @@ urlpatterns = [
 
     # Customize Your Earrings Customer Routes
     path('customize/', views.customize_earrings, name='customize_earrings'),
+    path('customize/add-to-cart/', views.customize_add_to_cart, name='customize_add_to_cart'),
     path('customize/place-order/', views.customize_place_order, name='customize_place_order'),
     path('customize/verify-payment/', views.customize_verify_payment, name='customize_verify_payment'),
 
