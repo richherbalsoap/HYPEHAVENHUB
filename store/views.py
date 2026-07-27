@@ -2327,6 +2327,3 @@ def order_success_animation(request, order_id):
     order = get_object_or_404(Order, order_id=order_id)
     return render(request, 'store/order_success.html', {'order': order, 'order_id': order_id})
 
-def box_customizer(request):
-    return render(request, 'store/box_customizer.html')
-
