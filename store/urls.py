@@ -111,6 +111,21 @@ urlpatterns = [
     path('admin/countries/<int:pk>/delete/', admin_views.admin_country_delete, name='admin_country_delete'),
     path('admin/get-presigned-url/', admin_views.get_presigned_url, name='admin_get_presigned_url'),
 
+    # Custom Admin: Customize Your Earrings
+    path('admin/custom-earrings/', admin_views.admin_custom_earrings, name='admin_custom_earrings'),
+    path('admin/custom-earrings/create/', admin_views.admin_custom_earring_create, name='admin_custom_earring_create'),
+    path('admin/custom-earrings/<int:pk>/edit/', admin_views.admin_custom_earring_edit, name='admin_custom_earring_edit'),
+    path('admin/custom-earrings/<int:pk>/delete/', admin_views.admin_custom_earring_delete, name='admin_custom_earring_delete'),
+    path('admin/custom-earrings/<int:pk>/toggle/', admin_views.admin_custom_earring_toggle, name='admin_custom_earring_toggle'),
+    path('admin/custom-orders/', admin_views.admin_custom_orders, name='admin_custom_orders'),
+    path('admin/custom-orders/<str:order_id>/', admin_views.admin_custom_order_detail, name='admin_custom_order_detail'),
+    path('admin/box-pricing/', admin_views.admin_custom_box_pricing, name='admin_custom_box_pricing'),
+
+    # Customize Your Earrings Customer Routes
+    path('customize/', views.customize_earrings, name='customize_earrings'),
+    path('customize/place-order/', views.customize_place_order, name='customize_place_order'),
+    path('customize/verify-payment/', views.customize_verify_payment, name='customize_verify_payment'),
+
     
     # User Complaints
     path('complaints/submit/', admin_views.submit_complaint, name='submit_complaint'),

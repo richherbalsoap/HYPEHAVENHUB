@@ -24,7 +24,8 @@ from .models import (
     ProductVariant, Cart, CartItem, Coupon, Order, OrderItem,
     Payment, OrderTracking, Review, ReviewImage, Wishlist,
     Address, ReturnRequest, Notification, UserPreference, FlashSale, Complaint,
-    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, ProductQuestion
+    UserProfile, CountrySetting, LANGUAGE_CHOICES, HeroPanel, ProductQuestion,
+    CustomEarring, CustomBoxOrder, CustomBoxPricing
 )
 from .forms import (
     SignupForm, LoginForm, OTPForm, ForgotPasswordForm, ResetPasswordForm,
@@ -2327,3 +2328,227 @@ def order_success_animation(request, order_id):
     order = get_object_or_404(Order, order_id=order_id)
     return render(request, 'store/order_success.html', {'order': order, 'order_id': order_id})
 
+
+# ═══════════════════════════════════════════════════════
+#  CUSTOMIZE YOUR EARRINGS — Frontend Views
+# ═══════════════════════════════════════════════════════
+
+def customize_earrings(request):
+    """Render the earring customizer page."""
+    earrings = CustomEarring.objects.filter(is_active=True)
+    pricing = {}
+    for p in CustomBoxPricing.objects.filter(is_active=True):
+        pricing[p.box_type] = float(p.price)
+
+    return render(request, 'store/customize_earrings.html', {
+        'earrings': earrings,
+        'pricing_json': json.dumps(pricing),
+        'pricing': pricing,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+    })
+
+
+@login_required
+@require_POST
+def customize_place_order(request):
+    """Create order + Razorpay payment for custom earring box."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid request.'})
+
+    box_type = data.get('box_type')  # '12' or '16'
+    earring_ids = data.get('earring_ids', [])
+    address_id = data.get('address_id')
+
+    if box_type not in ('12', '16'):
+        return JsonResponse({'success': False, 'message': 'Invalid box type.'})
+
+    expected_count = int(box_type)
+    if len(earring_ids) != expected_count:
+        return JsonResponse({'success': False, 'message': f'Please select exactly {expected_count} earrings.'})
+
+    # Validate earrings exist
+    earrings = CustomEarring.objects.filter(id__in=earring_ids, is_active=True)
+    if earrings.count() != expected_count:
+        return JsonResponse({'success': False, 'message': 'Some selected earrings are no longer available.'})
+
+    # Get pricing
+    try:
+        box_pricing = CustomBoxPricing.objects.get(box_type=box_type, is_active=True)
+    except CustomBoxPricing.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'This box type is currently not available.'})
+
+    # Get address
+    address = None
+    if address_id:
+        try:
+            address = Address.objects.get(id=address_id, user=request.user)
+        except Address.DoesNotExist:
+            pass
+
+    if not address:
+        address = Address.objects.filter(user=request.user).first()
+
+    if not address:
+        return JsonResponse({'success': False, 'message': 'Please add a delivery address first.'})
+
+    price = box_pricing.price
+
+    # Create Order
+    from django.db import transaction
+    with transaction.atomic():
+        order = Order.objects.create(
+            user=request.user,
+            address=address,
+            subtotal=price,
+            discount_amount=0,
+            delivery_charge=0,
+            grand_total=price,
+            notes=f'Custom {box_type}-pair earring box',
+        )
+
+        # Create OrderItem for the box
+        OrderItem.objects.create(
+            order=order,
+            product=None,
+            variant=None,
+            product_name=f'Custom {box_type}-Pair Earring Box',
+            variant_label='',
+            quantity=1,
+            unit_price=price,
+            total_price=price,
+        )
+
+        # Create CustomBoxOrder
+        custom_box = CustomBoxOrder.objects.create(
+            order=order,
+            box_type=box_type,
+        )
+        custom_box.selected_earrings.set(earrings)
+
+        # Create Payment
+        payment = Payment.objects.create(
+            order=order,
+            method='razorpay',
+            amount=price,
+            status='pending',
+        )
+
+        # Create Razorpay Order
+        import razorpay
+        try:
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            amount_in_paise = int(price * 100)
+
+            razorpay_order = client.order.create(data={
+                'amount': amount_in_paise,
+                'currency': 'INR',
+                'receipt': str(order.order_id),
+            })
+
+            payment.gateway_response = {
+                'razorpay_order_id': razorpay_order['id'],
+                'amount': amount_in_paise,
+                'currency': 'INR'
+            }
+            payment.save()
+
+            customer_name = f"{request.user.first_name} {request.user.last_name}".strip() or request.user.email
+
+            return JsonResponse({
+                'success': True,
+                'razorpay_order_id': razorpay_order['id'],
+                'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+                'amount': amount_in_paise,
+                'order_id': order.order_id,
+                'customer_name': customer_name,
+                'customer_email': request.user.email,
+                'customer_phone': address.phone or '',
+            })
+        except Exception as e:
+            logger.error(f"Razorpay order creation failed for custom box: {str(e)}")
+            order.delete()
+            return JsonResponse({
+                'success': False,
+                'message': 'Failed to initiate payment. Please try again.'
+            })
+
+
+@require_POST
+def customize_verify_payment(request):
+    """Verify Razorpay payment for custom earring box order."""
+    from django.db import transaction
+    try:
+        data = json.loads(request.body)
+        razorpay_payment_id = data.get('razorpay_payment_id')
+        razorpay_order_id = data.get('razorpay_order_id')
+        razorpay_signature = data.get('razorpay_signature')
+        local_order_id = data.get('order_id')
+
+        if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, local_order_id]):
+            return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
+
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(order_id=local_order_id)
+
+            if request.user.is_authenticated and order.user != request.user:
+                return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
+
+            payment = order.payment
+
+            import razorpay
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature,
+            }
+
+            try:
+                client.utility.verify_payment_signature(params_dict)
+            except Exception as e:
+                logger.error(f"Custom box Razorpay signature verification failed: {str(e)}")
+                payment.status = 'failed'
+                payment.save()
+                return JsonResponse({'success': False, 'message': 'Payment verification failed.'})
+
+            payment.status = 'success'
+            payment.payment_id = razorpay_payment_id
+            payment.gateway_response = params_dict
+            payment.save()
+
+            order.status = 'confirmed'
+            order.save()
+
+            OrderTracking.objects.create(
+                order=order,
+                status='confirmed',
+                description='Payment received. Custom earring box order confirmed.'
+            )
+
+            # Book Shiprocket order
+            try:
+                from .shipping import ShiprocketService
+                shipment_id, sr_err = ShiprocketService.create_shipment(order)
+                if shipment_id:
+                    order.shipping_tracking_id = str(shipment_id)
+                    order.save()
+                    logger.info(f"Shiprocket order created for custom box {order.order_id}: {shipment_id}")
+                elif sr_err:
+                    logger.warning(f"Shiprocket creation returned message for custom box {order.order_id}: {sr_err}")
+            except Exception as e:
+                logger.error(f"Shiprocket booking failed for custom box {order.order_id}: {str(e)}")
+
+            return JsonResponse({
+                'success': True,
+                'order_id': order.order_id,
+                'redirect': f'/order-success/{order.order_id}/'
+            })
+
+    except Order.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Order not found.'})
+    except Exception as e:
+        logger.error(f"Custom box payment verification error: {str(e)}")
+        return JsonResponse({'success': False, 'message': 'Payment verification failed. Contact support.'})

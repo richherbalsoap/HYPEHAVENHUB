@@ -1,0 +1,57 @@
+{% extends 'admin/custom_base.html' %}
+
+{% block title %}Box Pricing{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h5 class="fw-bold mb-1">Custom Box Pricing</h5>
+    <p class="text-muted mb-0">Set prices for 12-pair and 16-pair custom earring boxes.</p>
+</div>
+
+{% if messages %}
+<div class="mb-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm" style="max-width:600px;">
+    <div class="card-body p-4">
+        <form method="POST">
+            {% csrf_token %}
+
+            {% for box_type, data in pricing.items %}
+            <div class="card border mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-box me-2 text-primary"></i>{{ data.label }}
+                        </h6>
+                        <div class="form-check form-switch">
+                            <input type="checkbox" name="active_{{ box_type }}" id="active_{{ box_type }}"
+                                   class="form-check-input" {% if data.is_active %}checked{% endif %}>
+                            <label class="form-check-label small" for="active_{{ box_type }}">Active</label>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text fw-bold">₹</span>
+                        <input type="number" name="price_{{ box_type }}" class="form-control form-control-lg"
+                               value="{{ data.price }}" step="0.01" min="0" placeholder="e.g. 999"
+                               required>
+                    </div>
+                    <small class="text-muted mt-1 d-block">Price customers pay for a {{ data.label|lower }} box.</small>
+                </div>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fas fa-save me-2"></i>Save Pricing
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -15,7 +15,8 @@ from django.conf import settings
 
 from .models import (
     User, Product, ProductVariant, Order, Complaint, Category, Brand,
-    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage, SiteSetting, HeroPanel
+    AdminDashboardStats, Payment, OrderItem, Review, OrderTracking, ProductImage, ProductPrice, CountrySetting, LANGUAGE_CHOICES, ProductAplusImage, SiteSetting, HeroPanel,
+    CustomEarring, CustomBoxOrder, CustomBoxPricing, BOX_TYPE_CHOICES
 )
 from .forms import (
     ProductForm, AdminComplaintForm, ComplaintForm, AdminOrderUpdateForm, SiteSettingForm, HeroPanelForm
@@ -1143,3 +1144,149 @@ def admin_shiprocket_test(request):
     from .shipping import ShiprocketService
     result = ShiprocketService.test_connection()
     return render(request, 'admin/shiprocket_test.html', {'result': result})
+
+
+# ═══════════════════════════════════════════════════════
+#  CUSTOMIZE YOUR EARRINGS — Admin Views
+# ═══════════════════════════════════════════════════════
+
+@admin_required
+def admin_custom_earrings(request):
+    """List all uploaded single earring photos."""
+    earrings = CustomEarring.objects.all()
+    return render(request, 'admin/custom_earrings.html', {'earrings': earrings})
+
+
+@admin_required
+def admin_custom_earring_create(request):
+    """Upload a new single earring photo."""
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        image_url = request.POST.get('image_url', '').strip()
+        display_order = request.POST.get('order', 0)
+
+        if not name or not image_url:
+            messages.error(request, 'Name and Image URL are required.')
+            return render(request, 'admin/custom_earring_form.html', {
+                'form_name': name, 'form_image_url': image_url, 'form_order': display_order
+            })
+
+        try:
+            display_order = int(display_order)
+        except (ValueError, TypeError):
+            display_order = 0
+
+        CustomEarring.objects.create(
+            name=name,
+            image_url=image_url,
+            order=display_order,
+        )
+        messages.success(request, f'Earring "{name}" added successfully!')
+        return redirect('admin_custom_earrings')
+
+    return render(request, 'admin/custom_earring_form.html', {})
+
+
+@admin_required
+def admin_custom_earring_edit(request, pk):
+    """Edit an existing earring."""
+    earring = get_object_or_404(CustomEarring, pk=pk)
+
+    if request.method == 'POST':
+        earring.name = request.POST.get('name', earring.name).strip()
+        new_url = request.POST.get('image_url', '').strip()
+        if new_url:
+            earring.image_url = new_url
+        try:
+            earring.order = int(request.POST.get('order', earring.order))
+        except (ValueError, TypeError):
+            pass
+        earring.is_active = request.POST.get('is_active') == 'on'
+        earring.save()
+        messages.success(request, f'Earring "{earring.name}" updated!')
+        return redirect('admin_custom_earrings')
+
+    return render(request, 'admin/custom_earring_form.html', {
+        'earring': earring,
+        'form_name': earring.name,
+        'form_image_url': earring.image_url,
+        'form_order': earring.order,
+        'form_is_active': earring.is_active,
+    })
+
+
+@admin_required
+def admin_custom_earring_delete(request, pk):
+    """Delete an earring photo."""
+    earring = get_object_or_404(CustomEarring, pk=pk)
+    if request.method == 'POST':
+        name = earring.name
+        earring.delete()
+        messages.success(request, f'Earring "{name}" deleted.')
+    return redirect('admin_custom_earrings')
+
+
+@admin_required
+def admin_custom_earring_toggle(request, pk):
+    """Toggle active/inactive status."""
+    earring = get_object_or_404(CustomEarring, pk=pk)
+    earring.is_active = not earring.is_active
+    earring.save()
+    status = 'activated' if earring.is_active else 'deactivated'
+    messages.success(request, f'Earring "{earring.name}" {status}.')
+    return redirect('admin_custom_earrings')
+
+
+@admin_required
+def admin_custom_orders(request):
+    """List all real customize orders (only paid via Razorpay)."""
+    custom_orders = CustomBoxOrder.objects.select_related(
+        'order', 'order__user', 'order__payment', 'order__address'
+    ).filter(
+        order__payment__status='success'
+    ).order_by('-created_at')
+
+    return render(request, 'admin/custom_orders.html', {'custom_orders': custom_orders})
+
+
+@admin_required
+def admin_custom_order_detail(request, order_id):
+    """View which earrings the customer selected."""
+    custom_box = get_object_or_404(
+        CustomBoxOrder.objects.select_related(
+            'order', 'order__user', 'order__payment', 'order__address'
+        ).prefetch_related('selected_earrings'),
+        order__order_id=order_id
+    )
+    return render(request, 'admin/custom_order_detail.html', {'custom_box': custom_box})
+
+
+@admin_required
+def admin_custom_box_pricing(request):
+    """Set/edit prices for 12-pair and 16-pair boxes."""
+    if request.method == 'POST':
+        for box_type, _ in BOX_TYPE_CHOICES:
+            price = request.POST.get(f'price_{box_type}', '').strip()
+            is_active = request.POST.get(f'active_{box_type}') == 'on'
+            if price:
+                try:
+                    price_val = float(price)
+                    obj, _ = CustomBoxPricing.objects.get_or_create(box_type=box_type)
+                    obj.price = price_val
+                    obj.is_active = is_active
+                    obj.save()
+                except ValueError:
+                    pass
+        messages.success(request, 'Box pricing updated!')
+        return redirect('admin_custom_box_pricing')
+
+    pricing = {}
+    for box_type, label in BOX_TYPE_CHOICES:
+        obj = CustomBoxPricing.objects.filter(box_type=box_type).first()
+        pricing[box_type] = {
+            'label': label,
+            'price': obj.price if obj else '',
+            'is_active': obj.is_active if obj else True,
+        }
+
+    return render(request, 'admin/custom_box_pricing.html', {'pricing': pricing})

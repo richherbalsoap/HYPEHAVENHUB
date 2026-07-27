@@ -833,3 +833,56 @@ class ProductQuestion(models.Model):
     def __str__(self):
         return f"Question by {self.display_name} on {self.product.name}"
 
+
+class CustomEarring(models.Model):
+    """Single earring photos uploaded by admin for the customizer."""
+    name = models.CharField(max_length=150)
+    image_url = models.URLField(max_length=600, help_text="Cloudflare R2 image URL")
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0, help_text="Display order")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Custom Earring"
+        verbose_name_plural = "Custom Earrings"
+
+    def __str__(self):
+        return self.name
+
+
+BOX_TYPE_CHOICES = [
+    ('12', '12 Pairs'),
+    ('16', '16 Pairs'),
+]
+
+
+class CustomBoxPricing(models.Model):
+    """Admin-configurable pricing for custom earring boxes."""
+    box_type = models.CharField(max_length=2, choices=BOX_TYPE_CHOICES, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price in INR")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Custom Box Pricing"
+        verbose_name_plural = "Custom Box Pricing"
+
+    def __str__(self):
+        return f"{self.get_box_type_display()} — ₹{self.price}"
+
+
+class CustomBoxOrder(models.Model):
+    """Tracks which earrings a customer selected in their custom box order."""
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='custom_box')
+    box_type = models.CharField(max_length=2, choices=BOX_TYPE_CHOICES)
+    selected_earrings = models.ManyToManyField(CustomEarring, related_name='custom_orders')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Custom Box Order"
+        verbose_name_plural = "Custom Box Orders"
+
+    def __str__(self):
+        return f"Custom {self.get_box_type_display()} — {self.order.order_id}"
+

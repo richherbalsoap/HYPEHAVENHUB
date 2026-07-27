@@ -80,6 +80,7 @@
       <ul class="navbar-nav gap-3">
         <li class="nav-item"><a class="nav-link cat-link" href="{% url 'home' %}">{% t "home" %}</a></li>
         <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">{% t "all_jewelry" %}</a></li>
+        <li class="nav-item"><a class="nav-link cat-link text-warning fw-bold" href="{% url 'customize_earrings' %}">✨ Customize Box</a></li>
         {% for cat in all_categories %}
         <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
         {% endfor %}

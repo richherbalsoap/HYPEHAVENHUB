@@ -1,0 +1,473 @@
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Customize Your Earrings - HYPEHAVENHUB{% endblock %}
+
+{% block extra_css %}
+<style>
+  .customizer-hero {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #111827 100%);
+    color: #fff;
+    padding: 60px 0 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .customizer-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #d4af37;
+    color: #111;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 8px;
+  }
+  .box-option-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #fff;
+    position: relative;
+  }
+  .box-option-card:hover {
+    border-color: #d4af37;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(212,175,55,0.15);
+  }
+  .box-option-card.active {
+    border-color: #d4af37;
+    background: #fffdf5;
+    box-shadow: 0 8px 20px rgba(212,175,55,0.2);
+  }
+  .box-option-card.active::after {
+    content: '✓';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: #d4af37;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .earring-grid-card {
+    border: 2px solid #f3f4f6;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: #fff;
+    position: relative;
+    user-select: none;
+  }
+  .earring-grid-card:hover {
+    border-color: #d4af37;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+  }
+  .earring-grid-card.selected {
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.3);
+  }
+  .earring-grid-card.selected .check-overlay {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .check-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #d4af37;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .sticky-counter-bar {
+    position: sticky;
+    bottom: 20px;
+    z-index: 1000;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    border-radius: 50px;
+    padding: 14px 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    margin: 20px auto 30px;
+    max-width: 700px;
+    border: 1px solid rgba(212,175,55,0.3);
+  }
+
+  .progress-ring-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.15);
+    overflow: hidden;
+    width: 120px;
+  }
+  .progress-ring-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #f3e5ab);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  
+  .address-option {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .address-option:hover, .address-option.selected {
+    border-color: #d4af37;
+    background: #fffdf5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="customizer-hero">
+  <div class="container">
+    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold text-uppercase mb-3" style="letter-spacing: 1.5px; font-size: 11px;">
+      ✨ Build Your Own Set
+    </span>
+    <h1 class="fw-extrabold display-5 mb-2">Customize Your Earrings</h1>
+    <p class="text-light opacity-75 max-w-2xl mx-auto fs-5 mb-0">
+      Handpick your absolute favorite single earring pairs to create your personalized box set.
+    </p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <!-- Step 1: Choose Box Size -->
+  <div class="mb-5">
+    <div class="d-flex align-items-center mb-4">
+      <span class="step-badge">1</span>
+      <h3 class="fw-bold mb-0 fs-4">Select Box Size</h3>
+    </div>
+    
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="box-option-card active text-center" id="boxCard12" onclick="selectBoxSize('12')">
+          <div class="display-6 fw-bold text-dark mb-1">12 Pairs</div>
+          <p class="text-muted small mb-2">Select 12 single earring pairs</p>
+          <div class="fs-4 fw-extrabold text-warning text-dark" id="priceLabel12">
+            {% if pricing.12 %}₹{{ pricing.12 }}{% else %}₹999{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5 col-lg-4">
+        <div class="box-option-card text-center" id="boxCard16" onclick="selectBoxSize('16')">
+          <div class="display-6 fw-bold text-dark mb-1">16 Pairs</div>
+          <p class="text-muted small mb-2">Select 16 single earring pairs</p>
+          <div class="fs-4 fw-extrabold text-warning text-dark" id="priceLabel16">
+            {% if pricing.16 %}₹{{ pricing.16 }}{% else %}₹1299{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-5 opacity-10">
+
+  <!-- Step 2: Pick Earrings -->
+  <div>
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <div class="d-flex align-items-center">
+        <span class="step-badge">2</span>
+        <h3 class="fw-bold mb-0 fs-4">Pick Your Favorite Earrings</h3>
+      </div>
+      <span class="text-muted fs-6" id="selectionHint">
+        Click on any earring to select or deselect
+      </span>
+    </div>
+
+    {% if earrings %}
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3" id="earringGrid">
+      {% for earring in earrings %}
+      <div class="col">
+        <div class="earring-grid-card h-100" id="earring-{{ earring.id }}" onclick="toggleEarring({{ earring.id }})">
+          <div class="check-overlay"><i class="fas fa-check"></i></div>
+          <div class="ratio ratio-1x1 bg-light">
+            <img src="{{ earring.image_url }}" alt="{{ earring.name }}" class="w-100 h-100 object-fit-cover" loading="lazy">
+          </div>
+          <div class="p-2 text-center">
+            <small class="fw-semibold text-dark text-truncate d-block">{{ earring.name }}</small>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5 bg-light rounded-4">
+      <i class="fas fa-gem fa-3x text-muted mb-3"></i>
+      <h5 class="fw-bold">No Earrings Available</h5>
+      <p class="text-muted mb-0">Check back soon! The admin is adding new single earring pairs to the collection.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Delivery Address Section -->
+  {% if user.is_authenticated %}
+  <div class="mt-5 pt-4">
+    <div class="d-flex align-items-center mb-4">
+      <span class="step-badge">3</span>
+      <h3 class="fw-bold mb-0 fs-4">Select Delivery Address</h3>
+    </div>
+
+    <div id="addressContainer">
+      {% if user.addresses.exists %}
+      <div class="row g-3">
+        {% for addr in user.addresses.all %}
+        <div class="col-md-6">
+          <div class="address-option {% if forloop.first %}selected{% endif %}" data-address-id="{{ addr.id }}" onclick="selectAddress(this, {{ addr.id }})">
+            <div class="fw-bold text-dark">{{ addr.full_name }}</div>
+            <div class="small text-muted mb-1">{{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}</div>
+            <div class="small text-muted">{{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}</div>
+            <div class="small text-muted mt-1"><i class="fas fa-phone me-1"></i>{{ addr.phone }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-triangle me-3 fs-4"></i>
+        <div>
+          No address found. Please <a href="{% url 'add_address' %}" class="alert-link">add a shipping address</a> to your profile first before placing an order.
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Floating Bottom Bar -->
+<div class="sticky-counter-bar">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div>
+        <small class="text-light opacity-75 d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Selection</small>
+        <span class="fw-bold fs-5 text-white"><span id="selectedCount">0</span> / <span id="targetCount">12</span> Pairs</span>
+      </div>
+      <div class="progress-ring-bar d-none d-sm-block">
+        <div class="progress-ring-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-end d-none d-sm-block">
+        <small class="text-light opacity-75 d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Total Price</small>
+        <span class="fw-extrabold fs-5 text-warning" id="totalPriceDisplay">₹999</span>
+      </div>
+
+      {% if user.is_authenticated %}
+      <button class="btn btn-warning btn-lg fw-bold rounded-pill px-4" id="payBtn" disabled onclick="initiateCustomCheckout()">
+        <i class="fas fa-lock me-2"></i>Pay & Order
+      </button>
+      {% else %}
+      <a href="{% url 'login' %}?next={% url 'customize_earrings' %}" class="btn btn-warning btn-lg fw-bold rounded-pill px-4">
+        Login to Order
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  let currentBoxType = '12';
+  let targetCount = 12;
+  let selectedEarrings = new Set();
+  let selectedAddressId = {% if user.is_authenticated and user.addresses.first %}{{ user.addresses.first.id }}{% else %}null{% endif %};
+  const pricing = {{ pricing_json|safe }};
+
+  function selectBoxSize(type) {
+    currentBoxType = type;
+    targetCount = parseInt(type);
+    
+    document.getElementById('boxCard12').classList.toggle('active', type === '12');
+    document.getElementById('boxCard16').classList.toggle('active', type === '16');
+    
+    document.getElementById('targetCount').innerText = targetCount;
+    
+    const price = pricing[type] || (type === '12' ? 999 : 1299);
+    document.getElementById('totalPriceDisplay').innerText = '₹' + price;
+
+    // Reset selection if exceeding target
+    if (selectedEarrings.size > targetCount) {
+      selectedEarrings.clear();
+      document.querySelectorAll('.earring-grid-card').forEach(card => card.classList.remove('selected'));
+    }
+
+    updateCounter();
+  }
+
+  function toggleEarring(id) {
+    const card = document.getElementById('earring-' + id);
+    if (selectedEarrings.has(id)) {
+      selectedEarrings.delete(id);
+      card.classList.remove('selected');
+    } else {
+      if (selectedEarrings.size >= targetCount) {
+        alert(`You can only select ${targetCount} pairs for this box!`);
+        return;
+      }
+      selectedEarrings.add(id);
+      card.classList.add('selected');
+    }
+    updateCounter();
+  }
+
+  function updateCounter() {
+    const count = selectedEarrings.size;
+    document.getElementById('selectedCount').innerText = count;
+    
+    const pct = Math.min(100, (count / targetCount) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    const payBtn = document.getElementById('payBtn');
+    if (payBtn) {
+      payBtn.disabled = (count !== targetCount) || !selectedAddressId;
+    }
+  }
+
+  function selectAddress(element, addressId) {
+    document.querySelectorAll('.address-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+    selectedAddressId = addressId;
+    updateCounter();
+  }
+
+  async function initiateCustomCheckout() {
+    if (selectedEarrings.size !== targetCount) {
+      alert(`Please pick exactly ${targetCount} earring pairs.`);
+      return;
+    }
+    if (!selectedAddressId) {
+      alert('Please select a delivery address.');
+      return;
+    }
+
+    const payBtn = document.getElementById('payBtn');
+    payBtn.disabled = true;
+    payBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+    try {
+      const resp = await fetch('{% url "customize_place_order" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+          box_type: currentBoxType,
+          earring_ids: Array.from(selectedEarrings),
+          address_id: selectedAddressId
+        })
+      });
+
+      const data = await resp.json();
+      if (!data.success) {
+        alert(data.message || 'Error creating order.');
+        payBtn.disabled = false;
+        payBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Pay & Order';
+        return;
+      }
+
+      // Open Razorpay Checkout
+      const options = {
+        key: data.razorpay_key_id,
+        amount: data.amount,
+        currency: 'INR',
+        name: 'HYPEHAVENHUB',
+        description: `Custom ${currentBoxType}-Pair Earring Box`,
+        order_id: data.razorpay_order_id,
+        prefill: {
+          name: data.customer_name,
+          email: data.customer_email,
+          contact: data.customer_phone
+        },
+        theme: { color: '#d4af37' },
+        handler: async function (response) {
+          payBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verifying Payment...';
+          const verifyResp = await fetch('{% url "customize_verify_payment" %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+              order_id: data.order_id
+            })
+          });
+
+          const verifyData = await verifyResp.json();
+          if (verifyData.success) {
+            window.location.href = verifyData.redirect;
+          } else {
+            alert(verifyData.message || 'Payment verification failed.');
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Pay & Order';
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Pay & Order';
+          }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert('Checkout error: ' + err.message);
+      payBtn.disabled = false;
+      payBtn.innerHTML = '<i class="fas fa-lock me-2"></i>Pay & Order';
+    }
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    selectBoxSize('12');
+  });
+</script>
+{% endblock %}

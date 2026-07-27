@@ -1,0 +1,84 @@
+{% extends 'admin/custom_base.html' %}
+
+{% block title %}Custom Orders{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h5 class="fw-bold mb-1">Custom Earring Orders</h5>
+        <p class="text-muted mb-0">Only showing real orders with successful Razorpay payment.</p>
+    </div>
+    <span class="badge bg-primary fs-6">{{ custom_orders|length }} Order{{ custom_orders|length|pluralize }}</span>
+</div>
+
+{% if custom_orders %}
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Order ID</th>
+                    <th>Customer</th>
+                    <th>Box Type</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th class="text-end pe-4">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cbo in custom_orders %}
+                <tr>
+                    <td class="ps-4">
+                        <a href="{% url 'admin_custom_order_detail' cbo.order.order_id %}" class="fw-semibold text-primary">
+                            {{ cbo.order.order_id }}
+                        </a>
+                    </td>
+                    <td>
+                        <div class="fw-semibold">{{ cbo.order.user.get_full_name }}</div>
+                        <small class="text-muted">{{ cbo.order.user.email }}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if cbo.box_type == '16' %}warning text-dark{% else %}info{% endif %} rounded-pill px-3">
+                            {{ cbo.get_box_type_display }}
+                        </span>
+                    </td>
+                    <td class="fw-bold">₹{{ cbo.order.grand_total }}</td>
+                    <td>
+                        {% if cbo.order.payment.status == 'success' %}
+                        <span class="badge bg-success rounded-pill"><i class="fas fa-check me-1"></i>Paid</span>
+                        {% else %}
+                        <span class="badge bg-danger rounded-pill">{{ cbo.order.payment.status|title }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-{% if cbo.order.status == 'delivered' %}success{% elif cbo.order.status == 'shipped' %}primary{% elif cbo.order.status == 'cancelled' %}danger{% else %}secondary{% endif %} rounded-pill">
+                            {{ cbo.order.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <small>{{ cbo.created_at|date:"d M Y" }}</small><br>
+                        <small class="text-muted">{{ cbo.created_at|time:"h:i A" }}</small>
+                    </td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'admin_custom_order_detail' cbo.order.order_id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+        <h6 class="text-muted">No custom orders yet</h6>
+        <p class="text-muted small">Once customers create custom earring boxes and pay via Razorpay, orders will appear here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

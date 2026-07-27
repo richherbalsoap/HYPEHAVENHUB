@@ -1,0 +1,152 @@
+{% extends 'admin/custom_base.html' %}
+
+{% block title %}{% if earring %}Edit Earring{% else %}Add Earring{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'admin_custom_earrings' %}" class="text-decoration-none">
+        <i class="fas fa-arrow-left me-2"></i>Back to Earrings
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width:700px;">
+    <div class="card-header bg-white border-bottom py-3">
+        <h5 class="mb-0 fw-bold">
+            {% if earring %}<i class="fas fa-edit me-2 text-primary"></i>Edit Earring{% else %}<i class="fas fa-plus me-2 text-primary"></i>Add New Earring{% endif %}
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="POST" id="earringForm">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Earring Name <span class="text-danger">*</span></label>
+                <input type="text" name="name" class="form-control" required
+                       value="{{ form_name|default:'' }}" placeholder="e.g. Gold Peacock Stud">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Image <span class="text-danger">*</span></label>
+                <input type="hidden" name="image_url" id="imageUrlInput" value="{{ form_image_url|default:'' }}">
+
+                <div id="uploadArea" class="border rounded-3 p-4 text-center position-relative"
+                     style="border-style:dashed!important; cursor:pointer; min-height:200px; background:#fafafa;">
+
+                    <div id="uploadPlaceholder" {% if form_image_url %}style="display:none"{% endif %}>
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-1">Click or drag to upload earring photo</p>
+                        <small class="text-muted">JPG, PNG, WebP — max 5MB</small>
+                    </div>
+
+                    <div id="uploadPreview" {% if not form_image_url %}style="display:none"{% endif %}>
+                        <img id="previewImg" src="{{ form_image_url|default:'' }}"
+                             style="max-height:200px; border-radius:8px; object-fit:contain;">
+                        <br>
+                        <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">
+                            <i class="fas fa-times me-1"></i>Remove
+                        </button>
+                    </div>
+
+                    <div id="uploadProgress" style="display:none;" class="py-4">
+                        <div class="spinner-border text-primary mb-2" role="status"></div>
+                        <p class="text-muted mb-0">Uploading to Cloudflare R2...</p>
+                    </div>
+
+                    <input type="file" id="fileInput" accept="image/*" class="position-absolute top-0 start-0 w-100 h-100"
+                           style="opacity:0; cursor:pointer;" onchange="handleFileUpload(this)">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Display Order</label>
+                <input type="number" name="order" class="form-control" value="{{ form_order|default:0 }}"
+                       min="0" placeholder="0 = first">
+                <small class="text-muted">Lower numbers appear first.</small>
+            </div>
+
+            {% if earring %}
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input type="checkbox" name="is_active" id="isActive" class="form-check-input"
+                           {% if form_is_active %}checked{% endif %}>
+                    <label class="form-check-label fw-semibold" for="isActive">Active (visible to customers)</label>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                    <i class="fas fa-save me-2"></i>{% if earring %}Update{% else %}Add{% endif %} Earring
+                </button>
+                <a href="{% url 'admin_custom_earrings' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+async function handleFileUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        alert('File too large. Maximum 5MB.');
+        input.value = '';
+        return;
+    }
+
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+    document.getElementById('uploadPreview').style.display = 'none';
+    document.getElementById('uploadProgress').style.display = 'block';
+
+    try {
+        // Step 1: Get presigned URL from our backend
+        const presignResp = await fetch(`/admin/get-presigned-url/?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type)}&folder=custom-earrings`);
+        const presignData = await presignResp.json();
+
+        if (!presignData.success) {
+            throw new Error(presignData.error || 'Failed to get upload URL');
+        }
+
+        // Step 2: Upload directly to R2
+        const uploadResp = await fetch(presignData.presigned_url, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type }
+        });
+
+        if (!uploadResp.ok) {
+            throw new Error('Upload to storage failed');
+        }
+
+        // Step 3: Set the public URL
+        document.getElementById('imageUrlInput').value = presignData.public_url;
+        document.getElementById('previewImg').src = presignData.public_url;
+        document.getElementById('uploadProgress').style.display = 'none';
+        document.getElementById('uploadPreview').style.display = 'block';
+    } catch (err) {
+        alert('Upload failed: ' + err.message);
+        document.getElementById('uploadProgress').style.display = 'none';
+        document.getElementById('uploadPlaceholder').style.display = 'block';
+    }
+
+    input.value = '';
+}
+
+function removeImage() {
+    document.getElementById('imageUrlInput').value = '';
+    document.getElementById('uploadPreview').style.display = 'none';
+    document.getElementById('uploadPlaceholder').style.display = 'block';
+}
+</script>
+{% endblock %}
