@@ -2335,16 +2335,23 @@ def order_success_animation(request, order_id):
 
 def customize_earrings(request):
     """Render the earring customizer page."""
-    earrings = CustomEarring.objects.filter(is_active=True)
-    pricing = {}
-    for p in CustomBoxPricing.objects.filter(is_active=True):
-        pricing[p.box_type] = float(p.price)
+    try:
+        earrings = CustomEarring.objects.filter(is_active=True)
+        pricing = {}
+        for p in CustomBoxPricing.objects.filter(is_active=True):
+            pricing[p.box_type] = float(p.price)
+    except Exception as e:
+        logger.error(f"Error fetching customizer data: {str(e)}")
+        earrings = []
+        pricing = {}
+
+    razorpay_key = getattr(settings, 'RAZORPAY_KEY_ID', '')
 
     return render(request, 'store/customize_earrings.html', {
         'earrings': earrings,
         'pricing_json': json.dumps(pricing),
         'pricing': pricing,
-        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+        'razorpay_key_id': razorpay_key,
     })
 
 
