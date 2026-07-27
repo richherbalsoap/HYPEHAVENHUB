@@ -8,6 +8,7 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url='/static/images/logo-golden-hh.jpg', permanent=True)),
     # Home & Products
     path('', views.home, name='home'),
+    path('customizer/', views.box_customizer, name='box_customizer'),
     path('products/', views.product_list, name='product_list'),
     path('product/<slug:slug>/', views.product_detail, name='product_detail'),
     path('category/<slug:slug>/', views.category_products, name='category_products'),
