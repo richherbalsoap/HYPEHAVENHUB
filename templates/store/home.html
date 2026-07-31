@@ -234,13 +234,13 @@
           <img src="{% static 'images/img1.jpg' %}" alt="12-Piece Jhumka Box Set" width="800" height="800" loading="eager" decoding="async">
         </div>
         <div class="hhh2-stage-slide" id="hhh2-slide-1" role="img" aria-label="16-Piece Jhumka Box Set">
-          <img src="{% static 'images/img2.jpg' %}" alt="16-Piece Jhumka Box Set" width="800" height="800" loading="lazy" decoding="async">
+          <img src="{% static 'images/img2.jpg' %}" alt="16-Piece Jhumka Box Set" width="800" height="800" loading="eager" decoding="async">
         </div>
         <div class="hhh2-stage-slide" id="hhh2-slide-2" role="img" aria-label="Black Clover Jewelry Set">
-          <img src="{% static 'images/img3.jpg' %}" alt="Black Clover Jewelry Set" width="800" height="800" loading="lazy" decoding="async">
+          <img src="{% static 'images/img3.jpg' %}" alt="Black Clover Jewelry Set" width="800" height="800" loading="eager" decoding="async">
         </div>
         <div class="hhh2-stage-slide" id="hhh2-slide-3" role="img" aria-label="Handheld 12-Piece Box">
-          <img src="{% static 'images/img4.jpg' %}" alt="Handheld 12-Piece Box" width="800" height="800" loading="lazy" decoding="async">
+          <img src="{% static 'images/img4.jpg' %}" alt="Handheld 12-Piece Box" width="800" height="800" loading="eager" decoding="async">
         </div>
       </div>
 
@@ -258,19 +258,19 @@
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="1" aria-label="View 16-Piece Jhumka Box Set" id="hhh2-thumb-1">
-              <img src="{% static 'images/img2.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+              <img src="{% static 'images/img2.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
             <span class="hhh2-thumb-caption" aria-hidden="true">16-Piece Box</span>
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="2" aria-label="View Black Clover Jewelry Set" id="hhh2-thumb-2">
-              <img src="{% static 'images/img3.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+              <img src="{% static 'images/img3.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
             <span class="hhh2-thumb-caption" aria-hidden="true">Necklace Set</span>
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="3" aria-label="View Handheld 12-Piece Box" id="hhh2-thumb-3">
-              <img src="{% static 'images/img4.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+              <img src="{% static 'images/img4.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
             <span class="hhh2-thumb-caption" aria-hidden="true">Customize</span>
           </li>
@@ -286,6 +286,11 @@
 <script>
 (function () {
   'use strict';
+  // Preload all 4 hero images immediately
+  ['{% static "images/img1.jpg" %}', '{% static "images/img2.jpg" %}', '{% static "images/img3.jpg" %}', '{% static "images/img4.jpg" %}'].forEach(function(src) {
+    var img = new Image(); img.src = src;
+  });
+
   var TOTAL = 4, INTERVAL_MS = 3200;
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var current = 0, timer = null, paused = false;
