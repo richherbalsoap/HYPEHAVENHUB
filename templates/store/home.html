@@ -7,349 +7,328 @@
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 
-<!-- HypeHavenHub Hero Carousel (all styles/IDs are hhh- prefixed to avoid clashing with site-wide CSS/JS) -->
-<div id="hhh-hero-root"></div>
-
+<!-- ══════════════════════════════════════════════
+     HypeHavenHub — Two-Column Hero (hhh2-)
+══════════════════════════════════════════════ -->
 <style>
-  #hhh-hero-root, #hhh-hero-root *{ box-sizing:border-box; }
-  #hhh-hero-root{ width:100%; font-family:'Inter', sans-serif; }
+/* ── Tokens & Reset ─────────────────────────── */
+#hhh2-hero, #hhh2-hero * { box-sizing: border-box; }
+#hhh2-hero {
+  --gold:       #B8863E;
+  --gold-deep:  #96692A;
+  --gold-soft:  #E7CFA0;
+  --ink:        #231C14;
+  --muted:      #7C7061;
+  --hairline:   rgba(35,28,20,0.10);
+  font-family: 'Inter', sans-serif;
+  background: #ffffff;
+  width: 100%;
+  padding: 64px 24px;
+}
+.hhh2-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
 
-  .hhh-hero-outer{
-    position:relative;
-    width:100vw;
-    margin-left: calc(-50vw + 50%); /* full bleed */
-    overflow:hidden;
-    /* We'll animate background via Anime.js, no CSS transition needed here */
-  }
-  .hhh-hero-inner{
-    position:relative;
-    width:100%;
-    height:100vh;
-    min-height:560px;
-    overflow:hidden;
-  }
-  @media (max-width: 639px){
-    .hhh-hero-inner{
-      height: 54vh;
-      min-height: 350px;
-      max-height: 440px;
-    }
-    .hhh-ghost{
-      top: 8%;
-      font-size: clamp(22px, 7.5vw, 38px);
-    }
-    .hhh-brand img{
-      height: 32px;
-    }
-    .hhh-cta{
-      bottom: 14px;
-      font-size: clamp(16px, 4.8vw, 24px);
-    }
-  }
+/* ── Left column ────────────────────────────── */
+.hhh2-left {
+  flex: 0 0 420px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+}
+.hhh2-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin: 0 0 18px;
+}
+.hhh2-headline {
+  font-family: 'Playfair Display', serif;
+  font-weight: 600;
+  font-size: clamp(38px, 4.6vw, 58px);
+  line-height: 1.08;
+  color: var(--ink);
+  margin: 0 0 20px;
+}
+.hhh2-headline em {
+  display: block;
+  font-style: italic;
+  color: var(--gold);
+}
+.hhh2-subtext {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 38ch;
+  margin: 0 0 32px;
+}
+.hhh2-ctas {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.hhh2-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 28px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .22s, color .22s, box-shadow .22s, transform .18s;
+  border: 2px solid transparent;
+}
+.hhh2-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.hhh2-btn--solid { background: var(--gold); color: #fff; border-color: var(--gold); }
+.hhh2-btn--solid:hover { background: var(--gold-deep); border-color: var(--gold-deep); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,134,62,.35); color: #fff; }
+.hhh2-btn--outline { background: transparent; color: var(--ink); border-color: var(--hairline); }
+.hhh2-btn--outline:hover { border-color: var(--gold-soft); background: rgba(231,207,160,.08); transform: translateY(-1px); }
+.hhh2-divider { border: none; border-top: 1px solid var(--hairline); margin: 0 0 20px; }
+.hhh2-trust { display: flex; align-items: flex-start; gap: 12px; }
+.hhh2-trust-icon { font-family: 'Material Symbols Outlined'; font-size: 22px; color: var(--gold); line-height: 1; flex-shrink: 0; margin-top: 1px; }
+.hhh2-trust-title { font-size: 13.5px; font-weight: 700; color: var(--ink); display: block; margin-bottom: 2px; }
+.hhh2-trust-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 
-  .hhh-grain{
-    position:absolute; inset:0; pointer-events:none; z-index:50;
-    opacity:0.4;
-    background-size:200px 200px;
-    background-repeat:repeat;
-  }
+/* ── Right column ───────────────────────────── */
+.hhh2-right { flex: 1; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.hhh2-stage {
+  position: relative;
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  max-width: 480px;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 8px 48px rgba(35,28,20,.10), 0 2px 8px rgba(35,28,20,.06);
+  overflow: hidden;
+}
+.hhh2-stage::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 60% 40%, rgba(231,207,160,.30) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
+}
+.hhh2-stage-slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; z-index: 1;
+  transition: opacity .85s ease, transform .85s ease;
+  transform: scale(1.03);
+}
+.hhh2-stage-slide.active { opacity: 1; z-index: 2; transform: scale(1); }
+.hhh2-stage-slide img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 28px; user-select: none; }
 
-  .hhh-ghost{
-    position:absolute; inset-inline:0; top:13%;
-    display:flex; align-items:center; justify-content:center;
-    pointer-events:none; user-select:none; z-index:2;
-    font-family:'Anton', sans-serif;
-    font-size:clamp(35px, 10vw, 150px);
-    font-weight:900;
-    color:#fff;
-    line-height:1;
-    text-transform:uppercase;
-    letter-spacing:-0.02em;
-    white-space:normal;
-    text-align:center;
-    padding:0 20px;
-    opacity:1;
-  }
+/* ── Selector ───────────────────────────────── */
+.hhh2-selector { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
+.hhh2-chev {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid var(--hairline); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--muted);
+  transition: border-color .2s, background .2s, transform .18s;
+}
+.hhh2-chev:hover { border-color: var(--gold-soft); background: rgba(231,207,160,.12); color: var(--gold-deep); transform: scale(1.08); }
+.hhh2-chev:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.hhh2-thumb-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
+.hhh2-thumb-item { position: relative; }
+.hhh2-thumb {
+  display: block; width: 64px; height: 64px; border-radius: 12px;
+  overflow: hidden; border: 2px solid transparent; cursor: pointer;
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+  background: #f5f0ea; padding: 0;
+}
+.hhh2-thumb:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.hhh2-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.hhh2-thumb.active { border-color: var(--gold); transform: scale(1.08); box-shadow: 0 4px 16px rgba(184,134,62,.28); }
+.hhh2-thumb-caption {
+  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+  background: var(--ink); color: #fff; font-size: 11px; white-space: nowrap;
+  padding: 5px 10px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.hhh2-thumb-caption::after {
+  content: ''; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+  border: 5px solid transparent; border-left-color: var(--ink);
+}
+.hhh2-thumb:hover ~ .hhh2-thumb-caption,
+.hhh2-thumb.active ~ .hhh2-thumb-caption { opacity: 1; }
 
-  .hhh-brand{
-    position:absolute; top:20px; left:16px; z-index:60;
-    display:flex; align-items:center; gap:10px;
-  }
-  .hhh-brand img{ height:40px; width:auto; display:block; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.35)); }
-  @media(min-width:640px){ .hhh-brand{ left:32px; } .hhh-brand img{ height:52px; } }
-
-  .hhh-carousel{ position:absolute; inset:0; z-index:3; }
-  .hhh-card{
-    position:absolute;
-    aspect-ratio: 0.74 / 1;
-    will-change: transform, filter, opacity, left, bottom, height;
-  }
-  .hhh-card img{
-    width:100%; height:100%;
-    object-fit:contain;
-    object-position:bottom center;
-    display:block;
-    -webkit-user-drag:none;
-    user-select:none;
-    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.45));
-  }
-
-
-
-  .hhh-cta{
-    position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:60;
-    display:flex; align-items:center; gap:8px;
-    font-family:'Anton', sans-serif; font-weight:400;
-    color:#fff; opacity:0.95; text-decoration:none;
-    font-size:clamp(22px,5vw,48px); line-height:1;
-    letter-spacing:-0.02em; text-transform:uppercase;
-    transition:opacity 200ms, transform 200ms;
-  }
-  .hhh-cta:hover{ opacity:1; color:#fff; transform:translateX(-50%) scale(1.05); }
-  @media(min-width:640px){ .hhh-cta{ bottom:50px; gap:10px; } }
-  .hhh-cta svg{ width:22px; height:22px; }
-  @media(min-width:640px){ .hhh-cta svg{ width:30px; height:30px; } }
-
-  .hhh-dots{
-    position:absolute; top:20px; right:16px; z-index:60;
-    display:flex; gap:6px;
-  }
-  @media(min-width:640px){ .hhh-dots{ top:28px; right:32px; gap:8px; } }
-  .hhh-dot{
-    width:6px; height:6px; border-radius:50%;
-    background:rgba(255,255,255,0.4);
-    transition: background-color 300ms, transform 300ms;
-  }
-  .hhh-dot.active{ background:#fff; transform:scale(1.3); }
+/* ── Responsive <860px ──────────────────────── */
+@media (max-width: 860px) {
+  #hhh2-hero { padding: 48px 20px; }
+  .hhh2-wrap { flex-direction: column; gap: 32px; align-items: center; text-align: center; }
+  .hhh2-left { flex: none; max-width: 100%; align-items: center; order: 2; }
+  .hhh2-subtext { max-width: 52ch; }
+  .hhh2-right { order: 1; width: 100%; flex-direction: column; align-items: center; gap: 14px; }
+  .hhh2-stage { width: min(72vw, 340px); max-width: none; }
+  .hhh2-selector { flex-direction: row; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 4px; justify-content: center; }
+  .hhh2-selector::-webkit-scrollbar { display: none; }
+  .hhh2-thumb-list { flex-direction: row; gap: 10px; }
+  .hhh2-thumb-item { scroll-snap-align: center; }
+  .hhh2-thumb-caption { right: auto; left: 50%; top: auto; bottom: calc(100% + 8px); transform: translateX(-50%); }
+  .hhh2-thumb-caption::after { left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--ink); border-left-color: transparent; }
+}
+@media (max-width: 480px) {
+  #hhh2-hero { padding: 36px 16px; }
+  .hhh2-headline { font-size: clamp(30px, 8.5vw, 44px); }
+  .hhh2-subtext { font-size: 14.5px; }
+  .hhh2-btn { font-size: 14px; padding: 11px 22px; }
+  .hhh2-stage { width: 78vw; }
+  .hhh2-thumb { width: 52px; height: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hhh2-stage-slide { transition: opacity .3s ease; transform: none !important; }
+  .hhh2-stage-slide.active { transform: none; }
+}
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<section id="hhh2-hero" aria-label="Hero — Featured Collections">
+  <div class="hhh2-wrap">
+
+    <!-- Left column -->
+    <div class="hhh2-left">
+      <p class="hhh2-eyebrow">HypeHavenHub</p>
+      <h1 class="hhh2-headline">Your Elegant<em>Statement</em></h1>
+      <p class="hhh2-subtext">Handcrafted jhumkas, necklaces and bracelets — sorted, packed, and delivered straight from the velvet stand to your door.</p>
+      <div class="hhh2-ctas">
+        <a href="{% url 'product_list' %}" class="hhh2-btn hhh2-btn--solid" id="hhh2-cta-explore" aria-label="Explore all jewelry collections">Explore</a>
+        <a href="/customize/" class="hhh2-btn hhh2-btn--outline" id="hhh2-cta-customize" aria-label="Customize your own jewelry box"><span aria-hidden="true">✨</span> Customize Box</a>
+      </div>
+      <hr class="hhh2-divider" aria-hidden="true">
+      <div class="hhh2-trust" role="note">
+        <span class="hhh2-trust-icon" aria-hidden="true">verified_user</span>
+        <div>
+          <strong class="hhh2-trust-title">Quality Checked</strong>
+          <span class="hhh2-trust-desc">Each piece's finish is manually verified before it ships.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="hhh2-right">
+      <!-- Stage -->
+      <div class="hhh2-stage" id="hhh2-stage" aria-live="polite" aria-atomic="true" aria-label="12-Piece Jhumka Box Set">
+        <div class="hhh2-stage-slide active" id="hhh2-slide-0" role="img" aria-label="12-Piece Jhumka Box Set">
+          <img src="{% static 'images/img1.webp' %}" alt="12-Piece Jhumka Box Set" width="800" height="800" loading="eager" decoding="async">
+        </div>
+        <div class="hhh2-stage-slide" id="hhh2-slide-1" role="img" aria-label="16-Piece Jhumka Box Set">
+          <img src="{% static 'images/img2.webp' %}" alt="16-Piece Jhumka Box Set" width="800" height="800" loading="lazy" decoding="async">
+        </div>
+        <div class="hhh2-stage-slide" id="hhh2-slide-2" role="img" aria-label="Bracelets Collection">
+          <img src="{% static 'images/img3.webp' %}" alt="Bracelets" width="800" height="800" loading="lazy" decoding="async">
+        </div>
+        <div class="hhh2-stage-slide" id="hhh2-slide-3" role="img" aria-label="Customize Your Earrings">
+          <img src="{% static 'images/img4.webp' %}" alt="Customize Your Earrings" width="800" height="800" loading="lazy" decoding="async">
+        </div>
+      </div>
+
+      <!-- Thumbnail selector -->
+      <nav class="hhh2-selector" id="hhh2-selector" aria-label="Product category thumbnails">
+        <button class="hhh2-chev" id="hhh2-prev" aria-label="Previous image">
+          <span class="material-symbols-outlined hhh2-chev-icon" aria-hidden="true">keyboard_arrow_up</span>
+        </button>
+        <ul class="hhh2-thumb-list" role="list">
+          <li class="hhh2-thumb-item">
+            <button class="hhh2-thumb active" data-index="0" aria-label="View 12-Piece Jhumka Box Set" aria-current="true" id="hhh2-thumb-0">
+              <img src="{% static 'images/img1.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
+            </button>
+            <span class="hhh2-thumb-caption" aria-hidden="true">12-Piece Box</span>
+          </li>
+          <li class="hhh2-thumb-item">
+            <button class="hhh2-thumb" data-index="1" aria-label="View 16-Piece Jhumka Box Set" id="hhh2-thumb-1">
+              <img src="{% static 'images/img2.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+            </button>
+            <span class="hhh2-thumb-caption" aria-hidden="true">16-Piece Box</span>
+          </li>
+          <li class="hhh2-thumb-item">
+            <button class="hhh2-thumb" data-index="2" aria-label="View Bracelets collection" id="hhh2-thumb-2">
+              <img src="{% static 'images/img3.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+            </button>
+            <span class="hhh2-thumb-caption" aria-hidden="true">Bracelets</span>
+          </li>
+          <li class="hhh2-thumb-item">
+            <button class="hhh2-thumb" data-index="3" aria-label="View Customize Your Earrings" id="hhh2-thumb-3">
+              <img src="{% static 'images/img4.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+            </button>
+            <span class="hhh2-thumb-caption" aria-hidden="true">Customize</span>
+          </li>
+        </ul>
+        <button class="hhh2-chev" id="hhh2-next" aria-label="Next image">
+          <span class="material-symbols-outlined hhh2-chev-icon" aria-hidden="true">keyboard_arrow_down</span>
+        </button>
+      </nav>
+    </div>
+  </div>
+</section>
+
 <script>
-(function(){
-  {% if hero_panels %}
-  var IMAGES = [
-    {% for panel in hero_panels %}
-    {
-      src: "{{ panel.display_image_url|default:'' }}",
-      bg: "{{ panel.bg_color|default:'#7C1F45' }}",
-      panel: "{{ panel.panel_color|default:'#9A2E5B' }}",
-      label: "{{ panel.title|escapejs }}",
-      word: "{{ panel.display_word|escapejs }}",
-      link: "{{ panel.link|default:''|escapejs }}"
-    }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-  ];
-  {% else %}
-  var IMAGES = [
-    { src: "{% static 'images/img1.webp' %}", bg: '#7C1F45', panel: '#9A2E5B', label: 'Ruby Stone Long Jhumka', word: 'RUBY STONE LONG JHUMKA', link: '' },
-    { src: "{% static 'images/img2.webp' %}", bg: '#28553A', panel: '#38724D', label: 'Kashmiri Long Chain Jhumka', word: 'KASHMIRI LONG CHAIN JHUMKA', link: '' },
-    { src: "{% static 'images/img3.webp' %}", bg: '#A97A2E', panel: '#C4954B', label: 'Kundan Pearl Jhumka', word: 'KUNDAN PEARL JHUMKA', link: '' },
-    { src: "{% static 'images/img4.webp' %}", bg: '#C97B95', panel: '#D998AE', label: 'Rose Pearl Studs', word: 'ROSE PEARL STUDS', link: '' }
-  ];
-  {% endif %}
-  var logo = "{% static 'images/logo-golden-hh.jpg' %}";
-  var defaultShopUrl = "{% url 'product_list' %}";
+(function () {
+  'use strict';
+  var TOTAL = 4, INTERVAL_MS = 3200;
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var current = 0, timer = null, paused = false;
 
-  var ArrowLeftSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>';
-  var ArrowRightSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+  function slide(i) { return document.getElementById('hhh2-slide-' + i); }
+  function thumb(i) { return document.getElementById('hhh2-thumb-' + i); }
 
-  var root = document.getElementById('hhh-hero-root');
-  if (!root) return;
-
-  var count = IMAGES.length;
-  if (count === 0) return;
-
-  var activeIndex = 0;
-  var isAnimating = false;
-  var isMobile = window.innerWidth < 640;
-
-  // Preload
-  IMAGES.forEach(function(i){ if(i.src){ var im = new Image(); im.src = i.src; } });
-
-  function roleStyle(role, mobile){
-    if (role === 'center'){
-      return {
-        translateX: '-50%', scale: mobile ? 0.8 : 1.0,
-        filter: 'blur(0px)', opacity: 1, zIndex: 20,
-        left: '50%', height: mobile ? '54%' : '68%', bottom: mobile ? '16%' : '8%'
-      };
-    }
-    if (role === 'left'){
-      return {
-        translateX: '-50%', scale: 1,
-        filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
-        left: mobile ? '16%' : '27%', height: mobile ? '16%' : '24%', bottom: mobile ? '24%' : '14%'
-      };
-    }
-    if (role === 'right'){
-      return {
-        translateX: '-50%', scale: 1,
-        filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
-        left: mobile ? '84%' : '73%', height: mobile ? '16%' : '24%', bottom: mobile ? '24%' : '14%'
-      };
-    }
-    return {
-      translateX: '-50%', scale: 1,
-      filter: 'blur(4px)', opacity: 0.9, zIndex: 5,
-      left: '50%', height: mobile ? '14%' : '19%', bottom: mobile ? '24%' : '14%'
-    };
+  function goTo(idx) {
+    idx = ((idx % TOTAL) + TOTAL) % TOTAL;
+    if (idx === current) return;
+    slide(current).classList.remove('active');
+    slide(idx).classList.add('active');
+    var stage = document.getElementById('hhh2-stage');
+    if (stage) stage.setAttribute('aria-label', slide(idx).getAttribute('aria-label') || '');
+    thumb(current).classList.remove('active'); thumb(current).removeAttribute('aria-current');
+    thumb(idx).classList.add('active'); thumb(idx).setAttribute('aria-current', 'true');
+    current = idx;
   }
 
-  // Initial Build
-  function buildDOM() {
-    var cardsHTML = IMAGES.map(function(img, idx) {
-      return '<div class="hhh-card" id="hhh-card-'+idx+'"><img src="' + img.src + '" alt="' + img.label + '" draggable="false" /></div>';
-    }).join('');
-
-    var dotsHTML = IMAGES.map(function(_, idx){ return '<div class="hhh-dot" id="hhh-dot-'+idx+'"></div>'; }).join('');
-
-    root.innerHTML = '\
-    <div class="hhh-hero-outer" id="hhh-outer">\
-      <div class="hhh-hero-inner">\
-        <div class="hhh-grain" style="background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.08%22/></svg>\')"></div>\
-        <div class="hhh-ghost" id="hhh-ghost"></div>\
-        <div class="hhh-brand"><img src="' + logo + '" alt="HypeHavenHub" /></div>\
-        <div class="hhh-dots">' + dotsHTML + '</div>\
-        <div class="hhh-carousel">' + cardsHTML + '</div>\
-        <a class="hhh-cta" id="hhh-cta-btn" href="' + (IMAGES[0].link || defaultShopUrl) + '">Shop Now ' + ArrowRightSVG + '</a>\
-      </div>\
-    </div>';
+  function startAuto() {
+    if (REDUCED) return;
+    stopAuto();
+    timer = setInterval(function () { if (!paused) goTo(current + 1); }, INTERVAL_MS);
   }
+  function stopAuto() { if (timer) { clearInterval(timer); timer = null; } }
+  function resetAuto() { startAuto(); }
 
-  buildDOM();
+  document.getElementById('hhh2-prev').addEventListener('click', function () { goTo(current - 1); resetAuto(); });
+  document.getElementById('hhh2-next').addEventListener('click', function () { goTo(current + 1); resetAuto(); });
 
-  var outer = document.getElementById('hhh-outer');
-  var ghost = document.getElementById('hhh-ghost');
-  var ctaBtn = document.getElementById('hhh-cta-btn');
-
-  // Set initial state instantly
-  function setInitialState() {
-    var active = IMAGES[activeIndex];
-    if (!active) return;
-    outer.style.backgroundColor = active.bg;
-    ghost.innerText = active.word;
-    if (ctaBtn) ctaBtn.href = active.link || defaultShopUrl;
-    
-    for(var i=0; i<count; i++){
-      var dot = document.getElementById('hhh-dot-'+i);
-      if (dot) dot.classList.toggle('active', i === activeIndex);
-      var role = (i === activeIndex) ? 'center' : (i === (activeIndex + count - 1) % count) ? 'left' : (i === (activeIndex + 1) % count) ? 'right' : 'back';
-      var s = roleStyle(role, isMobile);
-      var card = document.getElementById('hhh-card-'+i);
-      if (card) {
-        card.style.transform = 'translateX('+s.translateX+') scale('+s.scale+')';
-        card.style.filter = s.filter;
-        card.style.opacity = s.opacity;
-        card.style.zIndex = s.zIndex;
-        card.style.left = s.left;
-        card.style.height = s.height;
-        card.style.bottom = s.bottom;
-      }
-    }
-  }
-  setInitialState();
-
-  // Anime.js powered navigation
-  function navigate(dir){
-    if (isAnimating || count === 0) return;
-    isAnimating = true;
-    
-    // Calculate new index
-    var nextIndex = dir === 'next' ? (activeIndex + 1) % count : (activeIndex + count - 1) % count;
-    var active = IMAGES[nextIndex];
-    var isNext = dir === 'next';
-
-    // Timeline for smooth orchestration
-    var tl = anime.timeline({
-      easing: 'spring(1, 150, 14, 0)',
-      duration: 250,
-      complete: function() {
-        activeIndex = nextIndex;
-        isAnimating = false;
-      }
-    });
-
-    // Animate background color
-    tl.add({
-      targets: outer,
-      backgroundColor: active.bg,
-      duration: 250,
-      easing: 'easeInOutSine'
-    }, 0);
-
-    // Animate Ghost Text (fade out, change, fade in)
-    tl.add({
-      targets: ghost,
-      opacity: [1, 0],
-      translateX: isNext ? [0, -30] : [0, 30],
-      duration: 100,
-      easing: 'easeInQuad',
-      complete: function() {
-        ghost.innerText = active.word;
-        if (ctaBtn) ctaBtn.href = active.link || defaultShopUrl;
-      }
-    }, 0).add({
-      targets: ghost,
-      opacity: [0, 1],
-      translateX: isNext ? [30, 0] : [-30, 0],
-      duration: 150,
-      easing: 'easeOutQuad'
-    }, 100);
-
-    // Animate dots
-    for(var i=0; i<count; i++){
-      var dot = document.getElementById('hhh-dot-'+i);
-      if (dot) dot.classList.toggle('active', i === nextIndex);
-    }
-
-    // Animate Cards with staggering based on direction
-    var cardTargets = [];
-    for(var i=0; i<count; i++) {
-      var role = (i === nextIndex) ? 'center' : (i === (nextIndex + count - 1) % count) ? 'left' : (i === (nextIndex + 1) % count) ? 'right' : 'back';
-      var s = roleStyle(role, isMobile);
-      var card = document.getElementById('hhh-card-'+i);
-      if (card) {
-        cardTargets.push({
-          el: card,
-          style: s,
-          role: role
-        });
-        card.style.zIndex = s.zIndex;
-      }
-    }
-
-    cardTargets.forEach(function(target, i) {
-      tl.add({
-        targets: target.el,
-        left: target.style.left,
-        height: target.style.height,
-        bottom: target.style.bottom,
-        scale: target.style.scale,
-        opacity: target.style.opacity,
-        translateX: '-50%',
-        update: function(anim) {
-          target.el.style.filter = target.style.filter; 
-        }
-      }, 0);
-    });
-  }
-
-  var autoTimer = setInterval(function(){ navigate('next'); }, 2500);
-  function resetAuto(){ clearInterval(autoTimer); autoTimer = setInterval(function(){ navigate('next'); }, 2500); }
-
-  window.addEventListener('resize', function(){
-    var nowMobile = window.innerWidth < 640;
-    if (nowMobile !== isMobile) { 
-      isMobile = nowMobile; 
-      setInitialState();
-    }
+  document.querySelectorAll('.hhh2-thumb').forEach(function (btn) {
+    btn.addEventListener('click', function () { goTo(parseInt(btn.dataset.index, 10)); resetAuto(); });
   });
 
+  [document.getElementById('hhh2-stage'), document.getElementById('hhh2-selector')].forEach(function (el) {
+    if (!el) return;
+    el.addEventListener('mouseenter', function () { paused = true; });
+    el.addEventListener('mouseleave', function () { paused = false; });
+    el.addEventListener('focusin',   function () { paused = true; });
+    el.addEventListener('focusout',  function () { paused = false; });
+  });
+
+  function updateChevIcons() {
+    var m = window.innerWidth <= 860;
+    var p = document.querySelector('#hhh2-prev .hhh2-chev-icon');
+    var n = document.querySelector('#hhh2-next .hhh2-chev-icon');
+    if (p) p.textContent = m ? 'chevron_left'  : 'keyboard_arrow_up';
+    if (n) n.textContent = m ? 'chevron_right' : 'keyboard_arrow_down';
+  }
+  updateChevIcons();
+  window.addEventListener('resize', updateChevIcons);
+  startAuto();
 })();
 </script>
 
