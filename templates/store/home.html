@@ -1041,22 +1041,37 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
 
+  /* 💎 Premium Glassmorphism Glassy Outline Product Cards 💎 */
   .range-product-card {
-    background-color: #ffffff;
-    border: 1.5px solid rgba(0, 0, 0, 0.08);
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    outline: 1.5px solid rgba(212, 175, 55, 0.28);
+    outline-offset: -1px;
+    border-radius: 22px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.05),
+      0 1px 3px rgba(0, 0, 0, 0.03),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+      inset 0 2px 4px rgba(255, 255, 255, 1);
+    transition: all 0.32s cubic-bezier(0.25, 1, 0.5, 1);
     display: flex;
     flex-direction: column;
     height: 100%;
-    will-change: transform;
+    will-change: transform, box-shadow;
   }
   .range-product-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(0, 0, 0, 0.18);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(212, 175, 55, 0.6);
+    outline: 1.5px solid rgba(212, 175, 55, 0.7);
+    outline-offset: 0px;
+    box-shadow: 
+      0 18px 45px rgba(42, 0, 2, 0.12),
+      0 4px 18px rgba(212, 175, 55, 0.25),
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.95);
   }
   .range-img-container {
     position: relative;
@@ -1064,8 +1079,8 @@
     aspect-ratio: 1;
     background-color: #f9f9f9;
     overflow: hidden;
-    border-top-left-radius: 18.5px;
-    border-top-right-radius: 18.5px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
   }
   .range-product-img {
     width: 100%;
@@ -1080,36 +1095,45 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    background-color: #ffd885;
+    background: rgba(255, 216, 133, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     color: #3a2500;
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 0.5px;
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 4px 9px;
+    border-radius: 6px;
     text-transform: uppercase;
     z-index: 2;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   .range-wishlist-btn {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(255,255,255,0.85);
-    border: 1px solid rgba(0,0,0,0.1);
-    color: #555;
-    width: 32px;
-    height: 32px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    color: #444;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 2;
-    transition: background 0.2s, color 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
   }
   .range-wishlist-btn:hover {
     background: #ffffff;
     color: #000;
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
   }
   .range-wishlist-btn.active {
     color: #ff4757;
@@ -1159,7 +1183,7 @@
     background-color: #000;
     color: #fff;
     border: 1px solid #000;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 10px 16px;
     font-size: 11px;
     font-weight: 700;
@@ -1167,12 +1191,16 @@
     cursor: pointer;
     width: 100%;
     margin-top: auto;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+    transition: all 0.22s ease;
     text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
   }
   .range-add-btn:hover {
-    background-color: transparent;
-    color: #000;
+    background-color: #2a0002;
+    color: #fff;
+    border-color: #2a0002;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(42,0,2,0.25);
   }
   
   /* Shop By Range Card Image Slider Arrows */
