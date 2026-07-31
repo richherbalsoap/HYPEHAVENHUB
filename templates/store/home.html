@@ -859,17 +859,31 @@
   </div>
 </section>
 
-<section class="hhh-collection">
-  <div class="hhh-collection__head">
-    <div class="hhh-collection__eyebrow">Shop by collection</div>
-    <h2 class="hhh-collection__title">Make Your Customize Set</h2>
-    <p class="hhh-collection__sub"><span class="hhh-highlight">Jhumkas, necklaces and bracelets</span>, displayed the way they're handed to you — <span class="hhh-highlight">straight off the velvet stand.</span></p>
+<!-- Custom Order Atelier Section -->
+<section class="hhh-collection position-relative py-5">
+  <!-- Glowing luxury accent background -->
+  <div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 300px; height: 300px; background: radial-gradient(circle, rgba(233,209,156,0.18) 0%, rgba(0,0,0,0) 70%); pointer-events: none; z-index: 1;"></div>
+
+  <div class="hhh-collection__head position-relative" style="z-index: 2;">
+    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3" style="background: rgba(233, 209, 156, 0.15); border: 1px solid rgba(233, 209, 156, 0.4); backdrop-filter: blur(8px);">
+      <span class="material-symbols-outlined fs-6" style="color: var(--hhh-gold-light);">auto_awesome</span>
+      <span style="font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--hhh-gold-light);">CUSTOM & CURATED ATELIER</span>
+    </div>
+    
+    <h2 class="hhh-collection__title text-uppercase fw-800" style="font-family: var(--font-display); font-size: clamp(26px, 4.5vw, 44px); letter-spacing: 0.08em; line-height: 1.2; margin-bottom: 16px; background: linear-gradient(135deg, #ffffff 0%, #ffeaa7 50%, #ffd700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
+      MAKE YOUR CUSTOMIZED ORDER
+    </h2>
+    
+    <p class="hhh-collection__sub" style="font-size: 15px; color: #d0c0b4; max-width: 640px; margin: 0 auto; line-height: 1.6;">
+      Create your dream jewelry collection — select from pre-curated sets or <span class="hhh-highlight" style="color: #ffe088; font-weight: 600;">handpick individual pairs</span> to craft your personalized 12 or 16 piece box.
+    </p>
   </div>
 
-  <div class="hhh-rail-wrap">
+  <div class="hhh-rail-wrap position-relative" style="z-index: 2;">
     <div class="hhh-rail"></div>
     <div class="hhh-grid">
 
+      <!-- Card 1 -->
       <a class="hhh-piece" href="{% url 'product_list' %}?category=12-piece-jhumka-box-set">
         <div class="hhh-chain"></div>
         <div class="hhh-arch">
@@ -882,15 +896,16 @@
           </div>
         </div>
         <div class="hhh-plate">
-          <p class="hhh-plate__meta">Oxidised silver &middot; 12 pairs</p>
+          <p class="hhh-plate__meta">Oxidised Silver &middot; 12 Pairs</p>
           <h3 class="hhh-plate__title">12 Piece Jhumka Box Set</h3>
-          <p class="hhh-plate__desc">One box, twelve pairs, endless mixing for the week ahead.</p>
-          <span class="hhh-plate__cta">Explore the set
+          <p class="hhh-plate__desc">One box, twelve pairs, endless mixing for every occasion.</p>
+          <span class="hhh-plate__cta">Order 12-Pair Box
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </span>
         </div>
       </a>
 
+      <!-- Card 2 -->
       <a class="hhh-piece" href="{% url 'product_list' %}?category=16-piece-jhumka-box-set">
         <div class="hhh-chain"></div>
         <div class="hhh-arch">
@@ -903,19 +918,20 @@
           </div>
         </div>
         <div class="hhh-plate">
-          <p class="hhh-plate__meta">Oxidised silver &middot; 16 pairs</p>
+          <p class="hhh-plate__meta">Oxidised Silver &middot; 16 Pairs</p>
           <h3 class="hhh-plate__title">16 Piece Jhumka Box Set</h3>
-          <p class="hhh-plate__desc">Sixteen pairs for every mood, from daily wear to festive.</p>
-          <span class="hhh-plate__cta">Explore the set
+          <p class="hhh-plate__desc">Sixteen pairs for every mood, from daily wear to festive celebrations.</p>
+          <span class="hhh-plate__cta">Order 16-Pair Box
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </span>
         </div>
       </a>
 
-      <a class="hhh-piece" href="{% url 'customize_earrings' %}">
+      <!-- Card 3 (Highlighted Custom Builder) -->
+      <a class="hhh-piece hhh-piece--featured" href="{% url 'customize_earrings' %}">
         <div class="hhh-chain"></div>
         <div class="hhh-arch">
-          <div class="hhh-arch__frame">
+          <div class="hhh-arch__frame" style="box-shadow: 0 0 25px rgba(255,215,0,0.45); border-color: #ffd700;">
             <div class="hhh-jali"><span></span><span></span><span></span></div>
             <div class="hhh-sparkles"><span></span><span></span><span></span><span></span></div>
             <div class="hhh-arch__inner">
@@ -924,15 +940,23 @@
           </div>
         </div>
         <div class="hhh-plate">
-          <p class="hhh-plate__meta">Custom Box &middot; 12 or 16 Pairs</p>
-          <h3 class="hhh-plate__title">Customize Your Earrings</h3>
-          <p class="hhh-plate__desc">Handpick your favorite single earrings and build your own custom box set.</p>
-          <span class="hhh-plate__cta">Start Customizing
+          <p class="hhh-plate__meta" style="color: #ffe088; font-weight: 700;">★ 100% BUILD YOUR OWN ★</p>
+          <h3 class="hhh-plate__title" style="color: #fff; font-weight: 700;">Customize Your Earrings</h3>
+          <p class="hhh-plate__desc">Handpick your favorite single earrings and build your custom box set.</p>
+          <span class="hhh-plate__cta" style="color: #ffe088; border-color: #ffe088; font-weight: 700;">Build Custom Order
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </span>
         </div>
       </a>
 
+    </div>
+
+    <!-- Main High-Impact CTA Button -->
+    <div class="d-flex justify-content-center mt-5">
+      <a href="{% url 'customize_earrings' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #ffe088 0%, #b8860b 100%) !important; color: #000 !important; border: none !important; font-size: 12px; font-weight: 800; letter-spacing: 0.18em; border-radius: 50px; box-shadow: 0 8px 24px rgba(255,215,0,0.35); text-decoration: none; transition: all 0.3s ease;">
+        <span class="material-symbols-outlined fs-5">tune</span>
+        MAKE YOUR CUSTOMIZED ORDER
+      </a>
     </div>
   </div>
 </section>
