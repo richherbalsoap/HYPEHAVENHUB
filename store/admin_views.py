@@ -1165,8 +1165,8 @@ def admin_custom_earring_create(request):
         image_url = request.POST.get('image_url', '').strip()
         display_order = request.POST.get('order', 0)
 
-        if not name or not image_url:
-            messages.error(request, 'Name and Image URL are required.')
+        if not image_url:
+            messages.error(request, 'Image is required.')
             return render(request, 'admin/custom_earring_form.html', {
                 'form_name': name, 'form_image_url': image_url, 'form_order': display_order
             })
@@ -1176,12 +1176,13 @@ def admin_custom_earring_create(request):
         except (ValueError, TypeError):
             display_order = 0
 
-        CustomEarring.objects.create(
+        earring = CustomEarring.objects.create(
             name=name,
             image_url=image_url,
             order=display_order,
         )
-        messages.success(request, f'Earring "{name}" added successfully!')
+        display_name = earring.name or f"Earring #{earring.pk}"
+        messages.success(request, f'Earring "{display_name}" added successfully!')
         return redirect('admin_custom_earrings')
 
     return render(request, 'admin/custom_earring_form.html', {})
@@ -1193,7 +1194,7 @@ def admin_custom_earring_edit(request, pk):
     earring = get_object_or_404(CustomEarring, pk=pk)
 
     if request.method == 'POST':
-        earring.name = request.POST.get('name', earring.name).strip()
+        earring.name = request.POST.get('name', '').strip()
         new_url = request.POST.get('image_url', '').strip()
         if new_url:
             earring.image_url = new_url
@@ -1203,7 +1204,8 @@ def admin_custom_earring_edit(request, pk):
             pass
         earring.is_active = request.POST.get('is_active') == 'on'
         earring.save()
-        messages.success(request, f'Earring "{earring.name}" updated!')
+        display_name = earring.name or f"Earring #{earring.pk}"
+        messages.success(request, f'Earring "{display_name}" updated!')
         return redirect('admin_custom_earrings')
 
     return render(request, 'admin/custom_earring_form.html', {

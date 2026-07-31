@@ -39,7 +39,7 @@
                     {% endif %}
                     <div class="position-absolute bottom-0 start-0 end-0 p-2"
                          style="background:linear-gradient(transparent, rgba(0,0,0,0.8));">
-                        <small class="text-white fw-semibold d-block text-truncate">{{ earring.name }}</small>
+                        <small class="text-white fw-semibold d-block text-truncate">{% if earring.name %}{{ earring.name }}{% else %}Earring #{{ earring.pk }}{% endif %}</small>
                         <small class="text-white-50">Order: {{ earring.order }}</small>
                     </div>
                 </div>

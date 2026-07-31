@@ -29,9 +29,9 @@
             {% csrf_token %}
 
             <div class="mb-4">
-                <label class="form-label fw-semibold">Earring Name <span class="text-danger">*</span></label>
-                <input type="text" name="name" class="form-control" required
-                       value="{{ form_name|default:'' }}" placeholder="e.g. Gold Peacock Stud">
+                <label class="form-label fw-semibold">Earring Name <span class="text-muted fw-normal">(Optional)</span></label>
+                <input type="text" name="name" class="form-control"
+                       value="{{ form_name|default:'' }}" placeholder="e.g. Gold Peacock Stud (Optional)">
             </div>
 
             <div class="mb-4">

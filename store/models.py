@@ -849,7 +849,7 @@ class ProductQuestion(models.Model):
 
 class CustomEarring(models.Model):
     """Single earring photos uploaded by admin for the customizer."""
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, blank=True, default='')
     image_url = models.URLField(max_length=600, help_text="Cloudflare R2 image URL")
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0, help_text="Display order")
@@ -861,7 +861,7 @@ class CustomEarring(models.Model):
         verbose_name_plural = "Custom Earrings"
 
     def __str__(self):
-        return self.name
+        return self.name or f"Earring #{self.pk}"
 
 
 BOX_TYPE_CHOICES = [
