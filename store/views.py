@@ -2362,14 +2362,18 @@ def order_success_animation(request, order_id):
 def customize_earrings(request):
     """Render the earring customizer page."""
     try:
+        # Update or set default box pricing: 12 pairs = 849, 16 pairs = 999
+        CustomBoxPricing.objects.update_or_create(box_type='12', defaults={'price': Decimal('849.00'), 'is_active': True})
+        CustomBoxPricing.objects.update_or_create(box_type='16', defaults={'price': Decimal('999.00'), 'is_active': True})
+
         earrings = CustomEarring.objects.filter(is_active=True)
         pricing = {}
         for p in CustomBoxPricing.objects.filter(is_active=True):
-            pricing[p.box_type] = float(p.price)
+            pricing[p.box_type] = int(p.price)
     except Exception as e:
         logger.error(f"Error fetching customizer data: {str(e)}")
         earrings = []
-        pricing = {}
+        pricing = {'12': 849, '16': 999}
 
     razorpay_key = getattr(settings, 'RAZORPAY_KEY_ID', '')
 
@@ -2405,12 +2409,12 @@ def customize_add_to_cart(request):
         if earrings.count() != expected_count:
             return JsonResponse({'success': False, 'message': 'Some selected earrings are no longer available.'})
 
-        # Get pricing
+        # Get pricing (12 pairs = 849, 16 pairs = 999)
         try:
             box_pricing = CustomBoxPricing.objects.get(box_type=box_type, is_active=True)
             price = box_pricing.price
         except CustomBoxPricing.DoesNotExist:
-            price = Decimal('999.00') if box_type == '12' else Decimal('1299.00')
+            price = Decimal('849.00') if box_type == '12' else Decimal('999.00')
 
         # Get or create container category & product for Custom Box
         category, _ = Category.objects.get_or_create(name='Custom Boxes', defaults={'slug': 'custom-boxes'})
@@ -2436,8 +2440,9 @@ def customize_add_to_cart(request):
             product=product,
             defaults={'quantity': 1}
         )
-        if not created:
-            cart_item.quantity += 1
+        # Always set quantity to 1 for custom box set to prevent double quantity stacking (e.g. Qty: 2)
+        if not created or cart_item.quantity != 1:
+            cart_item.quantity = 1
             cart_item.save()
 
         # Save selection mapping in session
