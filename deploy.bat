@@ -1,3 +1,3 @@
 @echo off
 set NODE_TLS_REJECT_UNAUTHORIZED=0
-npx vercel --prod --yes
+npx vercel@latest --prod --yes
