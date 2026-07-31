@@ -254,7 +254,7 @@
 .hhh2-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 .hhh2-thumb.active { border-color: var(--gold); transform: scale(1.08); box-shadow: 0 4px 16px rgba(184,134,62,.28); }
 
-/* ── Responsive Mobile Optimization (Grand & Spacious Hero + Big Photo Stage) ─────── */
+/* ── Responsive Mobile Optimization (Grand & Spacious Hero + Stacked Large CTAs) ─────── */
 @media (max-width: 768px) {
   #hhh2-hero {
     padding: 28px 16px 36px 16px;
@@ -281,13 +281,31 @@
   .hhh2-headline { font-size: clamp(24px, 6.5vw, 34px); line-height: 1.18; margin-bottom: 12px; text-align: center; }
   .hhh2-headline em { display: inline-block; margin-left: 6px; }
   .hhh2-subtext { font-size: 13.5px; line-height: 1.55; margin: 0 auto 18px; max-width: 92%; color: #4a3d39; text-align: center; }
-  .hhh2-ctas { justify-content: center; gap: 12px; margin-bottom: 18px; width: 100%; flex-wrap: wrap; }
-  #hhh2-cta-explore, #hhh2-cta-customize { padding: 11px 22px; font-size: 13px; font-weight: 700; }
-  .hhh2-divider { margin-bottom: 14px; width: 100%; }
-  .hhh2-trust { justify-content: center; text-align: left; gap: 10px; }
-  .hhh2-trust-icon { font-size: 20px; }
-  .hhh2-trust-title { font-size: 13px; }
-  .hhh2-trust-desc { font-size: 11.5px; }
+
+  /* 🌟 Up and Down Stacked Full-Width Buttons for Mobile */
+  .hhh2-ctas {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 0 auto 18px;
+    width: 100%;
+    max-width: 320px;
+  }
+  #hhh2-cta-explore, #hhh2-cta-customize {
+    width: 100%;
+    padding: 13px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    justify-content: center;
+    text-align: center;
+    border-radius: 50px;
+  }
+
+  /* Hide Quality Checked divider & trust box on mobile view per user request */
+  .hhh2-divider, .hhh2-trust {
+    display: none !important;
+  }
 
   .hhh2-right {
     flex: 1 1 100%;
@@ -302,7 +320,7 @@
   }
   .hhh2-stage {
     width: 100%;
-    max-width: 320px;
+    max-width: 330px;
     aspect-ratio: 1 / 1;
     border-radius: 24px;
     box-shadow: 0 14px 40px rgba(42, 0, 2, 0.12);
@@ -324,9 +342,10 @@
 
 @media (max-width: 480px) {
   #hhh2-hero { padding: 24px 14px 30px 14px; }
-  .hhh2-stage { max-width: 300px; }
+  .hhh2-stage { max-width: 310px; }
+  .hhh2-ctas { max-width: 100%; }
   .hhh2-thumb { width: 44px; height: 44px; border-radius: 10px; }
-  #hhh2-cta-explore, #hhh2-cta-customize { padding: 10px 18px; font-size: 12.5px; }
+  #hhh2-cta-explore, #hhh2-cta-customize { padding: 13px 20px; font-size: 13.5px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hhh2-stage-slide { transition: opacity .3s ease; transform: none !important; }
@@ -343,7 +362,7 @@
       <h1 class="hhh2-headline">Your Elegant<em>Statement</em></h1>
       <p class="hhh2-subtext">Handcrafted jhumkas, necklaces and bracelets — sorted, packed, and delivered straight from the velvet stand to your door.</p>
       <div class="hhh2-ctas">
-        <a href="{% url 'product_list' %}" class="hhh2-btn hhh2-btn--solid" id="hhh2-cta-explore">Explore</a>
+        <a href="{% url 'product_list' %}" class="hhh2-btn hhh2-btn--solid" id="hhh2-cta-explore">Explore Collection</a>
         <a href="/customize/" class="hhh2-btn hhh2-btn--outline" id="hhh2-cta-customize"><span aria-hidden="true">✨</span> Customize Box</a>
       </div>
       <hr class="hhh2-divider" aria-hidden="true">
