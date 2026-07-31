@@ -805,6 +805,60 @@
   }
 </style>
 
+<!-- Shop By Range Section -->
+<section class="py-5 position-relative overflow-hidden" id="shop-by-range" style="background-color: #ffffff; color: #111111;">
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h2 class="section-title text-dark text-uppercase" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 8px;">Shop By Range</h2>
+      <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Curated selections designed for every occasion</p>
+    </div>
+
+    <!-- Range Switcher Tabs -->
+    <div class="d-flex justify-content-center mb-5">
+      <div class="d-inline-flex p-1 rounded-pill" style="background-color: #f4f4f4; border: 1.5px solid #e0e0e0;">
+        <button class="range-tab-btn active" onclick="switchRangeTab('new-launch')" id="btn-new-launch">NEW LAUNCH</button>
+        <button class="range-tab-btn" onclick="switchRangeTab('trending-product')" id="btn-trending-product">TRENDING PRODUCT</button>
+        <button class="range-tab-btn" onclick="switchRangeTab('best-seller')" id="btn-best-seller">BEST SELLER</button>
+      </div>
+    </div>
+
+    <!-- Grids -->
+    <!-- New Launch Grid (Default Active) -->
+    <div class="row g-4 range-products-grid" id="grid-new-launch">
+      {% for product in new_arrivals %}
+        {% include 'store/_product_range_card.html' with product=product badge="NEW LAUNCH" %}
+      {% empty %}
+        <div class="col-12 text-center py-5 text-muted">No new launches found.</div>
+      {% endfor %}
+    </div>
+
+    <!-- Trending Product Grid -->
+    <div class="row g-4 range-products-grid" id="grid-trending-product" style="display: none;">
+      {% for product in featured %}
+        {% include 'store/_product_range_card.html' with product=product badge="TRENDING NOW" %}
+      {% empty %}
+        <div class="col-12 text-center py-5 text-muted">No trending products found.</div>
+      {% endfor %}
+    </div>
+
+    <!-- Best Seller Grid -->
+    <div class="row g-4 range-products-grid" id="grid-best-seller" style="display: none;">
+      {% for product in bestsellers %}
+        {% include 'store/_product_range_card.html' with product=product badge="TOP SELLER" %}
+      {% empty %}
+        <div class="col-12 text-center py-5 text-muted">No best sellers found.</div>
+      {% endfor %}
+    </div>
+
+    <!-- View All Collections Action Call -->
+    <div class="d-flex justify-content-center mt-5">
+      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: #000 !important; color: #fff !important; border: 2px solid #000 !important; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-decoration: none;">
+        View Full Collection
+      </a>
+    </div>
+  </div>
+</section>
+
 <section class="hhh-collection">
   <div class="hhh-collection__head">
     <div class="hhh-collection__eyebrow">Shop by collection</div>
@@ -908,60 +962,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 </script>
-
-<!-- Shop By Range Section -->
-<section class="py-5 position-relative overflow-hidden" id="shop-by-range" style="background-color: #ffffff; color: #111111;">
-  <div class="container py-4">
-    <div class="text-center mb-5">
-      <h2 class="section-title text-dark text-uppercase" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 8px;">Shop By Range</h2>
-      <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Curated selections designed for every occasion</p>
-    </div>
-
-    <!-- Range Switcher Tabs -->
-    <div class="d-flex justify-content-center mb-5">
-      <div class="d-inline-flex p-1 rounded-pill" style="background-color: #f4f4f4; border: 1.5px solid #e0e0e0;">
-        <button class="range-tab-btn active" onclick="switchRangeTab('new-launch')" id="btn-new-launch">NEW LAUNCH</button>
-        <button class="range-tab-btn" onclick="switchRangeTab('trending-product')" id="btn-trending-product">TRENDING PRODUCT</button>
-        <button class="range-tab-btn" onclick="switchRangeTab('best-seller')" id="btn-best-seller">BEST SELLER</button>
-      </div>
-    </div>
-
-    <!-- Grids -->
-    <!-- New Launch Grid (Default Active) -->
-    <div class="row g-4 range-products-grid" id="grid-new-launch">
-      {% for product in new_arrivals %}
-        {% include 'store/_product_range_card.html' with product=product badge="NEW LAUNCH" %}
-      {% empty %}
-        <div class="col-12 text-center py-5 text-muted">No new launches found.</div>
-      {% endfor %}
-    </div>
-
-    <!-- Trending Product Grid -->
-    <div class="row g-4 range-products-grid" id="grid-trending-product" style="display: none;">
-      {% for product in featured %}
-        {% include 'store/_product_range_card.html' with product=product badge="TRENDING NOW" %}
-      {% empty %}
-        <div class="col-12 text-center py-5 text-muted">No trending products found.</div>
-      {% endfor %}
-    </div>
-
-    <!-- Best Seller Grid -->
-    <div class="row g-4 range-products-grid" id="grid-best-seller" style="display: none;">
-      {% for product in bestsellers %}
-        {% include 'store/_product_range_card.html' with product=product badge="TOP SELLER" %}
-      {% empty %}
-        <div class="col-12 text-center py-5 text-muted">No best sellers found.</div>
-      {% endfor %}
-    </div>
-
-    <!-- View All Collections Action Call -->
-    <div class="d-flex justify-content-center mt-5">
-      <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: #000 !important; color: #fff !important; border: 2px solid #000 !important; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-decoration: none;">
-        View Full Collection
-      </a>
-    </div>
-  </div>
-</section>
 
 <style>
   /* Shop By Range Layout and Tabs */
