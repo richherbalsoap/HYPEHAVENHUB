@@ -70,7 +70,7 @@
                     <th>Order</th>
                     <th>Customer</th>
                     <th>Total</th>
-                    <th>Items</th>
+                    <th>Tracking / AWB</th>
                     <th>Order Status</th>
                     <th>Payment</th>
                     <th>Placed</th>
@@ -91,7 +91,19 @@
                         <small class="d-block text-muted">{{ order.user.email }}</small>
                     </td>
                     <td><strong>₹{{ order.grand_total|floatformat:0 }}</strong></td>
-                    <td><span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 3px 10px;">{{ order.items.count }}</span></td>
+                    <td>
+                        {% if order.shipping_tracking_id %}
+                            {% if order.get_tracking_url %}
+                            <a href="{{ order.get_tracking_url }}" target="_blank" class="btn btn-xs btn-outline-success rounded-pill fw-bold text-nowrap" title="Track Live Shipment">
+                                <i class="fas fa-truck-fast me-1"></i>{{ order.shipping_tracking_id }}
+                            </a>
+                            {% else %}
+                            <span class="badge bg-light text-dark border fw-semibold"><i class="fas fa-barcode me-1"></i>{{ order.shipping_tracking_id }}</span>
+                            {% endif %}
+                        {% else %}
+                        <span class="text-muted small"><i class="fas fa-box me-1" style="font-size: 10px;"></i>No AWB Yet</span>
+                        {% endif %}
+                    </td>
                     <td><span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span></td>
                     <td>
                         {% if order.payment %}

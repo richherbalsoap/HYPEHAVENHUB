@@ -80,28 +80,29 @@ def admin_clear_fake_data(request):
 
 @admin_required
 def admin_dashboard(request):
-    """Admin dashboard with statistics"""
+    """Admin dashboard with real live statistics"""
     today = timezone.now().date()
     stats, created = AdminDashboardStats.objects.get_or_create(date=today)
     
-    # Calculate statistics
-    # Only count successful orders for revenue/sales stats (exclude cancelled/failed test data)
-    valid_orders = Order.objects.exclude(status__in=['cancelled', 'returned'])
+    # Calculate real statistics strictly from actual orders & successful payments
+    paid_orders_qs = Order.objects.filter(payment__status='success').exclude(status__in=['cancelled', 'returned'])
+    all_orders = Order.objects.all()
     
-    total_orders = valid_orders.count()
-    total_revenue = valid_orders.aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    total_orders = all_orders.count()
+    total_revenue = paid_orders_qs.aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    today_revenue = paid_orders_qs.filter(created_at__date=today).aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    
     total_users = User.objects.filter(is_staff=False).count()
-    new_orders_today = valid_orders.filter(created_at__date=today).count()
+    new_orders_today = all_orders.filter(created_at__date=today).count()
     total_products = Product.objects.count()
     returned_orders = Order.objects.filter(status='returned').count()
     total_complaints = Complaint.objects.count()
     open_complaints = Complaint.objects.filter(status__in=['open', 'in_progress']).count()
-    pending_orders = valid_orders.filter(status__in=['pending', 'confirmed', 'processing']).count()
-    paid_orders = Payment.objects.filter(status='success').count()
-    unpaid_orders = Payment.objects.filter(status='pending').count()
-    today_revenue = valid_orders.filter(created_at__date=today).aggregate(Sum('grand_total'))['grand_total__sum'] or 0
+    pending_orders = Order.objects.filter(status__in=['pending', 'confirmed', 'processing', 'shipped']).exclude(status__in=['cancelled', 'returned']).count()
+    paid_orders = paid_orders_qs.count()
+    unpaid_orders = Order.objects.filter(payment__status='pending').exclude(status__in=['cancelled', 'returned']).count()
     
-    # Update stats
+    # Update stats model
     stats.total_orders = total_orders
     stats.total_revenue = today_revenue
     stats.total_users = total_users
