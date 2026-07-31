@@ -28,14 +28,16 @@
   font-family: 'Inter', sans-serif;
   background: #ffffff;
   width: 100%;
-  padding: 64px 24px;
+  padding: 40px 32px 48px;
 }
 .hhh2-wrap {
-  max-width: 1240px;
+  max-width: 1560px;
   margin: 0 auto;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 48px;
+  width: 100%;
 }
 
 /* ── Left column ────────────────────────────── */
@@ -105,21 +107,28 @@
 .hhh2-trust-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 
 /* ── Right column ───────────────────────────── */
-.hhh2-right { flex: 1; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.hhh2-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+  min-width: 0;
+}
 .hhh2-stage {
   position: relative;
   flex: 1;
   aspect-ratio: 1 / 1;
-  max-width: 480px;
+  max-width: 680px;
   border-radius: 28px;
   background: #fff;
-  box-shadow: 0 8px 48px rgba(35,28,20,.10), 0 2px 8px rgba(35,28,20,.06);
+  box-shadow: 0 12px 48px rgba(35,28,20,.08), 0 2px 8px rgba(35,28,20,.04);
   overflow: hidden;
 }
 .hhh2-stage::before {
   content: '';
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 60% 40%, rgba(231,207,160,.30) 0%, transparent 68%);
+  background: radial-gradient(ellipse at 60% 40%, rgba(231,207,160,.25) 0%, transparent 68%);
   pointer-events: none; z-index: 0;
 }
 .hhh2-stage-slide {
@@ -130,7 +139,7 @@
   transform: scale(1.03);
 }
 .hhh2-stage-slide.active { opacity: 1; z-index: 2; transform: scale(1); }
-.hhh2-stage-slide img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 28px; user-select: none; }
+.hhh2-stage-slide img { width: 100%; height: 100%; object-fit: contain; background: #fff; display: block; border-radius: 28px; user-select: none; }
 
 /* ── Selector ───────────────────────────────── */
 .hhh2-selector { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -146,7 +155,7 @@
 .hhh2-thumb-list { display: flex; flex-direction: column; gap: 10px; list-style: none; margin: 0; padding: 0; }
 .hhh2-thumb-item { position: relative; }
 .hhh2-thumb {
-  display: block; width: 64px; height: 64px; border-radius: 12px;
+  display: block; width: 68px; height: 68px; border-radius: 12px;
   overflow: hidden; border: 2px solid transparent; cursor: pointer;
   transition: border-color .25s, transform .25s, box-shadow .25s;
   background: #f5f0ea; padding: 0;
@@ -157,7 +166,7 @@
 .hhh2-thumb-caption {
   position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
   background: var(--ink); color: #fff; font-size: 11px; white-space: nowrap;
-  padding: 5px 10px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity .2s;
+  padding: 5px 10px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10;
 }
 .hhh2-thumb-caption::after {
   content: ''; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
@@ -168,12 +177,12 @@
 
 /* ── Responsive <860px ──────────────────────── */
 @media (max-width: 860px) {
-  #hhh2-hero { padding: 48px 20px; }
+  #hhh2-hero { padding: 32px 16px; }
   .hhh2-wrap { flex-direction: column; gap: 32px; align-items: center; text-align: center; }
   .hhh2-left { flex: none; max-width: 100%; align-items: center; order: 2; }
   .hhh2-subtext { max-width: 52ch; }
-  .hhh2-right { order: 1; width: 100%; flex-direction: column; align-items: center; gap: 14px; }
-  .hhh2-stage { width: min(72vw, 340px); max-width: none; }
+  .hhh2-right { order: 1; width: 100%; flex-direction: column; align-items: center; gap: 14px; justify-content: center; }
+  .hhh2-stage { width: min(85vw, 360px); max-width: none; }
   .hhh2-selector { flex-direction: row; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 4px; justify-content: center; }
   .hhh2-selector::-webkit-scrollbar { display: none; }
   .hhh2-thumb-list { flex-direction: row; gap: 10px; }
@@ -182,12 +191,12 @@
   .hhh2-thumb-caption::after { left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--ink); border-left-color: transparent; }
 }
 @media (max-width: 480px) {
-  #hhh2-hero { padding: 36px 16px; }
+  #hhh2-hero { padding: 24px 12px; }
   .hhh2-headline { font-size: clamp(30px, 8.5vw, 44px); }
   .hhh2-subtext { font-size: 14.5px; }
   .hhh2-btn { font-size: 14px; padding: 11px 22px; }
-  .hhh2-stage { width: 78vw; }
-  .hhh2-thumb { width: 52px; height: 52px; }
+  .hhh2-stage { width: 88vw; }
+  .hhh2-thumb { width: 56px; height: 56px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hhh2-stage-slide { transition: opacity .3s ease; transform: none !important; }
@@ -222,16 +231,16 @@
       <!-- Stage -->
       <div class="hhh2-stage" id="hhh2-stage" aria-live="polite" aria-atomic="true" aria-label="12-Piece Jhumka Box Set">
         <div class="hhh2-stage-slide active" id="hhh2-slide-0" role="img" aria-label="12-Piece Jhumka Box Set">
-          <img src="{% static 'images/img1.webp' %}" alt="12-Piece Jhumka Box Set" width="800" height="800" loading="eager" decoding="async">
+          <img src="{% static 'images/img1.jpg' %}" alt="12-Piece Jhumka Box Set" width="800" height="800" loading="eager" decoding="async">
         </div>
         <div class="hhh2-stage-slide" id="hhh2-slide-1" role="img" aria-label="16-Piece Jhumka Box Set">
-          <img src="{% static 'images/img2.webp' %}" alt="16-Piece Jhumka Box Set" width="800" height="800" loading="lazy" decoding="async">
+          <img src="{% static 'images/img2.jpg' %}" alt="16-Piece Jhumka Box Set" width="800" height="800" loading="lazy" decoding="async">
         </div>
-        <div class="hhh2-stage-slide" id="hhh2-slide-2" role="img" aria-label="Bracelets Collection">
-          <img src="{% static 'images/img3.webp' %}" alt="Bracelets" width="800" height="800" loading="lazy" decoding="async">
+        <div class="hhh2-stage-slide" id="hhh2-slide-2" role="img" aria-label="Black Clover Jewelry Set">
+          <img src="{% static 'images/img3.jpg' %}" alt="Black Clover Jewelry Set" width="800" height="800" loading="lazy" decoding="async">
         </div>
-        <div class="hhh2-stage-slide" id="hhh2-slide-3" role="img" aria-label="Customize Your Earrings">
-          <img src="{% static 'images/img4.webp' %}" alt="Customize Your Earrings" width="800" height="800" loading="lazy" decoding="async">
+        <div class="hhh2-stage-slide" id="hhh2-slide-3" role="img" aria-label="Handheld 12-Piece Box">
+          <img src="{% static 'images/img4.jpg' %}" alt="Handheld 12-Piece Box" width="800" height="800" loading="lazy" decoding="async">
         </div>
       </div>
 
@@ -243,25 +252,25 @@
         <ul class="hhh2-thumb-list" role="list">
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb active" data-index="0" aria-label="View 12-Piece Jhumka Box Set" aria-current="true" id="hhh2-thumb-0">
-              <img src="{% static 'images/img1.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
+              <img src="{% static 'images/img1.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
             <span class="hhh2-thumb-caption" aria-hidden="true">12-Piece Box</span>
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="1" aria-label="View 16-Piece Jhumka Box Set" id="hhh2-thumb-1">
-              <img src="{% static 'images/img2.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+              <img src="{% static 'images/img2.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
             </button>
             <span class="hhh2-thumb-caption" aria-hidden="true">16-Piece Box</span>
           </li>
           <li class="hhh2-thumb-item">
-            <button class="hhh2-thumb" data-index="2" aria-label="View Bracelets collection" id="hhh2-thumb-2">
-              <img src="{% static 'images/img3.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+            <button class="hhh2-thumb" data-index="2" aria-label="View Black Clover Jewelry Set" id="hhh2-thumb-2">
+              <img src="{% static 'images/img3.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
             </button>
-            <span class="hhh2-thumb-caption" aria-hidden="true">Bracelets</span>
+            <span class="hhh2-thumb-caption" aria-hidden="true">Necklace Set</span>
           </li>
           <li class="hhh2-thumb-item">
-            <button class="hhh2-thumb" data-index="3" aria-label="View Customize Your Earrings" id="hhh2-thumb-3">
-              <img src="{% static 'images/img4.webp' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
+            <button class="hhh2-thumb" data-index="3" aria-label="View Handheld 12-Piece Box" id="hhh2-thumb-3">
+              <img src="{% static 'images/img4.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="lazy">
             </button>
             <span class="hhh2-thumb-caption" aria-hidden="true">Customize</span>
           </li>
