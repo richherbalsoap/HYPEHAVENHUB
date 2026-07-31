@@ -168,8 +168,164 @@
     opacity: 0;
     transform: scale(0.6);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 10;
     box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+
+  /* 🔍 Quick View Glassy Magnifying Glass Button */
+  .earring-quick-view-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    color: #2a0002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 12;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    transition: all 0.22s ease;
+    padding: 0;
+  }
+  .earring-quick-view-btn span {
+    font-size: 18px;
+    line-height: 1;
+  }
+  .earring-quick-view-btn:hover {
+    background: #2a0002;
+    color: #fce8ad;
+    border-color: #d4af37;
+    transform: scale(1.12);
+    box-shadow: 0 4px 14px rgba(42,0,2,0.25);
+  }
+
+  /* 🔍 Full Screen Glassy Quick View Modal Overlay */
+  .qv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(15, 8, 8, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .qv-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .qv-modal-card {
+    background: #ffffff;
+    border-radius: 28px;
+    max-width: 500px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(212, 175, 55, 0.45);
+    transform: scale(0.92) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+  }
+  .qv-modal-overlay.show .qv-modal-card {
+    transform: scale(1) translateY(0);
+  }
+
+  .qv-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #2a0002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    transition: all 0.2s ease;
+  }
+  .qv-modal-close:hover {
+    background: #2a0002;
+    color: #ffffff;
+    transform: rotate(90deg);
+  }
+
+  .qv-image-box {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #fdfbf7;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qv-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 10px;
+  }
+
+  .qv-info-box {
+    padding: 18px 24px 22px;
+    text-align: center;
+    background: linear-gradient(180deg, #ffffff 0%, #fdfbf7 100%);
+    border-top: 1px solid rgba(212, 175, 55, 0.25);
+  }
+  .qv-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #2a0002;
+    margin-bottom: 14px;
+  }
+  .qv-toggle-btn {
+    background: linear-gradient(135deg, #2a0002 0%, #4a0e0e 100%);
+    color: #fce8ad;
+    border: 1.5px solid #d4af37;
+    border-radius: 50px;
+    padding: 12px 28px;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 18px rgba(42,0,2,0.22);
+  }
+  .qv-toggle-btn:hover {
+    background: linear-gradient(135deg, #4a0e0e 0%, #6b1414 100%);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(42,0,2,0.35);
+  }
+  .qv-toggle-btn.selected {
+    background: #e6f4ea;
+    color: #137333;
+    border-color: #34a853;
+    box-shadow: 0 4px 14px rgba(52, 168, 83, 0.2);
   }
 
   .sticky-counter-bar {
@@ -378,6 +534,9 @@
       {% for earring in earrings %}
       <div class="col">
         <div class="earring-grid-card h-100" id="earring-{{ earring.id }}" onclick="toggleEarring({{ earring.id }})">
+          <button type="button" class="earring-quick-view-btn" onclick="openEarringQuickView(event, {{ earring.id }}, '{{ earring.image_url|escapejs }}', '{{ earring.name|default:'Earring Pair'|escapejs }}')" title="Quick View Photo" aria-label="Quick View Photo">
+            <span class="material-symbols-outlined">zoom_in</span>
+          </button>
           <div class="check-overlay"><i class="fas fa-check"></i></div>
           <div class="ratio ratio-1x1 bg-light">
             <img src="{{ earring.image_url }}" alt="{{ earring.name }}" class="w-100 h-100 object-fit-cover" loading="lazy">
@@ -398,6 +557,25 @@
       <p class="text-muted mb-0">Check back soon! The admin is adding new single earring pairs to the collection.</p>
     </div>
     {% endif %}
+  </div>
+</div>
+
+<!-- 🔍 Quick View Enlarge Modal -->
+<div class="qv-modal-overlay" id="earringQuickViewModal" onclick="closeEarringQuickView(event)">
+  <div class="qv-modal-card" onclick="event.stopPropagation()">
+    <button type="button" class="qv-modal-close" onclick="closeEarringQuickView()" aria-label="Close">
+      <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+    </button>
+    <div class="qv-image-box">
+      <img id="qvModalImg" src="" alt="Earring Preview">
+    </div>
+    <div class="qv-info-box">
+      <div class="qv-title" id="qvModalTitle">Earring Details</div>
+      <button type="button" class="qv-toggle-btn" id="qvModalActionBtn" onclick="toggleEarringFromModal()">
+        <span class="material-symbols-outlined" style="font-size:18px;" id="qvModalIcon">add_circle</span>
+        <span id="qvActionBtnText">Select Pair For Box</span>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -566,6 +744,73 @@
       activeBtn.innerHTML = originalHtml;
     }
   }
+
+  /* 🔍 Quick View Modal JS Logic */
+  let activeModalEarringId = null;
+
+  function openEarringQuickView(e, id, imgUrl, name) {
+    if (e) {
+      e.stopPropagation(); // Prevents grid card click handler from triggering
+    }
+    activeModalEarringId = id;
+    const modal = document.getElementById('earringQuickViewModal');
+    const img = document.getElementById('qvModalImg');
+    const title = document.getElementById('qvModalTitle');
+    const btn = document.getElementById('qvModalActionBtn');
+    const icon = document.getElementById('qvModalIcon');
+    const btnText = document.getElementById('qvActionBtnText');
+
+    img.src = imgUrl;
+    title.innerText = name || 'Earring Pair';
+
+    const isSelected = selectedEarrings.has(id);
+    if (isSelected) {
+      btn.classList.add('selected');
+      icon.innerText = 'check_circle';
+      btnText.innerText = 'Selected (Click to Remove)';
+    } else {
+      btn.classList.remove('selected');
+      icon.innerText = 'add_circle';
+      btnText.innerText = 'Select Pair For Box';
+    }
+
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeEarringQuickView(e) {
+    if (e && e.target !== e.currentTarget && !e.target.classList.contains('qv-modal-close') && !e.target.closest('.qv-modal-close')) {
+      return;
+    }
+    const modal = document.getElementById('earringQuickViewModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function toggleEarringFromModal() {
+    if (activeModalEarringId !== null) {
+      toggleEarring(activeModalEarringId);
+      const isSelected = selectedEarrings.has(activeModalEarringId);
+      const btn = document.getElementById('qvModalActionBtn');
+      const icon = document.getElementById('qvModalIcon');
+      const btnText = document.getElementById('qvActionBtnText');
+      if (isSelected) {
+        btn.classList.add('selected');
+        icon.innerText = 'check_circle';
+        btnText.innerText = 'Selected (Click to Remove)';
+      } else {
+        btn.classList.remove('selected');
+        icon.innerText = 'add_circle';
+        btnText.innerText = 'Select Pair For Box';
+      }
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeEarringQuickView();
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', () => {
     selectBoxSize('12');
