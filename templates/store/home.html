@@ -137,8 +137,8 @@
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; z-index: 1;
-  transition: opacity .85s ease, transform .85s ease;
-  transform: scale(1.03);
+  transition: opacity .35s ease, transform .35s ease;
+  transform: scale(1.02);
 }
 .hhh2-stage-slide.active { opacity: 1; z-index: 2; transform: scale(1); }
 .hhh2-stage-slide img { width: 100%; height: 100%; object-fit: contain; background: #fff; display: block; border-radius: 28px; user-select: none; }
@@ -165,17 +165,6 @@
 .hhh2-thumb:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .hhh2-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 .hhh2-thumb.active { border-color: var(--gold); transform: scale(1.08); box-shadow: 0 4px 16px rgba(184,134,62,.28); }
-.hhh2-thumb-caption {
-  position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
-  background: var(--ink); color: #fff; font-size: 11px; white-space: nowrap;
-  padding: 5px 10px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 10;
-}
-.hhh2-thumb-caption::after {
-  content: ''; position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
-  border: 5px solid transparent; border-left-color: var(--ink);
-}
-.hhh2-thumb:hover ~ .hhh2-thumb-caption,
-.hhh2-thumb.active ~ .hhh2-thumb-caption { opacity: 1; }
 
 /* ── Responsive <860px ──────────────────────── */
 @media (max-width: 860px) {
@@ -189,8 +178,6 @@
   .hhh2-selector::-webkit-scrollbar { display: none; }
   .hhh2-thumb-list { flex-direction: row; gap: 10px; }
   .hhh2-thumb-item { scroll-snap-align: center; }
-  .hhh2-thumb-caption { right: auto; left: 50%; top: auto; bottom: calc(100% + 8px); transform: translateX(-50%); }
-  .hhh2-thumb-caption::after { left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--ink); border-left-color: transparent; }
 }
 @media (max-width: 480px) {
   #hhh2-hero { padding: 24px 12px; }
@@ -256,25 +243,21 @@
             <button class="hhh2-thumb active" data-index="0" aria-label="View 12-Piece Earring Box Set" aria-current="true" id="hhh2-thumb-0">
               <img src="{% static 'images/hero-box-12pc-flat.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
-            <span class="hhh2-thumb-caption" aria-hidden="true">12-Piece Box</span>
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="1" aria-label="View 16-Piece Oxidised Silver Jhumka Box Set" id="hhh2-thumb-1">
               <img src="{% static 'images/hero-box-16pc-silver.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
-            <span class="hhh2-thumb-caption" aria-hidden="true">16-Piece Box</span>
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="2" aria-label="View Black Clover Jewelry Set" id="hhh2-thumb-2">
               <img src="{% static 'images/hero-clover-set.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
-            <span class="hhh2-thumb-caption" aria-hidden="true">Necklace Set</span>
           </li>
           <li class="hhh2-thumb-item">
             <button class="hhh2-thumb" data-index="3" aria-label="View 12-Piece Earring Box Pearls Set" id="hhh2-thumb-3">
               <img src="{% static 'images/hero-box-12pc-pearls.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
             </button>
-            <span class="hhh2-thumb-caption" aria-hidden="true">Customize</span>
           </li>
         </ul>
         <button class="hhh2-chev" id="hhh2-next" aria-label="Next image">
@@ -293,7 +276,7 @@
     var img = new Image(); img.src = src;
   });
 
-  var TOTAL = 4, INTERVAL_MS = 3200;
+  var TOTAL = 4, INTERVAL_MS = 3000;
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var current = 0, timer = null, paused = false;
 
