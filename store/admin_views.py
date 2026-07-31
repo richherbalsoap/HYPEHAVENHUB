@@ -1181,8 +1181,8 @@ def admin_custom_earring_create(request):
             image_url=image_url,
             order=display_order,
         )
-        display_name = earring.name or f"Earring #{earring.pk}"
-        messages.success(request, f'Earring "{display_name}" added successfully!')
+        display_name = f'"{earring.name}"' if earring.name else 'Earring'
+        messages.success(request, f'{display_name} added successfully!')
         return redirect('admin_custom_earrings')
 
     return render(request, 'admin/custom_earring_form.html', {})
@@ -1204,8 +1204,8 @@ def admin_custom_earring_edit(request, pk):
             pass
         earring.is_active = request.POST.get('is_active') == 'on'
         earring.save()
-        display_name = earring.name or f"Earring #{earring.pk}"
-        messages.success(request, f'Earring "{display_name}" updated!')
+        display_name = f'"{earring.name}"' if earring.name else 'Earring'
+        messages.success(request, f'{display_name} updated successfully!')
         return redirect('admin_custom_earrings')
 
     return render(request, 'admin/custom_earring_form.html', {
@@ -1222,9 +1222,9 @@ def admin_custom_earring_delete(request, pk):
     """Delete an earring photo."""
     earring = get_object_or_404(CustomEarring, pk=pk)
     if request.method == 'POST':
-        name = earring.name
+        display_name = f'"{earring.name}"' if earring.name else 'Earring'
         earring.delete()
-        messages.success(request, f'Earring "{name}" deleted.')
+        messages.success(request, f'{display_name} deleted.')
     return redirect('admin_custom_earrings')
 
 
