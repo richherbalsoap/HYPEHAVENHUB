@@ -6,13 +6,13 @@
 {% block extra_css %}
 <style>
   .customizer-hero {
-    background: radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.22) 0%, transparent 65%), linear-gradient(135deg, #2a0002 0%, #4a0e0e 50%, #1c0001 100%);
-    color: #ffffff;
-    padding: 64px 0 44px;
+    background: linear-gradient(180deg, #FDFBF7 0%, #FAF4EB 100%);
+    color: #2a0002;
+    padding: 56px 0 40px;
     text-align: center;
     position: relative;
     overflow: hidden;
-    border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
   }
   .customizer-hero::before {
     content: '';
@@ -21,36 +21,35 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,224,136,0.12) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 60%);
     pointer-events: none;
   }
   .customizer-badge {
     display: inline-block;
-    background: rgba(212, 175, 55, 0.18);
-    border: 1px solid rgba(212, 175, 55, 0.55);
-    color: #fce8ad;
-    padding: 8px 20px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1.5px solid #d4af37;
+    color: #735c00;
+    font-family: 'Montserrat', sans-serif;
+    padding: 6px 18px;
     border-radius: 50px;
     font-weight: 700;
     font-size: 11px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.12);
   }
   .customizer-hero-title {
     font-family: 'Playfair Display', serif;
     font-weight: 700;
-    color: #ffffff;
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    color: #2a0002;
+    font-size: clamp(2.4rem, 5vw, 3.5rem);
     letter-spacing: -0.5px;
-    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
   .customizer-hero-sub {
     font-family: 'Montserrat', sans-serif;
-    color: rgba(255, 255, 255, 0.88);
-    font-size: 1.1rem;
-    max-width: 640px;
+    color: #544341;
+    font-size: 1.05rem;
+    max-width: 620px;
     margin: 0 auto;
     font-weight: 400;
     line-height: 1.6;
@@ -60,17 +59,17 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: linear-gradient(135deg, #2a0002 0%, #4a0e0e 100%);
-    color: #d4af37;
+    color: #fce8ad;
     border: 1.5px solid #d4af37;
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     font-size: 15px;
     margin-right: 10px;
-    box-shadow: 0 4px 10px rgba(42,0,2,0.2);
+    box-shadow: 0 4px 10px rgba(42,0,2,0.15);
   }
   .step-title {
     font-family: 'Playfair Display', serif;
@@ -80,24 +79,24 @@
   }
 
   .box-option-card {
-    border: 2px solid #e9e2dc;
-    border-radius: 18px;
+    border: 2px solid #eae2dc;
+    border-radius: 20px;
     padding: 28px 24px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     background: #ffffff;
     position: relative;
-    box-shadow: 0 4px 16px rgba(42,0,2,0.04);
+    box-shadow: 0 4px 16px rgba(42,0,2,0.03);
   }
   .box-option-card:hover {
     border-color: #d4af37;
     transform: translateY(-4px);
-    box-shadow: 0 14px 28px rgba(42,0,2,0.12);
+    box-shadow: 0 12px 28px rgba(42,0,2,0.08);
   }
   .box-option-card.active {
     border-color: var(--primary, #2a0002);
     background: linear-gradient(180deg, #ffffff 0%, #fdfbf7 100%);
-    box-shadow: 0 10px 24px rgba(42,0,2,0.14);
+    box-shadow: 0 10px 24px rgba(42,0,2,0.12);
   }
   .box-option-card.active::after {
     content: '✓';
@@ -107,7 +106,7 @@
     width: 26px;
     height: 26px;
     background: var(--primary, #2a0002);
-    color: #d4af37;
+    color: #fce8ad;
     border: 1.5px solid #d4af37;
     border-radius: 50%;
     display: flex;
@@ -115,7 +114,7 @@
     justify-content: center;
     font-size: 13px;
     font-weight: bold;
-    box-shadow: 0 2px 8px rgba(42,0,2,0.2);
+    box-shadow: 0 2px 8px rgba(42,0,2,0.15);
   }
   .box-option-title {
     font-family: 'Playfair Display', serif;
@@ -142,11 +141,11 @@
   .earring-grid-card:hover {
     border-color: #d4af37;
     transform: translateY(-3px);
-    box-shadow: 0 10px 22px rgba(42,0,2,0.1);
+    box-shadow: 0 10px 22px rgba(42,0,2,0.08);
   }
   .earring-grid-card.selected {
     border-color: var(--primary, #2a0002);
-    box-shadow: 0 0 0 3px rgba(42, 0, 2, 0.15), 0 8px 20px rgba(42,0,2,0.12);
+    box-shadow: 0 0 0 3px rgba(42, 0, 2, 0.12), 0 8px 20px rgba(42,0,2,0.1);
   }
   .earring-grid-card.selected .check-overlay {
     opacity: 1;
@@ -160,7 +159,7 @@
     height: 30px;
     border-radius: 50%;
     background: linear-gradient(135deg, #2a0002 0%, #4a0e0e 100%);
-    color: #d4af37;
+    color: #fce8ad;
     border: 1.5px solid #d4af37;
     display: flex;
     align-items: center;
@@ -170,48 +169,51 @@
     transform: scale(0.6);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
   }
 
   .sticky-counter-bar {
     position: sticky;
     bottom: 20px;
     z-index: 1000;
-    background: rgba(42, 0, 2, 0.95);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: #1e1b18;
     border-radius: 50px;
-    padding: 14px 28px;
-    box-shadow: 0 14px 38px rgba(42, 0, 2, 0.4);
+    padding: 12px 28px;
+    box-shadow: 0 16px 44px rgba(42, 0, 2, 0.12);
     margin: 30px auto;
-    max-width: 840px;
-    border: 1px solid rgba(212, 175, 55, 0.4);
+    max-width: 860px;
+    width: calc(100% - 32px);
+    border: 1.5px solid rgba(212, 175, 55, 0.45);
   }
 
   .progress-ring-bar {
     height: 6px;
     border-radius: 3px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(42, 0, 2, 0.08);
     overflow: hidden;
     width: 110px;
   }
   .progress-ring-fill {
     height: 100%;
-    background: linear-gradient(90deg, #d4af37 0%, #f3e5ab 100%);
+    background: linear-gradient(90deg, #2a0002 0%, #d4af37 100%);
     width: 0%;
     transition: width 0.3s ease;
   }
 
   .btn-custom-cart {
-    background: transparent;
-    color: #ffffff;
-    border: 1.5px solid rgba(212, 175, 55, 0.6);
+    background: #ffffff;
+    color: #2a0002;
+    border: 1.5px solid #2a0002;
     border-radius: 50px;
-    padding: 10px 22px;
+    padding: 10px 20px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
@@ -220,34 +222,37 @@
     cursor: pointer;
   }
   .btn-custom-cart:hover:not(:disabled) {
-    background: rgba(212, 175, 55, 0.2);
-    border-color: #d4af37;
+    background: #2a0002;
     color: #ffffff;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(42, 0, 2, 0.18);
   }
 
   .btn-custom-buy {
-    background: linear-gradient(135deg, #d4af37 0%, #b8863e 100%);
-    color: #2a0002;
-    border: none;
+    background: linear-gradient(135deg, #2a0002 0%, #4a0e0e 100%);
+    color: #fce8ad;
+    border: 1px solid #d4af37;
     border-radius: 50px;
     padding: 10px 24px;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: all 0.25s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+    box-shadow: 0 4px 16px rgba(42, 0, 2, 0.25);
   }
   .btn-custom-buy:hover:not(:disabled) {
-    background: linear-gradient(135deg, #e5be3c 0%, #c89642 100%);
-    color: #1a0001;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, #4a0e0e 0%, #6b1414 100%);
+    color: #ffffff;
+    border-color: #fce8ad;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(42, 0, 2, 0.35);
   }
 
   .btn-custom-cart:disabled, .btn-custom-buy:disabled {
@@ -345,12 +350,12 @@
 
 <!-- Floating Action Counter Bar -->
 <div class="sticky-counter-bar">
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+  <div class="d-flex align-items-center justify-content-between flex-nowrap gap-3">
     <!-- Left: Selection Info -->
     <div class="d-flex align-items-center gap-3">
       <div>
-        <small class="text-light opacity-75 d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Selection</small>
-        <span class="fw-bold fs-5 text-white"><span id="selectedCount">0</span> / <span id="targetCount">12</span> Pairs</span>
+        <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Selection</small>
+        <span class="fw-bold fs-5 text-dark" style="font-family: 'Playfair Display', serif; color: #2a0002;"><span id="selectedCount">0</span> / <span id="targetCount">12</span> Pairs</span>
       </div>
       <div class="progress-ring-bar d-none d-md-block">
         <div class="progress-ring-fill" id="progressFill"></div>
@@ -358,13 +363,13 @@
     </div>
 
     <!-- Right: Price + Add to Cart & Buy Now Buttons -->
-    <div class="d-flex align-items-center gap-3 ms-auto flex-wrap">
-      <div class="text-end me-1">
-        <small class="text-light opacity-75 d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Total Price</small>
-        <span class="fw-extrabold fs-5 text-warning" id="totalPriceDisplay">₹849</span>
+    <div class="d-flex align-items-center gap-3 ms-auto flex-nowrap">
+      <div class="text-end me-1 d-none d-sm-block">
+        <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Total Price</small>
+        <span class="fw-extrabold fs-5" id="totalPriceDisplay" style="font-family: 'Playfair Display', serif; color: #2a0002;">₹849</span>
       </div>
 
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 flex-nowrap">
         <button class="btn-custom-cart" id="addToCartBtn" disabled onclick="handleCustomBoxAction('cart')">
           <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">shopping_bag</span>
           <span>ADD TO CART</span>
