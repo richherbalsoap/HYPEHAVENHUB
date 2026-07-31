@@ -33,6 +33,24 @@
     min-height:560px;
     overflow:hidden;
   }
+  @media (max-width: 639px){
+    .hhh-hero-inner{
+      height: 54vh;
+      min-height: 350px;
+      max-height: 440px;
+    }
+    .hhh-ghost{
+      top: 8%;
+      font-size: clamp(22px, 7.5vw, 38px);
+    }
+    .hhh-brand img{
+      height: 32px;
+    }
+    .hhh-cta{
+      bottom: 14px;
+      font-size: clamp(16px, 4.8vw, 24px);
+    }
+  }
 
   .hhh-grain{
     position:absolute; inset:0; pointer-events:none; z-index:50;
@@ -156,29 +174,29 @@
   function roleStyle(role, mobile){
     if (role === 'center'){
       return {
-        translateX: '-50%', scale: mobile ? 0.85 : 1.0,
+        translateX: '-50%', scale: mobile ? 0.8 : 1.0,
         filter: 'blur(0px)', opacity: 1, zIndex: 20,
-        left: '50%', height: mobile ? '48%' : '68%', bottom: mobile ? '18%' : '8%'
+        left: '50%', height: mobile ? '54%' : '68%', bottom: mobile ? '16%' : '8%'
       };
     }
     if (role === 'left'){
       return {
         translateX: '-50%', scale: 1,
         filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
-        left: mobile ? '18%' : '27%', height: mobile ? '15%' : '24%', bottom: mobile ? '28%' : '14%'
+        left: mobile ? '16%' : '27%', height: mobile ? '16%' : '24%', bottom: mobile ? '24%' : '14%'
       };
     }
     if (role === 'right'){
       return {
         translateX: '-50%', scale: 1,
         filter: 'blur(2px)', opacity: 0.8, zIndex: 10,
-        left: mobile ? '82%' : '73%', height: mobile ? '15%' : '24%', bottom: mobile ? '28%' : '14%'
+        left: mobile ? '84%' : '73%', height: mobile ? '16%' : '24%', bottom: mobile ? '24%' : '14%'
       };
     }
     return {
       translateX: '-50%', scale: 1,
       filter: 'blur(4px)', opacity: 0.9, zIndex: 5,
-      left: '50%', height: mobile ? '12%' : '19%', bottom: mobile ? '28%' : '14%'
+      left: '50%', height: mobile ? '14%' : '19%', bottom: mobile ? '24%' : '14%'
     };
   }
 
