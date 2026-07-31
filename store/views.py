@@ -1230,6 +1230,7 @@ def razorpay_direct_checkout(request):
         
         for item in cart.items.all():
             items_to_create.append({
+                'cart_item_id': str(item.id),
                 'product': item.product,
                 'variant': item.variant,
                 'product_name': item.product.name,
@@ -1253,8 +1254,20 @@ def razorpay_direct_checkout(request):
         status='pending',
     )
 
+    custom_selections = request.session.get('custom_box_selections', {})
     for item_data in items_to_create:
-        OrderItem.objects.create(order=order, **item_data)
+        c_item_id = item_data.pop('cart_item_id', None)
+        order_item = OrderItem.objects.create(order=order, **item_data)
+        if c_item_id and c_item_id in custom_selections:
+            box_info = custom_selections[c_item_id]
+            b_type = box_info.get('box_type', '12')
+            e_ids = box_info.get('earring_ids', [])
+            c_box, _ = CustomBoxOrder.objects.get_or_create(
+                order=order,
+                defaults={'box_type': b_type}
+            )
+            earring_objs = CustomEarring.objects.filter(id__in=e_ids)
+            c_box.selected_earrings.set(earring_objs)
 
     payment = Payment.objects.create(
         order=order,
@@ -2371,14 +2384,6 @@ def customize_earrings(request):
 @require_POST
 def customize_add_to_cart(request):
     """Add a custom 12-pair or 16-pair earring box set to cart."""
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'requires_login': True,
-            'redirect': build_login_redirect_url(request, fallback='/customize/', notice='cart_required'),
-            'message': 'Please login first to add custom box to cart.',
-        }, status=401)
-
     try:
         data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
     except Exception:

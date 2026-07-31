@@ -446,7 +446,9 @@
 
     const activeBtn = (action === 'cart') ? addBtn : buyBtn;
     const originalHtml = activeBtn.innerHTML;
-    activeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Adding...';
+    activeBtn.innerHTML = (action === 'cart') 
+      ? '<i class="fas fa-spinner fa-spin me-1"></i> Adding...' 
+      : '<i class="fas fa-spinner fa-spin me-1"></i> Processing...';
 
     try {
       const resp = await fetch('{% url "customize_add_to_cart" %}', {
@@ -464,10 +466,6 @@
       const data = await resp.json();
 
       if (!data.success) {
-        if (data.requires_login) {
-          window.location.href = data.redirect || '{% url "login" %}?next={% url "customize_earrings" %}';
-          return;
-        }
         alert(data.message || 'Error adding custom box to cart.');
         addBtn.disabled = false;
         buyBtn.disabled = false;
@@ -479,7 +477,7 @@
       const badges = document.querySelectorAll('.cart-badge, .cart-count, #cartCount');
       badges.forEach(b => {
         b.innerText = data.cart_count;
-        b.style.display = 'inline-block';
+        b.style.display = 'inline-flex';
       });
 
       if (action === 'cart') {
@@ -495,11 +493,19 @@
         buyBtn.disabled = false;
         activeBtn.innerHTML = originalHtml;
       } else if (action === 'buynow') {
-        // Redirect directly to cart / checkout
-        window.location.href = '{% url "cart" %}';
+        activeBtn.innerHTML = originalHtml;
+        addBtn.disabled = false;
+        buyBtn.disabled = false;
+
+        // Trigger Razorpay Magic Checkout directly!
+        if (typeof window.initiateMagicCheckout === 'function') {
+          window.initiateMagicCheckout(buyBtn);
+        } else {
+          window.location.href = '{% url "checkout" %}';
+        }
       }
     } catch (err) {
-      alert('Failed to add custom box to cart: ' + err.message);
+      alert('Failed to process request: ' + err.message);
       addBtn.disabled = false;
       buyBtn.disabled = false;
       activeBtn.innerHTML = originalHtml;
