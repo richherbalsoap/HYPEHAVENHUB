@@ -174,7 +174,7 @@
 
   .sticky-counter-bar {
     position: sticky;
-    bottom: 20px;
+    bottom: 16px;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(20px);
@@ -182,11 +182,31 @@
     color: #1e1b18;
     border-radius: 50px;
     padding: 12px 28px;
-    box-shadow: 0 16px 44px rgba(42, 0, 2, 0.12);
-    margin: 30px auto;
+    box-shadow: 0 16px 44px rgba(42, 0, 2, 0.14);
+    margin: 30px auto 16px;
     max-width: 860px;
-    width: calc(100% - 32px);
+    width: calc(100% - 24px);
     border: 1.5px solid rgba(212, 175, 55, 0.45);
+  }
+  .sticky-counter-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .sticky-counter-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .sticky-counter-price {
+    display: block;
+  }
+  .sticky-counter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
   }
 
   .progress-ring-bar {
@@ -260,6 +280,37 @@
     cursor: not-allowed;
     transform: none!important;
     box-shadow: none!important;
+  }
+
+  @media (max-width: 576px) {
+    .sticky-counter-bar {
+      border-radius: 24px;
+      padding: 10px 16px;
+      bottom: 10px;
+      margin: 16px auto;
+      width: calc(100% - 20px);
+    }
+    .sticky-counter-inner {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sticky-counter-info {
+      width: 100%;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .sticky-counter-actions {
+      width: 100%;
+      margin-left: 0;
+      gap: 8px;
+    }
+    .btn-custom-cart, .btn-custom-buy {
+      flex: 1;
+      width: 50%;
+      padding: 9px 8px;
+      font-size: 11.5px;
+      justify-content: center;
+    }
   }
 </style>
 {% endblock %}
@@ -350,9 +401,9 @@
 
 <!-- Floating Action Counter Bar -->
 <div class="sticky-counter-bar">
-  <div class="d-flex align-items-center justify-content-between flex-nowrap gap-3">
-    <!-- Left: Selection Info -->
-    <div class="d-flex align-items-center gap-3">
+  <div class="sticky-counter-inner">
+    <!-- Left: Selection Info & Price (Mobile row 1) -->
+    <div class="sticky-counter-info">
       <div>
         <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Selection</small>
         <span class="fw-bold fs-5 text-dark" style="font-family: 'Playfair Display', serif; color: #2a0002;"><span id="selectedCount">0</span> / <span id="targetCount">12</span> Pairs</span>
@@ -360,26 +411,23 @@
       <div class="progress-ring-bar d-none d-md-block">
         <div class="progress-ring-fill" id="progressFill"></div>
       </div>
-    </div>
-
-    <!-- Right: Price + Add to Cart & Buy Now Buttons -->
-    <div class="d-flex align-items-center gap-3 ms-auto flex-nowrap">
-      <div class="text-end me-1 d-none d-sm-block">
+      <div class="sticky-counter-price text-end">
         <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Total Price</small>
         <span class="fw-extrabold fs-5" id="totalPriceDisplay" style="font-family: 'Playfair Display', serif; color: #2a0002;">₹849</span>
       </div>
+    </div>
 
-      <div class="d-flex gap-2 flex-nowrap">
-        <button class="btn-custom-cart" id="addToCartBtn" disabled onclick="handleCustomBoxAction('cart')">
-          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">shopping_bag</span>
-          <span>ADD TO CART</span>
-        </button>
+    <!-- Right: Add to Cart & Buy Now Buttons (Mobile row 2) -->
+    <div class="sticky-counter-actions">
+      <button class="btn-custom-cart" id="addToCartBtn" disabled onclick="handleCustomBoxAction('cart')">
+        <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">shopping_bag</span>
+        <span>ADD TO CART</span>
+      </button>
 
-        <button class="btn-custom-buy" id="buyNowBtn" disabled onclick="handleCustomBoxAction('buynow')">
-          <span class="material-symbols-outlined" style="font-size:18px; vertical-align:middle;">bolt</span>
-          <span>BUY NOW</span>
-        </button>
-      </div>
+      <button class="btn-custom-buy" id="buyNowBtn" disabled onclick="handleCustomBoxAction('buynow')">
+        <span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">bolt</span>
+        <span>BUY NOW</span>
+      </button>
     </div>
   </div>
 </div>
