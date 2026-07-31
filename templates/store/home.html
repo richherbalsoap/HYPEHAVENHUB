@@ -165,7 +165,10 @@
 .hhh2-thumb:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .hhh2-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 .hhh2-thumb.active { border-color: var(--gold); transform: scale(1.08); box-shadow: 0 4px 16px rgba(184,134,62,.28); }
-.hhh2-thumb-caption, .hhh2-thumb-caption::after, [class*="hhh2-thumb-caption"] { display: none !important; opacity: 0 !important; visibility: hidden !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important; }
+.hhh2-thumb-caption, .hhh2-thumb-caption::after, [class*="hhh2-thumb-caption"], [class*="caption"], [class*="tooltip"], .tooltip, .popover {
+  display: none !important; opacity: 0 !important; visibility: hidden !important;
+  width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;
+}
 
 /* ── Responsive <860px ──────────────────────── */
 @media (max-width: 860px) {
@@ -203,8 +206,8 @@
       <h1 class="hhh2-headline">Your Elegant<em>Statement</em></h1>
       <p class="hhh2-subtext">Handcrafted jhumkas, necklaces and bracelets — sorted, packed, and delivered straight from the velvet stand to your door.</p>
       <div class="hhh2-ctas">
-        <a href="{% url 'product_list' %}" class="hhh2-btn hhh2-btn--solid" id="hhh2-cta-explore" aria-label="Explore all jewelry collections">Explore</a>
-        <a href="/customize/" class="hhh2-btn hhh2-btn--outline" id="hhh2-cta-customize" aria-label="Customize your own jewelry box"><span aria-hidden="true">✨</span> Customize Box</a>
+        <a href="{% url 'product_list' %}" class="hhh2-btn hhh2-btn--solid" id="hhh2-cta-explore">Explore</a>
+        <a href="/customize/" class="hhh2-btn hhh2-btn--outline" id="hhh2-cta-customize"><span aria-hidden="true">✨</span> Customize Box</a>
       </div>
       <hr class="hhh2-divider" aria-hidden="true">
       <div class="hhh2-trust" role="note">
@@ -219,49 +222,49 @@
     <!-- Right column -->
     <div class="hhh2-right">
       <!-- Stage -->
-      <div class="hhh2-stage" id="hhh2-stage" aria-live="polite" aria-atomic="true" aria-label="12-Piece Earring Box Set">
-        <div class="hhh2-stage-slide active" id="hhh2-slide-0" role="img" aria-label="12-Piece Earring Box Set">
-          <img src="{% static 'images/hero-box-12pc-flat.jpg' %}" alt="12-Piece Earring Box Set" width="800" height="800" loading="eager" decoding="async">
+      <div class="hhh2-stage" id="hhh2-stage">
+        <div class="hhh2-stage-slide active" id="hhh2-slide-0">
+          <img src="{% static 'images/hero-box-12pc-flat.jpg' %}" alt="" width="800" height="800" loading="eager" decoding="async">
         </div>
-        <div class="hhh2-stage-slide" id="hhh2-slide-1" role="img" aria-label="16-Piece Oxidised Silver Jhumka Box Set">
-          <img src="{% static 'images/hero-box-16pc-silver.jpg' %}" alt="16-Piece Oxidised Silver Jhumka Box Set" width="800" height="800" loading="eager" decoding="async">
+        <div class="hhh2-stage-slide" id="hhh2-slide-1">
+          <img src="{% static 'images/hero-box-16pc-silver.jpg' %}" alt="" width="800" height="800" loading="eager" decoding="async">
         </div>
-        <div class="hhh2-stage-slide" id="hhh2-slide-2" role="img" aria-label="Black Clover Jewelry Set">
-          <img src="{% static 'images/hero-clover-set.jpg' %}" alt="Black Clover Jewelry Set" width="800" height="800" loading="eager" decoding="async">
+        <div class="hhh2-stage-slide" id="hhh2-slide-2">
+          <img src="{% static 'images/hero-clover-set.jpg' %}" alt="" width="800" height="800" loading="eager" decoding="async">
         </div>
-        <div class="hhh2-stage-slide" id="hhh2-slide-3" role="img" aria-label="12-Piece Earring Box Pearls Set">
-          <img src="{% static 'images/hero-box-12pc-pearls.jpg' %}" alt="12-Piece Earring Box Pearls Set" width="800" height="800" loading="eager" decoding="async">
+        <div class="hhh2-stage-slide" id="hhh2-slide-3">
+          <img src="{% static 'images/hero-box-12pc-pearls.jpg' %}" alt="" width="800" height="800" loading="eager" decoding="async">
         </div>
       </div>
 
       <!-- Thumbnail selector -->
-      <nav class="hhh2-selector" id="hhh2-selector" aria-label="Product category thumbnails">
-        <button class="hhh2-chev" id="hhh2-prev" aria-label="Previous image">
+      <nav class="hhh2-selector" id="hhh2-selector">
+        <button class="hhh2-chev" id="hhh2-prev">
           <span class="material-symbols-outlined hhh2-chev-icon" aria-hidden="true">keyboard_arrow_up</span>
         </button>
         <ul class="hhh2-thumb-list" role="list">
           <li class="hhh2-thumb-item">
-            <button class="hhh2-thumb active" data-index="0" aria-label="View 12-Piece Earring Box Set" aria-current="true" id="hhh2-thumb-0">
-              <img src="{% static 'images/hero-box-12pc-flat.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
+            <button class="hhh2-thumb active" data-index="0" id="hhh2-thumb-0">
+              <img src="{% static 'images/hero-box-12pc-flat.jpg' %}" alt="" width="128" height="128" loading="eager">
             </button>
           </li>
           <li class="hhh2-thumb-item">
-            <button class="hhh2-thumb" data-index="1" aria-label="View 16-Piece Oxidised Silver Jhumka Box Set" id="hhh2-thumb-1">
-              <img src="{% static 'images/hero-box-16pc-silver.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
+            <button class="hhh2-thumb" data-index="1" id="hhh2-thumb-1">
+              <img src="{% static 'images/hero-box-16pc-silver.jpg' %}" alt="" width="128" height="128" loading="eager">
             </button>
           </li>
           <li class="hhh2-thumb-item">
-            <button class="hhh2-thumb" data-index="2" aria-label="View Black Clover Jewelry Set" id="hhh2-thumb-2">
-              <img src="{% static 'images/hero-clover-set.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
+            <button class="hhh2-thumb" data-index="2" id="hhh2-thumb-2">
+              <img src="{% static 'images/hero-clover-set.jpg' %}" alt="" width="128" height="128" loading="eager">
             </button>
           </li>
           <li class="hhh2-thumb-item">
-            <button class="hhh2-thumb" data-index="3" aria-label="View 12-Piece Earring Box Pearls Set" id="hhh2-thumb-3">
-              <img src="{% static 'images/hero-box-12pc-pearls.jpg' %}" alt="" aria-hidden="true" width="128" height="128" loading="eager">
+            <button class="hhh2-thumb" data-index="3" id="hhh2-thumb-3">
+              <img src="{% static 'images/hero-box-12pc-pearls.jpg' %}" alt="" width="128" height="128" loading="eager">
             </button>
           </li>
         </ul>
-        <button class="hhh2-chev" id="hhh2-next" aria-label="Next image">
+        <button class="hhh2-chev" id="hhh2-next">
           <span class="material-symbols-outlined hhh2-chev-icon" aria-hidden="true">keyboard_arrow_down</span>
         </button>
       </nav>
