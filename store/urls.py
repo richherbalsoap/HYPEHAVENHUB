@@ -99,6 +99,7 @@ urlpatterns = [
     path('admin/products/<int:pk>/delete-video/', admin_views.admin_product_delete_video, name='admin_product_delete_video'),
     path('admin/products/<int:pk>/delete/', admin_views.admin_product_delete, name='admin_product_delete'),
     path('admin/orders/', admin_views.admin_orders, name='admin_orders'),
+    path('admin/orders/sync-shiprocket-statuses/', admin_views.admin_sync_shiprocket_statuses, name='admin_sync_shiprocket_statuses'),
     path('admin/orders/<str:order_id>/', admin_views.admin_order_detail, name='admin_order_detail'),
     path('admin/orders/<str:order_id>/retry-shiprocket/', admin_views.admin_retry_shiprocket, name='admin_retry_shiprocket'),
     path('admin/complaints/', admin_views.admin_complaints, name='admin_complaints'),

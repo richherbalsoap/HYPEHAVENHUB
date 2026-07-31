@@ -837,6 +837,62 @@ def admin_retry_shiprocket(request, order_id):
             messages.error(request, f'Shiprocket Retry Failed: {error_msg}')
 
     return redirect('admin_order_detail', order_id=order_id)
+
+
+@admin_required
+def admin_sync_shiprocket_statuses(request):
+    """Sync live tracking and order statuses for all active/pending orders from Shiprocket and Payment status."""
+    if request.method == 'POST':
+        from .shipping import ShiprocketService
+        
+        # Select orders that are pending, confirmed, processing, or shipped
+        orders_to_sync = Order.objects.exclude(status__in=['delivered', 'returned']).order_by('-created_at')[:50]
+        synced_count = 0
+        status_changes = 0
+
+        for order in orders_to_sync:
+            tracking_code = order.shipping_tracking_id or order.order_id
+            live_data, err = ShiprocketService.get_live_tracking(tracking_code)
+            
+            old_status = order.status
+            updated = False
+
+            if live_data:
+                sr_status = (live_data.get('current_status') or '').upper()
+                if 'DELIVERED' in sr_status and 'RTO' not in sr_status:
+                    order.status = 'delivered'
+                    updated = True
+                elif 'CANCEL' in sr_status:
+                    order.status = 'cancelled'
+                    updated = True
+                elif 'RETURN' in sr_status or 'RTO' in sr_status:
+                    order.status = 'returned'
+                    updated = True
+                elif any(kw in sr_status for kw in ['SHIPPED', 'TRANSIT', 'OUT FOR DELIVERY', 'DISPATCHED']):
+                    order.status = 'shipped'
+                    updated = True
+
+            # If order status was still pending but payment is successful, mark as confirmed
+            if order.status == 'pending' and hasattr(order, 'payment') and order.payment and order.payment.status == 'success':
+                order.status = 'confirmed'
+                updated = True
+
+            if updated and order.status != old_status:
+                order.save()
+                status_changes += 1
+                OrderTracking.objects.create(
+                    order=order,
+                    status=order.status,
+                    description=f"Status auto-synced to {order.get_status_display()} from Shiprocket Live API."
+                )
+
+            synced_count += 1
+
+        messages.success(request, f"Successfully synced live statuses for {synced_count} orders ({status_changes} status updates applied).")
+
+    return redirect('admin_orders')
+
+
 @admin_required
 def admin_complaints(request):
     """Manage complaints"""
