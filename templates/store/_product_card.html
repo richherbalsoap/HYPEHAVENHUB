@@ -32,9 +32,15 @@
     {% endif %}
 
     <div class="product-card-actions-wrapper">
+      {% if product.is_custom_box %}
+      <a href="{% url 'customize_earrings' %}" class="product-card-quick-add text-decoration-none text-center" style="background: var(--primary); color: var(--surface); display: flex; align-items: center; justify-content: center; gap: 4px;">
+        ✨ Customize Box
+      </a>
+      {% else %}
       <button class="product-card-quick-add" data-add-cart data-product-id="{{ product.id }}">
         {% t "add_to_cart" %}
       </button>
+      {% endif %}
       <button class="product-card-quick-view" data-quick-view data-product-id="{{ product.id }}" title="Quick View" aria-label="Quick View">
         <span class="material-symbols-outlined">visibility</span>
       </button>

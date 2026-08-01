@@ -254,6 +254,16 @@ class Product(models.Model):
         return 0
 
     @property
+    def is_custom_box(self):
+        if self.category and (self.category.slug == 'custom-boxes' or 'custom' in self.category.name.lower()):
+            return True
+        if self.slug and ('custom-12' in self.slug or 'custom-16' in self.slug or 'custom-boxes' in self.slug or 'custom-earring-box' in self.slug or self.slug.startswith('custom-')):
+            return True
+        if 'custom' in self.name.lower() and ('box' in self.name.lower() or 'earring' in self.name.lower()):
+            return True
+        return False
+
+    @property
     def review_count(self):
         reviews = list(self.reviews.all())
         return sum(1 for r in reviews if r.is_approved)

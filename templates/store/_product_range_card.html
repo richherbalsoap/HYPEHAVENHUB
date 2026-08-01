@@ -36,9 +36,15 @@
       <a href="{% url 'product_detail' product.slug %}" class="range-product-title">{{ product.name }}</a>
       <div class="range-product-price">{% get_localized_price product request %}</div>
       
+      {% if product.is_custom_box %}
+      <a href="{% url 'customize_earrings' %}" class="range-add-btn text-decoration-none text-center d-block" style="line-height: 38px;">
+        GO TO CUSTOMIZE PAGE
+      </a>
+      {% else %}
       <button class="range-add-btn" data-add-cart data-product-id="{{ product.id }}" data-variant-id="{{ product.variants.first.id }}">
         ADD TO CART
       </button>
+      {% endif %}
     </div>
   </div>
 </div>

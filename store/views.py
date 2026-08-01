@@ -390,6 +390,13 @@ def product_detail(request, slug):
         slug=slug,
         is_active=True,
     )
+    if product.is_custom_box:
+        if product.name != 'Custom 12 & 16-Pair Earring Box Set':
+            product.name = 'Custom 12 & 16-Pair Earring Box Set'
+            try:
+                product.save(update_fields=['name'])
+            except Exception:
+                pass
     try:
         product.view_count += 1
         product.save(update_fields=['view_count'])
@@ -2421,7 +2428,7 @@ def customize_add_to_cart(request):
         product, _ = Product.objects.get_or_create(
             slug=f'custom-{box_type}-pair-earring-box-set',
             defaults={
-                'name': f'Custom {box_type}-Pair Earring Box Set',
+                'name': 'Custom 12 & 16-Pair Earring Box Set',
                 'category': category,
                 'base_price': price,
                 'discount_percent': Decimal('0.00'),
@@ -2429,6 +2436,9 @@ def customize_add_to_cart(request):
                 'is_active': True,
             }
         )
+        if product.name != 'Custom 12 & 16-Pair Earring Box Set':
+            product.name = 'Custom 12 & 16-Pair Earring Box Set'
+            product.save(update_fields=['name'])
         if product.base_price != price:
             product.base_price = price
             product.save()
