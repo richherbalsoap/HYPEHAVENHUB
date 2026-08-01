@@ -166,33 +166,162 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="d-flex gap-3 mb-4 flex-wrap">
-        <button class="btn-add-cart flex-grow-1" data-add-cart
-                data-product-id="{{ product.id }}"
-                data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}"
-                style="padding: 12px 24px; border-radius: 12px; font-family: 'Montserrat', sans-serif;">
-          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">shopping_bag</span> Add to Cart
-        </button>
-        <button class="btn-buy-now flex-grow-1" id="buyNowBtn"
-                data-product-id="{{ product.id }}"
-                data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}"
-                style="background: var(--primary); color: var(--surface); border: none; border-radius: 12px; padding: 12px 24px; font-weight: 600; font-family: 'Montserrat', sans-serif; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">bolt</span> Buy Now
-        </button>
-        {% if user.is_authenticated %}
-        <button class="btn-wishlist-toggle {% if user_in_wishlist %}active{% endif %}"
-                data-wishlist data-product-id="{{ product.id }}"
-                title="{% if user_in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
-                style="border-radius: 12px; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--outline-variant); background: transparent; color: var(--on-surface);">
-          <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">favorite</span>
-        </button>
-        {% endif %}
+      <div class="mb-4">
+        <div class="d-flex gap-3 mb-3 flex-wrap align-items-center">
+          <button class="btn-add-cart flex-grow-1" data-add-cart
+                  data-product-id="{{ product.id }}"
+                  data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}"
+                  style="padding: 14px 24px; border-radius: 30px; font-family: 'Montserrat', sans-serif; font-weight: 700; border: 1.5px solid var(--outline-variant); background: var(--surface-container-low); color: var(--on-surface);">
+            <span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;">shopping_bag</span> Add to Cart
+          </button>
+          {% if user.is_authenticated %}
+          <button class="btn-wishlist-toggle {% if user_in_wishlist %}active{% endif %}"
+                  data-wishlist data-product-id="{{ product.id }}"
+                  title="{% if user_in_wishlist %}Remove from Wishlist{% else %}Add to Wishlist{% endif %}"
+                  style="border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--outline-variant); background: transparent; color: var(--on-surface); flex-shrink: 0;">
+            <span class="material-symbols-outlined" style="font-size:22px;vertical-align:middle;">favorite</span>
+          </button>
+          {% endif %}
+        </div>
+
+        <!-- Razorpay Direct Buy Now Container -->
+        <div class="rzp-buy-now-wrapper">
+          <button class="btn-buy-now-rzp" id="buyNowBtn"
+                  data-product-id="{{ product.id }}"
+                  data-variant-id="{% if variants %}{{ variants.first.id }}{% endif %}">
+            <div class="btn-buy-now-left">
+              <span class="material-symbols-outlined bolt-icon">bolt</span>
+              <span>Buy Now</span>
+            </div>
+            <div class="btn-buy-now-right">
+              <!-- PhonePe Badge -->
+              <span class="rzp-payment-badge" title="PhonePe">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="12" fill="#5F259F"/><path d="M15.5 8.5H12.5V7H11V8.5H9.5V10H12.5C13.3 10 14 10.7 14 11.5C14 12.3 13.3 13 12.5 13H11V15.5L8.5 17.5V14H9.5V11.5H8.5V10H11V8.5H15.5V8.5Z" fill="white"/><path d="M12.5 10H11V13H12.5C12.9 13 13.2 12.7 13.2 12.3V10.7C13.2 10.3 12.9 10 12.5 10Z" fill="white"/></svg>
+              </span>
+              <!-- GPay Badge -->
+              <span class="rzp-payment-badge" title="Google Pay">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M17.5 12.2c0-.4 0-.7-.1-1.1H12v2.1h3.1c-.1.7-.5 1.4-1.1 1.8v1.5h1.8c1.1-1 1.7-2.5 1.7-4.3z" fill="#4285F4"/><path d="M12 17.8c1.6 0 2.9-.5 3.9-1.4l-1.8-1.5c-.5.4-1.2.6-2.1.6-1.6 0-3-1.1-3.5-2.6H6.6v1.5c1 2 3.1 3.4 5.4 3.4z" fill="#34A853"/><path d="M8.5 12.9c-.1-.4-.2-.9-.2-1.4s.1-1 .2-1.4V8.6H6.6c-.4.9-.7 1.9-.7 2.9s.3 2 .7 2.9l1.9-1.5z" fill="#FBBC05"/><path d="M12 7.7c.9 0 1.6.3 2.2.9l1.7-1.7C14.9 6 13.6 5.4 12 5.4 9.7 5.4 7.6 6.8 6.6 8.8l1.9 1.5c.5-1.6 1.9-2.6 3.5-2.6z" fill="#EA4335"/></svg>
+              </span>
+              <!-- Paytm / UPI Badge -->
+              <span class="rzp-payment-badge" title="UPI & Cards">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="12" r="12" fill="#002E6E"/><path d="M7 9L12 14L17 9" stroke="#00BAF2" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 13L12 18L17 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </div>
+          </button>
+
+          <!-- Razorpay Secured Sub-banner -->
+          <div class="rzp-trust-subbanner">
+            <span class="rzp-trust-left">All payment modes available</span>
+            <span class="rzp-trust-right">
+              <em>Secured by</em>
+              <svg viewBox="0 0 100 22" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+                <path d="M12 2L3 20H8L17 2H12Z" fill="#0C2340"/>
+                <path d="M16 2L9 16H13L20 2H16Z" fill="#0284C7"/>
+                <text x="23" y="16" fill="#0C2340" font-family="'Montserrat', sans-serif" font-weight="800" font-size="14" letter-spacing="-0.3">Razorpay</text>
+              </svg>
+            </span>
+          </div>
+        </div>
       </div>
       {% endif %}
 
       <!-- Custom Product Details: Pincode Check, Badges, and Accordions -->
       <style>
         /* Gallery Navigation Arrows */
+        /* Razorpay Styled Buy Now Button & Trust Sub-banner */
+        .rzp-buy-now-wrapper {
+          width: 100%;
+          margin-top: 10px;
+        }
+        .btn-buy-now-rzp {
+          width: 100%;
+          background: #0f0507;
+          color: #ffffff !important;
+          border: none;
+          border-radius: 30px;
+          padding: 14px 24px;
+          font-weight: 700;
+          font-family: 'Montserrat', sans-serif;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          box-shadow: 0 4px 14px rgba(15, 5, 7, 0.25);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+          cursor: pointer;
+        }
+        .btn-buy-now-rzp:hover {
+          background: #25090d;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(15, 5, 7, 0.35);
+          color: #ffffff !important;
+        }
+        .btn-buy-now-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 16px;
+          letter-spacing: 0.5px;
+        }
+        .btn-buy-now-left .bolt-icon {
+          font-size: 20px;
+          color: #ffffff;
+        }
+        .btn-buy-now-right {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.15);
+          padding: 4px 10px;
+          border-radius: 20px;
+        }
+        .rzp-payment-badge {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #ffffff;
+          overflow: hidden;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .rzp-trust-subbanner {
+          background: #eff6ff;
+          border: 1px solid #dbeafe;
+          border-radius: 10px;
+          padding: 10px 16px;
+          margin-top: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-family: 'Montserrat', sans-serif;
+        }
+        .rzp-trust-left {
+          font-size: 12px;
+          font-weight: 600;
+          color: #334155;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .rzp-trust-right {
+          font-size: 12px;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        html.dark .rzp-trust-subbanner {
+          background: rgba(14, 116, 144, 0.12);
+          border-color: rgba(14, 116, 144, 0.25);
+        }
+        html.dark .rzp-trust-left {
+          color: #e2e8f0;
+        }
+        html.dark .rzp-trust-right {
+          color: #94a3b8;
+        }
         .gallery-arrow {
           position: absolute;
           top: 50%;
