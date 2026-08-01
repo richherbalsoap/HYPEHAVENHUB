@@ -5,6 +5,10 @@
 
 {% block title %}{% if product.is_custom_box %}Custom 12 & 16-Pair Earring Box Set{% else %}{{ product.name }}{% endif %} - HYPEHAVENHUB{% endblock %}
 
+{% block extra_head %}
+<script src="https://checkout.razorpay.com/v1/magic-checkout.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
   <!-- Breadcrumb -->
@@ -214,11 +218,7 @@
             <span class="rzp-trust-left">All payment modes available</span>
             <span class="rzp-trust-right">
               <em>Secured by</em>
-              <svg viewBox="0 0 100 22" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
-                <path d="M12 2L3 20H8L17 2H12Z" fill="#0C2340"/>
-                <path d="M16 2L9 16H13L20 2H16Z" fill="#0284C7"/>
-                <text x="23" y="16" fill="#0C2340" font-family="'Montserrat', sans-serif" font-weight="800" font-size="14" letter-spacing="-0.3">Razorpay</text>
-              </svg>
+              <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" style="height: 15px; vertical-align: middle; margin-left: 4px; display: inline-block;">
             </span>
           </div>
         </div>
