@@ -68,54 +68,52 @@
 
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-glamour sticky-top">
-  <div class="container-fluid px-3 px-md-4">
+  <div class="container-fluid px-2 px-md-4 d-flex align-items-center justify-content-between flex-nowrap" style="max-width: 100%; overflow-x: hidden;">
     <!-- Left: Brand Logo & Name -->
-    <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+    <a class="navbar-brand d-flex align-items-center flex-shrink-0" href="{% url 'home' %}">
       <img src="{% static 'images/logo-golden-hh.jpg' %}" alt="HYPEHAVENHUB Logo" class="brand-logo-img" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--outline-variant);">
       <span class="brand-name ms-2">HYPEHAVEN<span class="brand-accent">HUB</span></span>
     </a>
 
     <!-- Center: Desktop Navigation Links -->
-    <div class="d-none d-lg-flex ms-4">
-      <ul class="navbar-nav gap-3">
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'home' %}">{% t "home" %}</a></li>
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}">{% t "all_jewelry" %}</a></li>
-        <li class="nav-item"><a class="nav-link cat-link text-warning fw-bold" href="{% url 'customize_earrings' %}">✨ Customize Your Earrings Box</a></li>
+    <div class="d-none d-lg-flex align-items-center mx-auto flex-shrink-1 overflow-hidden">
+      <ul class="navbar-nav gap-2 gap-xl-3 flex-row flex-nowrap align-items-center" style="font-size: 13px;">
+        <li class="nav-item"><a class="nav-link cat-link text-nowrap" href="{% url 'home' %}">{% t "home" %}</a></li>
+        <li class="nav-item"><a class="nav-link cat-link text-nowrap" href="{% url 'product_list' %}">{% t "all_jewelry" %}</a></li>
+        <li class="nav-item"><a class="nav-link cat-link text-warning fw-bold text-nowrap" href="{% url 'customize_earrings' %}">✨ Customize Box</a></li>
         {% for cat in all_categories %}
-        <li class="nav-item"><a class="nav-link cat-link" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+        <li class="nav-item"><a class="nav-link cat-link text-nowrap" href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
         {% endfor %}
-        <li class="nav-item"><a class="nav-link cat-link sale-link" href="{% url 'product_list' %}?discount=10"><span class="material-symbols-outlined me-1" style="font-size: 18px; vertical-align: middle;">whatshot</span>{% t "offers" %}</a></li>
+        <li class="nav-item"><a class="nav-link cat-link sale-link text-nowrap" href="{% url 'product_list' %}?discount=10"><span class="material-symbols-outlined me-1" style="font-size: 16px; vertical-align: middle;">whatshot</span>{% t "offers" %}</a></li>
       </ul>
     </div>
 
-    <!-- Center-Right: Removed Search Input -->
-    
     <!-- Right: Icons cluster (Cart + Hamburger Only) -->
-    <div class="nav-icons d-flex align-items-center gap-1 ms-auto">
+    <div class="nav-icons d-flex align-items-center gap-2 ms-auto flex-shrink-0">
       
       <!-- Localization Trigger -->
-      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-1" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Ship to" aria-label="Ship to">
-        <span class="ms-1 d-flex align-items-center gap-1" style="font-size: clamp(11px, 3.5vw, 13px); font-weight: 600; white-space: nowrap;">
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-1 flex-shrink-0" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Ship to" aria-label="Ship to">
+        <span class="d-flex align-items-center gap-1" style="font-size: 12px; font-weight: 600; white-space: nowrap;">
           {% if current_country and current_country.code %}
-            <span class="fi fi-{{ current_country.code|lower }}" style="border-radius: 2px;"></span> Ship to {{ current_country.name }} <span class="material-symbols-outlined d-none d-md-inline" style="font-size: 16px;">keyboard_arrow_down</span>
+            <span class="fi fi-{{ current_country.code|lower }}" style="border-radius: 2px;"></span> Ship to {{ current_country.name }} <span class="material-symbols-outlined d-none d-md-inline" style="font-size: 15px;">keyboard_arrow_down</span>
           {% else %}
-            <span class="fi fi-in" style="border-radius: 2px;"></span> Ship to India <span class="material-symbols-outlined d-none d-md-inline" style="font-size: 16px;">keyboard_arrow_down</span>
+            <span class="fi fi-in" style="border-radius: 2px;"></span> Ship to India <span class="material-symbols-outlined d-none d-md-inline" style="font-size: 15px;">keyboard_arrow_down</span>
           {% endif %}
         </span>
       </button>
 
       <!-- Theme Switcher Trigger -->
-      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-1" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme Mode" style="border: none; background: transparent; outline: none; box-shadow: none;">
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-1 flex-shrink-0" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle Theme Mode" style="border: none; background: transparent; outline: none; box-shadow: none;">
         <span class="material-symbols-outlined" id="themeToggleIcon" style="font-size: 20px; color: var(--primary); vertical-align: middle;">dark_mode</span>
       </button>
 
-      <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon d-none d-md-inline-flex" title="{% t 'cart' %}" aria-label="View Shopping Cart" onclick="event.preventDefault(); if(typeof openCartDrawer === 'function'){openCartDrawer();}else{window.location.href=this.href;}">
+      <a href="{% url 'cart' %}" class="nav-icon-btn position-relative cart-icon d-none d-md-inline-flex flex-shrink-0" title="{% t 'cart' %}" aria-label="View Shopping Cart" onclick="event.preventDefault(); if(typeof openCartDrawer === 'function'){openCartDrawer();}else{window.location.href=this.href;}">
         <span class="material-symbols-outlined">shopping_bag</span>
         {% if cart_count > 0 %}<span class="cart-badge" id="cartBadge">{{ cart_count }}</span>{% endif %}
       </a>
       
       <!-- Hamburger toggle (always visible) -->
-      <button class="navbar-toggler d-block ms-1 p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" style="opacity: 1; border: none; outline: none;" aria-label="Toggle Navigation Menu">
+      <button class="navbar-toggler d-block ms-1 p-0 flex-shrink-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu" style="opacity: 1; border: none; outline: none;" aria-label="Toggle Navigation Menu">
         <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary);">menu</span>
       </button>
     </div>
