@@ -990,9 +990,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedVariantBtn = document.querySelector('.variant-thumb-box.selected, .variant-btn.selected');
     const variantId = selectedVariantBtn ? selectedVariantBtn.dataset.variantId : btn.dataset.variantId;
     const quantity = parseInt(document.getElementById('qtyInput')?.value || 1);
+    const personalizationName = document.getElementById('personalizationInput')?.value.trim() || '';
 
     if (window.initiateMagicCheckout) {
-      window.initiateMagicCheckout(btn, productId, variantId, quantity);
+      window.initiateMagicCheckout(btn, productId, variantId, quantity, personalizationName);
     } else {
       alert("Checkout system is still loading. Please try again in a moment.");
     }

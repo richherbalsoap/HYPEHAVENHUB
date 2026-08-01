@@ -106,6 +106,8 @@ class ShiprocketService:
             # Extract material details from product model
             product_material = item.product.material if (item.product and item.product.material) else "Alloy Metal"
             p_name = getattr(item, 'personalization_name', '') or ''
+            if not p_name and order.notes and 'Personalisation' in order.notes:
+                p_name = order.notes.replace('Personalisation:', '').strip()
             
             # If international order, declare clearly as Imitation Jewelry / Non-Precious Metal / Sample
             if is_international:
@@ -202,6 +204,9 @@ class ShiprocketService:
 
         # Add comment with personalisation details
         pers_details = [f"{item.product_name}: {item.personalization_name}" for item in order.items.all() if getattr(item, 'personalization_name', '')]
+        if not pers_details and order.notes and "Personalisation" in order.notes:
+            pers_details = [order.notes]
+
         comment_parts = []
         if is_international:
             comment_parts.append("SAMPLE ONLY - IMITATION JEWELRY (NON-PRECIOUS METAL). NO COMMERCIAL VALUE. FOR CUSTOMS CLEARANCE.")

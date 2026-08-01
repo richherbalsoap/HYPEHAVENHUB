@@ -69,6 +69,17 @@
             </div>
         </div>
 
+        {% if order.notes %}
+        <div class="admin-card mb-4" style="background: rgba(255, 235, 238, 0.7); border: 1.5px solid #d32f2f; border-radius: 12px; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.1);">
+            <div class="admin-card-header" style="border-bottom: 1px solid rgba(211, 47, 47, 0.2); padding: 14px 20px;">
+                <div>
+                    <div class="eyebrow" style="color: #c62828; font-weight: 700; letter-spacing: 0.5px;"><i class="fas fa-signature me-1"></i> Customer Personalisation / Special Order Notes</div>
+                    <h5 class="mb-0" style="color: #b71c1c; font-weight: 700; font-size: 16px; margin-top: 4px;">{{ order.notes }}</h5>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Retry Shiprocket Booking Form -->
         {% if not order.shipping_tracking_id %}
         <div class="collapse {% if order.status == 'shiprocket_failed' %}show{% endif %} mb-4" id="retryShiprocketCollapse">
