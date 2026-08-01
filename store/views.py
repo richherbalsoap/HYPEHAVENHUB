@@ -95,11 +95,7 @@ def build_login_redirect_url(request, fallback='/', notice=''):
     if not url_has_allowed_host_and_scheme(next_url, {request.get_host()}):
         next_url = fallback
 
-    login_base = settings.LOGIN_URL if str(settings.LOGIN_URL).startswith('/') else '/auth/login/'
-    query = {'next': next_url}
-    if notice:
-        query['notice'] = notice
-    return f"{login_base}?{urllib_parse.urlencode(query)}"
+    return f"/accounts/google/login/?next={urllib_parse.quote(next_url)}"
 
 
 def normalize_phone_number(phone):
@@ -1181,16 +1177,14 @@ def razorpay_direct_checkout(request):
         
     user = request.user
     if not user.is_authenticated:
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        user, _ = User.objects.get_or_create(
-            username='guest_checkout',
-            defaults={
-                'email': 'guest@hypehavenhub.com',
-                'first_name': 'Guest',
-                'last_name': 'User',
-            }
-        )
+        referer = request.META.get('HTTP_REFERER', '/cart/')
+        google_login_url = f"/accounts/google/login/?next={urllib_parse.quote(referer)}"
+        return JsonResponse({
+            'success': False,
+            'requires_login': True,
+            'redirect': google_login_url,
+            'message': 'Please login with Google to proceed with checkout.'
+        }, status=401)
         
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
