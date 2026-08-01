@@ -389,7 +389,7 @@ class ProductForm(forms.ModelForm):
             'description', 'short_description', 'ingredients', 'how_to_use',
             'weight', 'material', 'metal_purity', 'warranty', 'artisan_story',
             'base_price', 'discount_percent', 'is_flash_sale', 'finish',
-            'is_active', 'is_featured', 'is_new_arrival', 'is_bestseller'
+            'is_active', 'is_featured', 'is_new_arrival', 'is_bestseller', 'allow_personalization'
         ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),

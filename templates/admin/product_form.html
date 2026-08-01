@@ -211,6 +211,14 @@
                             <span class="d-block text-muted small fw-normal">Mark as best seller</span>
                         </label>
                     </div>
+
+                    <div class="form-check form-switch p-3 rounded" style="background: var(--admin-surface-hover); border: 1px solid var(--admin-border);">
+                        {{ form.allow_personalization }}
+                        <label class="form-check-label ms-2 fw-semibold" style="color: var(--admin-primary);" for="{{ form.allow_personalization.id_for_label }}">
+                            <i class="fas fa-signature" style="margin-right: 4px;"></i> Personalisation Input
+                            <span class="d-block text-muted small fw-normal">Enable customer personalisation name field on product page</span>
+                        </label>
+                    </div>
                 </div>
 
                 {% if form.non_field_errors %}

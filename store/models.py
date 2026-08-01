@@ -215,6 +215,7 @@ class Product(models.Model):
     is_featured = models.BooleanField(default=False, db_index=True)
     is_new_arrival = models.BooleanField(default=False, db_index=True)
     is_bestseller = models.BooleanField(default=False, db_index=True)
+    allow_personalization = models.BooleanField(default=False, help_text="Explicitly allow personalisation input for this product")
     aplus_image_url = models.URLField(max_length=600, blank=True, help_text="Upload a single long image for A+ Amazon-style content")
     view_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -233,6 +234,18 @@ class Product(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+    @property
+    def is_personalizable(self):
+        if self.allow_personalization:
+            return True
+        name_str = (self.name or '').lower()
+        slug_str = (self.slug or '').lower()
+        cat_name = (self.category.name or '').lower() if self.category else ''
+        cat_slug = (self.category.slug or '').lower() if self.category else ''
+        combined = f"{name_str} {slug_str} {cat_name} {cat_slug}"
+        keywords = ['12', '16', '12-pair', '16-pair', '12-piece', '16-piece', '12 pair', '16 pair', '12pc', '16pc', 'box-set', 'custom-box']
+        return any(kw in combined for kw in keywords)
 
     @property
     def selling_price(self):
