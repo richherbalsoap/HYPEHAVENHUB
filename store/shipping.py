@@ -105,12 +105,16 @@ class ShiprocketService:
             
             # Extract material details from product model
             product_material = item.product.material if (item.product and item.product.material) else "Alloy Metal"
+            p_name = getattr(item, 'personalization_name', '') or ''
             
             # If international order, declare clearly as Imitation Jewelry / Non-Precious Metal / Sample
             if is_international:
                 item_name = f"{item.product_name} (Imitation Jewelry - Non-Precious Metal: {product_material}) - SAMPLE"
             else:
                 item_name = item.product_name
+
+            if p_name:
+                item_name += f" [Name: {p_name}]"
 
             item_payload = {
                 "name": item_name[:250],  # Ensure length limit
@@ -196,9 +200,15 @@ class ShiprocketService:
         if channel_id:
             payload["channel_id"] = channel_id
 
-        # Add comment/customs declaration for international sample shipment
+        # Add comment with personalisation details
+        pers_details = [f"{item.product_name}: {item.personalization_name}" for item in order.items.all() if getattr(item, 'personalization_name', '')]
+        comment_parts = []
         if is_international:
-            payload["comment"] = "SAMPLE ONLY - IMITATION JEWELRY (NON-PRECIOUS METAL). NO COMMERCIAL VALUE. FOR CUSTOMS CLEARANCE."
+            comment_parts.append("SAMPLE ONLY - IMITATION JEWELRY (NON-PRECIOUS METAL). NO COMMERCIAL VALUE. FOR CUSTOMS CLEARANCE.")
+        if pers_details:
+            comment_parts.append("PERSONALISATION: " + ", ".join(pers_details))
+        if comment_parts:
+            payload["comment"] = " | ".join(comment_parts)[:500]
 
         try:
             url = f"{cls.BASE_URL}/orders/create/adhoc"

@@ -482,11 +482,12 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, null=True, blank=True)
+    personalization_name = models.CharField(max_length=255, blank=True, default='', verbose_name="Name for Personalisation")
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('cart', 'product', 'variant')
+        unique_together = ('cart', 'product', 'variant', 'personalization_name')
 
     @property
     def unit_price(self):
@@ -565,6 +566,7 @@ class OrderItem(models.Model):
     variant = models.ForeignKey(ProductVariant, on_delete=models.SET_NULL, null=True, blank=True)
     product_name = models.CharField(max_length=255)
     variant_label = models.CharField(max_length=100, blank=True)
+    personalization_name = models.CharField(max_length=255, blank=True, default='', verbose_name="Name for Personalisation")
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)

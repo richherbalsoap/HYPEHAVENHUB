@@ -845,6 +845,7 @@ def add_to_cart(request):
     data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
+    personalization_name = (data.get('personalization_name') or '').strip()[:255]
     try:
         quantity = int(data.get('quantity') or 1)
     except (ValueError, TypeError):
@@ -860,7 +861,7 @@ def add_to_cart(request):
 
     cart = get_or_create_cart(request)
     ci, created = CartItem.objects.get_or_create(
-        cart=cart, product=product, variant=variant,
+        cart=cart, product=product, variant=variant, personalization_name=personalization_name,
         defaults={'quantity': quantity}
     )
     if not created:
@@ -1065,17 +1066,26 @@ def place_order(request):
 
     # Create OrderItems & link CustomBoxOrders if any
     custom_selections = request.session.get('custom_box_selections', {})
+    pers_list = []
     for item in cart.items.all():
+        p_name = getattr(item, 'personalization_name', '') or ''
+        if p_name:
+            pers_list.append(f"{item.product.name}: {p_name}")
         order_item = OrderItem.objects.create(
             order=order,
             product=item.product,
             variant=item.variant,
             product_name=item.product.name,
             variant_label=item.variant.label if item.variant else '',
+            personalization_name=p_name,
             quantity=item.quantity,
             unit_price=item.unit_price,
             total_price=item.total_price,
         )
+
+    if pers_list:
+        order.notes = ("Personalisation: " + ", ".join(pers_list))[:500]
+        order.save(update_fields=['notes'])
 
         item_str_id = str(item.id)
         if item_str_id in custom_selections:
@@ -1215,11 +1225,13 @@ def razorpay_direct_checkout(request):
         # Basic delivery charge for Buy Now (0 for now to match Cart behavior)
         delivery_charge = Decimal('0.00')
 
+        personalization_name = (data.get('personalization_name') or '').strip()[:255]
         items_to_create.append({
             'product': product,
             'variant': variant,
             'product_name': product.name,
             'variant_label': variant.label if variant else '',
+            'personalization_name': personalization_name,
             'quantity': quantity,
             'unit_price': unit_price,
             'total_price': total_price
@@ -1242,12 +1254,17 @@ def razorpay_direct_checkout(request):
                 'variant': item.variant,
                 'product_name': item.product.name,
                 'variant_label': item.variant.label if item.variant else '',
+                'personalization_name': getattr(item, 'personalization_name', '') or '',
                 'quantity': item.quantity,
                 'unit_price': item.unit_price,
                 'total_price': item.total_price
             })
 
     grand_total = subtotal - discount_amount + delivery_charge
+
+    # Aggregate personalization names
+    pers_names = [f"{item['product_name']}: {item['personalization_name']}" for item in items_to_create if item.get('personalization_name')]
+    order_notes = ("Personalisation: " + ", ".join(pers_names))[:500] if pers_names else ""
 
     # Create Order without address
     order = Order.objects.create(
@@ -1258,6 +1275,7 @@ def razorpay_direct_checkout(request):
         delivery_charge=delivery_charge,
         grand_total=grand_total,
         coupon=coupon,
+        notes=order_notes,
         status='pending',
     )
 

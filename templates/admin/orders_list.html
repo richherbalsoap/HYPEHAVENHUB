@@ -92,6 +92,9 @@
                 <tr>
                     <td>
                         <strong style="color: var(--admin-primary);">{{ order.order_id }}</strong>
+                        {% if order.notes %}
+                        <small class="d-block text-primary fw-bold mt-1" style="font-size: 11px;"><i class="fas fa-signature me-1"></i>{{ order.notes }}</small>
+                        {% endif %}
                         {% if order.address %}
                         <small class="d-block text-muted"><i class="fas fa-location-dot" style="font-size: 10px;"></i> {{ order.address.city }}</small>
                         {% endif %}

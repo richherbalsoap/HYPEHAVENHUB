@@ -118,6 +118,11 @@
               <span style="vertical-align: middle;">{{ item.variant.label }}</span>
             </div>
             {% endif %}
+            {% if item.personalization_name %}
+            <div style="color: var(--primary); font-size: 12px; font-weight: 500; margin-top: 4px; background: rgba(82, 16, 27, 0.06); padding: 3px 8px; border-radius: 6px; width: fit-content;">
+              <i class="fas fa-signature me-1"></i>Name: <strong>{{ item.personalization_name }}</strong>
+            </div>
+            {% endif %}
             <div style="color: var(--primary); font-weight: 600; font-family: 'Montserrat', sans-serif; font-size: 14px; margin-top: 4px;">{% get_cart_item_price item as it_price %}{% format_price it_price|floatformat:"0" %}</div>
           </div>
         </div>

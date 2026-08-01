@@ -73,12 +73,13 @@ document.addEventListener('click', async (e) => {
   const productId = btn.dataset.productId;
   const variantId = btn.dataset.variantId || null;
   const qty = parseInt(document.getElementById('qtyInput')?.value || 1);
+  const personalizationName = document.getElementById('personalizationInput')?.value.trim() || '';
 
   btn.disabled = true;
   const original = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding...';
 
-  const data = await api('/cart/add/', { product_id: productId, variant_id: variantId, quantity: qty });
+  const data = await api('/cart/add/', { product_id: productId, variant_id: variantId, quantity: qty, personalization_name: personalizationName });
 
   btn.disabled = false;
   btn.innerHTML = original;
@@ -91,7 +92,8 @@ document.addEventListener('click', async (e) => {
         product_id: productId,
         variant_id: variantId,
         quantity: qty,
-        cart_count: data.cart_count
+        cart_count: data.cart_count,
+        personalization_name: personalizationName
       });
     }
     updateCartBadge(data.cart_count);
@@ -853,7 +855,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ====== GLOBAL MAGIC CHECKOUT ====== */
-window.initiateMagicCheckout = async function(btn, productId = null, variantId = null, quantity = null) {
+window.initiateMagicCheckout = async function(btn, productId = null, variantId = null, quantity = null, personalizationName = null) {
+  if (!personalizationName) {
+    personalizationName = document.getElementById('personalizationInput')?.value.trim() || '';
+  }
+
   btn.style.pointerEvents = 'none';
   const originalHtml = btn.innerHTML;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
@@ -862,7 +868,8 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
     const data = await api('/razorpay/checkout/initiate/', {
       product_id: productId,
       variant_id: variantId,
-      quantity: quantity
+      quantity: quantity,
+      personalization_name: personalizationName
     });
 
     if (data.requires_login && data.redirect) {

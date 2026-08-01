@@ -67,6 +67,7 @@
           <div class="flex-grow-1">
             <div class="fw-600" style="font-size: 15px;">{{ item.product_name }}</div>
             {% if item.variant_label %}<div class="text-muted small">{{ item.variant_label }}</div>{% endif %}
+            {% if item.personalization_name %}<div class="text-primary small mt-1 fw-500"><i class="fas fa-signature me-1"></i>Name: <strong>{{ item.personalization_name }}</strong></div>{% endif %}
             <div class="text-muted small mt-1">Qty: {{ item.quantity }} &times; {% format_price item.unit_price|floatformat:"0" %}</div>
           </div>
           <div class="fw-700" style="font-size: 16px;">{% format_price item.total_price|floatformat:"0" %}</div>
