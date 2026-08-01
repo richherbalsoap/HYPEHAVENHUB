@@ -571,28 +571,28 @@
 <div class="container pb-5">
   <!-- Product Reviews -->
   <div class="mt-4" id="reviews-section">
-    <div class="review-header-section d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-4 rounded" style="background-color: #1a1a1a; color: #ffffff;">
+    <div class="review-header-section d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 p-4" style="background-color: #52101B; color: #ffffff; border-radius: 12px;">
       <div class="review-stats mb-3 mb-md-0">
         <h3 class="section-title mb-1" style="font-size: 1.8rem; font-family: 'Playfair Display', serif; color: white !important;">Customer Reviews</h3>
         <div class="d-flex align-items-center gap-2">
           <span class="fw-bold fs-4">{{ product.average_rating|default:"5.0"|floatformat:1 }}</span>
-          <div class="d-flex" style="color: #3b8c7b;">
+          <div class="d-flex" style="color: #FFC107;">
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 1 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 2 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 3 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 4 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
             <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' {% if product.average_rating >= 4.8 %}1{% else %}0{% endif %}; font-size: 20px;">star</span>
           </div>
-          <span class="text-muted" style="color: #ccc !important;">{{ product.review_count }} reviews</span>
+          <span style="color: rgba(255,255,255,0.85) !important;">{{ product.review_count }} reviews</span>
         </div>
       </div>
       <div class="review-actions d-flex flex-column gap-2" style="min-width: 200px;">
         {% if user.is_authenticated and not user_review %}
-          <button class="btn btn-write-review w-100" onclick="openReviewModal()" style="background-color: black; color: white; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: 1px solid white;">Write a review</button>
+          <button class="btn btn-write-review w-100" onclick="openReviewModal()" style="background-color: rgba(255, 255, 255, 0.15); color: white; font-weight: 600; padding: 10px 24px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.4);">Write a review</button>
         {% elif not user.is_authenticated %}
-          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-write-review w-100" style="background-color: black; color: white; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: 1px solid white; text-align: center;">Write a review</a>
+          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-write-review w-100" style="background-color: rgba(255, 255, 255, 0.15); color: white; font-weight: 600; padding: 10px 24px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.4); text-align: center;">Write a review</a>
         {% endif %}
-        <button class="btn btn-ask-question w-100" onclick="openQuestionModal()" style="background-color: black; color: white; font-weight: 600; padding: 10px 24px; border-radius: 4px; border: 1px solid white;">Ask a question</button>
+        <button class="btn btn-ask-question w-100" onclick="openQuestionModal()" style="background-color: rgba(255, 255, 255, 0.15); color: white; font-weight: 600; padding: 10px 24px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.4);">Ask a question</button>
       </div>
     </div>
     
