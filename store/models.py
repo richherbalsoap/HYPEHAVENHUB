@@ -299,6 +299,8 @@ class Product(models.Model):
         primary = self.primary_image
         if primary and primary.url:
             return primary.url
+        if self.is_custom_box:
+            return "/static/images/custom-box-16pc.jpg" if "16" in str(self.slug) else "/static/images/custom-box-12pc.jpg"
         return ""
 
     @property
@@ -306,11 +308,18 @@ class Product(models.Model):
         all_imgs = [img for img in self.images.all() if img.url]
         if len(all_imgs) > 1:
             return all_imgs[1].url
+        if self.is_custom_box:
+            return "/static/images/custom-box-12pc.jpg" if "16" in str(self.slug) else "/static/images/custom-box-16pc.jpg"
         return self.display_image_url
 
     @property
     def display_gallery_urls(self):
-        return [img.url for img in self.images.all() if img.url]
+        urls = [img.url for img in self.images.all() if img.url]
+        if urls:
+            return urls
+        if self.is_custom_box:
+            return ["/static/images/custom-box-16pc.jpg", "/static/images/custom-box-12pc.jpg"]
+        return []
 
     def __str__(self):
         return self.name
