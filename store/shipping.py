@@ -30,7 +30,7 @@ class ShiprocketService:
         email = (getattr(settings, 'SHIPROCKET_EMAIL', '') or '').strip()
         password = (getattr(settings, 'SHIPROCKET_PASSWORD', '') or '').strip()
 
-        if api_key:
+        if api_key and api_key.startswith("ey"):
             if return_error:
                 return api_key, None
             return api_key
@@ -75,6 +75,7 @@ class ShiprocketService:
     def create_shipment(cls, order):
         """
         Creates a new order shipment in Shiprocket.
+        Handles multi-item orders, multi-quantity orders, SKU uniqueness, and proportional discounts.
         """
         token = cls._get_token()
         if not token:
@@ -99,76 +100,110 @@ class ShiprocketService:
         shiprocket_items = []
         is_international = country_name.lower() != "india"
 
-        for item in order.items.all():
-            product_id = item.product.id if item.product else 'UNKNOWN'
-            variant_id = item.variant.id if item.variant else 'default'
-            
-            # Extract material details from product model
-            product_material = item.product.material if (item.product and item.product.material) else "Alloy Metal"
+        order_items_list = list(order.items.all())
+        if not order_items_list:
+            logger.warning(f"Skipping Shiprocket booking for order {order.order_id} - order has no items.")
+            return None, "Order has no items."
+
+        # Group identical items (same product, variant, selling price, personalization)
+        grouped_items = {}
+        for item in order_items_list:
+            p_id = item.product.id if item.product else 'UNKNOWN'
+            v_id = item.variant.id if item.variant else 'default'
             p_name = getattr(item, 'personalization_name', '') or ''
-            if not p_name and order.notes and 'Personalisation' in order.notes:
+            if not p_name and len(order_items_list) == 1 and order.notes and 'Personalisation' in order.notes:
                 p_name = order.notes.replace('Personalisation:', '').strip()
             
-            # If international order, declare clearly as Imitation Jewelry / Non-Precious Metal / Sample
-            if is_international:
-                item_name = f"{item.product_name} (Imitation Jewelry - Non-Precious Metal: {product_material}) - SAMPLE"
+            key = (p_id, v_id, float(item.unit_price), p_name)
+            if key not in grouped_items:
+                grouped_items[key] = {
+                    'product': item.product,
+                    'variant': item.variant,
+                    'product_name': item.product_name,
+                    'quantity': item.quantity,
+                    'unit_price': float(item.unit_price),
+                    'personalization_name': p_name
+                }
             else:
-                item_name = item.product_name
+                grouped_items[key]['quantity'] += item.quantity
+
+        total_gross_subtotal = sum(g['unit_price'] * g['quantity'] for g in grouped_items.values())
+        discount_amount = float(order.discount_amount) if getattr(order, 'discount_amount', 0) else 0.0
+
+        sku_counts = {}
+        for idx, (key, g) in enumerate(grouped_items.items(), 1):
+            p_id, v_id, unit_price, p_name = key
+            base_sku = f"JHMK-{p_id}-{v_id}"
+            sku_counts[base_sku] = sku_counts.get(base_sku, 0) + 1
+            sku = base_sku if (sku_counts[base_sku] == 1 and len(grouped_items) == 1) else f"{base_sku}-{sku_counts[base_sku]}"
+
+            product_material = g['product'].material if (g['product'] and getattr(g['product'], 'material', None)) else "Alloy Metal"
+            if is_international:
+                item_name = f"{g['product_name']} (Imitation Jewelry - Non-Precious Metal: {product_material}) - SAMPLE"
+            else:
+                item_name = g['product_name']
 
             if p_name:
                 item_name += f" [Name: {p_name}]"
 
+            # Proportionally calculate item discount
+            item_sub = g['unit_price'] * g['quantity']
+            if total_gross_subtotal > 0 and discount_amount > 0:
+                item_disc = round((item_sub / total_gross_subtotal) * discount_amount, 2)
+            else:
+                item_disc = 0.0
+
             item_payload = {
-                "name": item_name[:250],  # Ensure length limit
-                "sku": f"JHMK-{product_id}-{variant_id}",
-                "units": item.quantity,
-                "selling_price": float(item.unit_price),
-                "discount": 0.0,
+                "name": item_name[:250],
+                "sku": sku,
+                "units": g['quantity'],
+                "selling_price": g['unit_price'],
+                "discount": item_disc,
                 "tax": 0.0,
-                "hsn": "71179090"  # Standard HSN for base metal imitation jewelry
+                "hsn": "71179090"
             }
             shiprocket_items.append(item_payload)
 
-        # Set default dimensions/weight based on box set category
-        # A typical jhumka box weighs around 0.5kg for 12pcs, and 0.7kg for 16pcs
-        weight = 0.5
-        length = 15
-        width = 15
-        height = 10
+        # Compute net subtotal for Shiprocket matching item sum
+        calculated_subtotal = round(sum(i['units'] * i['selling_price'] - i['discount'] for i in shiprocket_items), 2)
 
-        # Attempt to detect package properties from items
-        for item in order.items.all():
-            cat_slug = getattr(getattr(item.product, 'category', None), 'slug', '') if item.product else ''
-            if "16" in item.product_name or "16-piece" in cat_slug:
-                weight = 0.7
-                length = 20
-                width = 20
-                height = 12
+        # Dynamic Package Dimensions/Weight based on total items/quantity
+        total_weight = 0.0
+        has_16_pc = False
+        for g in grouped_items.values():
+            cat_slug = getattr(getattr(g['product'], 'category', None), 'slug', '') if g['product'] else ''
+            if "16" in g['product_name'] or "16-piece" in cat_slug:
+                has_16_pc = True
+                w_unit = 0.7
+            else:
+                w_unit = 0.5
+            total_weight += w_unit * g['quantity']
+
+        weight = max(0.5, round(total_weight, 2))
+        length = 20 if (has_16_pc or len(grouped_items) > 1 or sum(g['quantity'] for g in grouped_items.values()) > 1) else 15
+        width = 20 if (has_16_pc or len(grouped_items) > 1 or sum(g['quantity'] for g in grouped_items.values()) > 1) else 15
+        height = 12 if (has_16_pc or len(grouped_items) > 1 or sum(g['quantity'] for g in grouped_items.values()) > 1) else 10
 
         # Sanitize phone
         phone_digits = ''.join(filter(str.isdigit, str(address.phone)))
         if country_name.lower() == "india":
-            # Sanitize to exactly 10 digits for India
             if len(phone_digits) > 10:
                 phone_digits = phone_digits[-10:]
             if len(phone_digits) < 10 or not phone_digits[0] in ['6', '7', '8', '9'] or phone_digits == '9999999999':
-                phone_digits = '9876543210' # fallback for test garbage data
+                phone_digits = '9876543210'
         else:
-            # For international, keep digits as-is, ensure it's not empty
             if not phone_digits:
                 phone_digits = '9876543210'
 
         # Sanitize pincode
         if country_name.lower() == "india":
-            # Sanitize to exactly 6 digits for India
             pincode_digits = ''.join(filter(str.isdigit, str(address.pincode)))[:6]
             if len(pincode_digits) < 6:
-                pincode_digits = '110001' # fallback for test garbage data
+                pincode_digits = '110001'
         else:
-            # For international, keep alphanumeric zip/pincode as-is (e.g., SW1A 1AA, 90210)
             pincode_digits = str(address.pincode).strip()
             if not pincode_digits:
-                pincode_digits = '90210' # default fallback zip
+                pincode_digits = '90210'
 
         pickup_location = (getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary') or 'Primary').strip()
         channel_id = (getattr(settings, 'SHIPROCKET_CHANNEL_ID', '') or '').strip()
@@ -189,21 +224,19 @@ class ShiprocketService:
             "billing_phone": phone_digits,
             "shipping_is_billing": True,
             "order_items": shiprocket_items,
-            "payment_method": "Prepaid" if order.payment.status in ['success', 'completed'] else "COD",
-            "sub_total": float(order.subtotal),
+            "payment_method": "Prepaid" if (order.payment and order.payment.status in ['success', 'completed']) else "COD",
+            "sub_total": calculated_subtotal,
             "length": length,
             "breadth": width,
             "height": height,
             "weight": weight
         }
 
-        # Only send channel_id if actually configured. Sending an empty string
-        # here makes Shiprocket reject the whole order on some accounts.
         if channel_id:
             payload["channel_id"] = channel_id
 
         # Add comment with personalisation details
-        pers_details = [f"{item.product_name}: {item.personalization_name}" for item in order.items.all() if getattr(item, 'personalization_name', '')]
+        pers_details = [f"{g['product_name']}: {g['personalization_name']}" for g in grouped_items.values() if g['personalization_name']]
         if not pers_details and order.notes and "Personalisation" in order.notes:
             pers_details = [order.notes]
 
