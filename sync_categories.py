@@ -1,42 +1,10 @@
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-from .models import UserProfile, CountrySetting
+import os
+import django
 
-User = get_user_model()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'glamour_store.settings')
+django.setup()
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """
-    Auto-creates UserProfile for new users to avoid profile lookup errors.
-    """
-    if created:
-        default_country = CountrySetting.objects.first()
-        UserProfile.objects.get_or_create(
-            user=instance,
-            defaults={
-                'country': default_country,
-                'preferred_language': 'en'
-            }
-        )
-
-# Import allauth signal to detect login
-from allauth.account.signals import user_logged_in
-from .models import Order
-
-@receiver(user_logged_in)
-def merge_guest_orders_on_login(request, user, **kwargs):
-    """
-    Merge guest orders created with `guest_email` into the user's account upon login.
-    """
-    if user.email:
-        guest_orders = Order.objects.filter(guest_email=user.email).exclude(user=user)
-        if guest_orders.exists():
-            guest_orders.update(user=user)
-
-
-from django.db.models.signals import post_migrate
-from django.apps import AppConfig
+from store.models import Category, Product
 
 CATEGORIES_DATA = [
     {
@@ -77,25 +45,40 @@ CATEGORIES_DATA = [
     }
 ]
 
-@receiver(post_migrate)
-def ensure_default_categories(sender, **kwargs):
-    if sender.name != 'store':
-        return
-    try:
-        from .models import Category, Product
-        for data in CATEGORIES_DATA:
-            cat, created = Category.objects.get_or_create(
-                slug=data['slug'],
-                defaults={
-                    'name': data['name'],
-                    'description': data['description'],
-                    'image_url': data['image_url'],
-                    'is_active': True
-                }
-            )
-            if not created and not cat.is_active:
-                cat.is_active = True
-                cat.save()
-    except Exception:
-        pass
+def sync_categories():
+    print("Syncing Categories...")
+    category_objs = {}
+    for data in CATEGORIES_DATA:
+        cat, created = Category.objects.get_or_create(
+            slug=data['slug'],
+            defaults={
+                'name': data['name'],
+                'description': data['description'],
+                'image_url': data['image_url'],
+                'is_active': True
+            }
+        )
+        if not created:
+            cat.name = data['name']
+            cat.description = data['description']
+            if not cat.image_url:
+                cat.image_url = data['image_url']
+            cat.is_active = True
+            cat.save()
+        category_objs[data['slug']] = cat
+        print(f"  [{'CREATED' if created else 'UPDATED'}] Category: {cat.name} ({cat.slug})")
 
+    # Map existing products across categories so each category has at least one product
+    products = list(Product.objects.all())
+    if products:
+        category_list = list(category_objs.values())
+        for idx, prod in enumerate(products):
+            target_cat = category_list[idx % len(category_list)]
+            prod.category = target_cat
+            prod.save(update_fields=['category'])
+            print(f"  Assigned Product '{prod.name}' -> Category '{target_cat.name}'")
+
+    print("Categories Sync Complete!")
+
+if __name__ == '__main__':
+    sync_categories()

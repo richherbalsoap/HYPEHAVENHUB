@@ -176,6 +176,20 @@ def admin_product_create(request):
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
+            new_cat = (request.POST.get('new_category_name') or '').strip()
+            if new_cat:
+                from django.utils.text import slugify
+                base_slug = slugify(new_cat) or 'cat'
+                slug = base_slug
+                counter = 1
+                while Category.objects.filter(slug=slug).exists():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                cat_obj, _ = Category.objects.get_or_create(
+                    name__iexact=new_cat,
+                    defaults={'name': new_cat, 'slug': slug, 'is_active': True}
+                )
+                product.category = cat_obj
             hype_brand, _ = Brand.objects.get_or_create(name='HypeHavenHub')
             product.brand = hype_brand
             product.save()
@@ -387,6 +401,20 @@ def admin_product_edit(request, pk):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save(commit=False)
+            new_cat = (request.POST.get('new_category_name') or '').strip()
+            if new_cat:
+                from django.utils.text import slugify
+                base_slug = slugify(new_cat) or 'cat'
+                slug = base_slug
+                counter = 1
+                while Category.objects.filter(slug=slug).exists():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                cat_obj, _ = Category.objects.get_or_create(
+                    name__iexact=new_cat,
+                    defaults={'name': new_cat, 'slug': slug, 'is_active': True}
+                )
+                product.category = cat_obj
             hype_brand, _ = Brand.objects.get_or_create(name='HypeHavenHub')
             product.brand = hype_brand
             product.save()
@@ -1349,3 +1377,163 @@ def admin_custom_box_pricing(request):
         }
 
     return render(request, 'admin/custom_box_pricing.html', {'pricing': pricing})
+
+
+from django.views.decorators.http import require_POST
+
+@admin_required
+@require_POST
+def admin_quick_add_category(request):
+    """
+    AJAX Endpoint to quickly create a category from the Product Add/Edit form.
+    """
+    try:
+        data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
+        name = (data.get('name') or '').strip()
+        if not name:
+            return JsonResponse({'success': False, 'message': 'Category name is required.'})
+
+        from django.utils.text import slugify
+        base_slug = slugify(name) or 'category'
+        slug = base_slug
+        counter = 1
+        while Category.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        cat, created = Category.objects.get_or_create(
+            name__iexact=name,
+            defaults={'name': name, 'slug': slug, 'is_active': True}
+        )
+        return JsonResponse({
+            'success': True,
+            'id': cat.id,
+            'name': cat.name,
+            'created': created,
+            'message': f"Category '{cat.name}' {'created' if created else 'selected'} successfully!"
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
+@admin_required
+def admin_categories(request):
+    """
+    List all categories in the Admin Panel with product counts and quick actions.
+    """
+    q = request.GET.get('q', '').strip()
+    categories = Category.objects.all().order_by('name')
+    if q:
+        categories = categories.filter(Q(name__icontains=q) | Q(description__icontains=q) | Q(slug__icontains=q))
+
+    categories_data = []
+    for cat in categories:
+        categories_data.append({
+            'category': cat,
+            'product_count': cat.products.count()
+        })
+
+    return render(request, 'admin/categories_list.html', {
+        'categories_data': categories_data,
+        'q': q
+    })
+
+
+@admin_required
+def admin_category_create(request):
+    """
+    Create a new Category in Admin Panel.
+    """
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        image_url = request.POST.get('image_url', '').strip()
+        is_active = request.POST.get('is_active') == 'on'
+
+        if not name:
+            messages.error(request, 'Category name is required.')
+            return render(request, 'admin/category_form.html', {'is_edit': False})
+
+        base_slug = slugify(name) or 'category'
+        slug = base_slug
+        counter = 1
+        while Category.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        cat = Category(
+            name=name,
+            slug=slug,
+            description=description,
+            image_url=image_url,
+            is_active=is_active
+        )
+        if 'image' in request.FILES:
+            cat.image = request.FILES['image']
+        cat.save()
+
+        messages.success(request, f"Category '{cat.name}' created successfully!")
+        return redirect('admin_categories')
+
+    return render(request, 'admin/category_form.html', {'is_edit': False})
+
+
+@admin_required
+def admin_category_edit(request, pk):
+    """
+    Edit an existing Category in Admin Panel.
+    """
+    cat = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        image_url = request.POST.get('image_url', '').strip()
+        is_active = request.POST.get('is_active') == 'on'
+
+        if not name:
+            messages.error(request, 'Category name is required.')
+            return render(request, 'admin/category_form.html', {'category': cat, 'is_edit': True})
+
+        cat.name = name
+        cat.description = description
+        cat.image_url = image_url
+        cat.is_active = is_active
+
+        if 'image' in request.FILES:
+            cat.image = request.FILES['image']
+        cat.save()
+
+        messages.success(request, f"Category '{cat.name}' updated successfully!")
+        return redirect('admin_categories')
+
+    return render(request, 'admin/category_form.html', {'category': cat, 'is_edit': True})
+
+
+@admin_required
+def admin_category_toggle(request, pk):
+    """
+    Toggle Category active status.
+    """
+    cat = get_object_or_404(Category, pk=pk)
+    cat.is_active = not cat.is_active
+    cat.save()
+    status_str = "activated" if cat.is_active else "deactivated"
+    messages.success(request, f"Category '{cat.name}' {status_str} successfully.")
+    return redirect('admin_categories')
+
+
+@admin_required
+def admin_category_delete(request, pk):
+    """
+    Delete a Category safely.
+    """
+    cat = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        name = cat.name
+        cat.delete()
+        messages.success(request, f"Category '{name}' has been deleted.")
+        return redirect('admin_categories')
+
+    return render(request, 'admin/category_confirm_delete.html', {'category': cat})
+
+

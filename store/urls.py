@@ -90,6 +90,11 @@ urlpatterns = [
     
 
     path('admin/products/', admin_views.admin_products, name='admin_products'),
+    path('admin/categories/', admin_views.admin_categories, name='admin_categories'),
+    path('admin/categories/create/', admin_views.admin_category_create, name='admin_category_create'),
+    path('admin/categories/<int:pk>/edit/', admin_views.admin_category_edit, name='admin_category_edit'),
+    path('admin/categories/<int:pk>/toggle/', admin_views.admin_category_toggle, name='admin_category_toggle'),
+    path('admin/categories/<int:pk>/delete/', admin_views.admin_category_delete, name='admin_category_delete'),
     path('admin/products/create/', admin_views.admin_product_create, name='admin_product_create'),
     path('admin/products/<int:pk>/edit/', admin_views.admin_product_edit, name='admin_product_edit'),
     path('admin/products/<int:pk>/prices/', admin_views.admin_product_prices, name='admin_product_prices'),

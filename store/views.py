@@ -256,7 +256,13 @@ def home(request):
     new_arrivals = storefront_products.filter(is_new_arrival=True).prefetch_related('images', 'variants', 'reviews')[:8]
     bestsellers = storefront_products.filter(is_bestseller=True).prefetch_related('images', 'variants', 'reviews')[:8]
     flash_sale = storefront_products.filter(is_flash_sale=True).prefetch_related('images', 'variants', 'reviews')[:6]
-    categories = active_categories()[:3]
+    categories = list(active_categories())
+    category_products_map = {}
+    for cat in categories:
+        category_products_map[cat.slug] = list(
+            storefront_products.filter(category=cat).prefetch_related('images', 'variants', 'reviews')[:8]
+        )
+
     hero_products = [
         storefront_products.filter(category=cat).prefetch_related('images', 'variants', 'reviews').first()
         for cat in categories
@@ -280,6 +286,7 @@ def home(request):
         'bestsellers': bestsellers,
         'flash_sale': flash_sale,
         'categories': categories,
+        'category_products_map': category_products_map,
         'brands': brands,
         'flash_sale_end_time': flash_sale_obj.end_time.isoformat() if flash_sale_obj else None,
         'hero_panels': hero_panels,

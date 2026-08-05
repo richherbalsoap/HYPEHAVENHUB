@@ -6,6 +6,20 @@
 
 {% block content %}
 <div class="container-fluid px-4 py-4">
+  <!-- Category Filter Pill Bar -->
+  <div class="mb-4">
+    <div class="d-flex align-items-center gap-2 flex-wrap pb-2 border-bottom">
+      <a href="{% url 'product_list' %}" class="btn btn-sm rounded-pill px-3 py-2 fw-bold text-uppercase fs-8 {% if not selected_category %}btn-dark shadow-sm{% else %}btn-light border text-muted{% endif %}" style="letter-spacing: 0.5px;">
+        All Jewelry
+      </a>
+      {% for cat in categories %}
+      <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="btn btn-sm rounded-pill px-3 py-2 fw-bold text-uppercase fs-8 {% if selected_category == cat.slug %}btn-dark shadow-sm{% else %}btn-light border text-muted{% endif %}" style="letter-spacing: 0.5px;">
+        {{ cat.name }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
   <!-- Horizontal filter bar -->
   <form method="GET" id="filterForm" class="horizontal-filter-bar mb-4">
     {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
