@@ -40,34 +40,46 @@ from django.apps import AppConfig
 
 CATEGORIES_DATA = [
     {
-        'name': '12 Pair Set',
-        'slug': '12-pair-set',
-        'description': 'Exquisite collection of 12 pair earring sets designed for elegance, daily wear, and special occasions.',
+        'name': '12 Pair Earrings Box With Bracelet',
+        'slug': '12-pair-earrings-box-with-bracelet',
+        'description': 'Handcrafted 12 pair earrings box with designer bracelet collection.',
+        'image_url': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'
+    },
+    {
+        'name': '12 Pair earrings box',
+        'slug': '12-pair-earrings-box',
+        'description': 'Handcrafted 12 pair earrings box collection.',
         'image_url': 'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        'name': 'Necklace With Earrings 16 Pair Set',
-        'slug': 'necklace-with-earrings-16-pair-set',
-        'description': 'Grand bridal & festive set featuring a statement necklace paired with 16 royal earring designs.',
-        'image_url': 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        'name': 'Necklace',
-        'slug': 'necklace',
-        'description': 'Luxury handcrafted necklaces, chokers, and pendant chains with intricate gold & stone detail.',
-        'image_url': 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80'
     },
     {
         'name': 'Bracelet',
         'slug': 'bracelet',
-        'description': 'Stunning artisan bracelets, bangles, and cuffs designed to elevate every outfit with luxury shimmer.',
+        'description': 'Stunning artisan bracelets, bangles, and cuffs.',
         'image_url': 'https://images.unsplash.com/photo-1611591475140-be3617c98480?auto=format&fit=crop&w=800&q=80'
     },
     {
-        'name': '12 Pair Earrings Box With Bracelet',
-        'slug': '12-pair-earrings-box-with-bracelet',
-        'description': 'Deluxe combo gift set featuring 12 pair curated jhumka/earrings along with a matching designer bracelet.',
-        'image_url': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'
+        'name': 'Necklace',
+        'slug': 'necklace',
+        'description': 'Luxury handcrafted necklaces and chokers.',
+        'image_url': 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80'
+    },
+    {
+        'name': 'neckless with earring',
+        'slug': 'neckless-with-earring',
+        'description': 'Statement necklace paired with matching earring collection.',
+        'image_url': 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80'
+    },
+    {
+        'name': '16 Pair earrings box',
+        'slug': '16-pair-earrings-box',
+        'description': 'Deluxe 16 pair earrings box collection.',
+        'image_url': 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'
+    },
+    {
+        'name': '16 pair earrings box with bracelet',
+        'slug': '16-pair-earrings-box-with-bracelet',
+        'description': 'Grand 16 pair earrings box with designer bracelet collection.',
+        'image_url': 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'
     }
 ]
 
@@ -82,7 +94,7 @@ def ensure_default_categories(sender, **kwargs):
         brand = Brand.objects.filter(is_active=True).first()
         valid_slugs = [data['slug'] for data in CATEGORIES_DATA]
 
-        # 1. Ensure the 5 master categories exist
+        # 1. Ensure the 7 master categories exist
         master_cats = {}
         for data in CATEGORIES_DATA:
             cat, created = Category.objects.get_or_create(
@@ -94,12 +106,12 @@ def ensure_default_categories(sender, **kwargs):
                     'is_active': True
                 }
             )
-            cat.name = data['name']
+            cat.name = data['name'] # Ensure EXACT case & spelling
             cat.is_active = True
             cat.save()
             master_cats[data['slug']] = cat
 
-        fallback_cat = master_cats.get('12-pair-set')
+        fallback_cat = master_cats.get('12-pair-earrings-box-with-bracelet')
 
         # 2. Reassign products from unwanted categories and delete the unwanted categories
         unwanted = Category.objects.exclude(slug__in=valid_slugs)
@@ -112,7 +124,7 @@ def ensure_default_categories(sender, **kwargs):
         for data in CATEGORIES_DATA:
             cat = master_cats[data['slug']]
             if not cat.products.filter(is_active=True).exists():
-                p_name = f"{data['name']} Luxury Collection Piece"
+                p_name = f"{data['name']} Collection Piece"
                 prod, _ = Product.objects.get_or_create(
                     name=p_name,
                     defaults={
