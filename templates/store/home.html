@@ -969,12 +969,14 @@
       <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Select a category below to explore curated handcrafted jewelry</p>
     </div>
 
-    <!-- Category Switcher Tabs -->
-    <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-5 px-2">
-      <button class="range-tab-btn active text-nowrap" onclick="switchRangeTab('all')" id="btn-all">ALL PRODUCTS</button>
-      {% for item in categories_with_products %}
-      <button class="range-tab-btn text-nowrap" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name|upper }}</button>
-      {% endfor %}
+    <!-- Master Category Pill Track -->
+    <div class="category-tabs-wrapper mb-4">
+      <div class="category-tabs-scroll">
+        <button class="range-tab-btn active text-nowrap" onclick="switchRangeTab('all')" id="btn-all">All Products</button>
+        {% for item in categories_with_products %}
+        <button class="range-tab-btn text-nowrap" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name }}</button>
+        {% endfor %}
+      </div>
     </div>
 
     <!-- Product Grids for Categories -->
@@ -1014,33 +1016,58 @@
 
 
 <style>
-  /* Shop By Range Layout and Tabs */
+  /* 💎 Luxury Single-Line Category Scroll Track 💎 */
+  .category-tabs-wrapper {
+    width: 100%;
+    position: relative;
+  }
+  .category-tabs-scroll {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 8px 12px 14px 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .category-tabs-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 992px) {
+    .category-tabs-scroll {
+      justify-content: center;
+    }
+  }
+
   .range-tab-btn {
-    background: #f5f5f7;
-    color: #444444;
-    border: 1.5px solid #e2e2e8;
-    padding: 10px 22px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
+    flex: 0 0 auto;
+    background: #f6f6f9;
+    color: #333333;
+    border: 1px solid #e1e1e8;
+    padding: 9px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    text-transform: uppercase;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
   }
   .range-tab-btn:hover {
     color: #000000;
     border-color: #000000;
     background: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
   .range-tab-btn.active {
     background-color: #000000 !important;
     color: #ffffff !important;
     border-color: #000000 !important;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
     transform: translateY(-1px);
   }
 
