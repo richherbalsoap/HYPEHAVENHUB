@@ -68,12 +68,6 @@ CATEGORIES_DATA = [
         'slug': '12-pair-earrings-box-with-bracelet',
         'description': 'Deluxe combo gift set featuring 12 pair curated jhumka/earrings along with a matching designer bracelet.',
         'image_url': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80'
-    },
-    {
-        'name': '16 Pair Earrings With Bracelet',
-        'slug': '16-pair-earrings-with-bracelet',
-        'description': 'Ultimate festive hamper containing 16 versatile earring pairs and a premium matching bracelet.',
-        'image_url': 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80'
     }
 ]
 
@@ -86,6 +80,10 @@ def ensure_default_categories(sender, **kwargs):
         from decimal import Decimal
         
         brand = Brand.objects.filter(is_active=True).first()
+        valid_slugs = [data['slug'] for data in CATEGORIES_DATA]
+
+        # Deactivate any category not in our master 5 list
+        Category.objects.exclude(slug__in=valid_slugs).update(is_active=False)
 
         for data in CATEGORIES_DATA:
             cat, created = Category.objects.get_or_create(
@@ -97,9 +95,9 @@ def ensure_default_categories(sender, **kwargs):
                     'is_active': True
                 }
             )
-            if not created and not cat.is_active:
-                cat.is_active = True
-                cat.save()
+            cat.name = data['name']
+            cat.is_active = True
+            cat.save()
 
             # Ensure every category has products
             if not cat.products.filter(is_active=True).exists():
@@ -119,9 +117,8 @@ def ensure_default_categories(sender, **kwargs):
                     }
                 )
                 if not prod.images.exists():
-                    ProductImage.objects.create(product=prod, url=data['image_url'], is_primary=True)
+                    ProductImage.objects.create(product=prod, image_url=data['image_url'], is_primary=True)
                 if not prod.variants.exists():
                     ProductVariant.objects.create(product=prod, sku=f"SKU-{prod.id}", stock=50, is_active=True)
     except Exception:
         pass
-

@@ -6,7 +6,8 @@ django.setup()
 
 from store.models import Category, Product
 
-CATEGORIES_DATA = [
+# Exact 5 clean categories requested by user
+CLEAN_CATEGORIES = [
     {
         'name': '12 Pair Set',
         'slug': '12-pair-set',
@@ -39,40 +40,44 @@ CATEGORIES_DATA = [
     }
 ]
 
-def sync_categories():
-    print("Syncing Categories...")
-    category_objs = {}
-    for data in CATEGORIES_DATA:
+def clean_database():
+    print("Cleaning Database Categories...")
+    
+    # 1. Ensure the 5 clean categories exist
+    clean_objs = {}
+    clean_slugs = [c['slug'] for c in CLEAN_CATEGORIES]
+    for c_data in CLEAN_CATEGORIES:
         cat, created = Category.objects.get_or_create(
-            slug=data['slug'],
+            slug=c_data['slug'],
             defaults={
-                'name': data['name'],
-                'description': data['description'],
-                'image_url': data['image_url'],
+                'name': c_data['name'],
+                'description': c_data['description'],
+                'image_url': c_data['image_url'],
                 'is_active': True
             }
         )
-        if not created:
-            cat.name = data['name']
-            cat.description = data['description']
-            if not cat.image_url:
-                cat.image_url = data['image_url']
-            cat.is_active = True
-            cat.save()
-        category_objs[data['slug']] = cat
-        print(f"  [{'CREATED' if created else 'UPDATED'}] Category: {cat.name} ({cat.slug})")
+        cat.name = c_data['name']
+        cat.is_active = True
+        cat.save()
+        clean_objs[c_data['slug']] = cat
 
-    # Map existing products across categories so each category has at least one product
-    products = list(Product.objects.all())
-    if products:
-        category_list = list(category_objs.values())
-        for idx, prod in enumerate(products):
-            target_cat = category_list[idx % len(category_list)]
-            prod.category = target_cat
-            prod.save(update_fields=['category'])
-            print(f"  Assigned Product '{prod.name}' -> Category '{target_cat.name}'")
+    fallback_cat = clean_objs['12-pair-set']
 
-    print("Categories Sync Complete!")
+    # 2. Reassign products from unwanted categories to fallback_cat
+    unwanted_cats = Category.objects.exclude(slug__in=clean_slugs)
+    for bad_cat in unwanted_cats:
+        prods = list(bad_cat.products.all())
+        for p in prods:
+            p.category = fallback_cat
+            p.save()
+            print(f"Reassigned product '{p.name}' from '{bad_cat.name}' -> '{fallback_cat.name}'")
+        
+        print(f"Deleting unwanted category: '{bad_cat.name}' ({bad_cat.slug})")
+        bad_cat.delete()
+
+    print("\nRemaining Active Categories in DB:")
+    for c in Category.objects.all():
+        print(f"  - ID: {c.id} | Name: {c.name} | Slug: {c.slug} | Products: {c.products.count()}")
 
 if __name__ == '__main__':
-    sync_categories()
+    clean_database()
