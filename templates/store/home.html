@@ -503,64 +503,7 @@
   .marquee-content {
     animation-duration: var(--dynamic-duration, 20s) !important;
   }
-  .cat-card-item:hover .cat-card-img {
-    transform: scale(1.08);
-  }
-  .cat-card-item:hover {
-    border-color: rgba(212, 175, 55, 0.7) !important;
-    box-shadow: 0 14px 40px rgba(212, 175, 55, 0.25);
-    transform: translateY(-5px);
-  }
 </style>
-
-<!-- ══════════════════════════════════════════════════════════════════════════════
-     EDITORIAL LUXURY CATEGORY SHOWCASE — 6 CATEGORIES
-══════════════════════════════════════════════════════════════════════════════ -->
-<section class="py-5 position-relative overflow-hidden" id="category-showcase-section" style="background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 50%, #0f0f23 100%); color: #ffffff;">
-  <div class="container py-4">
-    <div class="text-center mb-5">
-      <span class="text-uppercase tracking-widest fw-bold" style="color: #d4af37; font-size: 11px; letter-spacing: 0.3em;">ATELIER CATALOGUE</span>
-      <h2 class="display-5 fw-bold text-white mt-2 mb-3" style="font-family: 'Playfair Display', serif; font-style: italic;">Curated Collections</h2>
-      <p class="text-white-50 mx-auto" style="max-width: 540px; font-size: 15px; line-height: 1.6;">Discover our handcrafted 12 & 16-pair earring sets, statement necklaces, and artisan bracelets.</p>
-    </div>
-
-    <!-- Category Grid Cards -->
-    <div class="row g-4 justify-content-center">
-      {% for cat in categories %}
-      <div class="col-12 col-md-6 col-lg-4">
-        <a href="{% url 'product_list' %}?category={{ cat.slug }}" class="text-decoration-none d-block h-100">
-          <div class="card border-0 h-100 position-relative overflow-hidden rounded-4 cat-card-item" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.3) !important; transition: all 0.35s ease;">
-            <div class="position-relative overflow-hidden" style="aspect-ratio: 4/3;">
-              {% if cat.display_image_url %}
-              <img src="{{ cat.display_image_url }}" alt="{{ cat.name }}" class="w-100 h-100 object-fit-cover cat-card-img" style="transition: transform 0.6s ease;">
-              {% else %}
-              <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-dark text-muted">
-                <span class="material-symbols-outlined fs-1 text-warning opacity-50">diamond</span>
-              </div>
-              {% endif %}
-              <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, rgba(15,15,35,0.1) 0%, rgba(15,15,35,0.92) 100%);"></div>
-              <span class="position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill fw-bold text-uppercase" style="background: rgba(212, 175, 55, 0.95); color: #0f0f23; backdrop-filter: blur(4px); font-size: 10px; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                CATEGORY
-              </span>
-            </div>
-            <div class="card-body p-4 text-center d-flex flex-column justify-content-between position-relative z-1" style="margin-top: -24px;">
-              <div>
-                <h4 class="card-title fw-bold text-white mb-2" style="font-family: 'Playfair Display', serif; font-size: 1.35rem;">{{ cat.name }}</h4>
-                <p class="text-white-50 fs-7 mb-4 line-clamp-2" style="font-size: 13px; line-height: 1.5;">{{ cat.description|default:"Handcrafted luxury jewelry piece designed with master polish and artisan detail." }}</p>
-              </div>
-              <div>
-                <span class="btn btn-outline-warning btn-sm rounded-pill px-4 py-2 fw-bold text-uppercase" style="border-color: #d4af37; color: #d4af37; font-size: 10px; letter-spacing: 1.5px; transition: all 0.25s ease;">
-                  Explore Collection &rarr;
-                </span>
-              </div>
-            </div>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
 
 <!-- Shop by Collection Redesign -->
 <style>
@@ -1018,55 +961,53 @@
   }
 </style>
 
-<!-- Shop By Range Section -->
+<!-- Shop By Category Section -->
 <section class="py-5 position-relative overflow-hidden" id="shop-by-range" style="background-color: #ffffff; color: #111111;">
   <div class="container py-4">
-    <div class="text-center mb-5">
-      <h2 class="section-title text-dark text-uppercase" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 8px;">Shop By Range</h2>
-      <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Curated selections designed for every occasion</p>
+    <div class="text-center mb-4">
+      <h2 class="section-title text-dark text-uppercase" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 8px;">Shop By Category</h2>
+      <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Select a category below to explore curated handcrafted jewelry</p>
     </div>
 
-    <!-- Range Switcher Tabs -->
-    <div class="d-flex justify-content-center mb-5">
-      <div class="d-inline-flex p-1 rounded-pill" style="background-color: #f4f4f4; border: 1.5px solid #e0e0e0;">
-        <button class="range-tab-btn active" onclick="switchRangeTab('new-launch')" id="btn-new-launch">NEW LAUNCH</button>
-        <button class="range-tab-btn" onclick="switchRangeTab('trending-product')" id="btn-trending-product">TRENDING PRODUCT</button>
-        <button class="range-tab-btn" onclick="switchRangeTab('best-seller')" id="btn-best-seller">BEST SELLER</button>
+    <!-- Category Pill Switcher Tabs -->
+    <div class="d-flex justify-content-center mb-5 overflow-auto px-2">
+      <div class="d-inline-flex p-1 rounded-pill flex-nowrap align-items-center" style="background-color: #f4f4f4; border: 1.5px solid #e0e0e0; max-width: 100%; overflow-x: auto; scrollbar-width: none; white-space: nowrap;">
+        <button class="range-tab-btn active text-nowrap" onclick="switchRangeTab('all')" id="btn-all">ALL PRODUCTS</button>
+        {% for item in categories_with_products %}
+        <button class="range-tab-btn text-nowrap" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name|upper }}</button>
+        {% endfor %}
       </div>
     </div>
 
-    <!-- Grids -->
-    <!-- New Launch Grid (Default Active) -->
-    <div class="row g-4 range-products-grid" id="grid-new-launch">
+    <!-- Product Grids for Categories -->
+    <!-- All Products Grid (Default Active) -->
+    <div class="row g-4 range-products-grid" id="grid-all">
       {% for product in new_arrivals %}
-        {% include 'store/_product_range_card.html' with product=product badge="NEW LAUNCH" %}
+        {% include 'store/_product_range_card.html' with product=product badge="FEATURED" %}
       {% empty %}
-        <div class="col-12 text-center py-5 text-muted">No new launches found.</div>
+        <div class="col-12 text-center py-5 text-muted">No products found.</div>
       {% endfor %}
     </div>
 
-    <!-- Trending Product Grid -->
-    <div class="row g-4 range-products-grid" id="grid-trending-product" style="display: none;">
-      {% for product in featured %}
-        {% include 'store/_product_range_card.html' with product=product badge="TRENDING NOW" %}
+    <!-- Category Specific Grids -->
+    {% for item in categories_with_products %}
+    <div class="row g-4 range-products-grid" id="grid-{{ item.category.slug }}" style="display: none;">
+      {% for product in item.products %}
+        {% include 'store/_product_range_card.html' with product=product badge=item.category.name|upper %}
       {% empty %}
-        <div class="col-12 text-center py-5 text-muted">No trending products found.</div>
+        <div class="col-12 text-center py-5 text-muted">
+          <i class="fas fa-box-open fs-1 mb-3 d-block opacity-25"></i>
+          <p class="mb-1 fw-bold">No products added in {{ item.category.name }} yet.</p>
+          <a href="{% url 'admin_products' %}" class="btn btn-outline-dark btn-sm rounded-pill mt-2">Add Products in Admin</a>
+        </div>
       {% endfor %}
     </div>
-
-    <!-- Best Seller Grid -->
-    <div class="row g-4 range-products-grid" id="grid-best-seller" style="display: none;">
-      {% for product in bestsellers %}
-        {% include 'store/_product_range_card.html' with product=product badge="TOP SELLER" %}
-      {% empty %}
-        <div class="col-12 text-center py-5 text-muted">No best sellers found.</div>
-      {% endfor %}
-    </div>
+    {% endfor %}
 
     <!-- View All Collections Action Call -->
     <div class="d-flex justify-content-center mt-5">
       <a href="{% url 'product_list' %}" class="btn px-5 py-3 text-uppercase font-semibold text-center" style="background-color: #000 !important; color: #fff !important; border: 2px solid #000 !important; font-size: 11px; font-weight: bold; letter-spacing: 0.15em; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-decoration: none;">
-        View Full Collection
+        View Full Collection Catalogue
       </a>
     </div>
   </div>
