@@ -82,7 +82,11 @@ def ensure_default_categories(sender, **kwargs):
     if sender.name != 'store':
         return
     try:
-        from .models import Category, Product
+        from .models import Category, Product, ProductImage, ProductVariant, Brand
+        from decimal import Decimal
+        
+        brand = Brand.objects.filter(is_active=True).first()
+
         for data in CATEGORIES_DATA:
             cat, created = Category.objects.get_or_create(
                 slug=data['slug'],
@@ -96,6 +100,28 @@ def ensure_default_categories(sender, **kwargs):
             if not created and not cat.is_active:
                 cat.is_active = True
                 cat.save()
+
+            # Ensure every category has products
+            if not cat.products.filter(is_active=True).exists():
+                p_name = f"{data['name']} Luxury Collection Piece"
+                prod, _ = Product.objects.get_or_create(
+                    name=p_name,
+                    defaults={
+                        'category': cat,
+                        'brand': brand,
+                        'base_price': Decimal('2499.00'),
+                        'discount_percent': Decimal('15.00'),
+                        'description': data['description'],
+                        'short_description': data['description'][:150],
+                        'is_active': True,
+                        'is_featured': True,
+                        'is_bestseller': True,
+                    }
+                )
+                if not prod.images.exists():
+                    ProductImage.objects.create(product=prod, url=data['image_url'], is_primary=True)
+                if not prod.variants.exists():
+                    ProductVariant.objects.create(product=prod, sku=f"SKU-{prod.id}", stock=50, is_active=True)
     except Exception:
         pass
 

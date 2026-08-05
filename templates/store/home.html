@@ -996,9 +996,9 @@
         {% include 'store/_product_range_card.html' with product=product badge=item.category.name|upper %}
       {% empty %}
         <div class="col-12 text-center py-5 text-muted">
-          <i class="fas fa-box-open fs-1 mb-3 d-block opacity-25"></i>
-          <p class="mb-1 fw-bold">No products added in {{ item.category.name }} yet.</p>
-          <a href="{% url 'admin_products' %}" class="btn btn-outline-dark btn-sm rounded-pill mt-2">Add Products in Admin</a>
+          <span class="material-symbols-outlined fs-1 text-secondary opacity-50 mb-2">auto_awesome</span>
+          <p class="mb-1 fw-bold">New {{ item.category.name }} pieces are being handcrafted.</p>
+          <p class="small text-muted mb-0">Check back soon for new arrivals!</p>
         </div>
       {% endfor %}
     </div>
