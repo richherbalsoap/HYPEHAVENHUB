@@ -969,12 +969,12 @@
       <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Select a category below to explore curated handcrafted jewelry</p>
     </div>
 
-    <!-- Master Category Pill Track -->
-    <div class="category-tabs-wrapper mb-4">
-      <div class="category-tabs-scroll">
-        <button class="range-tab-btn active text-nowrap" onclick="switchRangeTab('all')" id="btn-all">All Products</button>
+    <!-- Master Category Grid Pill Container -->
+    <div class="category-grid-wrapper mb-5 text-center">
+      <div class="category-pill-container">
+        <button class="range-tab-btn active" onclick="switchRangeTab('all')" id="btn-all">All Products</button>
         {% for item in categories_with_products %}
-        <button class="range-tab-btn text-nowrap" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name }}</button>
+        <button class="range-tab-btn" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name }}</button>
         {% endfor %}
       </div>
     </div>
@@ -1016,35 +1016,26 @@
 
 
 <style>
-  /* 💎 Luxury Single-Line Category Scroll Track 💎 */
-  .category-tabs-wrapper {
+  /* 💎 Luxury Responsive Category Grid Track 💎 */
+  .category-grid-wrapper {
     width: 100%;
-    position: relative;
+    padding: 0 8px;
   }
-  .category-tabs-scroll {
+  .category-pill-container {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 10px;
-    overflow-x: auto;
-    white-space: nowrap;
-    padding: 8px 12px 14px 12px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    max-width: 1000px;
+    margin: 0 auto;
   }
-  .category-tabs-scroll::-webkit-scrollbar {
-    display: none;
-  }
-  @media (min-width: 992px) {
-    .category-tabs-scroll {
-      justify-content: center;
-    }
-  }
-
   .range-tab-btn {
-    flex: 0 0 auto;
-    background: #f6f6f9;
-    color: #333333;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f7fa;
+    color: #222222;
     border: 1px solid #e1e1e8;
     padding: 9px 20px;
     font-size: 12px;
@@ -1052,15 +1043,16 @@
     letter-spacing: 0.3px;
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    text-align: center;
   }
   .range-tab-btn:hover {
     color: #000000;
     border-color: #000000;
     background: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   }
   .range-tab-btn.active {
     background-color: #000000 !important;
@@ -1069,6 +1061,13 @@
     font-weight: 700;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2) !important;
     transform: translateY(-1px);
+  }
+
+  @media (max-width: 576px) {
+    .range-tab-btn {
+      padding: 8px 14px;
+      font-size: 11px;
+    }
   }
 
   /* 💎 Premium Glassmorphism Glassy Outline Product Cards 💎 */
