@@ -969,14 +969,12 @@
       <p class="section-subtitle mb-0" style="color: #666666; font-size: 14px; font-style: italic;">Select a category below to explore curated handcrafted jewelry</p>
     </div>
 
-    <!-- Category Pill Switcher Tabs -->
-    <div class="d-flex justify-content-center mb-5 overflow-auto px-2">
-      <div class="d-inline-flex p-1 rounded-pill flex-nowrap align-items-center" style="background-color: #f4f4f4; border: 1.5px solid #e0e0e0; max-width: 100%; overflow-x: auto; scrollbar-width: none; white-space: nowrap;">
-        <button class="range-tab-btn active text-nowrap" onclick="switchRangeTab('all')" id="btn-all">ALL PRODUCTS</button>
-        {% for item in categories_with_products %}
-        <button class="range-tab-btn text-nowrap" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name|upper }}</button>
-        {% endfor %}
-      </div>
+    <!-- Category Switcher Tabs -->
+    <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 mb-5 px-2">
+      <button class="range-tab-btn active text-nowrap" onclick="switchRangeTab('all')" id="btn-all">ALL PRODUCTS</button>
+      {% for item in categories_with_products %}
+      <button class="range-tab-btn text-nowrap" onclick="switchRangeTab('{{ item.category.slug }}')" id="btn-{{ item.category.slug }}">{{ item.category.name|upper }}</button>
+      {% endfor %}
     </div>
 
     <!-- Product Grids for Categories -->
@@ -1018,25 +1016,32 @@
 <style>
   /* Shop By Range Layout and Tabs */
   .range-tab-btn {
-    background: transparent;
-    color: #666666;
-    border: none;
-    padding: 10px 24px;
+    background: #f5f5f7;
+    color: #444444;
+    border: 1.5px solid #e2e2e8;
+    padding: 10px 22px;
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.2px;
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
   }
   .range-tab-btn:hover {
     color: #000000;
+    border-color: #000000;
+    background: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
   .range-tab-btn.active {
-    background-color: #000000;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+    transform: translateY(-1px);
   }
 
   /* 💎 Premium Glassmorphism Glassy Outline Product Cards 💎 */
