@@ -82,9 +82,8 @@ def ensure_default_categories(sender, **kwargs):
         brand = Brand.objects.filter(is_active=True).first()
         valid_slugs = [data['slug'] for data in CATEGORIES_DATA]
 
-        # Deactivate any category not in our master 5 list
-        Category.objects.exclude(slug__in=valid_slugs).update(is_active=False)
-
+        # 1. Ensure the 5 master categories exist
+        master_cats = {}
         for data in CATEGORIES_DATA:
             cat, created = Category.objects.get_or_create(
                 slug=data['slug'],
@@ -98,8 +97,20 @@ def ensure_default_categories(sender, **kwargs):
             cat.name = data['name']
             cat.is_active = True
             cat.save()
+            master_cats[data['slug']] = cat
 
-            # Ensure every category has products
+        fallback_cat = master_cats.get('12-pair-set')
+
+        # 2. Reassign products from unwanted categories and delete the unwanted categories
+        unwanted = Category.objects.exclude(slug__in=valid_slugs)
+        for bad_cat in unwanted:
+            if fallback_cat:
+                bad_cat.products.update(category=fallback_cat)
+            bad_cat.delete()
+
+        # 3. Ensure every master category has active products
+        for data in CATEGORIES_DATA:
+            cat = master_cats[data['slug']]
             if not cat.products.filter(is_active=True).exists():
                 p_name = f"{data['name']} Luxury Collection Piece"
                 prod, _ = Product.objects.get_or_create(

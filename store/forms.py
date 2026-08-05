@@ -407,6 +407,10 @@ class ProductForm(forms.ModelForm):
             'finish': forms.Select(attrs={'class': 'form-select'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.filter(is_active=True).order_by('name')
+
 
 class SiteSettingForm(forms.ModelForm):
     class Meta:
