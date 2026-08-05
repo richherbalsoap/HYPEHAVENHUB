@@ -120,28 +120,7 @@ def ensure_default_categories(sender, **kwargs):
                 bad_cat.products.update(category=fallback_cat)
             bad_cat.delete()
 
-        # 3. Ensure every master category has active products
-        for data in CATEGORIES_DATA:
-            cat = master_cats[data['slug']]
-            if not cat.products.filter(is_active=True).exists():
-                p_name = f"{data['name']} Collection Piece"
-                prod, _ = Product.objects.get_or_create(
-                    name=p_name,
-                    defaults={
-                        'category': cat,
-                        'brand': brand,
-                        'base_price': Decimal('2499.00'),
-                        'discount_percent': Decimal('15.00'),
-                        'description': data['description'],
-                        'short_description': data['description'][:150],
-                        'is_active': True,
-                        'is_featured': True,
-                        'is_bestseller': True,
-                    }
-                )
-                if not prod.images.exists():
-                    ProductImage.objects.create(product=prod, image_url=data['image_url'], is_primary=True)
-                if not prod.variants.exists():
-                    ProductVariant.objects.create(product=prod, sku=f"SKU-{prod.id}", stock=50, is_active=True)
+        # 3. PERMANENTLY DELETE ANY AUTO-GENERATED FAKE 'Collection Piece' PRODUCTS
+        Product.objects.filter(name__icontains='Collection Piece').delete()
     except Exception:
         pass
