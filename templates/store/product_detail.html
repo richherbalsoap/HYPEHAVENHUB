@@ -838,10 +838,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Locate Me / Pincode check
+  // Locate Me / Pincode check rate limiter (5 attempts, 2-minute rate limit)
   const locateMeBtn = document.getElementById('locateMeBtn');
   const pincodeInput = document.getElementById('pincodeInput');
   const pincodeStatus = document.getElementById('pincodeStatus');
+
+  const MAX_LOCATE_ATTEMPTS = 5;
+  const RATE_LIMIT_DURATION = 2 * 60 * 1000; // 2 minutes in ms
+
+  let locateAttempts = parseInt(sessionStorage.getItem('locateAttempts') || '0', 10);
+  let lockoutUntil = parseInt(sessionStorage.getItem('locateLockoutUntil') || '0', 10);
+  let lockoutInterval = null;
+
+  function updateLocateMeRateLimitUI() {
+    const now = Date.now();
+    if (lockoutUntil > now) {
+      const remainingSec = Math.ceil((lockoutUntil - now) / 1000);
+      const min = Math.floor(remainingSec / 60);
+      const sec = remainingSec % 60;
+      const timeStr = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+      pincodeStatus.textContent = `Too many attempts (5/5). Please wait ${timeStr} before trying again.`;
+      pincodeStatus.style.color = "var(--error)";
+      if (locateMeBtn) {
+        locateMeBtn.disabled = true;
+        locateMeBtn.style.opacity = '0.5';
+        locateMeBtn.style.cursor = 'not-allowed';
+      }
+      if (!lockoutInterval) {
+        lockoutInterval = setInterval(() => {
+          if (Date.now() >= lockoutUntil) {
+            clearInterval(lockoutInterval);
+            lockoutInterval = null;
+            locateAttempts = 0;
+            lockoutUntil = 0;
+            sessionStorage.removeItem('locateAttempts');
+            sessionStorage.removeItem('locateLockoutUntil');
+            updateLocateMeRateLimitUI();
+          } else {
+            updateLocateMeRateLimitUI();
+          }
+        }, 1000);
+      }
+      return false; // rate limited
+    } else {
+      if (lockoutInterval) {
+        clearInterval(lockoutInterval);
+        lockoutInterval = null;
+      }
+      if (locateMeBtn) {
+        locateMeBtn.disabled = false;
+        locateMeBtn.style.opacity = '1';
+        locateMeBtn.style.cursor = 'pointer';
+      }
+      return true; // allowed
+    }
+  }
+
+  // Initialize UI on page load
+  updateLocateMeRateLimitUI();
 
   async function checkPincodeServiceability(pincode) {
     if (!/^\d{6}$/.test(pincode)) {
@@ -869,29 +923,101 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   locateMeBtn?.addEventListener('click', () => {
-    if (navigator.geolocation) {
-      pincodeStatus.textContent = "Locating you...";
-      navigator.geolocation.getCurrentPosition(async (position) => {
+    const now = Date.now();
+    if (lockoutUntil > now) {
+      updateLocateMeRateLimitUI();
+      return;
+    }
+
+    if (locateAttempts >= MAX_LOCATE_ATTEMPTS) {
+      lockoutUntil = Date.now() + RATE_LIMIT_DURATION;
+      sessionStorage.setItem('locateLockoutUntil', lockoutUntil.toString());
+      updateLocateMeRateLimitUI();
+      return;
+    }
+
+    locateAttempts++;
+    sessionStorage.setItem('locateAttempts', locateAttempts.toString());
+
+    if (locateAttempts >= MAX_LOCATE_ATTEMPTS) {
+      lockoutUntil = Date.now() + RATE_LIMIT_DURATION;
+      sessionStorage.setItem('locateLockoutUntil', lockoutUntil.toString());
+    }
+
+    if (!navigator.geolocation) {
+      pincodeStatus.textContent = "Geolocation is not supported by your browser.";
+      pincodeStatus.style.color = "var(--error)";
+      return;
+    }
+
+    const attemptInfo = `(Attempt ${locateAttempts}/${MAX_LOCATE_ATTEMPTS})`;
+    pincodeStatus.textContent = `Locating you... ${attemptInfo}`;
+    pincodeStatus.style.color = "var(--on-surface-variant)";
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
+        pincodeStatus.textContent = `Detecting pincode... ${attemptInfo}`;
+
+        let detectedPincode = null;
+
+        // Primary: BigDataCloud reverse geocode API
         try {
-          const res = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lon + '&localityLanguage=en');
-          const data = await res.json();
-          if (data && data.postcode) {
-            pincodeInput.value = data.postcode;
-            checkPincodeServiceability(data.postcode);
-          } else {
-            pincodeStatus.textContent = "Could not detect pincode. Please enter manually.";
+          const res1 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+          if (res1.ok) {
+            const data1 = await res1.json();
+            if (data1 && data1.postcode) {
+              const match = data1.postcode.replace(/\D/g, '').slice(0, 6);
+              if (match.length === 6) detectedPincode = match;
+            }
           }
-        } catch (err) {
-          pincodeStatus.textContent = "Error detecting location. Please enter manually.";
+        } catch (e) {
+          console.warn("BigDataCloud lookup failed, trying fallback...", e);
         }
-      }, () => {
-        pincodeStatus.textContent = "Location permission denied. Please enter manually.";
-      });
-    } else {
-      pincodeStatus.textContent = "Geolocation is not supported by your browser.";
-    }
+
+        // Fallback: OpenStreetMap Nominatim reverse geocode API
+        if (!detectedPincode) {
+          try {
+            const res2 = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
+            if (res2.ok) {
+              const data2 = await res2.json();
+              const addr = data2.address || {};
+              const rawPostcode = addr.postcode || addr.pincode || '';
+              const match = rawPostcode.replace(/\D/g, '').slice(0, 6);
+              if (match.length === 6) detectedPincode = match;
+            }
+          } catch (e) {
+            console.warn("Nominatim lookup failed...", e);
+          }
+        }
+
+        if (detectedPincode) {
+          pincodeInput.value = detectedPincode;
+          checkPincodeServiceability(detectedPincode);
+        } else {
+          if (locateAttempts >= MAX_LOCATE_ATTEMPTS) {
+            updateLocateMeRateLimitUI();
+          } else {
+            pincodeStatus.textContent = `Could not detect pincode automatically. Please enter manually. ${attemptInfo}`;
+            pincodeStatus.style.color = "var(--error)";
+          }
+        }
+      },
+      (err) => {
+        let errMsg = `Location access failed. Please enter pincode manually. ${attemptInfo}`;
+        if (err && err.code === 1) {
+          errMsg = `Location permission denied. Please enter pincode manually. ${attemptInfo}`;
+        }
+        if (locateAttempts >= MAX_LOCATE_ATTEMPTS) {
+          updateLocateMeRateLimitUI();
+        } else {
+          pincodeStatus.textContent = errMsg;
+          pincodeStatus.style.color = "var(--error)";
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   });
 
   pincodeInput?.addEventListener('input', (e) => {
