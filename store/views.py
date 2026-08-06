@@ -1126,13 +1126,18 @@ def place_order(request):
             rzp_line_items = []
             for item in cart.items.all():
                 unit_price_paise = int(item.unit_price * 100)
+                sku = (item.variant.sku.strip() if (item.variant and item.variant.sku and item.variant.sku.strip()) else f"PROD-{item.product.id}")
+                item_name = item.product.name
+                if item.variant and item.variant.label:
+                    item_name += f" - {item.variant.label}"
+                item_name = item_name[:120].strip()
                 rzp_line_items.append({
-                    "sku": item.variant.sku if item.variant else f"PROD-{item.product.id}",
+                    "sku": sku,
                     "variant_id": str(item.variant.id) if item.variant else str(item.product.id),
                     "price": unit_price_paise,
                     "offer_price": unit_price_paise,
                     "quantity": item.quantity,
-                    "name": item.product.name[:250],
+                    "name": item_name,
                 })
             line_items_total = sum(li['offer_price'] * li['quantity'] for li in rzp_line_items)
 
@@ -1316,13 +1321,18 @@ def razorpay_direct_checkout(request):
             variant = item_data.get('variant')
             product = item_data['product']
             unit_price_paise = int(item_data['unit_price'] * 100)
+            sku = (variant.sku.strip() if (variant and variant.sku and variant.sku.strip()) else f"PROD-{product.id}")
+            item_name = item_data['product_name']
+            if item_data.get('variant_label'):
+                item_name += f" - {item_data['variant_label']}"
+            item_name = item_name[:120].strip()
             rzp_line_items.append({
-                "sku": variant.sku if variant else f"PROD-{product.id}",
+                "sku": sku,
                 "variant_id": str(variant.id) if variant else str(product.id),
                 "price": unit_price_paise,
                 "offer_price": unit_price_paise,
                 "quantity": item_data['quantity'],
-                "name": item_data['product_name'][:250] + (" - " + item_data['variant_label'] if item_data['variant_label'] else ""),
+                "name": item_name,
             })
         line_items_total = sum(li['offer_price'] * li['quantity'] for li in rzp_line_items)
 
