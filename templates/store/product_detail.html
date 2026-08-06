@@ -83,11 +83,14 @@
       {% endif %}
 
       <!-- Price -->
-      <div class="product-detail-price">
+      <div class="product-detail-price" id="priceDisplayContainer"
+           data-unit-selling-price="{{ product.selling_price }}"
+           data-unit-mrp="{{ product.base_price }}"
+           data-currency-symbol="{% if current_country %}{{ current_country.currency_symbol }}{% else %}₹{% endif %}">
         <span class="detail-price" id="detailPrice">{% get_localized_price product request %}</span>
         {% if product.discount_percent > 0 %}
-        <span class="detail-mrp">MRP {% get_localized_base_price product request %}</span>
-        <span class="detail-discount">{{ product.discount_percent|floatformat:"0" }}% OFF</span>
+        <span class="detail-mrp" id="detailMrp">MRP {% get_localized_base_price product request %}</span>
+        <span class="detail-discount" id="detailDiscount">{{ product.discount_percent|floatformat:"0" }}% OFF</span>
         {% endif %}
       </div>
       <div class="mb-3 text-muted small">
@@ -1056,6 +1059,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Live Price Calculation based on Quantity and Variant
+  function updateLivePrice() {
+    const container = document.getElementById('priceDisplayContainer');
+    const priceEl = document.getElementById('detailPrice');
+    const mrpEl = document.getElementById('detailMrp');
+    const qtyInp = document.getElementById('qtyInput');
+
+    if (!container || !priceEl) return;
+
+    const baseSelling = parseFloat(container.dataset.unitSellingPrice || '0');
+    const baseMrp = parseFloat(container.dataset.unitMrp || '0');
+    const currencySymbol = container.dataset.currencySymbol || '₹';
+
+    const selectedVariant = document.querySelector('.variant-thumb-box.selected, .variant-btn.selected');
+    const additionalPrice = parseFloat(selectedVariant?.dataset.additionalPrice || '0');
+
+    let qty = parseInt(qtyInp?.value || '1', 10);
+    if (isNaN(qty) || qty < 1) qty = 1;
+
+    const totalSelling = (baseSelling + additionalPrice) * qty;
+    const totalMrp = (baseMrp + additionalPrice) * qty;
+
+    priceEl.textContent = `${currencySymbol}${totalSelling.toFixed(2)}`;
+    if (mrpEl && baseMrp > 0) {
+      mrpEl.textContent = `MRP ${currencySymbol}${totalMrp.toFixed(2)}`;
+    }
+  }
+
+  const qtyInpEl = document.getElementById('qtyInput');
+  if (qtyInpEl) {
+    qtyInpEl.addEventListener('input', updateLivePrice);
+    qtyInpEl.addEventListener('change', updateLivePrice);
+  }
+
+  document.querySelectorAll('.qty-increase, .qty-decrease').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setTimeout(updateLivePrice, 10);
+    });
+  });
+
   // Flipkart Variant Selection Logic
   document.querySelectorAll('.variant-thumb-box, .variant-btn').forEach(box => {
     box.addEventListener('click', function() {
@@ -1105,6 +1148,8 @@ document.addEventListener('DOMContentLoaded', () => {
           stockStatus.textContent = 'Out of Stock';
         }
       }
+
+      updateLivePrice();
     });
   });
 

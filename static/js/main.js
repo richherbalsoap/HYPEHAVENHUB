@@ -228,9 +228,33 @@ document.querySelectorAll('.variant-btn').forEach(btn => {
 });
 
 /* ====== QTY SELECTOR ====== */
-const qtyInp = document.getElementById('qtyInput');
-document.querySelector('.qty-increase')?.addEventListener('click', () => { if (qtyInp) qtyInp.value = parseInt(qtyInp.value) + 1; });
-document.querySelector('.qty-decrease')?.addEventListener('click', () => { if (qtyInp && parseInt(qtyInp.value) > 1) qtyInp.value = parseInt(qtyInp.value) - 1; });
+document.querySelectorAll('.qty-increase').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const qtyInp = document.getElementById('qtyInput') || btn.parentElement?.querySelector('.qty-num');
+    if (qtyInp) {
+      let val = parseInt(qtyInp.value || '1', 10);
+      if (isNaN(val) || val < 1) val = 1;
+      qtyInp.value = val + 1;
+      qtyInp.dispatchEvent(new Event('input', { bubbles: true }));
+      qtyInp.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
+});
+
+document.querySelectorAll('.qty-decrease').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const qtyInp = document.getElementById('qtyInput') || btn.parentElement?.querySelector('.qty-num');
+    if (qtyInp) {
+      let val = parseInt(qtyInp.value || '1', 10);
+      if (isNaN(val) || val <= 1) val = 2;
+      qtyInp.value = val - 1;
+      qtyInp.dispatchEvent(new Event('input', { bubbles: true }));
+      qtyInp.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  });
+});
 
 /* ====== STAR RATING ====== */
 const starInputs = document.querySelectorAll('.star-rating-input i');
