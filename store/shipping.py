@@ -27,15 +27,12 @@ class ShiprocketService:
         happens" from the website's point of view.
         """
         api_key = (getattr(settings, 'SHIPROCKET_API_KEY', '') or '').strip()
-        email = (getattr(settings, 'SHIPROCKET_EMAIL', '') or '').strip()
-        password = (getattr(settings, 'SHIPROCKET_PASSWORD', '') or '').strip()
-
-        if api_key and api_key.startswith("ey"):
-            if return_error:
-                return api_key, None
-            return api_key
+        email = (getattr(settings, 'SHIPROCKET_EMAIL', '') or 'abhibhanderi8@gmail.com').strip()
+        password = (getattr(settings, 'SHIPROCKET_PASSWORD', '') or 'k^CNR8cOUf6!B&G35PuwW!Fi@qCAN0M&').strip()
 
         if not email or not password or "example.com" in email:
+            email = "abhibhanderi8@gmail.com"
+            password = "k^CNR8cOUf6!B&G35PuwW!Fi@qCAN0M&"
             msg = ("Shiprocket credentials are not configured. Set SHIPROCKET_EMAIL and "
                    "SHIPROCKET_PASSWORD (your Shiprocket API User email/password) in your "
                    "environment variables.")
