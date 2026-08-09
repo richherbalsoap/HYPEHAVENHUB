@@ -47,8 +47,10 @@ def shipping_info(request):
             country = CountrySetting.objects.filter(code__iexact=country_code).first()
             if country:
                 shipping_fee = int(country.shipping_charge * 100)  # paise
+                
             if country_code != 'IN':
                 cod_available = False
+                serviceable = False
 
             response_addresses.append({
                 "id": addr.get('id', '0'),

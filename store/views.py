@@ -2400,9 +2400,12 @@ def razorpay_webhook(request):
                     order.save()
 
                     for item in order.items.all():
-                        if item.variant and item.variant.stock >= item.quantity:
-                            item.variant.stock -= item.quantity
-                            item.variant.save()
+                        if item.variant:
+                            from store.models import ProductVariant
+                            variant = ProductVariant.objects.select_for_update().get(id=item.variant.id)
+                            if variant.stock >= item.quantity:
+                                variant.stock -= item.quantity
+                                variant.save()
 
                     OrderTracking.objects.create(
                         order=order,
@@ -2422,7 +2425,6 @@ def razorpay_webhook(request):
                         shipment_id, error_msg = ShiprocketService.create_shipment(order)
                         if shipment_id:
                             order.shipping_tracking_id = str(shipment_id)
-                            order.shiprocket_shipment_id = str(shipment_id)
                             order.status = 'confirmed'
                             order.save()
                             OrderTracking.objects.create(
