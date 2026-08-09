@@ -103,7 +103,7 @@
                         <strong>{{ order.user.get_full_name|default:order.user.email }}</strong>
                         <small class="d-block text-muted">{{ order.user.email }}</small>
                     </td>
-                    <td><strong>₹{{ order.grand_total|floatformat:0 }}</strong></td>
+                    <td><strong>&#8377;{{ order.grand_total|floatformat:0 }}</strong></td>
                     <td>
                         {% if order.shipping_tracking_id %}
                             {% if order.get_tracking_url %}

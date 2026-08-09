@@ -86,7 +86,7 @@
       <div class="product-detail-price" id="priceDisplayContainer"
            data-unit-selling-price="{{ product.selling_price }}"
            data-unit-mrp="{{ product.base_price }}"
-           data-currency-symbol="{% if current_country %}{{ current_country.currency_symbol }}{% else %}₹{% endif %}">
+           data-currency-symbol="{% if current_country %}{{ current_country.currency_symbol }}{% else %}&#8377;{% endif %}">
         <span class="detail-price" id="detailPrice">{% get_localized_price product request %}</span>
         {% if product.discount_percent > 0 %}
         <span class="detail-mrp" id="detailMrp">MRP {% get_localized_base_price product request %}</span>
@@ -1070,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const baseSelling = parseFloat(container.dataset.unitSellingPrice || '0');
     const baseMrp = parseFloat(container.dataset.unitMrp || '0');
-    const currencySymbol = container.dataset.currencySymbol || '₹';
+    const currencySymbol = container.dataset.currencySymbol || '&#8377;';
 
     const selectedVariant = document.querySelector('.variant-thumb-box.selected, .variant-btn.selected');
     const additionalPrice = parseFloat(selectedVariant?.dataset.additionalPrice || '0');

@@ -56,7 +56,7 @@
                     <div class="eyebrow">Configured Pricing</div>
                     <h6>Regional Prices for {{ product.name|truncatechars:30 }}</h6>
                 </div>
-                <span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 4px 12px;">Base: ₹{{ product.base_price }}</span>
+                <span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 4px 12px;">Base: &#8377;{{ product.base_price }}</span>
             </div>
             <div class="table-responsive">
                 <table class="table mb-0">
@@ -91,7 +91,7 @@
                             <td colspan="4">
                                 <div class="empty-state">
                                     <i class="fas fa-globe"></i>
-                                    <p>No custom regional prices set yet.<br>Default base price (₹{{ product.base_price }}) will be used globally.</p>
+                                    <p>No custom regional prices set yet.<br>Default base price (&#8377;{{ product.base_price }}) will be used globally.</p>
                                 </div>
                             </td>
                         </tr>

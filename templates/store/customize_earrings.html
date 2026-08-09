@@ -533,7 +533,7 @@
           <div class="display-6 box-option-title mb-1">12 Pairs</div>
           <p class="text-muted small mb-2">Select 12 single earring pairs</p>
           <div class="fs-4 box-option-price" id="priceLabel12">
-            {% if pricing.12 %}₹{{ pricing.12 }}{% else %}₹849{% endif %}
+            {% if pricing.12 %}&#8377;{{ pricing.12 }}{% else %}&#8377;849{% endif %}
           </div>
         </div>
       </div>
@@ -542,7 +542,7 @@
           <div class="display-6 box-option-title mb-1">16 Pairs</div>
           <p class="text-muted small mb-2">Select 16 single earring pairs</p>
           <div class="fs-4 box-option-price" id="priceLabel16">
-            {% if pricing.16 %}₹{{ pricing.16 }}{% else %}₹999{% endif %}
+            {% if pricing.16 %}&#8377;{{ pricing.16 }}{% else %}&#8377;999{% endif %}
           </div>
         </div>
       </div>
@@ -627,7 +627,7 @@
       </div>
       <div class="sticky-counter-price text-end">
         <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px; font-size: 10px;">Total Price</small>
-        <span class="fw-extrabold fs-5" id="totalPriceDisplay" style="font-family: 'Playfair Display', serif; color: #2a0002;">₹849</span>
+        <span class="fw-extrabold fs-5" id="totalPriceDisplay" style="font-family: 'Playfair Display', serif; color: #2a0002;">&#8377;849</span>
       </div>
     </div>
 
@@ -662,7 +662,7 @@
     document.getElementById('targetCount').innerText = targetCount;
 
     const price = pricing[type] || (type === '12' ? 849 : 999);
-    document.getElementById('totalPriceDisplay').innerText = '₹' + price;
+    document.getElementById('totalPriceDisplay').innerText = '&#8377;' + price;
 
     if (selectedEarrings.size > targetCount) {
       selectedEarrings.clear();

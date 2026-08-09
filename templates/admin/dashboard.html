@@ -26,7 +26,7 @@
         <div class="stat-card stat-primary">
             <div class="stat-icon"><i class="fas fa-indian-rupee-sign"></i></div>
             <div class="stat-content">
-                <div class="stat-number">₹{{ total_revenue|floatformat:0 }}</div>
+                <div class="stat-number">&#8377;{{ total_revenue|floatformat:0 }}</div>
                 <div class="stat-label">Lifetime Revenue</div>
             </div>
         </div>
@@ -53,7 +53,7 @@
         <div class="stat-card stat-green">
             <div class="stat-icon"><i class="fas fa-arrow-trend-up"></i></div>
             <div class="stat-content">
-                <div class="stat-number">₹{{ today_revenue|floatformat:0 }}</div>
+                <div class="stat-number">&#8377;{{ today_revenue|floatformat:0 }}</div>
                 <div class="stat-label">Today's Revenue</div>
             </div>
         </div>
@@ -140,7 +140,7 @@
                                 <small class="d-block text-muted">{{ order.created_at|date:"d M, h:i A" }}</small>
                             </td>
                             <td>{{ order.user.email }}</td>
-                            <td><strong>₹{{ order.grand_total|floatformat:0 }}</strong></td>
+                            <td><strong>&#8377;{{ order.grand_total|floatformat:0 }}</strong></td>
                             <td><span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span></td>
                             <td>
                                 {% if order.payment %}

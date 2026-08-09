@@ -68,8 +68,8 @@
                         </div>
                     </td>
                     <td><span style="color: var(--admin-muted);">{{ product.category.name|default:"—" }}</span></td>
-                    <td><span style="color: var(--admin-muted); text-decoration: {% if product.discount_percent > 0 %}line-through{% else %}none{% endif %};">₹{{ product.base_price|floatformat:0 }}</span></td>
-                    <td><strong style="color: var(--admin-green);">₹{{ product.selling_price|floatformat:0 }}</strong></td>
+                    <td><span style="color: var(--admin-muted); text-decoration: {% if product.discount_percent > 0 %}line-through{% else %}none{% endif %};">&#8377;{{ product.base_price|floatformat:0 }}</span></td>
+                    <td><strong style="color: var(--admin-green);">&#8377;{{ product.selling_price|floatformat:0 }}</strong></td>
                     <td>
                         {% if product.discount_percent > 0 %}
                         <span class="status-pill" style="background: var(--admin-red-bg); color: var(--admin-red); border: 1px solid var(--admin-red-border); font-size: 10px; padding: 3px 8px;">{{ product.discount_percent|floatformat:0 }}% OFF</span>

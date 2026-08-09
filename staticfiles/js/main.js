@@ -124,7 +124,7 @@ document.addEventListener('click', async (e) => {
       const qtyEl = document.getElementById(`qty-${itemId}`);
       const totalEl = document.getElementById(`total-${itemId}`);
       if (qtyEl) qtyEl.textContent = data.quantity;
-      if (totalEl) totalEl.textContent = '₹' + Math.round(data.item_total);
+      if (totalEl) totalEl.textContent = '&#8377;' + Math.round(data.item_total);
       updateCartBadge(data.cart_count);
       refreshOrderSummary(data);
     }
@@ -134,8 +134,8 @@ document.addEventListener('click', async (e) => {
 function refreshOrderSummary(data) {
   const sub = document.getElementById('summary-subtotal');
   const total = document.getElementById('summary-total');
-  if (sub) sub.textContent = '₹' + Math.round(data.cart_subtotal);
-  if (total) total.textContent = '₹' + Math.round(data.cart_total);
+  if (sub) sub.textContent = '&#8377;' + Math.round(data.cart_subtotal);
+  if (total) total.textContent = '&#8377;' + Math.round(data.cart_total);
 
   // Update item count text in the subtotal line
   const subtotalLabel = sub ? sub.parentElement.querySelector('.text-muted') : null;
@@ -151,7 +151,7 @@ function refreshOrderSummary(data) {
     if (data.delivery_charge === 0) {
       deliveryVal.innerHTML = '<span class="text-success">FREE</span>';
     } else {
-      deliveryVal.innerHTML = '₹' + Math.round(data.delivery_charge);
+      deliveryVal.innerHTML = '&#8377;' + Math.round(data.delivery_charge);
     }
   }
 }
@@ -193,7 +193,7 @@ if (couponForm) {
     if (data.success) {
       refreshOrderSummary({ cart_subtotal: 0, cart_total: data.grand_total });
       const discRow = document.getElementById('discount-row');
-      if (discRow) { discRow.style.display = 'flex'; document.getElementById('discount-amt').textContent = '-₹' + data.discount; }
+      if (discRow) { discRow.style.display = 'flex'; document.getElementById('discount-amt').textContent = '-&#8377;' + data.discount; }
     }
   });
 }
@@ -212,7 +212,7 @@ document.querySelectorAll('.variant-btn').forEach(btn => {
 
     const data = await fetch(`/api/variant-info/${variantId}/`).then(r => r.json());
     const priceEl = document.getElementById('detailPrice');
-    if (priceEl) priceEl.textContent = '₹' + data.price.toFixed(2);
+    if (priceEl) priceEl.textContent = '&#8377;' + data.price.toFixed(2);
 
     const stockEl = document.getElementById('stockStatus');
     if (stockEl) {
@@ -714,7 +714,7 @@ const setupQuickView = () => {
         data.variants.forEach((v) => {
           const disabledStr = v.stock <= 0 ? ' (Out of stock)' : '';
           const disabledAttr = v.stock <= 0 ? 'disabled' : '';
-          variantsHtml += `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stock}" ${disabledAttr}>${v.label} - ₹${v.price}${disabledStr}</option>`;
+          variantsHtml += `<option value="${v.id}" data-price="${v.price}" data-stock="${v.stock}" ${disabledAttr}>${v.label} - &#8377;${v.price}${disabledStr}</option>`;
         });
         variantsHtml += '</select></div>';
       }
@@ -919,7 +919,7 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
       if (typeof Razorpay === 'undefined') {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.src = 'https://checkout.razorpay.com/v1/magic-checkout.js';
           script.onload = resolve;
           script.onerror = reject;
           document.head.appendChild(script);
@@ -938,6 +938,7 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
         "theme": {
           "color": "#2a0002"
         },
+        "one_click_checkout": true, // Enabled Razorpay Magic Checkout
         "handler": async function (response) {
           const verifyData = await api('/checkout/verify-payment/', {
             razorpay_payment_id: response.razorpay_payment_id,

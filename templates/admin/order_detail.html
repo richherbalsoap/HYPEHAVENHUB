@@ -53,7 +53,7 @@
                 </div>
                 <div>
                     <span><i class="fas fa-indian-rupee-sign" style="margin-right: 4px; font-size: 10px;"></i> Amount</span>
-                    <strong style="font-size: 18px; color: var(--admin-primary);">₹{{ order.grand_total|floatformat:0 }}</strong>
+                    <strong style="font-size: 18px; color: var(--admin-primary);">&#8377;{{ order.grand_total|floatformat:0 }}</strong>
                     <small>{{ order.items.count }} item{{ order.items.count|pluralize }}</small>
                 </div>
                 <div>
@@ -155,8 +155,8 @@
                             </td>
                             <td><span style="color: var(--admin-muted);">{{ item.variant_label|default:"—" }}</span></td>
                             <td><span class="status-pill" style="background: var(--admin-surface-hover); color: var(--admin-ink); border: 1px solid var(--admin-border); padding: 3px 10px;">×{{ item.quantity }}</span></td>
-                            <td>₹{{ item.unit_price|floatformat:0 }}</td>
-                            <td><strong>₹{{ item.total_price|floatformat:0 }}</strong></td>
+                            <td>&#8377;{{ item.unit_price|floatformat:0 }}</td>
+                            <td><strong>&#8377;{{ item.total_price|floatformat:0 }}</strong></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -198,10 +198,10 @@
                             <h6>Billing Summary</h6>
                         </div>
                     </div>
-                    <div class="total-row"><span>Subtotal</span><strong>₹{{ order.subtotal|floatformat:0 }}</strong></div>
-                    <div class="total-row"><span>Discount</span><strong style="color: var(--admin-green);">- ₹{{ order.discount_amount|floatformat:0 }}</strong></div>
-                    <div class="total-row"><span>Delivery</span><strong>₹{{ order.delivery_charge|floatformat:0 }}</strong></div>
-                    <div class="total-row grand"><span>Grand Total</span><strong>₹{{ order.grand_total|floatformat:0 }}</strong></div>
+                    <div class="total-row"><span>Subtotal</span><strong>&#8377;{{ order.subtotal|floatformat:0 }}</strong></div>
+                    <div class="total-row"><span>Discount</span><strong style="color: var(--admin-green);">- &#8377;{{ order.discount_amount|floatformat:0 }}</strong></div>
+                    <div class="total-row"><span>Delivery</span><strong>&#8377;{{ order.delivery_charge|floatformat:0 }}</strong></div>
+                    <div class="total-row grand"><span>Grand Total</span><strong>&#8377;{{ order.grand_total|floatformat:0 }}</strong></div>
                 </div>
             </div>
         </div>
