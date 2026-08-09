@@ -79,6 +79,11 @@ class User(AbstractUser):
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip() or self.email
 
+    def save(self, *args, **kwargs):
+        if not self.username and self.email:
+            self.username = self.email
+        super().save(*args, **kwargs)
+
 
 class CountrySetting(models.Model):
     name = models.CharField(max_length=100) # e.g., "United States"
