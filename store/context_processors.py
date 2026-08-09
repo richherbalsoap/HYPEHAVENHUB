@@ -122,3 +122,18 @@ def country_settings(request):
         }
 
 global_country_context = country_settings
+
+
+def posthog_settings(request):
+    try:
+        from django.conf import settings
+        return {
+            'POSTHOG_API_KEY': getattr(settings, 'POSTHOG_API_KEY', ''),
+            'POSTHOG_HOST': getattr(settings, 'POSTHOG_HOST', 'https://app.posthog.com'),
+        }
+    except Exception as e:
+        logger.warning(f"posthog_settings context processor error: {e}")
+        return {
+            'POSTHOG_API_KEY': '',
+            'POSTHOG_HOST': 'https://app.posthog.com',
+        }
