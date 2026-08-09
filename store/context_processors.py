@@ -1,141 +1,114 @@
-import requests
+import logging
 from .models import Category, Cart, Wishlist, CountrySetting, LANGUAGE_CHOICES, SiteSetting
+
+logger = logging.getLogger(__name__)
+
+CURRENCY_NAMES = {
+    'INR': 'Indian Rupee',
+    'USD': 'US Dollar',
+    'EUR': 'Euro',
+    'GBP': 'British Pound',
+    'CAD': 'Canadian Dollar',
+    'AUD': 'Australian Dollar',
+    'AED': 'UAE Dirham',
+    'SGD': 'Singapore Dollar',
+}
 
 
 def site_settings(request):
-    settings = SiteSetting.objects.first()
-    if not settings:
-        settings = SiteSetting.objects.create()
-    return {'site_settings': settings}
+    try:
+        settings = SiteSetting.objects.first()
+        if not settings:
+            settings = SiteSetting.objects.create()
+        return {'site_settings': settings}
+    except Exception as e:
+        logger.warning(f"site_settings context processor error: {e}")
+        return {'site_settings': None}
 
 
 def cart_count(request):
     count = 0
-    if request.user.is_authenticated:
-        try:
-            cart = Cart.objects.get(user=request.user)
-            count = cart.total_items
-        except Cart.DoesNotExist:
-            count = 0
-    else:
-        session_key = request.session.session_key
-        if session_key:
+    try:
+        if request.user.is_authenticated:
             try:
-                cart = Cart.objects.get(session_key=session_key)
+                cart = Cart.objects.get(user=request.user)
                 count = cart.total_items
             except Cart.DoesNotExist:
                 count = 0
+        else:
+            session_key = request.session.session_key
+            if session_key:
+                try:
+                    cart = Cart.objects.get(session_key=session_key)
+                    count = cart.total_items
+                except Cart.DoesNotExist:
+                    count = 0
+    except Exception as e:
+        logger.warning(f"cart_count context processor error: {e}")
+        count = 0
     return {'cart_count': count}
 
 
 def wishlist_count(request):
     count = 0
-    if request.user.is_authenticated:
-        count = Wishlist.objects.filter(user=request.user).count()
+    try:
+        if request.user.is_authenticated:
+            count = Wishlist.objects.filter(user=request.user).count()
+    except Exception as e:
+        logger.warning(f"wishlist_count context processor error: {e}")
+        count = 0
     return {'wishlist_count': count}
 
 
-def categories_list(request):
-    categories = Category.objects.filter(
-        is_active=True,
-    ).order_by('name')
+def categories_processor(request):
+    try:
+        categories = Category.objects.filter(
+            is_active=True,
+            products__is_active=True
+        ).distinct()
+    except Exception as e:
+        logger.warning(f"categories_processor error: {e}")
+        categories = []
     return {'all_categories': categories}
 
 
-def company_dashboard_access(request):
-    can_access = False
-    if request.user.is_authenticated:
-        can_access = (
-            request.user.is_superuser or
-            request.user.is_staff or
-            request.user.groups.filter(name='Company').exists()
-        )
-    return {'can_access_company_dashboard': can_access}
-
-CURRENCY_NAMES = {
-    'AED': 'United Arab Emirates Dirham',
-    'ARS': 'Argentine Peso',
-    'AUD': 'Australian Dollar',
-    'BDT': 'Bangladeshi Taka',
-    'BRL': 'Brazilian Real',
-    'CAD': 'Canadian Dollar',
-    'CHF': 'Swiss Franc',
-    'CLP': 'Chilean Peso',
-    'CNY': 'Chinese Yuan',
-    'COP': 'Colombian Peso',
-    'CZK': 'Czech Koruna',
-    'DKK': 'Danish Krone',
-    'EGP': 'Egyptian Pound',
-    'EUR': 'Euro',
-    'GBP': 'British Pound',
-    'HKD': 'Hong Kong Dollar',
-    'IDR': 'Indonesian Rupiah',
-    'ILS': 'Israeli Shekel',
-    'INR': 'Indian Rupee',
-    'JPY': 'Japanese Yen',
-    'KRW': 'South Korean Won',
-    'MXN': 'Mexican Peso',
-    'MYR': 'Malaysian Ringgit',
-    'NOK': 'Norwegian Krone',
-    'NZD': 'New Zealand Dollar',
-    'PHP': 'Philippine Peso',
-    'PKR': 'Pakistani Rupee',
-    'PLN': 'Polish Zloty',
-    'RUB': 'Russian Ruble',
-    'SAR': 'Saudi Riyal',
-    'SGD': 'Singapore Dollar',
-    'THB': 'Thai Baht',
-    'TRY': 'Turkish Lira',
-    'TWD': 'Taiwan Dollar',
-    'USD': 'United States Dollar',
-    'VND': 'Vietnamese Dong',
-    'ZAR': 'South African Rand'
-}
-
-def global_country_context(request):
-    # Force language to English always
-    request.session['django_language'] = 'en'
-    
-    if 'selected_country_id' not in request.session:
-        try:
-            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR'))
-            response = requests.get(f'http://ip-api.com/json/{ip}', timeout=2).json()
-            country_code = response.get('countryCode', 'IN')
-            
-            country = CountrySetting.objects.filter(code=country_code).first()
-            if country:
-                request.session['selected_country_id'] = country.id
-            else:
-                request.session['selected_country_id'] = 1 # Fallback to 1
-        except:
-            request.session['selected_country_id'] = 1 # Fallback
-            
-    # Session se data templates me bhejna
+def country_settings(request):
     try:
-        current_country = CountrySetting.objects.get(id=request.session.get('selected_country_id', 1))
-    except CountrySetting.DoesNotExist:
-        current_country = CountrySetting.objects.first()
+        if 'selected_country_id' not in request.session:
+            first_country = CountrySetting.objects.first()
+            if first_country:
+                request.session['selected_country_id'] = first_country.id
 
-    # Collect unique currencies
-    unique_currencies = []
-    seen_currencies = set()
-    for country in CountrySetting.objects.all().order_by('name'):
-        if country.currency_code not in seen_currencies:
-            seen_currencies.add(country.currency_code)
-            country.currency_name = CURRENCY_NAMES.get(country.currency_code, '')
-            unique_currencies.append(country)
-    unique_currencies.sort(key=lambda x: x.currency_code)
+        selected_id = request.session.get('selected_country_id')
+        current_country = None
+        if selected_id:
+            current_country = CountrySetting.objects.filter(id=selected_id).first()
+        if not current_country:
+            current_country = CountrySetting.objects.first()
 
-    return {
-        'current_country': current_country,
-        'unique_currencies': unique_currencies,
-        'active_country': current_country.name if current_country else 'GLOBAL',
-    }
+        all_countries = list(CountrySetting.objects.all().order_by('name'))
+        unique_currencies = []
+        seen_currencies = set()
+        for country in all_countries:
+            if country.currency_code not in seen_currencies:
+                seen_currencies.add(country.currency_code)
+                country.currency_name = CURRENCY_NAMES.get(country.currency_code, '')
+                unique_currencies.append(country)
+        unique_currencies.sort(key=lambda x: x.currency_code)
 
-
-def posthog_settings(request):
-    from django.conf import settings
-    return {
-        'POSTHOG_API_KEY': getattr(settings, 'POSTHOG_API_KEY', ''),
-        'POSTHOG_HOST': getattr(settings, 'POSTHOG_HOST', 'https://us.i.posthog.com'),
-    }
+        return {
+            'current_country': current_country,
+            'all_countries': all_countries,
+            'unique_currencies': unique_currencies,
+            'all_languages': LANGUAGE_CHOICES,
+            'current_language': request.session.get('django_language', 'en'),
+        }
+    except Exception as e:
+        logger.warning(f"country_settings context processor error: {e}")
+        return {
+            'current_country': None,
+            'all_countries': [],
+            'unique_currencies': [],
+            'all_languages': LANGUAGE_CHOICES,
+            'current_language': 'en',
+        }
