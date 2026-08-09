@@ -7,6 +7,8 @@ try:
 except ImportError:
     def config(key, default=None, cast=None):
         value = os.environ.get(key, default)
+        if value and isinstance(value, str):
+            value = value.strip('"').strip("'")
         if cast is None:
             return value
         if cast is bool:
