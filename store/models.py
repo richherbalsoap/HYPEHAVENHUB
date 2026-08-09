@@ -577,11 +577,10 @@ class Order(models.Model):
         """
         Returns Shiprocket Official Live Tracking URL for this order.
         """
-        if self.shipping_tracking_id and str(self.shipping_tracking_id).strip():
-            return f"https://shiprocket.co/tracking/{self.shipping_tracking_id.strip()}"
-        elif self.order_id:
-            return f"https://shiprocket.co/tracking/{self.order_id.strip()}"
-        return "https://shiprocket.co/tracking"
+        code = self.shipping_tracking_id or self.shiprocket_shipment_id or self.order_id
+        if code and str(code).strip():
+            return f"https://hypehavenhub.shiprocket.co/tracking/{str(code).strip()}"
+        return "https://hypehavenhub.shiprocket.co/tracking"
 
 
 class OrderItem(models.Model):

@@ -1150,6 +1150,9 @@ def place_order(request):
                 'line_items': rzp_line_items,
             })
             
+            order.razorpay_order_id = razorpay_order['id']
+            order.save(update_fields=['razorpay_order_id'])
+
             payment.gateway_response = {
                 'razorpay_order_id': razorpay_order['id'],
                 'amount': amount_in_paise,
@@ -2341,19 +2344,22 @@ def razorpay_webhook(request):
         elif event in ['order.paid', 'payment.captured', 'payment.authorized']:
             logger.info(f"Razorpay webhook received event '{event}': {payload}")
             payment_entity = payload.get('payload', {}).get('payment', {}).get('entity', {}) or payload.get('payload', {}).get('order', {}).get('entity', {})
-            rzp_order_id = payment_entity.get('order_id') or payload.get('payload', {}).get('order', {}).get('entity', {}).get('id')
+            order_entity = payload.get('payload', {}).get('order', {}).get('entity', {}) or {}
+            rzp_order_id = payment_entity.get('order_id') or order_entity.get('id')
             payment_id = payment_entity.get('id')
+            receipt = order_entity.get('receipt') or payment_entity.get('notes', {}).get('order_id')
             
-            if rzp_order_id or payment_id:
-                order = None
-                if rzp_order_id:
-                    order = Order.objects.filter(razorpay_order_id=rzp_order_id).first()
-                if not order and payment_id:
-                    order = Order.objects.filter(payment__payment_id=payment_id).first()
-                if not order and payment_entity.get('notes', {}).get('order_id'):
-                    order = Order.objects.filter(order_id=payment_entity.get('notes', {}).get('order_id')).first()
+            order = None
+            if rzp_order_id:
+                order = Order.objects.filter(razorpay_order_id=rzp_order_id).first()
+            if not order and receipt:
+                order = Order.objects.filter(order_id=receipt).first()
+            if not order and payment_id:
+                order = Order.objects.filter(payment__payment_id=payment_id).first()
+            if not order and rzp_order_id:
+                order = Order.objects.filter(payment__gateway_response__icontains=rzp_order_id).first()
                 
-                if order:
+            if order:
                     from django.db import transaction
                     with transaction.atomic():
                         payment_obj, _ = Payment.objects.get_or_create(order=order)
@@ -2714,6 +2720,9 @@ def customize_place_order(request):
                 'currency': 'INR',
                 'receipt': str(order.order_id),
             })
+
+            order.razorpay_order_id = razorpay_order['id']
+            order.save(update_fields=['razorpay_order_id'])
 
             payment.gateway_response = {
                 'razorpay_order_id': razorpay_order['id'],
