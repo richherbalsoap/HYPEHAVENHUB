@@ -69,7 +69,15 @@ def categories_processor(request):
     except Exception as e:
         logger.warning(f"categories_processor error: {e}")
         categories = []
-    return {'all_categories': categories}
+    return {'all_categories': categories, 'categories': categories}
+
+categories_list = categories_processor
+
+
+def company_dashboard_access(request):
+    return {
+        'has_company_access': request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    }
 
 
 def country_settings(request):
@@ -112,3 +120,5 @@ def country_settings(request):
             'all_languages': LANGUAGE_CHOICES,
             'current_language': 'en',
         }
+
+global_country_context = country_settings
