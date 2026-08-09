@@ -11,10 +11,13 @@ def t(context, key):
     Translate a UI string key into the visitor's selected language.
     Usage: {% load i18n_store %}  then  {% t "add_to_cart" %}
     """
-    request = context.get('request')
-    if not request:
+    try:
+        request = context.get('request')
+        if not request:
+            return key
+        return mark_safe(_translate(request, key))
+    except Exception:
         return key
-    return mark_safe(_translate(request, key))
 
 
 @register.simple_tag(takes_context=True)
@@ -22,82 +25,122 @@ def format_price(context, amount):
     """
     Format a generic amount with the active country's currency symbol.
     """
-    country = context.get('current_country')
-    if country:
-        return f"{country.currency_symbol}{amount}"
-    return f"₹{amount}"
+    try:
+        if amount is None:
+            amount = 0
+        country = context.get('current_country')
+        symbol = getattr(country, 'currency_symbol', '₹') if country else '₹'
+        return f"{symbol}{amount}"
+    except Exception:
+        return f"₹{amount or 0}"
+
 
 @register.simple_tag(takes_context=True)
 def display_product_price(context, product):
     """
     Display a product's price for the active country, considering discounts.
     """
-    country = context.get('current_country')
-    if not country:
-        return f"₹{product.selling_price}"
+    try:
+        if not product:
+            return "₹0"
+        country = context.get('current_country')
+        symbol = getattr(country, 'currency_symbol', '₹') if country else '₹'
         
-    country_price = product.get_price_for_country(country.id)
-    # Apply discount
-    if product.discount_percent > 0:
-        country_price = round(country_price * (1 - product.discount_percent / 100), 2)
-    return f"{country.currency_symbol}{country_price}"
+        selling_price = getattr(product, 'selling_price', 0) or 0
+        if not country or not hasattr(product, 'get_price_for_country'):
+            return f"{symbol}{selling_price}"
+            
+        country_price = product.get_price_for_country(getattr(country, 'id', 1))
+        discount_percent = getattr(product, 'discount_percent', 0) or 0
+        if discount_percent > 0:
+            country_price = round(country_price * (1 - discount_percent / 100), 2)
+        return f"{symbol}{country_price}"
+    except Exception:
+        return "₹0"
 
 
 @register.simple_tag(takes_context=True)
 def get_cart_subtotal(context, cart):
-    country = context.get('current_country')
-    if not country:
-        return float(cart.subtotal)
-    
-    subtotal = 0
-    for item in cart.items.all():
-        p = item.product.get_price_for_country(country.id)
-        if item.product.discount_percent > 0:
-            p = round(p * (1 - item.product.discount_percent / 100), 2)
-        if item.variant:
-            p += item.variant.additional_price
-        subtotal += p * item.quantity
-    return float(subtotal)
+    try:
+        if not cart:
+            return 0.0
+        country = context.get('current_country')
+        if not country or not hasattr(country, 'id'):
+            return float(getattr(cart, 'subtotal', 0) or 0.0)
+        
+        subtotal = 0
+        for item in cart.items.all():
+            if not item.product:
+                continue
+            p = item.product.get_price_for_country(country.id)
+            discount_percent = getattr(item.product, 'discount_percent', 0) or 0
+            if discount_percent > 0:
+                p = round(p * (1 - discount_percent / 100), 2)
+            if item.variant and getattr(item.variant, 'additional_price', None):
+                p += item.variant.additional_price
+            subtotal += p * item.quantity
+        return float(subtotal)
+    except Exception:
+        return float(getattr(cart, 'subtotal', 0) if cart else 0.0)
+
 
 @register.simple_tag(takes_context=True)
 def get_cart_total(context, cart, subtotal):
-    country = context.get('current_country')
-    discount_amount = 0.0
-    if cart.coupon and cart.coupon.is_valid():
-        discount_val = float(cart.coupon.discount_value)
-        if cart.coupon.discount_type == 'percent':
-            disc = float(subtotal) * discount_val / 100
-            if cart.coupon.max_discount_amount:
-                disc = min(disc, float(cart.coupon.max_discount_amount))
-            discount_amount = round(disc, 2)
-        else:
-            discount_amount = min(discount_val, float(subtotal))
-    
-    delivery = float(country.shipping_charge) if country else 0.0
-    return float(float(subtotal) - discount_amount + delivery)
+    try:
+        subtotal = float(subtotal or 0.0)
+        country = context.get('current_country')
+        discount_amount = 0.0
+        if cart and getattr(cart, 'coupon', None) and cart.coupon.is_valid():
+            discount_val = float(cart.coupon.discount_value or 0)
+            if cart.coupon.discount_type == 'percent':
+                disc = subtotal * discount_val / 100
+                if cart.coupon.max_discount_amount:
+                    disc = min(disc, float(cart.coupon.max_discount_amount))
+                discount_amount = round(disc, 2)
+            else:
+                discount_amount = min(discount_val, subtotal)
+        
+        delivery = float(getattr(country, 'shipping_charge', 0.0) or 0.0) if country else 0.0
+        return float(subtotal - discount_amount + delivery)
+    except Exception:
+        return float(subtotal or 0.0)
+
 
 @register.simple_tag(takes_context=True)
 def get_cart_item_total(context, item):
-    country = context.get('current_country')
-    if not country:
-        return float(item.total_price)
-    
-    p = item.product.get_price_for_country(country.id)
-    if item.product.discount_percent > 0:
-        p = round(p * (1 - item.product.discount_percent / 100), 2)
-    if item.variant:
-        p += item.variant.additional_price
-    return float(p * item.quantity)
+    try:
+        if not item or not item.product:
+            return 0.0
+        country = context.get('current_country')
+        if not country or not hasattr(country, 'id'):
+            return float(getattr(item, 'total_price', 0) or 0.0)
+        
+        p = item.product.get_price_for_country(country.id)
+        discount_percent = getattr(item.product, 'discount_percent', 0) or 0
+        if discount_percent > 0:
+            p = round(p * (1 - discount_percent / 100), 2)
+        if item.variant and getattr(item.variant, 'additional_price', None):
+            p += item.variant.additional_price
+        return float(p * item.quantity)
+    except Exception:
+        return float(getattr(item, 'total_price', 0) if item else 0.0)
+
 
 @register.simple_tag(takes_context=True)
 def get_cart_item_price(context, item):
-    country = context.get('current_country')
-    if not country:
-        return float(item.unit_price)
-    
-    p = item.product.get_price_for_country(country.id)
-    if item.product.discount_percent > 0:
-        p = round(p * (1 - item.product.discount_percent / 100), 2)
-    if item.variant:
-        p += item.variant.additional_price
-    return float(p)
+    try:
+        if not item or not item.product:
+            return 0.0
+        country = context.get('current_country')
+        if not country or not hasattr(country, 'id'):
+            return float(getattr(item, 'unit_price', 0) or 0.0)
+        
+        p = item.product.get_price_for_country(country.id)
+        discount_percent = getattr(item.product, 'discount_percent', 0) or 0
+        if discount_percent > 0:
+            p = round(p * (1 - discount_percent / 100), 2)
+        if item.variant and getattr(item.variant, 'additional_price', None):
+            p += item.variant.additional_price
+        return float(p)
+    except Exception:
+        return float(getattr(item, 'unit_price', 0) if item else 0.0)
