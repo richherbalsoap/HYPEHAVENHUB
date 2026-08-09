@@ -2,19 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "glamour_store/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxDuration": 60,
-        "runtime": "python3.9"
-      }
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
   ],
-  "buildCommand": "python manage.py collectstatic --noinput",
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "glamour_store/wsgi.py"
+      "dest": "api/index.py"
     }
   ]
 }
