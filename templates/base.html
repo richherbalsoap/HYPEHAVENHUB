@@ -91,8 +91,8 @@
     <!-- Right: Icons cluster (Cart + Hamburger Only) -->
     <div class="nav-icons d-flex align-items-center gap-2 ms-auto flex-shrink-0">
       
-      <!-- Localization Trigger -->
-      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-1 flex-shrink-0" data-bs-toggle="modal" data-bs-target="#localizationModal" title="Ship to" aria-label="Ship to">
+      <!-- Localization Trigger (Locked to India) -->
+      <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center p-0 me-1 flex-shrink-0" style="cursor: default; pointer-events: none;" title="Ship to" aria-label="Ship to">
         <span class="d-flex align-items-center gap-1" style="font-size: 12px; font-weight: 600; white-space: nowrap;">
           {% if current_country and current_country.code %}
             <span class="fi fi-{{ current_country.code|lower }}" style="border-radius: 2px;"></span> Ship to {{ current_country.name }} <span class="material-symbols-outlined d-none d-md-inline" style="font-size: 15px;">keyboard_arrow_down</span>
@@ -392,14 +392,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const locModalEl = document.getElementById('localizationModal');
     if (!locModalEl) return;
     
-    const locModal = new bootstrap.Modal(locModalEl, {
-        backdrop: hasCountry ? true : 'static',
-        keyboard: hasCountry
-    });
-    
-    if (!hasCountry) {
-        locModal.show();
-    }
+    // Auto-open logic removed to lock shipping to India
 
     const searchInput = document.getElementById('countrySearchInput');
     if (searchInput) {
