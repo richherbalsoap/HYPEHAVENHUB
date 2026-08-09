@@ -2338,9 +2338,104 @@ def razorpay_webhook(request):
             except Payment.DoesNotExist:
                 logger.warning(f"Webhook received for unknown payment_id: {payment_id}")
                 
-        elif event == 'order.paid':
-            logger.info(f"Order paid webhook received: {payload}")
-            # Magic checkout success handling can be done here if needed
+        elif event in ['order.paid', 'payment.captured', 'payment.authorized']:
+            logger.info(f"Razorpay webhook received event '{event}': {payload}")
+            payment_entity = payload.get('payload', {}).get('payment', {}).get('entity', {}) or payload.get('payload', {}).get('order', {}).get('entity', {})
+            rzp_order_id = payment_entity.get('order_id') or payload.get('payload', {}).get('order', {}).get('entity', {}).get('id')
+            payment_id = payment_entity.get('id')
+            
+            if rzp_order_id or payment_id:
+                order = None
+                if rzp_order_id:
+                    order = Order.objects.filter(razorpay_order_id=rzp_order_id).first()
+                if not order and payment_id:
+                    order = Order.objects.filter(payment__payment_id=payment_id).first()
+                if not order and payment_entity.get('notes', {}).get('order_id'):
+                    order = Order.objects.filter(order_id=payment_entity.get('notes', {}).get('order_id')).first()
+                
+                if order:
+                    from django.db import transaction
+                    with transaction.atomic():
+                        payment_obj, _ = Payment.objects.get_or_create(order=order)
+                        if payment_id:
+                            payment_obj.payment_id = payment_id
+                        payment_obj.status = 'success'
+                        payment_obj.save()
+
+                        if order.address is None:
+                            try:
+                                import razorpay
+                                client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                                rzp_order = client.order.fetch(rzp_order_id) if rzp_order_id else {}
+                                customer_details = rzp_order.get('customer_details', {}) or {}
+                                shipping_address = customer_details.get('shipping_address') or payment_entity.get('notes', {}).get('shipping_address')
+                                contact = customer_details.get('contact', '') or payment_entity.get('contact', '')
+                                email = customer_details.get('email', '') or payment_entity.get('email', 'guest@hypehavenhub.com')
+
+                                if shipping_address and isinstance(shipping_address, dict):
+                                    from store.models import Address
+                                    address_obj, _ = Address.objects.get_or_create(
+                                        user=order.user,
+                                        address_line1=shipping_address.get('line1', shipping_address.get('street_address', 'Address Line 1'))[:255],
+                                        city=shipping_address.get('city', 'City')[:100],
+                                        state=shipping_address.get('state', 'State')[:100],
+                                        pincode=shipping_address.get('zipcode', '110001')[:10],
+                                        defaults={
+                                            'full_name': shipping_address.get('name', 'Customer')[:100],
+                                            'phone': contact[:15],
+                                            'address_line2': shipping_address.get('line2', '')[:255]
+                                        }
+                                    )
+                                    order.address = address_obj
+                            except Exception as addr_err:
+                                logger.error(f"Webhook address resolution error for order {order.order_id}: {addr_err}")
+
+                        order.status = 'confirmed'
+                        order.save()
+
+                        for item in order.items.all():
+                            if item.variant and item.variant.stock >= item.quantity:
+                                item.variant.stock -= item.quantity
+                                item.variant.save()
+
+                        OrderTracking.objects.create(
+                            order=order,
+                            status='confirmed',
+                            description=f'Webhook ({event}): Payment verified server-to-server successfully.'
+                        )
+
+                    try:
+                        send_order_bill_email(order)
+                        send_order_bill_sms(order)
+                    except Exception as notify_err:
+                        logger.error(f"Error sending notifications for webhook order {order.order_id}: {notify_err}")
+
+                    if not order.shipping_tracking_id:
+                        try:
+                            from .shipping import ShiprocketService
+                            shipment_id, error_msg = ShiprocketService.create_shipment(order)
+                            if shipment_id:
+                                order.shipping_tracking_id = str(shipment_id)
+                                order.shiprocket_shipment_id = str(shipment_id)
+                                order.status = 'confirmed'
+                                order.save()
+                                OrderTracking.objects.create(
+                                    order=order,
+                                    status='confirmed',
+                                    description=f'Webhook: Shipment booked with Shiprocket (Tracking ID: {shipment_id})'
+                                )
+                            elif error_msg:
+                                order.status = 'shiprocket_failed'
+                                order.save()
+                                OrderTracking.objects.create(
+                                    order=order,
+                                    status='shiprocket_failed',
+                                    description=f'Webhook: Shiprocket Sync Failed: {error_msg}'
+                                )
+                        except Exception as sr_err:
+                            logger.error(f"Webhook Shiprocket booking error: {sr_err}")
+                else:
+                    logger.warning(f"Razorpay webhook received for unknown order. RZP Order ID: {rzp_order_id}, Payment ID: {payment_id}")
         elif event == 'checkout.abandoned':
             logger.info(f"Abandoned checkout webhook received: {payload}")
             # Track abandoned carts for retargeting here

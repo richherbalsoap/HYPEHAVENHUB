@@ -901,9 +901,31 @@ def admin_sync_shiprocket_statuses(request):
                     updated = True
 
             # If order status was still pending but payment is successful, mark as confirmed
-            if order.status == 'pending' and hasattr(order, 'payment') and order.payment and order.payment.status == 'success':
+            if order.status in ['pending', 'shiprocket_failed'] and hasattr(order, 'payment') and order.payment and order.payment.status == 'success':
                 order.status = 'confirmed'
                 updated = True
+
+            # If order is confirmed but has no Shiprocket shipment ID, attempt auto-booking
+            if order.status == 'confirmed' and not order.shipping_tracking_id and not order.shiprocket_shipment_id:
+                try:
+                    shipment_id, error_msg = ShiprocketService.create_shipment(order)
+                    if shipment_id:
+                        order.shipping_tracking_id = str(shipment_id)
+                        order.shiprocket_shipment_id = str(shipment_id)
+                        updated = True
+                        OrderTracking.objects.create(
+                            order=order,
+                            status='confirmed',
+                            description=f"Auto-booked shipment via Shiprocket sync button (Tracking ID: {shipment_id})"
+                        )
+                    elif error_msg:
+                        OrderTracking.objects.create(
+                            order=order,
+                            status='shiprocket_failed',
+                            description=f"Shiprocket Sync Retry Failed: {error_msg}"
+                        )
+                except Exception as sr_err:
+                    logger.error(f"Error during admin sync Shiprocket booking for order {order.order_id}: {sr_err}")
 
             if updated and order.status != old_status:
                 order.save()

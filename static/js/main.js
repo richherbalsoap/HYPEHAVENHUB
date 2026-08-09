@@ -368,6 +368,11 @@ if (checkoutForm) {
           }
 
           try {
+            const prefillData = {};
+            if (data.customer_name && data.customer_name !== 'Guest User') prefillData.name = data.customer_name;
+            if (data.customer_email && data.customer_email !== 'guest@hypehavenhub.com') prefillData.email = data.customer_email;
+            if (data.customer_phone) prefillData.contact = data.customer_phone;
+
             const options = {
               "key": data.razorpay_key_id,
               "amount": data.amount,
@@ -375,12 +380,13 @@ if (checkoutForm) {
               "name": "HYPEHAVENHUB",
               "description": "Premium Assorted Jhumka Box Sets",
               "order_id": data.razorpay_order_id,
-              "line_items_total": data.line_items_total,
-              "line_items": data.line_items,
               "theme": {
-                "color": "#2a0002"
+                "color": "#092c20"
               },
-              "one_click_checkout": true, // Enabled Razorpay Magic Checkout
+              "retry": {
+                "enabled": true,
+                "max_count": 3
+              },
               "handler": async function (paymentRes) {
                 console.log("Razorpay payment successful response:", paymentRes);
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verifying Payment...';
@@ -422,15 +428,10 @@ if (checkoutForm) {
                   btn.innerHTML = 'Place Order Securely';
                 }
               },
-              "prefill": {
-                "name": data.customer_name,
-                "email": data.customer_email,
-                "contact": data.customer_phone
-              },
-              "theme": {
-                "color": "#092c20"
-              },
               "modal": {
+                "handleback": true,
+                "escape": true,
+                "backdropclose": false,
                 "ondismiss": function() {
                   console.log("Razorpay modal dismissed by user");
                   showToast('Payment cancelled.', 'error');
@@ -439,6 +440,9 @@ if (checkoutForm) {
                 }
               }
             };
+            if (Object.keys(prefillData).length > 0) {
+              options.prefill = prefillData;
+            }
             const rzp = new Razorpay(options);
             rzp.open();
           } catch (rzpErr) {
