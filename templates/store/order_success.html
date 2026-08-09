@@ -63,7 +63,7 @@
     });
 
     setTimeout(function() {
-        window.location.href = "{% url 'track_order' order_id %}";
+        window.location.href = "{% url 'order_detail' order_id %}";
     }, 3500); // Wait 3.5 seconds before redirecting
 </script>
 {% endblock %}

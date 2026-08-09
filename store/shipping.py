@@ -227,7 +227,7 @@ class ShiprocketService:
             "weight": weight
         }
 
-        if channel_id:
+        if channel_id and channel_id.isdigit():
             payload["channel_id"] = channel_id
 
         # Add comment with personalisation details
