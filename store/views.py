@@ -290,7 +290,7 @@ def home(request):
         'categories': categories,
         'categories_with_products': categories_with_products,
         'brands': brands,
-        'flash_sale_end_time': flash_sale_obj.end_time.isoformat() if flash_sale_obj else None,
+        'flash_sale_end_time': flash_sale_obj.end_time.isoformat() if (flash_sale_obj and flash_sale_obj.end_time) else None,
         'hero_panels': hero_panels,
         'wishlist_product_ids': wishlist_product_ids,
     })
