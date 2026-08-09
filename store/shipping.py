@@ -202,6 +202,7 @@ class ShiprocketService:
 
         pickup_location = (getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary') or 'Primary').strip()
         channel_id = (getattr(settings, 'SHIPROCKET_CHANNEL_ID', '') or '').strip()
+        channel_id_2 = (getattr(settings, 'SHIPROCKET_CHANNEL_ID_2', '') or '').strip()
 
         payload = {
             "order_id": order.order_id,
@@ -227,7 +228,10 @@ class ShiprocketService:
             "weight": weight
         }
 
-        if channel_id and channel_id.isdigit():
+        # Use channel_id_2 if valid, otherwise channel_id
+        if channel_id_2 and channel_id_2.isdigit():
+            payload["channel_id"] = channel_id_2
+        elif channel_id and channel_id.isdigit():
             payload["channel_id"] = channel_id
 
         # Add comment with personalisation details
