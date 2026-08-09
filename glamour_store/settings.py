@@ -136,7 +136,6 @@ if POSTGRES_URL and HAS_PSYCOPG:
         'default': dj_database_url.parse(
             POSTGRES_URL,
             conn_max_age=0,
-            ssl_require=True,
         )
     }
 elif PGDATABASE and HAS_PSYCOPG:
