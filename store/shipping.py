@@ -4,6 +4,36 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+# Indian state code → full name mapping (Shiprocket requires full names)
+INDIAN_STATE_MAP = {
+    'AN': 'Andaman and Nicobar Islands', 'AP': 'Andhra Pradesh',
+    'AR': 'Arunachal Pradesh', 'AS': 'Assam', 'BR': 'Bihar',
+    'CH': 'Chandigarh', 'CT': 'Chhattisgarh', 'CG': 'Chhattisgarh',
+    'DD': 'Dadra and Nagar Haveli and Daman and Diu',
+    'DL': 'Delhi', 'GA': 'Goa', 'GJ': 'Gujarat', 'HR': 'Haryana',
+    'HP': 'Himachal Pradesh', 'JK': 'Jammu and Kashmir', 'JH': 'Jharkhand',
+    'KA': 'Karnataka', 'KL': 'Kerala', 'LA': 'Ladakh',
+    'LD': 'Lakshadweep', 'MP': 'Madhya Pradesh', 'MH': 'Maharashtra',
+    'MN': 'Manipur', 'ML': 'Meghalaya', 'MZ': 'Mizoram',
+    'NL': 'Nagaland', 'OR': 'Odisha', 'OD': 'Odisha',
+    'PB': 'Punjab', 'PY': 'Puducherry', 'RJ': 'Rajasthan',
+    'SK': 'Sikkim', 'TN': 'Tamil Nadu', 'TS': 'Telangana',
+    'TR': 'Tripura', 'UP': 'Uttar Pradesh', 'UK': 'Uttarakhand',
+    'UT': 'Uttarakhand', 'WB': 'West Bengal',
+}
+
+def normalize_indian_state(raw_state):
+    """Convert state codes (GJ, MH) or abbreviations to full Shiprocket-compatible names."""
+    if not raw_state:
+        return 'Delhi'  # Safe default
+    cleaned = raw_state.strip()
+    # If it's a 2-letter code, look it up
+    upper = cleaned.upper()
+    if upper in INDIAN_STATE_MAP:
+        return INDIAN_STATE_MAP[upper]
+    # Already a full name — title-case it for consistency
+    return cleaned.title()
+
 class ShiprocketService:
     """
     Shiprocket API Service wrapper to handle authentication and shipment bookings.
@@ -83,7 +113,16 @@ class ShiprocketService:
             logger.warning(f"Skipping Shiprocket booking for order {order.order_id} - missing shipping address.")
             return None, "Order is missing shipping address."
             
-        customer_name = f"{order.user.first_name} {order.user.last_name}".strip() or order.user.email
+        # Use address full_name first (most accurate from checkout), then user name, then email
+        raw_name = (getattr(address, 'full_name', '') or '').strip()
+        if not raw_name:
+            raw_name = f"{order.user.first_name} {order.user.last_name}".strip()
+        if not raw_name:
+            raw_name = order.user.email
+        # Split into first/last for Shiprocket (it requires both fields)
+        name_parts = raw_name.split(' ', 1)
+        billing_first_name = name_parts[0][:50] or 'Customer'
+        billing_last_name = name_parts[1][:50] if len(name_parts) > 1 else ''
 
         # Determine billing country dynamically from user profile, default to "India"
         country_name = "India"
@@ -200,6 +239,22 @@ class ShiprocketService:
             if not pincode_digits:
                 pincode_digits = '90210'
 
+        # Normalize state: convert codes like GJ/MH/KA to full names Gujarat/Maharashtra/Karnataka
+        raw_state = str(address.state).strip()
+        billing_state = normalize_indian_state(raw_state) if country_name.lower() == "india" else raw_state
+
+        # Sanitize city — Shiprocket needs a non-empty city
+        billing_city = (address.city or '').strip()
+        if not billing_city:
+            billing_city = 'Unknown'
+
+        # Sanitize address lines — Shiprocket limits billing_address to 190 chars
+        billing_addr1 = (address.address_line1 or '').strip()[:190]
+        if not billing_addr1:
+            billing_addr1 = 'Address'
+        billing_addr2_raw = f"{address.address_line2}, {address.town}".strip(", ") if getattr(address, 'town', None) else (address.address_line2 or "")
+        billing_addr2 = billing_addr2_raw.strip()[:190]
+
         pickup_location = (getattr(settings, 'SHIPROCKET_PICKUP_LOCATION', 'Primary') or 'Primary').strip()
         channel_id = (getattr(settings, 'SHIPROCKET_CHANNEL_ID', '') or '').strip()
         channel_id_2 = (getattr(settings, 'SHIPROCKET_CHANNEL_ID_2', '') or '').strip()
@@ -208,13 +263,13 @@ class ShiprocketService:
             "order_id": order.order_id,
             "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
             "pickup_location": pickup_location,
-            "billing_customer_name": customer_name,
-            "billing_last_name": "",
-            "billing_address": address.address_line1,
-            "billing_address_2": f"{address.address_line2}, {address.town}".strip(", ") if getattr(address, 'town', None) else (address.address_line2 or ""),
-            "billing_city": address.city,
+            "billing_customer_name": billing_first_name,
+            "billing_last_name": billing_last_name,
+            "billing_address": billing_addr1,
+            "billing_address_2": billing_addr2,
+            "billing_city": billing_city,
             "billing_pincode": pincode_digits,
-            "billing_state": address.state,
+            "billing_state": billing_state,
             "billing_country": country_name,
             "billing_email": order.user.email,
             "billing_phone": phone_digits,
@@ -227,6 +282,9 @@ class ShiprocketService:
             "height": height,
             "weight": weight
         }
+
+        # Debug log the address fields being sent
+        logger.info(f"Shiprocket payload for {order.order_id}: name={billing_first_name} {billing_last_name}, addr={billing_addr1[:50]}, city={billing_city}, state={billing_state} (raw={raw_state}), pin={pincode_digits}, phone={phone_digits}")
 
         # Use channel_id_2 if valid, otherwise channel_id
         if channel_id_2 and channel_id_2.isdigit():
