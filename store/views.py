@@ -1668,14 +1668,6 @@ def order_detail(request, order_id):
 
 def track_order_view(request, order_id=None):
     from django.shortcuts import redirect
-    from django.db.models import Q
-    query = (order_id or request.GET.get('order_id') or request.GET.get('awb') or request.GET.get('q') or '').strip()
-    
-    if query:
-        order = Order.objects.filter(Q(order_id__iexact=query) | Q(shipping_tracking_id__iexact=query)).first()
-        tracking_code = order.shipping_tracking_id if (order and order.shipping_tracking_id) else query
-        return redirect(f"https://hypehavenhub.shiprocket.co/tracking/{tracking_code}")
-        
     return redirect("https://hypehavenhub.shiprocket.co/")
 
 

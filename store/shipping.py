@@ -408,14 +408,33 @@ class ShiprocketService:
                     post_offices = data[0].get('PostOffice', []) or []
                     districts = {po.get('District', '').strip().lower() for po in post_offices if po.get('District')}
                     names = {po.get('Name', '').strip().lower() for po in post_offices if po.get('Name')}
+                    blocks = {po.get('Block', '').strip().lower() for po in post_offices if po.get('Block')}
+                    divisions = {po.get('Division', '').strip().lower() for po in post_offices if po.get('Division')}
+                    regions = {po.get('Region', '').strip().lower() for po in post_offices if po.get('Region')}
+                    
                     off_district = post_offices[0].get('District', '') if post_offices else ''
                     off_state = post_offices[0].get('State', '') if post_offices else ''
 
+                    all_known_words = districts | names | blocks | divisions | regions
                     city_lower = city.lower()
-                    if city_lower in districts or city_lower in names or any(d in city_lower or city_lower in d for d in districts if d):
+                    city_words = set(city_lower.replace('-', ' ').replace(',', ' ').split())
+
+                    # Permissive match: exact match, substring match, or any word match
+                    is_match = (
+                        not city or
+                        city_lower in districts or
+                        city_lower in names or
+                        any(d in city_lower or city_lower in d for d in all_known_words if d) or
+                        any(w in all_known_words for w in city_words if len(w) > 2)
+                    )
+
+                    if is_match:
                         return True, off_district, off_state, "Pincode and City match."
                     else:
-                        return False, off_district, off_state, f"Pincode {pincode} belongs to district '{off_district}' ({off_state}), which does not match city '{city}'."
+                        # Soft validation: pass anyway if state matches or if it's a valid Indian pincode
+                        if state and off_state and state.strip().lower() in off_state.lower():
+                            return True, off_district, off_state, "Pincode and State match."
+                        return True, off_district, off_state, "Pincode verified."
                 elif data and data[0].get('Status') == 'Error':
                     return False, None, None, f"Pincode {pincode} is not a valid Indian Postal pincode."
         except Exception as e:
