@@ -271,8 +271,12 @@ class ShiprocketService:
             (order.payment and order.payment.status in ['success', 'completed'])
         )
 
+        # If this order had previous failed attempts, append retry suffix so Shiprocket treats it as fresh
+        failed_retries = order.tracking.filter(status='shiprocket_failed').count() if hasattr(order, 'tracking') else 0
+        sr_order_id = f"{order.order_id}-R{failed_retries}" if failed_retries > 0 else order.order_id
+
         payload = {
-            "order_id": order.order_id,
+            "order_id": sr_order_id,
             "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
             "pickup_location": pickup_location,
             "billing_customer_name": billing_first_name,
