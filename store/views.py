@@ -1468,7 +1468,7 @@ def verify_payment(request):
                     addr_line1 = (
                         shipping_address.get('line1') or shipping_address.get('address1') or 
                         shipping_address.get('street_address') or shipping_address.get('street1') or 
-                        shipping_address.get('address') or 'Main Street'
+                        shipping_address.get('address') or 'Address'
                     )
                     addr_line2 = (
                         shipping_address.get('line2') or shipping_address.get('address2') or 
@@ -1476,15 +1476,15 @@ def verify_payment(request):
                     )
                     addr_city = (
                         shipping_address.get('city') or shipping_address.get('district') or 
-                        shipping_address.get('town') or 'City'
+                        shipping_address.get('town') or 'Rajkot'
                     )
                     addr_state = (
                         shipping_address.get('state') or shipping_address.get('province') or 
-                        shipping_address.get('state_code') or 'State'
+                        shipping_address.get('state_code') or 'Gujarat'
                     )
                     addr_pin = (
                         shipping_address.get('zipcode') or shipping_address.get('pincode') or 
-                        shipping_address.get('postal_code') or shipping_address.get('zip') or '110001'
+                        shipping_address.get('postal_code') or shipping_address.get('zip') or '360002'
                     )
                     addr_name = (
                         shipping_address.get('name') or shipping_address.get('full_name') or 

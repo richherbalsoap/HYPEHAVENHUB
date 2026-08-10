@@ -24,15 +24,16 @@ INDIAN_STATE_MAP = {
 
 def normalize_indian_state(raw_state):
     """Convert state codes (GJ, MH) or abbreviations to full Shiprocket-compatible names."""
-    if not raw_state:
-        return 'Delhi'  # Safe default
+    if not raw_state or raw_state.strip().lower() in ['state', 'unknown', 'n/a', 'none', '']:
+        return 'Gujarat'
     cleaned = raw_state.strip()
-    # If it's a 2-letter code, look it up
     upper = cleaned.upper()
     if upper in INDIAN_STATE_MAP:
         return INDIAN_STATE_MAP[upper]
-    # Already a full name — title-case it for consistency
-    return cleaned.title()
+    for full_state in INDIAN_STATE_MAP.values():
+        if full_state.lower() == cleaned.lower():
+            return full_state
+    return 'Gujarat'
 
 class ShiprocketService:
     """
