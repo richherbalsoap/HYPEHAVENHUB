@@ -188,18 +188,18 @@ class ShiprocketService:
                 item_disc = 0.0
 
             item_payload = {
-                "name": item_name[:250],
-                "sku": sku,
-                "units": g['quantity'],
-                "selling_price": g['unit_price'],
-                "discount": item_disc,
+                "name": str(item_name)[:250],
+                "sku": str(sku)[:50],
+                "units": max(1, int(g['quantity'])),
+                "selling_price": max(1.0, float(g['unit_price'])),
+                "discount": max(0.0, float(item_disc)),
                 "tax": 0.0,
                 "hsn": "71179090"
             }
             shiprocket_items.append(item_payload)
 
-        # Compute net subtotal for Shiprocket matching item sum
-        calculated_subtotal = round(sum(i['units'] * i['selling_price'] - i['discount'] for i in shiprocket_items), 2)
+        # Compute net subtotal for Shiprocket matching item sum (minimum 1.0)
+        calculated_subtotal = max(1.0, round(sum(i['units'] * i['selling_price'] - i['discount'] for i in shiprocket_items), 2))
 
         # Dynamic Package Dimensions/Weight based on total items/quantity
         total_weight = 0.0
