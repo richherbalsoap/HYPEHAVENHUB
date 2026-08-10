@@ -259,6 +259,17 @@ class ShiprocketService:
         channel_id = (getattr(settings, 'SHIPROCKET_CHANNEL_ID', '') or '').strip()
         channel_id_2 = (getattr(settings, 'SHIPROCKET_CHANNEL_ID_2', '') or '').strip()
 
+        # Sanitize customer email for Shiprocket
+        billing_email = (getattr(order, 'guest_email', '') or order.user.email or '').strip()
+        if not billing_email or '@' not in billing_email or '.' not in billing_email or billing_email == 'guest_checkout':
+            billing_email = 'guest@hypehavenhub.in'
+
+        # Payment method: Prepaid for confirmed/paid orders or successful payment
+        is_prepaid = (
+            order.status in ['confirmed', 'paid', 'processing'] or 
+            (order.payment and order.payment.status in ['success', 'completed'])
+        )
+
         payload = {
             "order_id": order.order_id,
             "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -271,11 +282,11 @@ class ShiprocketService:
             "billing_pincode": pincode_digits,
             "billing_state": billing_state,
             "billing_country": country_name,
-            "billing_email": order.user.email,
+            "billing_email": billing_email,
             "billing_phone": phone_digits,
             "shipping_is_billing": True,
             "order_items": shiprocket_items,
-            "payment_method": "Prepaid" if (order.payment and order.payment.status in ['success', 'completed']) else "COD",
+            "payment_method": "Prepaid" if is_prepaid else "COD",
             "sub_total": calculated_subtotal,
             "length": length,
             "breadth": width,
