@@ -558,7 +558,10 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.order_id:
-            self.order_id = f"HH{uuid.uuid4().hex[:8].upper()}"
+            import time
+            ts_hex = f"{int(time.time()):X}"
+            rnd_hex = uuid.uuid4().hex[:4].upper()
+            self.order_id = f"HH{ts_hex}{rnd_hex}"
         super().save(*args, **kwargs)
 
     def __str__(self):
