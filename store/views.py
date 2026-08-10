@@ -1444,62 +1444,75 @@ def verify_payment(request):
                     rzp_order = client.order.fetch(razorpay_order_id)
                     customer_details = rzp_order.get('customer_details', {}) or {}
                     shipping_address = customer_details.get('shipping_address')
-                    contact = customer_details.get('contact', '')
-                    email = customer_details.get('email', 'guest@hypehavenhub.com')
+                    contact = customer_details.get('contact', '') or rzp_order.get('contact', '')
+                    email = customer_details.get('email', '') or rzp_order.get('email', 'guest@hypehavenhub.com')
 
-                    if not shipping_address:
-                        # Fallback: some payment methods only populate this on the payment object
+                    if not shipping_address or not isinstance(shipping_address, dict):
                         rzp_payment = client.payment.fetch(razorpay_payment_id)
-                        notes = rzp_payment.get('notes', {})
-                        shipping_address = notes.get('shipping_address')
+                        notes = rzp_payment.get('notes', {}) or {}
+                        shipping_address = notes.get('shipping_address') or notes.get('address') or notes
                         
                         if isinstance(shipping_address, str):
                             try:
                                 shipping_address = json.loads(shipping_address)
-                            except:
-                                shipping_address = None
+                            except Exception:
+                                shipping_address = {}
                                 
-                        if not isinstance(shipping_address, dict) and notes.get('shipping_address_line1'):
-                            shipping_address = {
-                                'line1': notes.get('shipping_address_line1', ''),
-                                'city': notes.get('shipping_address_city', ''),
-                                'state': notes.get('shipping_address_state', ''),
-                                'zipcode': notes.get('shipping_address_zipcode', ''),
-                                'name': notes.get('shipping_name', 'Guest User')
-                            }
-
                         contact = contact or rzp_payment.get('contact', '')
                         email = email or rzp_payment.get('email', 'guest@hypehavenhub.com')
 
-                    if shipping_address and isinstance(shipping_address, dict):
-                        from store.models import Address
-                        address_obj, _ = Address.objects.get_or_create(
-                            user=order.user,
-                            address_line1=shipping_address.get('line1', shipping_address.get('street_address', ''))[:255],
-                            city=shipping_address.get('city', '')[:100],
-                            state=shipping_address.get('state', '')[:100],
-                            pincode=shipping_address.get('zipcode', '')[:10],
-                            defaults={
-                                'full_name': shipping_address.get('name', 'Guest User')[:100],
-                                'phone': contact[:15],
-                                'address_line2': shipping_address.get('line2', '')[:255]
-                            }
-                        )
-                        order.address = address_obj
-                        
-                        if order.user.username == 'guest_checkout':
-                            # Save the guest email permanently to link to a Google account later
-                            order.guest_email = email
-                            
-                            # Dynamically inject real details so Shiprocket doesn't get 'guest_checkout' default info
-                            order.user.email = email
-                            parts = shipping_address.get('name', 'Guest User').split(' ', 1)
-                            order.user.first_name = parts[0][:30]
-                            order.user.last_name = parts[1][:30] if len(parts) > 1 else ""
-                    else:
-                        logger.error(f"No shipping address found in Razorpay response for order {order.order_id}. Shiprocket booking will be skipped.")
+                    if not isinstance(shipping_address, dict):
+                        shipping_address = {}
+
+                    # Extract address with support for all Razorpay Magic Checkout field naming variants
+                    addr_line1 = (
+                        shipping_address.get('line1') or shipping_address.get('address1') or 
+                        shipping_address.get('street_address') or shipping_address.get('street1') or 
+                        shipping_address.get('address') or 'Main Street'
+                    )
+                    addr_line2 = (
+                        shipping_address.get('line2') or shipping_address.get('address2') or 
+                        shipping_address.get('street2') or ''
+                    )
+                    addr_city = (
+                        shipping_address.get('city') or shipping_address.get('district') or 
+                        shipping_address.get('town') or 'City'
+                    )
+                    addr_state = (
+                        shipping_address.get('state') or shipping_address.get('province') or 
+                        shipping_address.get('state_code') or 'State'
+                    )
+                    addr_pin = (
+                        shipping_address.get('zipcode') or shipping_address.get('pincode') or 
+                        shipping_address.get('postal_code') or shipping_address.get('zip') or '110001'
+                    )
+                    addr_name = (
+                        shipping_address.get('name') or shipping_address.get('full_name') or 
+                        shipping_address.get('contact_name') or 'Customer'
+                    )
+
+                    from store.models import Address
+                    address_obj = Address.objects.create(
+                        user=order.user,
+                        full_name=str(addr_name)[:100],
+                        phone=str(contact or '9876543210')[:15],
+                        address_line1=str(addr_line1)[:255],
+                        address_line2=str(addr_line2)[:255],
+                        city=str(addr_city)[:100],
+                        state=str(addr_state)[:100],
+                        pincode=str(addr_pin)[:10]
+                    )
+                    order.address = address_obj
+                    
+                    if order.user.username == 'guest_checkout':
+                        order.guest_email = email
+                        order.user.email = email
+                        parts = str(addr_name).split(' ', 1)
+                        order.user.first_name = parts[0][:30]
+                        order.user.last_name = parts[1][:30] if len(parts) > 1 else ""
+                        order.user.save()
                 except Exception as e:
-                    logger.error(f"Error fetching Magic Checkout address: {e}")
+                    logger.error(f"Error fetching Magic Checkout address for order {order.order_id}: {e}")
 
             # Update order status
             order.status = 'confirmed'
@@ -2367,21 +2380,53 @@ def razorpay_webhook(request):
                             contact = customer_details.get('contact', '') or payment_entity.get('contact', '')
                             email = customer_details.get('email', '') or payment_entity.get('email', 'guest@hypehavenhub.com')
 
-                            if shipping_address and isinstance(shipping_address, dict):
-                                from store.models import Address
-                                address_obj, _ = Address.objects.get_or_create(
-                                    user=order.user,
-                                    address_line1=shipping_address.get('line1', shipping_address.get('street_address', 'Address Line 1'))[:255],
-                                    city=shipping_address.get('city', 'City')[:100],
-                                    state=shipping_address.get('state', 'State')[:100],
-                                    pincode=shipping_address.get('zipcode', '110001')[:10],
-                                    defaults={
-                                        'full_name': shipping_address.get('name', 'Customer')[:100],
-                                        'phone': contact[:15],
-                                        'address_line2': shipping_address.get('line2', '')[:255]
-                                    }
-                                )
-                                order.address = address_obj
+                            if isinstance(shipping_address, str):
+                                try:
+                                    shipping_address = json.loads(shipping_address)
+                                except Exception:
+                                    shipping_address = {}
+
+                            if not isinstance(shipping_address, dict):
+                                shipping_address = {}
+
+                            addr_line1 = (
+                                shipping_address.get('line1') or shipping_address.get('address1') or 
+                                shipping_address.get('street_address') or shipping_address.get('street1') or 
+                                shipping_address.get('address') or 'Main Street'
+                            )
+                            addr_line2 = (
+                                shipping_address.get('line2') or shipping_address.get('address2') or 
+                                shipping_address.get('street2') or ''
+                            )
+                            addr_city = (
+                                shipping_address.get('city') or shipping_address.get('district') or 
+                                shipping_address.get('town') or 'City'
+                            )
+                            addr_state = (
+                                shipping_address.get('state') or shipping_address.get('province') or 
+                                shipping_address.get('state_code') or 'State'
+                            )
+                            addr_pin = (
+                                shipping_address.get('zipcode') or shipping_address.get('pincode') or 
+                                shipping_address.get('postal_code') or shipping_address.get('zip') or '110001'
+                            )
+                            addr_name = (
+                                shipping_address.get('name') or shipping_address.get('full_name') or 
+                                shipping_address.get('contact_name') or 'Customer'
+                            )
+
+                            from store.models import Address
+                            address_obj = Address.objects.create(
+                                user=order.user,
+                                full_name=str(addr_name)[:100],
+                                phone=str(contact or '9876543210')[:15],
+                                address_line1=str(addr_line1)[:255],
+                                address_line2=str(addr_line2)[:255],
+                                city=str(addr_city)[:100],
+                                state=str(addr_state)[:100],
+                                pincode=str(addr_pin)[:10]
+                            )
+                            order.address = address_obj
                         except Exception as addr_err:
                             logger.error(f"Webhook address resolution error for order {order.order_id}: {addr_err}")
 

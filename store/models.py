@@ -575,12 +575,9 @@ class Order(models.Model):
     @property
     def shiprocket_tracking_url(self):
         """
-        Returns Shiprocket Official Live Tracking URL for this order.
+        Returns Shiprocket Official Live Tracking URL for this store.
         """
-        code = self.shipping_tracking_id or getattr(self, 'shiprocket_shipment_id', None) or self.order_id
-        if code and str(code).strip():
-            return f"https://hypehavenhub.shiprocket.co/tracking/{str(code).strip()}"
-        return "https://hypehavenhub.shiprocket.co/tracking"
+        return "https://hypehavenhub.shiprocket.co/"
 
 
 class OrderItem(models.Model):
