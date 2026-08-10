@@ -1648,6 +1648,18 @@ def order_list(request):
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    
+    # Auto-attempt Shiprocket booking if confirmed but un-synced
+    if order.status in ['confirmed', 'processing', 'paid'] and not order.shipping_tracking_id:
+        try:
+            from .shipping import ShiprocketService
+            shipment_id, _ = ShiprocketService.create_shipment(order)
+            if shipment_id:
+                order.shipping_tracking_id = str(shipment_id)
+                order.save()
+        except Exception as auto_err:
+            logger.error(f"Auto-sync on detail view failed for order {order_id}: {auto_err}")
+
     tracking = order.tracking.all()
     all_statuses = [
         ('pending', 'Ordered'), ('confirmed', 'Confirmed'),
