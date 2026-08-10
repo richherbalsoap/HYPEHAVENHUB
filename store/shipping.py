@@ -286,11 +286,11 @@ class ShiprocketService:
         # Debug log the address fields being sent
         logger.info(f"Shiprocket payload for {order.order_id}: name={billing_first_name} {billing_last_name}, addr={billing_addr1[:50]}, city={billing_city}, state={billing_state} (raw={raw_state}), pin={pincode_digits}, phone={phone_digits}")
 
-        # Use channel_id_2 if valid, otherwise channel_id
-        if channel_id_2 and channel_id_2.isdigit():
-            payload["channel_id"] = channel_id_2
-        elif channel_id and channel_id.isdigit():
+        # Use primary channel_id (8087473) first, fallback to channel_id_2
+        if channel_id and channel_id.isdigit():
             payload["channel_id"] = channel_id
+        elif channel_id_2 and channel_id_2.isdigit():
+            payload["channel_id"] = channel_id_2
 
         # Add comment with personalisation details
         pers_details = [f"{g['product_name']}: {g['personalization_name']}" for g in grouped_items.values() if g['personalization_name']]
