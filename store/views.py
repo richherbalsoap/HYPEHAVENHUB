@@ -1575,7 +1575,7 @@ def verify_payment(request):
                 )
             elif error_msg:
                 shiprocket_error = error_msg
-                order.status = 'shiprocket_failed'
+                order.status = 'confirmed'
                 order.save()
                 OrderTracking.objects.create(
                     order=order,
@@ -1598,7 +1598,7 @@ def verify_payment(request):
         except Exception as e:
             logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
             shiprocket_error = str(e)
-            order.status = 'shiprocket_failed'
+            order.status = 'confirmed'
             order.save()
 
         # PostHog Purchase Event Capture in Views
@@ -2459,7 +2459,7 @@ def razorpay_webhook(request):
                                 description=f'Webhook: Shipment booked with Shiprocket (Tracking ID: {shipment_id})'
                             )
                         elif error_msg:
-                            order.status = 'shiprocket_failed'
+                            order.status = 'confirmed'
                             order.save()
                             OrderTracking.objects.create(
                                 order=order,
