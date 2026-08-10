@@ -275,9 +275,13 @@ class ShiprocketService:
         failed_retries = order.tracking.filter(status='shiprocket_failed').count() if hasattr(order, 'tracking') else 0
         sr_order_id = f"{order.order_id}-R{failed_retries}" if failed_retries > 0 else order.order_id
 
+        # Use current time for order_date on retries so Shiprocket accepts past order dates
+        import django.utils.timezone
+        order_date_str = django.utils.timezone.now().strftime("%Y-%m-%d %H:%M") if failed_retries > 0 else order.created_at.strftime("%Y-%m-%d %H:%M")
+
         payload = {
             "order_id": sr_order_id,
-            "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
+            "order_date": order_date_str,
             "pickup_location": pickup_location,
             "billing_customer_name": billing_first_name,
             "billing_last_name": billing_last_name,
