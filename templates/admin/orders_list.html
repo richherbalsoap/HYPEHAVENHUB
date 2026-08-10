@@ -117,7 +117,14 @@
                         <span class="text-muted small"><i class="fas fa-box me-1" style="font-size: 10px;"></i>No AWB Yet</span>
                         {% endif %}
                     </td>
-                    <td><span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                    <td>
+                        <span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        {% if order.status == 'SHIPROCKET_FAILED' %}
+                        <small class="d-block text-danger mt-1 fw-bold" style="font-size: 11px; max-width: 200px; white-space: normal;">
+                            Error: {{ order.tracking.last.description }}
+                        </small>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if order.payment %}
                         <span class="status-pill payment-{{ order.payment.status }}">{{ order.payment.get_status_display }}</span>
