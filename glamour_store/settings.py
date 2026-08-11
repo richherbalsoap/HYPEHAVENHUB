@@ -40,7 +40,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://hypehavenhub.vercel.app']
+CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app', 'https://hypehavenhub.vercel.app', 'https://hypehavenhub.in', 'https://*.hypehavenhub.in', 'https://www.hypehavenhub.in']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
