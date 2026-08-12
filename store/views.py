@@ -1277,10 +1277,20 @@ def razorpay_direct_checkout(request):
     pers_names = [f"{item['product_name']}: {item['personalization_name']}" for item in items_to_create if item.get('personalization_name')]
     order_notes = ("Personalisation: " + ", ".join(pers_names))[:500] if pers_names else ""
 
-    # Create Order without address
+    # Check if address_id passed or available for user
+    address_id = data.get('address_id')
+    address = None
+    if address_id:
+        from store.models import Address
+        address = Address.objects.filter(id=address_id, user=user).first()
+    if not address and user.is_authenticated and user.username != 'guest_checkout':
+        from store.models import Address
+        address = Address.objects.filter(user=user).order_by('-id').first()
+
+    # Create Order
     order = Order.objects.create(
         user=user,
-        address=None,
+        address=address,
         subtotal=subtotal,
         discount_amount=discount_amount,
         delivery_charge=delivery_charge,
