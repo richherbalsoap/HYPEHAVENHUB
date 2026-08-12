@@ -839,14 +839,6 @@ def cart_drawer_view(request):
 
 @require_POST
 def add_to_cart(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({
-            'success': False,
-            'requires_login': True,
-            'redirect': build_login_redirect_url(request, notice='cart_required'),
-            'message': 'Please login first to add products to cart.',
-        }, status=401)
-
     data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
@@ -1194,14 +1186,17 @@ def razorpay_direct_checkout(request):
         
     user = request.user
     if not user.is_authenticated:
-        referer = request.META.get('HTTP_REFERER', '/cart/')
-        google_login_url = f"/accounts/google/login/?next={urllib_parse.quote(referer)}"
-        return JsonResponse({
-            'success': False,
-            'requires_login': True,
-            'redirect': google_login_url,
-            'message': 'Please login with Google to proceed with checkout.'
-        }, status=401)
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        guest_user, _ = User.objects.get_or_create(
+            username='guest_checkout',
+            defaults={
+                'email': 'guest@hypehavenhub.in',
+                'first_name': 'Guest',
+                'last_name': 'Checkout'
+            }
+        )
+        user = guest_user
         
     product_id = data.get('product_id')
     variant_id = data.get('variant_id')
