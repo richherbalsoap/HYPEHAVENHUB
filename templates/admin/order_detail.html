@@ -95,16 +95,32 @@
                     <p class="small text-muted mb-3">If automated booking failed (e.g. City & Pincode mismatch), verify or edit the shipping address below and click <strong>Retry Sync</strong>.</p>
                     <div class="row g-2 mb-3">
                         <div class="col-md-6">
+                            <label class="form-label small fw-bold">Customer Name</label>
+                            <input type="text" name="full_name" class="form-control form-control-sm" value="{{ order.address.full_name|default:'' }}" placeholder="Full Name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="text" name="phone" class="form-control form-control-sm" value="{{ order.address.phone|default:'' }}" placeholder="Mobile Number">
+                        </div>
+                        <div class="col-md-6">
                             <label class="form-label small fw-bold">Address Line 1</label>
-                            <input type="text" name="address_line1" class="form-control form-control-sm" value="{{ order.address.address_line1|default:'' }}">
+                            <input type="text" name="address_line1" class="form-control form-control-sm" value="{{ order.address.address_line1|default:'' }}" placeholder="House, Street, Locality">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Address Line 2 (Landmark)</label>
+                            <input type="text" name="address_line2" class="form-control form-control-sm" value="{{ order.address.address_line2|default:'' }}" placeholder="Landmark, Area">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label small fw-bold">City / District</label>
-                            <input type="text" name="city" class="form-control form-control-sm" value="{{ order.address.city|default:'' }}" required>
+                            <input type="text" name="city" class="form-control form-control-sm" value="{{ order.address.city|default:'' }}" required placeholder="City">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">State</label>
+                            <input type="text" name="state" class="form-control form-control-sm" value="{{ order.address.state|default:'' }}" required placeholder="State (e.g. Gujarat)">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label small fw-bold">Pincode</label>
-                            <input type="text" name="pincode" class="form-control form-control-sm" value="{{ order.address.pincode|default:'' }}" required>
+                            <input type="text" name="pincode" class="form-control form-control-sm" value="{{ order.address.pincode|default:'' }}" required placeholder="6-digit Pincode">
                         </div>
                     </div>
                     <button type="submit" class="btn btn-warning btn-sm fw-bold">
