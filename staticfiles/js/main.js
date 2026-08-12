@@ -919,7 +919,7 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
       if (typeof Razorpay === 'undefined') {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'https://checkout.razorpay.com/v1/magic-checkout.js';
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
           script.onload = resolve;
           script.onerror = reject;
           document.head.appendChild(script);
@@ -933,12 +933,9 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
         "name": "HYPEHAVENHUB",
         "description": "Order Payment",
         "order_id": data.razorpay_order_id,
-        "line_items_total": data.line_items_total,
-        "line_items": data.line_items,
         "theme": {
-          "color": "#2a0002"
+          "color": "#3b8c7b"
         },
-        "one_click_checkout": true, // Enabled Razorpay Magic Checkout
         "handler": async function (response) {
           const verifyData = await api('/checkout/verify-payment/', {
             razorpay_payment_id: response.razorpay_payment_id,
