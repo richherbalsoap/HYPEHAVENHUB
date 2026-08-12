@@ -275,7 +275,7 @@ TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
 TWILIO_FROM_NUMBER = config('TWILIO_FROM_NUMBER', default='')
 SMS_TIMEOUT = config('SMS_TIMEOUT', default=15, cast=int)
-SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
+SITE_URL = config('SITE_URL', default='https://hypehavenhub.in')
 
 SESSION_COOKIE_AGE = 86400 * 30
 SESSION_SAVE_EVERY_REQUEST = True
