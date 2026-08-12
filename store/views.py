@@ -1554,6 +1554,8 @@ def verify_payment(request):
             logger.error(f"Billing notification error for order {order.order_id}: {notif_err}")
 
         # Trigger Shiprocket booking for prepaid order
+        shipment_id = None
+        shiprocket_error = None
         try:
             from .shipping import ShiprocketService
             shipment_id, error_msg = ShiprocketService.create_shipment(order)
@@ -1562,13 +1564,15 @@ def verify_payment(request):
                 order.status = 'confirmed'
                 order.save(update_fields=['shipping_tracking_id', 'status'])
             else:
+                shiprocket_error = error_msg
                 logger.error(f"Shiprocket automatic booking failed for order {order.order_id}: {error_msg}")
                 OrderTracking.objects.get_or_create(
                     order=order,
                     status='shiprocket_failed',
-                    defaults={'description': f"Shiprocket Sync Error: {error_msg[:250]}. Will retry automatically."}
+                    defaults={'description': f"Shiprocket Sync Error: {str(error_msg)[:250]}. Will retry automatically."}
                 )
         except Exception as sr_ex:
+            shiprocket_error = str(sr_ex)
             logger.error(f"Shiprocket exception for order {order.order_id}: {sr_ex}")
 
         redirect_url = f'/orders/{order.order_id}/'
