@@ -919,7 +919,7 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
       if (typeof Razorpay === 'undefined') {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
-          script.src = 'https://checkout.razorpay.com/v1/magic-checkout.js';
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
           script.onload = resolve;
           script.onerror = reject;
           document.head.appendChild(script);
