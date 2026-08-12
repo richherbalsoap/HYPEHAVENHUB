@@ -350,6 +350,12 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+# Vercel Reverse Proxy HTTPS & Mobile OAuth Cookie Settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 # Redis Caching Config (Graceful LocMem fallback for local development)
 REDIS_URL = config('REDIS_URL', default='')
 if REDIS_URL:

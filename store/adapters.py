@@ -4,7 +4,17 @@ from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
 
+from django.shortcuts import redirect
+from django.contrib import messages
+
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
+    def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
+        logger.error(f"Social authentication error ({provider_id}): {error} - {exception}")
+        if request.user.is_authenticated:
+            return redirect('/')
+        messages.error(request, "Google sign-in could not be completed. Please try logging in again.")
+        return redirect('/')
+
     def populate_user(self, request, sociallogin, data):
         user = super().populate_user(request, sociallogin, data)
         if user.email:
