@@ -1442,60 +1442,65 @@ def verify_payment(request):
             if order.address is None:
                 try:
                     rzp_order = client.order.fetch(razorpay_order_id)
-                    customer_details = rzp_order.get('customer_details', {}) or {}
-                    shipping_address = customer_details.get('shipping_address')
-                    contact = customer_details.get('contact', '') or rzp_order.get('contact', '')
-                    email = customer_details.get('email', '') or rzp_order.get('email', 'guest@hypehavenhub.com')
-
-                    if not shipping_address or not isinstance(shipping_address, dict):
-                        rzp_payment = client.payment.fetch(razorpay_payment_id)
-                        notes = rzp_payment.get('notes', {}) or {}
-                        shipping_address = notes.get('shipping_address') or notes.get('address') or notes
-                        
-                        if isinstance(shipping_address, str):
-                            try:
-                                shipping_address = json.loads(shipping_address)
-                            except Exception:
-                                shipping_address = {}
-                                
-                        contact = contact or rzp_payment.get('contact', '')
-                        email = email or rzp_payment.get('email', 'guest@hypehavenhub.com')
-
+                    rzp_payment = client.payment.fetch(razorpay_payment_id) if razorpay_payment_id else {}
+                    
+                    customer_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
+                    if not isinstance(customer_details, dict): customer_details = {}
+                    
+                    p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
+                    if not isinstance(p_notes, dict): p_notes = {}
+                    o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
+                    if not isinstance(o_notes, dict): o_notes = {}
+                    merged_notes = {**o_notes, **p_notes}
+                    
+                    shipping_address = (
+                        customer_details.get('shipping_address') or 
+                        customer_details.get('billing_address') or 
+                        rzp_order.get('shipping_address') or 
+                        rzp_payment.get('shipping_address') or 
+                        merged_notes.get('shipping_address') or 
+                        merged_notes.get('address') or {}
+                    )
+                    
+                    if isinstance(shipping_address, str):
+                        try:
+                            shipping_address = json.loads(shipping_address)
+                        except Exception:
+                            shipping_address = {}
                     if not isinstance(shipping_address, dict):
                         shipping_address = {}
 
-                    # Extract address with support for all Razorpay Magic Checkout field naming variants
-                    addr_line1 = (
-                        shipping_address.get('line1') or shipping_address.get('address1') or 
-                        shipping_address.get('street_address') or shipping_address.get('street1') or 
-                        shipping_address.get('address') or 'Address'
-                    )
-                    addr_line2 = (
-                        shipping_address.get('line2') or shipping_address.get('address2') or 
-                        shipping_address.get('street2') or ''
-                    )
-                    addr_city = (
-                        shipping_address.get('city') or shipping_address.get('district') or 
-                        shipping_address.get('town') or 'Rajkot'
-                    )
-                    addr_state = (
-                        shipping_address.get('state') or shipping_address.get('province') or 
-                        shipping_address.get('state_code') or 'Gujarat'
-                    )
-                    addr_pin = (
-                        shipping_address.get('zipcode') or shipping_address.get('pincode') or 
-                        shipping_address.get('postal_code') or shipping_address.get('zip') or '360002'
-                    )
-                    addr_name = (
-                        shipping_address.get('name') or shipping_address.get('full_name') or 
-                        shipping_address.get('contact_name') or 'Customer'
-                    )
+                    def get_field(keys):
+                        for k in keys:
+                            v = shipping_address.get(k) or merged_notes.get(k)
+                            if v and str(v).strip():
+                                return str(v).strip()
+                        return ''
+
+                    addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
+                    addr_line2 = get_field(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
+                    addr_city = get_field(['city', 'district', 'town', 'shipping_city', 'city_name'])
+                    addr_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
+                    addr_pin = get_field(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
+                    addr_name = get_field(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name'])
+                    if not addr_name:
+                        addr_name = customer_details.get('name') or rzp_payment.get('name') or rzp_order.get('name') or 'Customer'
+
+                    contact = get_field(['contact', 'phone', 'mobile', 'shipping_phone'])
+                    if not contact:
+                        contact = customer_details.get('contact') or rzp_payment.get('contact') or rzp_order.get('contact') or ''
+                    
+                    email = get_field(['email', 'shipping_email'])
+                    if not email:
+                        email = customer_details.get('email') or rzp_payment.get('email') or rzp_order.get('email') or 'guest@hypehavenhub.in'
+
+                    logger.info(f"Extracted Razorpay Magic Checkout address for order {order.order_id}: name={addr_name}, line1={addr_line1}, city={addr_city}, state={addr_state}, pin={addr_pin}, phone={contact}")
 
                     from store.models import Address
                     address_obj = Address.objects.create(
                         user=order.user,
                         full_name=str(addr_name)[:100],
-                        phone=str(contact or '9876543210')[:15],
+                        phone=str(contact)[:15],
                         address_line1=str(addr_line1)[:255],
                         address_line2=str(addr_line2)[:255],
                         city=str(addr_city)[:100],

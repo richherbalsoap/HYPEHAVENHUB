@@ -112,22 +112,65 @@ class ShiprocketService:
         address = order.address
         if not address:
             try:
-                from store.models import Address
-                user_name = f"{order.user.first_name} {order.user.last_name}".strip() or getattr(order, 'guest_email', '') or order.user.email or "Customer"
-                address = Address.objects.create(
-                    user=order.user,
-                    full_name=user_name[:100],
-                    phone='9876543210',
-                    address_line1='Address Line 1',
-                    city='Rajkot',
-                    state='Gujarat',
-                    pincode='360002'
+                import razorpay
+                client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                rzp_order_id = getattr(order.payment, 'gateway_response', {}).get('razorpay_order_id') if hasattr(order, 'payment') and order.payment else None
+                rzp_payment_id = getattr(order.payment, 'payment_id', None) if hasattr(order, 'payment') and order.payment else None
+                
+                rzp_order = client.order.fetch(rzp_order_id) if rzp_order_id else {}
+                rzp_payment = client.payment.fetch(rzp_payment_id) if rzp_payment_id else {}
+                
+                c_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
+                p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
+                o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
+                merged_notes = {**o_notes, **p_notes}
+                
+                ship_addr = (
+                    c_details.get('shipping_address') or 
+                    c_details.get('billing_address') or 
+                    rzp_order.get('shipping_address') or 
+                    rzp_payment.get('shipping_address') or 
+                    merged_notes.get('shipping_address') or 
+                    merged_notes.get('address') or {}
                 )
-                order.address = address
-                order.save()
+                if isinstance(ship_addr, str):
+                    try: ship_addr = json.loads(ship_addr)
+                    except Exception: ship_addr = {}
+                if not isinstance(ship_addr, dict): ship_addr = {}
+                
+                def get_f(keys):
+                    for k in keys:
+                        v = ship_addr.get(k) or merged_notes.get(k)
+                        if v and str(v).strip(): return str(v).strip()
+                    return ''
+                    
+                addr_line1 = get_f(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
+                addr_line2 = get_f(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
+                addr_city = get_f(['city', 'district', 'town', 'shipping_city', 'city_name'])
+                addr_state = get_f(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
+                addr_pin = get_f(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
+                addr_name = get_f(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name']) or c_details.get('name') or rzp_payment.get('name') or "Customer"
+                contact = get_f(['contact', 'phone', 'mobile', 'shipping_phone']) or c_details.get('contact') or rzp_payment.get('contact') or '9876543210'
+                
+                if addr_line1 and addr_city and addr_state and addr_pin:
+                    from store.models import Address
+                    address = Address.objects.create(
+                        user=order.user,
+                        full_name=str(addr_name)[:100],
+                        phone=str(contact)[:15],
+                        address_line1=str(addr_line1)[:255],
+                        address_line2=str(addr_line2)[:255],
+                        city=str(addr_city)[:100],
+                        state=str(addr_state)[:100],
+                        pincode=str(addr_pin)[:10]
+                    )
+                    order.address = address
+                    order.save()
             except Exception as addr_err:
-                logger.error(f"Failed to create fallback address for order {order.order_id}: {addr_err}")
-                return None, "Order is missing shipping address."
+                logger.error(f"Failed to fetch dynamic Razorpay address for order {order.order_id}: {addr_err}")
+                
+        if not address:
+            return None, "Order is missing shipping address."
             
         # Use address full_name first (most accurate from checkout), then user name, then email
         raw_name = (getattr(address, 'full_name', '') or '').strip()
