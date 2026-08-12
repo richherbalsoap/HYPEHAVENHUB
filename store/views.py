@@ -1441,104 +1441,23 @@ def verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
-            try:
-                rzp_order = client.order.fetch(razorpay_order_id)
-                rzp_payment = client.payment.fetch(razorpay_payment_id) if razorpay_payment_id else {}
-                
-                customer_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
-                if not isinstance(customer_details, dict): customer_details = {}
-                
-                p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
-                if not isinstance(p_notes, dict): p_notes = {}
-                o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
-                if not isinstance(o_notes, dict): o_notes = {}
-                merged_notes = {**o_notes, **p_notes}
-                
-                shipping_address = (
-                    customer_details.get('shipping_address') or 
-                    customer_details.get('billing_address') or 
-                    rzp_order.get('shipping_address') or 
-                    rzp_payment.get('shipping_address') or 
-                    merged_notes.get('shipping_address') or 
-                    merged_notes.get('address') or {}
-                )
-                
-                if isinstance(shipping_address, str):
-                    try:
-                        shipping_address = json.loads(shipping_address)
-                    except Exception:
-                        shipping_address = {}
-                if not isinstance(shipping_address, dict):
-                    shipping_address = {}
-
-                def get_field(keys):
-                    for k in keys:
-                        v = shipping_address.get(k) or merged_notes.get(k)
-                        if v and str(v).strip():
-                            return str(v).strip()
-                    return ''
-
-                addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
-                addr_line2 = get_field(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
-                addr_city = get_field(['city', 'district', 'town', 'shipping_city', 'city_name'])
-                addr_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
-                addr_pin = get_field(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
-                addr_name = get_field(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name'])
-                if not addr_name:
-                    addr_name = customer_details.get('name') or rzp_payment.get('name') or rzp_order.get('name') or 'Customer'
-
-                contact = get_field(['contact', 'phone', 'mobile', 'shipping_phone'])
-                if not contact:
-                    contact = customer_details.get('contact') or rzp_payment.get('contact') or rzp_order.get('contact') or ''
-                
-                email = get_field(['email', 'shipping_email'])
-                if not email:
-                    email = customer_details.get('email') or rzp_payment.get('email') or rzp_order.get('email') or 'guest@hypehavenhub.in'
-
-                # If Razorpay returned fresh address, ALWAYS update order.address with this fresh address
-                if addr_line1 and addr_city and addr_state and addr_pin:
-                    from store.models import Address
-                    address_obj = Address.objects.create(
-                        user=order.user,
-                        full_name=str(addr_name)[:100],
-                        phone=str(contact)[:15],
-                        address_line1=str(addr_line1)[:255],
-                        address_line2=str(addr_line2)[:255],
-                        city=str(addr_city)[:100],
-                        state=str(addr_state)[:100],
-                        pincode=str(addr_pin)[:10]
-                    )
-                    order.address = address_obj
-                    logger.info(f"Updated fresh Magic Checkout address for order {order.order_id}: {address_obj.address_line1}, {address_obj.city}")
-                
-                if order.user.username == 'guest_checkout':
-                    order.guest_email = email
-                    order.user.email = email
-                    parts = str(addr_name).split(' ', 1)
-                    order.user.first_name = parts[0][:30]
-                    order.user.last_name = parts[1][:30] if len(parts) > 1 else ""
-                    order.user.save()
-            except Exception as e:
-                logger.error(f"Error fetching Magic Checkout address for order {order.order_id}: {e}")
-
             # Update order status
             order.status = 'confirmed'
             order.save()
 
-            # Decrement stock with row locking (select_for_update)
+            # Decrement stock with row locking
             for item in order.items.all():
                 if item.variant:
                     variant = ProductVariant.objects.select_for_update().get(id=item.variant.id)
-                    if variant.stock < item.quantity:
-                        raise InventoryConflictError(f"Insufficient stock for {item.product.name} ({variant.label}).")
-                    variant.stock -= item.quantity
-                    variant.save()
+                    if variant.stock >= item.quantity:
+                        variant.stock -= item.quantity
+                        variant.save()
 
-            # Create tracking entry
-            OrderTracking.objects.create(
+            # Create tracking entry if not exists
+            OrderTracking.objects.get_or_create(
                 order=order,
                 status='confirmed',
-                description='Payment verified successfully. Order confirmed.'
+                defaults={'description': 'Payment verified successfully. Order confirmed.'}
             )
 
             cart = get_or_create_cart(request)
@@ -1551,81 +1470,108 @@ def verify_payment(request):
             cart.coupon = None
             cart.save()
 
-            # Create notification
-            if request.user.is_authenticated:
-                Notification.objects.create(
-                    user=request.user,
-                    type='order',
-                    title='Order Paid & Placed!',
-                    message=f'Your payment for order #{order.order_id} has been verified successfully.',
-                    link=f'/orders/{order.order_id}/'
-                )
+        # Step 2: Safe Address Extraction & Customer Info (outside atomic block to prevent transaction rollbacks)
+        try:
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            rzp_order = client.order.fetch(razorpay_order_id)
+            rzp_payment = client.payment.fetch(razorpay_payment_id) if razorpay_payment_id else {}
+            
+            customer_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
+            if not isinstance(customer_details, dict): customer_details = {}
+            
+            p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
+            if not isinstance(p_notes, dict): p_notes = {}
+            o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
+            if not isinstance(o_notes, dict): o_notes = {}
+            merged_notes = {**o_notes, **p_notes}
+            
+            shipping_address = (
+                customer_details.get('shipping_address') or 
+                customer_details.get('billing_address') or 
+                rzp_order.get('shipping_address') or 
+                rzp_payment.get('shipping_address') or 
+                merged_notes.get('shipping_address') or 
+                merged_notes.get('address') or {}
+            )
+            
+            if isinstance(shipping_address, str):
+                try: shipping_address = json.loads(shipping_address)
+                except Exception: shipping_address = {}
+            if not isinstance(shipping_address, dict): shipping_address = {}
 
-        # Send billing notifications
-        email_sent = send_order_bill_email(order)
-        sms_sent = send_order_bill_sms(order)
+            def get_field(keys):
+                for k in keys:
+                    v = shipping_address.get(k) or merged_notes.get(k)
+                    if v and str(v).strip():
+                        return str(v).strip()
+                return ''
+
+            addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
+            addr_line2 = get_field(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
+            addr_city = get_field(['city', 'district', 'town', 'shipping_city', 'city_name'])
+            addr_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
+            addr_pin = get_field(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
+            addr_name = get_field(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name'])
+            if not addr_name:
+                addr_name = customer_details.get('name') or rzp_payment.get('name') or rzp_order.get('name') or 'Customer'
+
+            contact = get_field(['contact', 'phone', 'mobile', 'shipping_phone'])
+            if not contact:
+                contact = customer_details.get('contact') or rzp_payment.get('contact') or rzp_order.get('contact') or ''
+            
+            email = get_field(['email', 'shipping_email'])
+            if not email:
+                email = customer_details.get('email') or rzp_payment.get('email') or rzp_order.get('email') or 'guest@hypehavenhub.in'
+
+            if addr_line1 and addr_city and addr_state and addr_pin:
+                from store.models import Address
+                address_obj = Address.objects.create(
+                    user=order.user,
+                    full_name=str(addr_name)[:100],
+                    phone=str(contact)[:15],
+                    address_line1=str(addr_line1)[:255],
+                    address_line2=str(addr_line2)[:255],
+                    city=str(addr_city)[:100],
+                    state=str(addr_state)[:100],
+                    pincode=str(addr_pin)[:10]
+                )
+                order.address = address_obj
+                logger.info(f"Updated fresh Magic Checkout address for order {order.order_id}: {address_obj.address_line1}, {address_obj.city}")
+            
+            if email and email != 'guest@hypehavenhub.in':
+                order.guest_email = email
+                order.save(update_fields=['address', 'guest_email'])
+            elif order.address:
+                order.save(update_fields=['address'])
+        except Exception as e:
+            logger.error(f"Error fetching Magic Checkout address for order {order.order_id}: {e}")
+
+        # Send billing notifications safely
+        try:
+            send_order_bill_email(order)
+            send_order_bill_sms(order)
+        except Exception as notif_err:
+            logger.error(f"Billing notification error for order {order.order_id}: {notif_err}")
 
         # Trigger Shiprocket booking for prepaid order
-        shipment_id = None
-        shiprocket_error = None
         try:
             from .shipping import ShiprocketService
             shipment_id, error_msg = ShiprocketService.create_shipment(order)
             if shipment_id:
                 order.shipping_tracking_id = str(shipment_id)
                 order.status = 'confirmed'
-                order.save()
-                OrderTracking.objects.create(
-                    order=order,
-                    status='confirmed',
-                    description=f'Shipment booked with Shiprocket (Tracking ID: {shipment_id})'
-                )
-            elif error_msg:
-                shiprocket_error = error_msg
-                order.status = 'confirmed'
-                order.save()
-                OrderTracking.objects.create(
+                order.save(update_fields=['shipping_tracking_id', 'status'])
+            else:
+                logger.error(f"Shiprocket automatic booking failed for order {order.order_id}: {error_msg}")
+                OrderTracking.objects.get_or_create(
                     order=order,
                     status='shiprocket_failed',
-                    description=f'Shiprocket Sync Failed: {error_msg}'
+                    defaults={'description': f"Shiprocket Sync Error: {error_msg[:250]}. Will retry automatically."}
                 )
-                # Notify admin via email
-                try:
-                    from django.core.mail import send_mail
-                    admin_email = getattr(settings, 'ADMIN_EMAIL', settings.DEFAULT_FROM_EMAIL)
-                    send_mail(
-                        subject=f"⚠️ ACTION NEEDED: Shiprocket Booking Failed - Order #{order.order_id}",
-                        message=f"Payment for Order #{order.order_id} was received (₹{order.grand_total}), but Shiprocket automated booking failed.\n\nError: {error_msg}\nCustomer Email: {order.user.email}\nAddress: {order.address.address_line1 if order.address else 'N/A'}, {order.address.city if order.address else ''} ({order.address.pincode if order.address else ''})\n\nPlease visit the Admin Panel to correct the address and retry dispatch.",
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[admin_email],
-                        fail_silently=True
-                    )
-                except Exception as mail_err:
-                    logger.error(f"Error sending admin email for shiprocket failure: {mail_err}")
-        except Exception as e:
-            logger.error(f"Error booking Shiprocket for prepaid order {order.order_id}: {str(e)}")
-            shiprocket_error = str(e)
-            order.status = 'confirmed'
-            order.save()
+        except Exception as sr_ex:
+            logger.error(f"Shiprocket exception for order {order.order_id}: {sr_ex}")
 
-        # PostHog Purchase Event Capture in Views
-        if getattr(settings, 'POSTHOG_API_KEY', None):
-            try:
-                import posthog
-                posthog.capture(order.user.email, 'purchase_backend', {
-                    'order_id': order.order_id,
-                    'grand_total': float(order.grand_total),
-                    'subtotal': float(order.subtotal),
-                    'discount_amount': float(order.discount_amount),
-                    'delivery_charge': float(order.delivery_charge),
-                    'payment_method': 'razorpay',
-                    'shipment_id': shipment_id,
-                    'shiprocket_success': bool(shipment_id),
-                })
-            except Exception as ph_err:
-                logger.error(f"Failed to capture backend purchase event in PostHog: {ph_err}")
-
-        redirect_url = f'/orders/{order.order_id}/' if request.user.is_authenticated else f'/accounts/google/login/?next=/orders/{order.order_id}/assign/'
+        redirect_url = f'/orders/{order.order_id}/'
 
         return JsonResponse({
             'success': True,
@@ -1634,8 +1580,6 @@ def verify_payment(request):
             'shipment_id': shipment_id,
             'shiprocket_success': bool(shipment_id),
             'shiprocket_error': shiprocket_error,
-            'email_sent': email_sent,
-            'sms_sent': sms_sent
         })
 
     except Exception as e:
