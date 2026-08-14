@@ -1628,8 +1628,14 @@ def order_list(request):
 
 @login_required
 def order_detail(request, order_id):
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
-    
+    if not request.user.is_authenticated:
+        return redirect(f'/login/?next=/orders/{order_id}/')
+        
+    order = get_object_or_404(Order, order_id=order_id)
+    if order.user != request.user and order.user.username != 'guest_checkout':
+        # If it belongs to someone else, 404
+        raise Http404("Order not found")
+        
     # Auto-attempt Shiprocket booking if confirmed but un-synced
     if order.status in ['confirmed', 'processing', 'paid'] and not order.shipping_tracking_id:
         try:
