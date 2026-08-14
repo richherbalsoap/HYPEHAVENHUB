@@ -108,7 +108,7 @@ urlpatterns = [
     path('admin/orders/<str:order_id>/', admin_views.admin_order_detail, name='admin_order_detail'),
     path('admin/orders/<str:order_id>/accept/', admin_views.admin_accept_order, name='admin_accept_order'),
     path('admin/orders/<str:order_id>/reject/', admin_views.admin_reject_order, name='admin_reject_order'),
-    path('admin/orders/<str:order_id>/retry-shiprocket/', admin_views.admin_retry_shiprocket, name='admin_retry_shiprocket'),
+
     path('admin/complaints/', admin_views.admin_complaints, name='admin_complaints'),
     path('admin/complaints/<str:complaint_id>/', admin_views.admin_complaint_detail, name='admin_complaint_detail'),
     path('admin/reports/', admin_views.admin_reports, name='admin_reports'),

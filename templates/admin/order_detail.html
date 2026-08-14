@@ -47,8 +47,8 @@
                     <strong>{{ order.shipping_tracking_id }}</strong>
                     <small><a href="https://app.shiprocket.in/seller/orders/processing" target="_blank" style="color: var(--admin-primary);">Dispatch Order <i class="fas fa-external-link-alt" style="font-size: 9px;"></i></a></small>
                     {% else %}
-                    <strong style="color: var(--admin-amber);">Sync Failed</strong>
-                    <small><button type="button" class="btn btn-sm btn-outline-warning py-0 px-2 mt-1" data-bs-toggle="collapse" data-bs-target="#retryShiprocketCollapse">Fix Address & Retry</button></small>
+                    <strong style="color: var(--admin-amber);">Not Dispatched</strong>
+                    <small>Pending or Cancelled</small>
                     {% endif %}
                 </div>
                 <div>
@@ -133,56 +133,6 @@
         </div>
         {% endif %}
 
-        <!-- Retry Shiprocket Booking Form -->
-        {% if not order.shipping_tracking_id %}
-        <div class="collapse {% if order.status == 'shiprocket_failed' %}show{% endif %} mb-4" id="retryShiprocketCollapse">
-            <div class="admin-card border-warning" style="background: rgba(255, 193, 7, 0.05);">
-                <div class="admin-card-header text-warning-emphasis">
-                    <div>
-                        <div class="eyebrow text-warning"><i class="fas fa-exclamation-triangle"></i> Action Required</div>
-                        <h6 class="mb-0">Fix Address & Retry Shiprocket Dispatch</h6>
-                    </div>
-                </div>
-                <form method="POST" action="{% url 'admin_retry_shiprocket' order.order_id %}" class="p-3">
-                    {% csrf_token %}
-                    <p class="small text-muted mb-3">If automated booking failed (e.g. City & Pincode mismatch), verify or edit the shipping address below and click <strong>Retry Sync</strong>.</p>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Customer Name</label>
-                            <input type="text" name="full_name" class="form-control form-control-sm" value="{{ order.address.full_name|default:'' }}" placeholder="Full Name">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Phone Number</label>
-                            <input type="text" name="phone" class="form-control form-control-sm" value="{{ order.address.phone|default:'' }}" placeholder="Mobile Number">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Address Line 1</label>
-                            <input type="text" name="address_line1" class="form-control form-control-sm" value="{{ order.address.address_line1|default:'' }}" placeholder="House, Street, Locality">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold">Address Line 2 (Landmark)</label>
-                            <input type="text" name="address_line2" class="form-control form-control-sm" value="{{ order.address.address_line2|default:'' }}" placeholder="Landmark, Area">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">City / District</label>
-                            <input type="text" name="city" class="form-control form-control-sm" value="{{ order.address.city|default:'' }}" required placeholder="City">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">State</label>
-                            <input type="text" name="state" class="form-control form-control-sm" value="{{ order.address.state|default:'' }}" required placeholder="State (e.g. Gujarat)">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold">Pincode</label>
-                            <input type="text" name="pincode" class="form-control form-control-sm" value="{{ order.address.pincode|default:'' }}" required placeholder="6-digit Pincode">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-warning btn-sm fw-bold">
-                        <i class="fas fa-sync-alt me-1"></i> Retry Shiprocket Sync Now
-                    </button>
-                </form>
-            </div>
-        </div>
-        {% endif %}
 
         <!-- Order Items -->
         <div class="admin-card mb-4">

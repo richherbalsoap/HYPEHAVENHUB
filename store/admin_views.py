@@ -823,64 +823,6 @@ def admin_order_detail(request, order_id):
     return render(request, 'admin/order_detail.html', context)
 
 
-@admin_required
-def admin_retry_shiprocket(request, order_id):
-    """Admin endpoint to update order address if needed and re-trigger Shiprocket shipment creation."""
-    order = get_object_or_404(Order, order_id=order_id)
-    if request.method == 'POST':
-        full_name = request.POST.get('full_name', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        address_line1 = request.POST.get('address_line1', '').strip()
-        address_line2 = request.POST.get('address_line2', '').strip()
-        city = request.POST.get('city', '').strip()
-        state = request.POST.get('state', '').strip()
-        pincode = request.POST.get('pincode', '').strip()
-
-        if not order.address:
-            from store.models import Address
-            order.address = Address.objects.create(
-                user=order.user,
-                full_name=full_name or 'Customer',
-                phone=phone or '9876543210',
-                address_line1=address_line1 or 'Address',
-                address_line2=address_line2,
-                city=city or 'Rajkot',
-                state=state or 'Gujarat',
-                pincode=pincode or '360002'
-            )
-            order.save()
-        else:
-            if full_name: order.address.full_name = full_name
-            if phone: order.address.phone = phone
-            if address_line1: order.address.address_line1 = address_line1
-            if address_line2 is not None: order.address.address_line2 = address_line2
-            if city: order.address.city = city
-            if state: order.address.state = state
-            if pincode: order.address.pincode = pincode
-            order.address.save()
-
-        from .shipping import ShiprocketService
-        shipment_id, error_msg = ShiprocketService.create_shipment(order)
-        if shipment_id:
-            order.shipping_tracking_id = str(shipment_id)
-            order.status = 'confirmed'
-            order.save()
-            OrderTracking.objects.create(
-                order=order,
-                status='confirmed',
-                description=f'Shiprocket booking retry succeeded! Shipment ID: {shipment_id}'
-            )
-            messages.success(request, f'Shiprocket booking successful! Shipment ID: {shipment_id}')
-        else:
-            OrderTracking.objects.create(
-                order=order,
-                status='shiprocket_failed',
-                description=f'Shiprocket Retry Failed: {error_msg}'
-            )
-            messages.error(request, f'Shiprocket Retry Failed: {error_msg}')
-
-    return redirect('admin_order_detail', order_id=order.order_id)
-
 
 @admin_required
 def admin_accept_order(request, order_id):
