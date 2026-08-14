@@ -373,6 +373,8 @@ if (checkoutForm) {
             if (data.customer_email && data.customer_email !== 'guest@hypehavenhub.com') prefillData.email = data.customer_email;
             if (data.customer_phone) prefillData.contact = data.customer_phone;
 
+            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
             const options = {
               "key": data.razorpay_key_id,
               "amount": data.amount,
@@ -381,6 +383,7 @@ if (checkoutForm) {
               "description": "Premium Assorted Jhumka Box Sets",
               "order_id": data.razorpay_order_id,
               "callback_url": window.location.origin + "/checkout/verify-payment/?order_id=" + encodeURIComponent(data.order_id),
+              "redirect": isMobileDevice,
               "notes": {
                 "order_id": data.order_id
               },
@@ -930,6 +933,8 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
         });
       }
 
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
       var options = {
         "key": data.razorpay_key_id,
         "amount": data.amount,
@@ -937,6 +942,11 @@ window.initiateMagicCheckout = async function(btn, productId = null, variantId =
         "name": "HYPEHAVENHUB",
         "description": "Order Payment",
         "order_id": data.razorpay_order_id,
+        "callback_url": window.location.origin + "/customize/verify-payment/?order_id=" + encodeURIComponent(data.order_id),
+        "redirect": isMobileDevice,
+        "notes": {
+          "order_id": data.order_id
+        },
         "line_items_total": data.line_items_total,
         "line_items": data.line_items,
         "one_click_checkout": true,

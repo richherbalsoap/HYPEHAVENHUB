@@ -1454,6 +1454,12 @@ def verify_payment(request):
             
             payment = order.payment
 
+            if order.status == 'confirmed' and payment.status == 'success':
+                redirect_url = f'/orders/{order.order_id}/'
+                if not is_ajax:
+                    return redirect(redirect_url)
+                return JsonResponse({'success': True, 'order_id': order.order_id, 'redirect': redirect_url})
+
             # Verify signature
             import razorpay
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -2839,6 +2845,12 @@ def customize_verify_payment(request):
                 return redirect('/customize/?error=unauthorized')
 
             payment = order.payment
+
+            if order.status == 'confirmed' and payment.status == 'success':
+                redirect_url = f'/order-success/{order.order_id}/'
+                if not is_ajax:
+                    return redirect(redirect_url)
+                return JsonResponse({'success': True, 'order_id': order.order_id, 'redirect': redirect_url})
 
             import razorpay
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
