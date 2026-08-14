@@ -44,3 +44,12 @@ Then **include the updated `staticfiles/` files in the git commit** alongside th
 3. **State Normalization**: Indian state codes (e.g. `GJ`, `MH`, `KA`) MUST ALWAYS be normalized to full names (`Gujarat`, `Maharashtra`, `Karnataka`) in `store/shipping.py` using `normalize_indian_state` before dispatching to Shiprocket API.
 4. **Address Parsing**: Razorpay Magic Checkout address parsing MUST check all key variations (`line1`, `address1`, `street_address`, `city`, `district`, `state_code`, `zipcode`, `pincode`) and ALWAYS create complete `Address` objects.
 5. **Customer Experience**: Paid customer orders MUST ALWAYS maintain status `confirmed` and NEVER display error banners or warning alerts on the order confirmation page. Any sync errors must be logged silently for admin retry only.
+
+## Mobile & Desktop Synchronized Payment & Static Files Rule
+
+**CRITICAL**: Mobile and desktop payment handling, static files, and backend endpoints MUST ALWAYS be updated synchronously in tandem:
+
+1. **Razorpay Options & Redirect Fallback**: Every Razorpay checkout instance MUST specify `callback_url` pointing to `/checkout/verify-payment/` alongside the JS `handler`. On mobile browsers, deep-linked UPI app returns can destroy JS memory state; providing `callback_url` ensures mobile browsers seamlessly redirect and complete payment verification.
+2. **Dual-Payload Backend Verification**: Backend payment verification endpoints (`verify_payment`, `customize_verify_payment`) MUST support BOTH JSON AJAX payloads (desktop JS handler) AND Form POST/GET HTTP redirects (mobile browser returns). If standard HTTP redirect occurs, return `HttpResponseRedirect` to the order detail page instead of raw `JsonResponse`.
+3. **Synchronized Static Compilation**: Editing any JS/CSS file in `static/` MUST immediately be followed by running `python manage.py collectstatic --noinput` so `staticfiles/` remains 100% in sync across mobile and desktop clients.
+4. **Mandatory Auto Deployment**: Always commit both `static/` and `staticfiles/` together and push to GitHub (`git push origin main`) and deploy to Vercel (`./deploy.bat`).

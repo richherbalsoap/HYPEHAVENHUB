@@ -380,6 +380,10 @@ if (checkoutForm) {
               "name": "HYPEHAVENHUB",
               "description": "Premium Assorted Jhumka Box Sets",
               "order_id": data.razorpay_order_id,
+              "callback_url": window.location.origin + "/checkout/verify-payment/?order_id=" + encodeURIComponent(data.order_id),
+              "notes": {
+                "order_id": data.order_id
+              },
               "theme": {
                 "color": "#092c20"
               },

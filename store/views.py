@@ -16,7 +16,8 @@ from django.core.paginator import Paginator
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 from .models import (
@@ -1138,7 +1139,10 @@ def place_order(request):
                 'amount': amount_in_paise,
                 'currency': 'INR',
                 'receipt': str(order.order_id),
-                'line_items_total': line_items_total,  # mandatory for Magic Checkout
+                'notes': {
+                    'order_id': str(order.order_id)
+                },
+                'line_items_total': line_items_total,
                 'line_items': rzp_line_items,
             })
             
@@ -1148,7 +1152,8 @@ def place_order(request):
             payment.gateway_response = {
                 'razorpay_order_id': razorpay_order['id'],
                 'amount': amount_in_paise,
-                'currency': 'INR'
+                'currency': 'INR',
+                'order_id': str(order.order_id)
             }
             payment.save()
             
@@ -1395,203 +1400,242 @@ def razorpay_direct_checkout(request):
         })
 
 
-@require_POST
-def verify_payment(request):
-    from django.db import transaction
-    from store.exceptions import InventoryConflictError
+1403: @csrf_exempt
+1404: @require_http_methods(["GET", "POST"])
+1405: def verify_payment(request):
+1406:     from django.db import transaction
+1407:     from store.exceptions import InventoryConflictError
+1408: 
+1409:     is_ajax = (
+1410:         request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
+1411:         (request.content_type and 'application/json' in request.content_type)
+1412:     )
 
-    try:
-        data = json.loads(request.body)
-        razorpay_payment_id = data.get('razorpay_payment_id')
-        razorpay_order_id = data.get('razorpay_order_id')
-        razorpay_signature = data.get('razorpay_signature')
-        local_order_id = data.get('order_id')
-
-        if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, local_order_id]):
-            return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
-
-        with transaction.atomic():
-            order = Order.objects.select_for_update().get(order_id=local_order_id)
-            if request.user.is_authenticated and order.user != request.user and order.user.username != 'guest_checkout':
-                return JsonResponse({'success': False, 'message': 'Unauthorized access.'}, status=403)
-            
-            payment = order.payment
-
-            # Verify signature
-            import razorpay
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-            
-            params_dict = {
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': razorpay_payment_id,
-                'razorpay_signature': razorpay_signature
-            }
-
-            try:
-                client.utility.verify_payment_signature(params_dict)
-            except Exception as e:
-                logger.error(f"Razorpay signature verification failed: {str(e)}")
-                payment.status = 'failed'
-                payment.save()
-                return JsonResponse({'success': False, 'message': 'Payment verification signature mismatch.'})
-
-            # Payment successful - complete transaction
-            payment.status = 'success'
-            payment.payment_id = razorpay_payment_id
-            payment.gateway_response = params_dict
-            payment.save()
-
-            # Update order status
-            order.status = 'confirmed'
-            order.save()
-
-            # Decrement stock with row locking
-            for item in order.items.all():
-                if item.variant:
-                    variant = ProductVariant.objects.select_for_update().get(id=item.variant.id)
-                    if variant.stock >= item.quantity:
-                        variant.stock -= item.quantity
-                        variant.save()
-
-            # Create tracking entry if not exists
-            OrderTracking.objects.get_or_create(
-                order=order,
-                status='confirmed',
-                defaults={'description': 'Payment verified successfully. Order confirmed.'}
-            )
-
-            cart = get_or_create_cart(request)
-            if cart.coupon:
-                cart.coupon.used_count += 1
-                cart.coupon.save()
-
-            # Clear cart
-            cart.items.all().delete()
-            cart.coupon = None
-            cart.save()
-
-        # Step 2: Safe Address Extraction & Customer Info (outside atomic block to prevent transaction rollbacks)
-        try:
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-            rzp_order = client.order.fetch(razorpay_order_id)
-            rzp_payment = client.payment.fetch(razorpay_payment_id) if razorpay_payment_id else {}
-            
-            customer_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
-            if not isinstance(customer_details, dict): customer_details = {}
-            
-            p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
-            if not isinstance(p_notes, dict): p_notes = {}
-            o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
-            if not isinstance(o_notes, dict): o_notes = {}
-            merged_notes = {**o_notes, **p_notes}
-            
-            shipping_address = (
-                customer_details.get('shipping_address') or 
-                customer_details.get('billing_address') or 
-                rzp_order.get('shipping_address') or 
-                rzp_payment.get('shipping_address') or 
-                merged_notes.get('shipping_address') or 
-                merged_notes.get('address') or {}
-            )
-            
-            if isinstance(shipping_address, str):
-                try: shipping_address = json.loads(shipping_address)
-                except Exception: shipping_address = {}
-            if not isinstance(shipping_address, dict): shipping_address = {}
-
-            def get_field(keys):
-                for k in keys:
-                    v = shipping_address.get(k) or merged_notes.get(k)
-                    if v and str(v).strip():
-                        return str(v).strip()
-                return ''
-
-            addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
-            addr_line2 = get_field(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
-            addr_city = get_field(['city', 'district', 'town', 'shipping_city', 'city_name'])
-            addr_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
-            addr_pin = get_field(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
-            addr_name = get_field(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name'])
-            if not addr_name:
-                addr_name = customer_details.get('name') or rzp_payment.get('name') or rzp_order.get('name') or 'Customer'
-
-            contact = get_field(['contact', 'phone', 'mobile', 'shipping_phone'])
-            if not contact:
-                contact = customer_details.get('contact') or rzp_payment.get('contact') or rzp_order.get('contact') or ''
-            
-            email = get_field(['email', 'shipping_email'])
-            if not email:
-                email = customer_details.get('email') or rzp_payment.get('email') or rzp_order.get('email') or 'guest@hypehavenhub.in'
-
-            if addr_line1 and addr_city and addr_state and addr_pin:
-                from store.models import Address
-                address_obj = Address.objects.create(
-                    user=order.user,
-                    full_name=str(addr_name)[:100],
-                    phone=str(contact)[:15],
-                    address_line1=str(addr_line1)[:255],
-                    address_line2=str(addr_line2)[:255],
-                    city=str(addr_city)[:100],
-                    state=str(addr_state)[:100],
-                    pincode=str(addr_pin)[:10]
-                )
-                order.address = address_obj
-                logger.info(f"Updated fresh Magic Checkout address for order {order.order_id}: {address_obj.address_line1}, {address_obj.city}")
-            
-            if email and email != 'guest@hypehavenhub.in':
-                order.guest_email = email
-                order.save(update_fields=['address', 'guest_email'])
-            elif order.address:
-                order.save(update_fields=['address'])
-        except Exception as e:
-            logger.error(f"Error fetching Magic Checkout address for order {order.order_id}: {e}")
-
-        # Send billing notifications safely
-        try:
-            send_order_bill_email(order)
-            send_order_bill_sms(order)
-        except Exception as notif_err:
-            logger.error(f"Billing notification error for order {order.order_id}: {notif_err}")
-
-        # Trigger Shiprocket booking for prepaid order
-        shipment_id = None
-        shiprocket_error = None
-        try:
-            from .shipping import ShiprocketService
-            shipment_id, error_msg = ShiprocketService.create_shipment(order)
-            if shipment_id:
-                order.shipping_tracking_id = str(shipment_id)
-                order.status = 'confirmed'
-                order.save(update_fields=['shipping_tracking_id', 'status'])
-            else:
-                shiprocket_error = error_msg
-                logger.error(f"Shiprocket automatic booking failed for order {order.order_id}: {error_msg}")
-                OrderTracking.objects.get_or_create(
-                    order=order,
-                    status='shiprocket_failed',
-                    defaults={'description': f"Shiprocket Sync Error: {str(error_msg)[:250]}. Will retry automatically."}
-                )
-        except Exception as sr_ex:
-            shiprocket_error = str(sr_ex)
-            logger.error(f"Shiprocket exception for order {order.order_id}: {sr_ex}")
-
-        redirect_url = f'/orders/{order.order_id}/'
-
-        return JsonResponse({
-            'success': True,
-            'order_id': order.order_id,
-            'redirect': redirect_url,
-            'shipment_id': shipment_id,
-            'shiprocket_success': bool(shipment_id),
-            'shiprocket_error': shiprocket_error,
-        })
-
-    except Exception as e:
-        logger.error(f"Error during payment verification: {str(e)}")
-        from store.exceptions import InventoryConflictError
-        if isinstance(e, InventoryConflictError):
-            return JsonResponse({'success': False, 'message': str(e)})
-        return JsonResponse({'success': False, 'message': f'An internal error occurred: {str(e)}'})
+1413:     try:
+1414:         data = {}
+1415:         if request.content_type and 'application/json' in request.content_type:
+1416:             try:
+1417:                 data = json.loads(request.body)
+1418:             except Exception:
+1419:                 data = {}
+1420:         
+1421:         if not data:
+1422:             data = {**request.GET.dict(), **request.POST.dict()}
+1423:             if not data and request.body:
+1424:                 try:
+1425:                     data = json.loads(request.body)
+1426:                 except Exception:
+1427:                     pass
+1428: 
+1429:         razorpay_payment_id = data.get('razorpay_payment_id')
+1430:         razorpay_order_id = data.get('razorpay_order_id')
+1431:         razorpay_signature = data.get('razorpay_signature')
+1432:         local_order_id = data.get('order_id')
+1433: 
+1434:         if not local_order_id and razorpay_order_id:
+1435:             found_order = (
+1436:                 Order.objects.filter(payment__gateway_response__icontains=razorpay_order_id).first() or
+1437:                 Order.objects.filter(notes__icontains=razorpay_order_id).first()
+1438:             )
+1439:             if found_order:
+1440:                 local_order_id = found_order.order_id
+1441: 
+1442:         if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, local_order_id]):
+1443:             if is_ajax:
+1444:                 return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
+1445:             return redirect('/checkout/?error=missing_credentials')
+1446: 
+1447:         with transaction.atomic():
+1448:             order = Order.objects.select_for_update().get(order_id=local_order_id)
+1449:             if request.user.is_authenticated and order.user != request.user and order.user.username != 'guest_checkout':
+1450:                 if is_ajax:
+1451:                     return JsonResponse({'success': False, 'message': 'Unauthorized access.'}, status=403)
+1452:                 return redirect('/checkout/?error=unauthorized')
+1453:             
+1454:             payment = order.payment
+1455: 
+1456:             # Verify signature
+1457:             import razorpay
+1458:             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+1459:             
+1460:             params_dict = {
+1461:                 'razorpay_order_id': razorpay_order_id,
+1462:                 'razorpay_payment_id': razorpay_payment_id,
+1463:                 'razorpay_signature': razorpay_signature
+1464:             }
+1465: 
+1466:             try:
+1467:                 client.utility.verify_payment_signature(params_dict)
+1468:             except Exception as e:
+1469:                 logger.error(f"Razorpay signature verification failed: {str(e)}")
+1470:                 payment.status = 'failed'
+1471:                 payment.save()
+1472:                 if is_ajax:
+1473:                     return JsonResponse({'success': False, 'message': 'Payment verification signature mismatch.'})
+1474:                 return redirect('/checkout/?error=signature_mismatch')
+1475: 
+1476:             # Payment successful - complete transaction
+1477:             payment.status = 'success'
+1478:             payment.payment_id = razorpay_payment_id
+1479:             payment.gateway_response = params_dict
+1480:             payment.save()
+1481: 
+1482:             # Update order status
+1483:             order.status = 'confirmed'
+1484:             order.save()
+1485: 
+1486:             # Decrement stock with row locking
+1487:             for item in order.items.all():
+1488:                 if item.variant:
+1489:                     variant = ProductVariant.objects.select_for_update().get(id=item.variant.id)
+1490:                     if variant.stock >= item.quantity:
+1491:                         variant.stock -= item.quantity
+1492:                         variant.save()
+1493: 
+1494:             # Create tracking entry if not exists
+1495:             OrderTracking.objects.get_or_create(
+1496:                 order=order,
+1497:                 status='confirmed',
+1498:                 defaults={'description': 'Payment verified successfully. Order confirmed.'}
+1499:             )
+1500: 
+1501:             cart = get_or_create_cart(request)
+1502:             if cart.coupon:
+1503:                 cart.coupon.used_count += 1
+1504:                 cart.coupon.save()
+1505: 
+1506:             # Clear cart
+1507:             cart.items.all().delete()
+1508:             cart.coupon = None
+1509:             cart.save()
+1510: 
+1511:         # Step 2: Safe Address Extraction & Customer Info (outside atomic block to prevent transaction rollbacks)
+1512:         try:
+1513:             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+1514:             rzp_order = client.order.fetch(razorpay_order_id)
+1515:             rzp_payment = client.payment.fetch(razorpay_payment_id) if razorpay_payment_id else {}
+1516:             
+1517:             customer_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
+1518:             if not isinstance(customer_details, dict): customer_details = {}
+1519:             
+1520:             p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
+1521:             if not isinstance(p_notes, dict): p_notes = {}
+1522:             o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
+1523:             if not isinstance(o_notes, dict): o_notes = {}
+1524:             merged_notes = {**o_notes, **p_notes}
+1525:             
+1526:             shipping_address = (
+1527:                 customer_details.get('shipping_address') or 
+1528:                 customer_details.get('billing_address') or 
+1529:                 rzp_order.get('shipping_address') or 
+1530:                 rzp_payment.get('shipping_address') or 
+1531:                 merged_notes.get('shipping_address') or 
+1532:                 merged_notes.get('address') or {}
+1533:             )
+1534:             
+1535:             if isinstance(shipping_address, str):
+1536:                 try: shipping_address = json.loads(shipping_address)
+1537:                 except Exception: shipping_address = {}
+1538:             if not isinstance(shipping_address, dict): shipping_address = {}
+1539: 
+1540:             def get_field(keys):
+1541:                 for k in keys:
+1542:                     v = shipping_address.get(k) or merged_notes.get(k)
+1543:                     if v and str(v).strip():
+1544:                         return str(v).strip()
+1545:                 return ''
+1546: 
+1547:             addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
+1548:             addr_line2 = get_field(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
+1549:             addr_city = get_field(['city', 'district', 'town', 'shipping_city', 'city_name'])
+1550:             addr_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
+1551:             addr_pin = get_field(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
+1552:             addr_name = get_field(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name'])
+1553:             if not addr_name:
+1554:                 addr_name = customer_details.get('name') or rzp_payment.get('name') or rzp_order.get('name') or 'Customer'
+1555: 
+1556:             contact = get_field(['contact', 'phone', 'mobile', 'shipping_phone'])
+1557:             if not contact:
+1558:                 contact = customer_details.get('contact') or rzp_payment.get('contact') or rzp_order.get('contact') or ''
+1559:             
+1560:             email = get_field(['email', 'shipping_email'])
+1561:             if not email:
+1562:                 email = customer_details.get('email') or rzp_payment.get('email') or rzp_order.get('email') or 'guest@hypehavenhub.in'
+1563: 
+1564:             if addr_line1 and addr_city and addr_state and addr_pin:
+1565:                 from store.models import Address
+1566:                 address_obj = Address.objects.create(
+1567:                     user=order.user,
+1568:                     full_name=str(addr_name)[:100],
+1569:                     phone=str(contact)[:15],
+1570:                     address_line1=str(addr_line1)[:255],
+1571:                     address_line2=str(addr_line2)[:255],
+1572:                     city=str(addr_city)[:100],
+1573:                     state=str(addr_state)[:100],
+1574:                     pincode=str(addr_pin)[:10]
+1575:                 )
+1576:                 order.address = address_obj
+1577:                 logger.info(f"Updated fresh Magic Checkout address for order {order.order_id}: {address_obj.address_line1}, {address_obj.city}")
+1578:             
+1579:             if email and email != 'guest@hypehavenhub.in':
+1580:                 order.guest_email = email
+1581:                 order.save(update_fields=['address', 'guest_email'])
+1582:             elif order.address:
+1583:                 order.save(update_fields=['address'])
+1584:         except Exception as e:
+1585:             logger.error(f"Error fetching Magic Checkout address for order {order.order_id}: {e}")
+1586: 
+1587:         # Send billing notifications safely
+1588:         try:
+1589:             send_order_bill_email(order)
+1590:             send_order_bill_sms(order)
+1591:         except Exception as notif_err:
+1592:             logger.error(f"Billing notification error for order {order.order_id}: {notif_err}")
+1593: 
+1594:         # Trigger Shiprocket booking for prepaid order
+1595:         shipment_id = None
+1596:         shiprocket_error = None
+1597:         try:
+1598:             from .shipping import ShiprocketService
+1599:             shipment_id, error_msg = ShiprocketService.create_shipment(order)
+1600:             if shipment_id:
+1601:                 order.shipping_tracking_id = str(shipment_id)
+1602:                 order.status = 'confirmed'
+1603:                 order.save(update_fields=['shipping_tracking_id', 'status'])
+1604:             else:
+1605:                 shiprocket_error = error_msg
+1606:                 logger.error(f"Shiprocket automatic booking failed for order {order.order_id}: {error_msg}")
+1607:                 OrderTracking.objects.get_or_create(
+1608:                     order=order,
+1609:                     status='shiprocket_failed',
+1610:                     defaults={'description': f"Shiprocket Sync Error: {str(error_msg)[:250]}. Will retry automatically."}
+1611:                 )
+1612:         except Exception as sr_ex:
+1613:             shiprocket_error = str(sr_ex)
+1614:             logger.error(f"Shiprocket exception for order {order.order_id}: {sr_ex}")
+1615: 
+1616:         redirect_url = f'/orders/{order.order_id}/'
+1617: 
+1618:         if not is_ajax:
+1619:             return redirect(redirect_url)
+1620: 
+1621:         return JsonResponse({
+1622:             'success': True,
+1623:             'order_id': order.order_id,
+1624:             'redirect': redirect_url,
+1625:             'shipment_id': shipment_id,
+1626:             'shiprocket_success': bool(shipment_id),
+1627:             'shiprocket_error': shiprocket_error,
+1628:         })
+1629: 
+1630:     except Exception as e:
+1631:         logger.error(f"Error during payment verification: {str(e)}")
+1632:         from store.exceptions import InventoryConflictError
+1633:         if is_ajax:
+1634:             if isinstance(e, InventoryConflictError):
+1635:                 return JsonResponse({'success': False, 'message': str(e)})
+1636:             return JsonResponse({'success': False, 'message': f'An internal error occurred: {str(e)}'})
+1637:         return redirect('/checkout/?error=payment_failed')
 
 
 @login_required
@@ -2747,80 +2791,120 @@ def customize_place_order(request):
             })
 
 
-@require_POST
-def customize_verify_payment(request):
-    """Verify Razorpay payment for custom earring box order."""
-    from django.db import transaction
-    try:
-        data = json.loads(request.body)
-        razorpay_payment_id = data.get('razorpay_payment_id')
-        razorpay_order_id = data.get('razorpay_order_id')
-        razorpay_signature = data.get('razorpay_signature')
-        local_order_id = data.get('order_id')
+2794: @csrf_exempt
+2795: @require_http_methods(["GET", "POST"])
+2796: def customize_verify_payment(request):
+2797:     """Verify Razorpay payment for custom earring box order."""
+2798:     from django.db import transaction
+2799:     is_ajax = (
+2800:         request.headers.get('x-requested-with') == 'XMLHttpRequest' or 
+2801:         (request.content_type and 'application/json' in request.content_type)
+2802:     )
+2803:     try:
+2804:         data = {}
+2805:         if request.content_type and 'application/json' in request.content_type:
+2806:             try:
+2807:                 data = json.loads(request.body)
+2808:             except Exception:
+2809:                 data = {}
+2810:         if not data:
+2811:             data = {**request.GET.dict(), **request.POST.dict()}
+2812:             if not data and request.body:
+2813:                 try:
+2814:                     data = json.loads(request.body)
+2815:                 except Exception:
+2816:                     pass
 
-        if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, local_order_id]):
-            return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
+2817:         razorpay_payment_id = data.get('razorpay_payment_id')
+2818:         razorpay_order_id = data.get('razorpay_order_id')
+2819:         razorpay_signature = data.get('razorpay_signature')
+2820:         local_order_id = data.get('order_id')
+2821: 
+2822:         if not local_order_id and razorpay_order_id:
+2823:             found_order = (
+2824:                 Order.objects.filter(payment__gateway_response__icontains=razorpay_order_id).first() or
+2825:                 Order.objects.filter(notes__icontains=razorpay_order_id).first()
+2826:             )
+2827:             if found_order:
+2828:                 local_order_id = found_order.order_id
+2829: 
+2830:         if not all([razorpay_payment_id, razorpay_order_id, razorpay_signature, local_order_id]):
+2831:             if is_ajax:
+2832:                 return JsonResponse({'success': False, 'message': 'Missing payment credentials.'})
+2833:             return redirect('/customize/?error=missing_credentials')
+2834: 
+2835:         with transaction.atomic():
+2836:             order = Order.objects.select_for_update().get(order_id=local_order_id)
+2837: 
+2838:             if request.user.is_authenticated and order.user != request.user:
+2839:                 if is_ajax:
+2840:                     return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
+2841:                 return redirect('/customize/?error=unauthorized')
+2842: 
+2843:             payment = order.payment
+2844: 
+2845:             import razorpay
+2846:             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+2847: 
+2848:             params_dict = {
+2849:                 'razorpay_order_id': razorpay_order_id,
+2850:                 'razorpay_payment_id': razorpay_payment_id,
+2851:                 'razorpay_signature': razorpay_signature,
+2852:             }
+2853: 
+2854:             try:
+2855:                 client.utility.verify_payment_signature(params_dict)
+2856:             except Exception as e:
+2857:                 logger.error(f"Custom box Razorpay signature verification failed: {str(e)}")
+2858:                 payment.status = 'failed'
+2859:                 payment.save()
+2860:                 if is_ajax:
+2861:                     return JsonResponse({'success': False, 'message': 'Payment verification failed.'})
+2862:                 return redirect('/customize/?error=signature_mismatch')
+2863: 
+2864:             payment.status = 'success'
+2865:             payment.payment_id = razorpay_payment_id
+2866:             payment.gateway_response = params_dict
+2867:             payment.save()
+2868: 
+2869:             order.status = 'confirmed'
+2870:             order.save()
+2871: 
+2872:             OrderTracking.objects.create(
+2873:                 order=order,
+2874:                 status='confirmed',
+2875:                 description='Payment received. Custom earring box order confirmed.'
+2876:             )
+2877: 
+2878:             # Book Shiprocket order
+2879:             try:
+2880:                 from .shipping import ShiprocketService
+2881:                 shipment_id, sr_err = ShiprocketService.create_shipment(order)
+2882:                 if shipment_id:
+2883:                     order.shipping_tracking_id = str(shipment_id)
+2884:                     order.save()
+2885:                     logger.info(f"Shiprocket order created for custom box {order.order_id}: {shipment_id}")
+2886:                 elif sr_err:
+2887:                     logger.warning(f"Shiprocket creation returned message for custom box {order.order_id}: {sr_err}")
+2888:             except Exception as e:
+2889:                 logger.error(f"Shiprocket booking failed for custom box {order.order_id}: {str(e)}")
+2890: 
+2891:             redirect_url = f'/order-success/{order.order_id}/'
+2892:             if not is_ajax:
+2893:                 return redirect(redirect_url)
 
-        with transaction.atomic():
-            order = Order.objects.select_for_update().get(order_id=local_order_id)
-
-            if request.user.is_authenticated and order.user != request.user:
-                return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
-
-            payment = order.payment
-
-            import razorpay
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
-            params_dict = {
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': razorpay_payment_id,
-                'razorpay_signature': razorpay_signature,
-            }
-
-            try:
-                client.utility.verify_payment_signature(params_dict)
-            except Exception as e:
-                logger.error(f"Custom box Razorpay signature verification failed: {str(e)}")
-                payment.status = 'failed'
-                payment.save()
-                return JsonResponse({'success': False, 'message': 'Payment verification failed.'})
-
-            payment.status = 'success'
-            payment.payment_id = razorpay_payment_id
-            payment.gateway_response = params_dict
-            payment.save()
-
-            order.status = 'confirmed'
-            order.save()
-
-            OrderTracking.objects.create(
-                order=order,
-                status='confirmed',
-                description='Payment received. Custom earring box order confirmed.'
-            )
-
-            # Book Shiprocket order
-            try:
-                from .shipping import ShiprocketService
-                shipment_id, sr_err = ShiprocketService.create_shipment(order)
-                if shipment_id:
-                    order.shipping_tracking_id = str(shipment_id)
-                    order.save()
-                    logger.info(f"Shiprocket order created for custom box {order.order_id}: {shipment_id}")
-                elif sr_err:
-                    logger.warning(f"Shiprocket creation returned message for custom box {order.order_id}: {sr_err}")
-            except Exception as e:
-                logger.error(f"Shiprocket booking failed for custom box {order.order_id}: {str(e)}")
-
-            return JsonResponse({
-                'success': True,
-                'order_id': order.order_id,
-                'redirect': f'/order-success/{order.order_id}/'
-            })
-
-    except Order.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Order not found.'})
-    except Exception as e:
-        logger.error(f"Custom box payment verification error: {str(e)}")
-        return JsonResponse({'success': False, 'message': 'Payment verification failed. Contact support.'})
+2894:             return JsonResponse({
+2895:                 'success': True,
+2896:                 'order_id': order.order_id,
+2897:                 'redirect': redirect_url
+2898:             })
+2899: 
+2900:     except Order.DoesNotExist:
+2901:         if is_ajax:
+2902:             return JsonResponse({'success': False, 'message': 'Order not found.'})
+2903:         return redirect('/customize/?error=order_not_found')
+2904:     except Exception as e:
+2905:         logger.error(f"Custom box payment verification error: {str(e)}")
+2906:         if is_ajax:
+2907:             return JsonResponse({'success': False, 'message': 'Payment verification failed. Contact support.'})
+2908:         return redirect('/customize/?error=verification_error')
