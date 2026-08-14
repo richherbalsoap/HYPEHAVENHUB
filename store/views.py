@@ -623,6 +623,7 @@ def login_view(request):
     if request.method == 'POST' and form.is_valid():
         user = form.cleaned_data['user']
         login(request, user)
+        request.session.set_expiry(86400 * 365)
         merge_anonymous_cart(request, user)
 
         # PostHog User Identification and Event Capture

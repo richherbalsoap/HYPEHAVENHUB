@@ -24,6 +24,12 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
         return user
 
     def pre_social_login(self, request, sociallogin):
+        # Force 1-year permanent session persistence for social login
+        try:
+            request.session.set_expiry(86400 * 365)
+        except Exception:
+            pass
+
         # 1. Existing social account login
         if sociallogin.is_existing:
             if sociallogin.user:
