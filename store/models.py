@@ -533,7 +533,8 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'), ('confirmed', 'Confirmed'),
+        ('pending', 'Pending'), ('pending_approval', 'Pending Approval'),
+        ('confirmed', 'Confirmed'),
         ('processing', 'Processing'), ('shipped', 'Shipped'),
         ('out_for_delivery', 'Out for Delivery'), ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'), ('returned', 'Returned'),
@@ -550,6 +551,7 @@ class Order(models.Model):
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     notes = models.TextField(blank=True)
     guest_email = models.EmailField(max_length=255, blank=True, null=True, help_text="Email captured during guest checkout")
+    admin_notes = models.TextField(blank=True, default='', help_text="Admin notes for order approval/rejection")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 

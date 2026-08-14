@@ -24,7 +24,7 @@
         <i class="fas fa-truck-fast fa-2x text-primary"></i>
         <div>
             <strong>Shiprocket Live Sync Active</strong>
-            <span class="d-block text-muted small">Orders are synced automatically with Shiprocket. Click "Sync Live Statuses" to pull real-time tracking updates (Shipped, Delivered, Cancelled).</span>
+            <span class="d-block text-muted small">Paid orders now require manual approval. Review "Pending Approval" orders and Accept them to dispatch to Shiprocket. Click "Sync Live Statuses" to pull real-time updates for already dispatched orders.</span>
         </div>
     </div>
 </div>
@@ -118,7 +118,11 @@
                         {% endif %}
                     </td>
                     <td>
+                        {% if order.status == 'pending_approval' %}
+                        <span class="status-pill text-dark fw-bold" style="background-color: #ffeb3b; border: 1px solid #fbc02d; box-shadow: 0 0 5px rgba(255, 235, 59, 0.5);"><i class="fas fa-exclamation-circle me-1"></i>{{ order.get_status_display }}</span>
+                        {% else %}
                         <span class="status-pill status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        {% endif %}
                         {% if order.status == 'SHIPROCKET_FAILED' %}
                         <small class="d-block text-danger mt-1 fw-bold" style="font-size: 11px; max-width: 200px; white-space: normal;">
                             Error: {{ order.tracking.last.description }}

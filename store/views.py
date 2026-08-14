@@ -1487,8 +1487,8 @@ def verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
-            # Update order status
-            order.status = 'confirmed'
+            # Update order status to pending_approval (admin will review and accept/reject)
+            order.status = 'pending_approval'
             order.save()
 
             # Decrement stock with row locking
@@ -1502,8 +1502,8 @@ def verify_payment(request):
             # Create tracking entry if not exists
             OrderTracking.objects.get_or_create(
                 order=order,
-                status='confirmed',
-                defaults={'description': 'Payment verified successfully. Order confirmed.'}
+                status='pending_approval',
+                defaults={'description': 'Payment verified successfully. Order awaiting admin approval.'}
             )
 
             cart = get_or_create_cart(request)
@@ -1599,28 +1599,6 @@ def verify_payment(request):
         except Exception as notif_err:
             logger.error(f"Billing notification error for order {order.order_id}: {notif_err}")
 
-        # Trigger Shiprocket booking for prepaid order
-        shipment_id = None
-        shiprocket_error = None
-        try:
-            from .shipping import ShiprocketService
-            shipment_id, error_msg = ShiprocketService.create_shipment(order)
-            if shipment_id:
-                order.shipping_tracking_id = str(shipment_id)
-                order.status = 'confirmed'
-                order.save(update_fields=['shipping_tracking_id', 'status'])
-            else:
-                shiprocket_error = error_msg
-                logger.error(f"Shiprocket automatic booking failed for order {order.order_id}: {error_msg}")
-                OrderTracking.objects.get_or_create(
-                    order=order,
-                    status='shiprocket_failed',
-                    defaults={'description': f"Shiprocket Sync Error: {str(error_msg)[:250]}. Will retry automatically."}
-                )
-        except Exception as sr_ex:
-            shiprocket_error = str(sr_ex)
-            logger.error(f"Shiprocket exception for order {order.order_id}: {sr_ex}")
-
         redirect_url = f'/orders/{order.order_id}/'
 
         if not is_ajax:
@@ -1630,9 +1608,6 @@ def verify_payment(request):
             'success': True,
             'order_id': order.order_id,
             'redirect': redirect_url,
-            'shipment_id': shipment_id,
-            'shiprocket_success': bool(shipment_id),
-            'shiprocket_error': shiprocket_error,
         })
 
     except Exception as e:
@@ -2440,7 +2415,7 @@ def razorpay_webhook(request):
                         except Exception as addr_err:
                             logger.error(f"Webhook address resolution error for order {order.order_id}: {addr_err}")
 
-                    order.status = 'confirmed'
+                    order.status = 'pending_approval'
                     order.save()
 
                     for item in order.items.all():
@@ -2453,8 +2428,8 @@ def razorpay_webhook(request):
 
                     OrderTracking.objects.create(
                         order=order,
-                        status='confirmed',
-                        description=f'Webhook ({event}): Payment verified server-to-server successfully.'
+                        status='pending_approval',
+                        description=f'Webhook ({event}): Payment verified. Order awaiting admin approval.'
                     )
 
                 try:
@@ -2463,29 +2438,7 @@ def razorpay_webhook(request):
                 except Exception as notify_err:
                     logger.error(f"Error sending notifications for webhook order {order.order_id}: {notify_err}")
 
-                if not order.shipping_tracking_id:
-                    try:
-                        from .shipping import ShiprocketService
-                        shipment_id, error_msg = ShiprocketService.create_shipment(order)
-                        if shipment_id:
-                            order.shipping_tracking_id = str(shipment_id)
-                            order.status = 'confirmed'
-                            order.save()
-                            OrderTracking.objects.create(
-                                order=order,
-                                status='confirmed',
-                                description=f'Webhook: Shipment booked with Shiprocket (Tracking ID: {shipment_id})'
-                            )
-                        elif error_msg:
-                            order.status = 'confirmed'
-                            order.save()
-                            OrderTracking.objects.create(
-                                order=order,
-                                status='shiprocket_failed',
-                                description=f'Webhook: Shiprocket Sync Failed: {error_msg}'
-                            )
-                    except Exception as sr_err:
-                        logger.error(f"Webhook Shiprocket booking error: {sr_err}")
+                # No auto Shiprocket booking — admin will accept/reject order manually
             else:
                     logger.warning(f"Razorpay webhook received for unknown order. RZP Order ID: {rzp_order_id}, Payment ID: {payment_id}")
         elif event == 'checkout.abandoned':
@@ -2877,27 +2830,14 @@ def customize_verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
-            order.status = 'confirmed'
+            order.status = 'pending_approval'
             order.save()
 
             OrderTracking.objects.create(
                 order=order,
-                status='confirmed',
-                description='Payment received. Custom earring box order confirmed.'
+                status='pending_approval',
+                description='Payment received. Custom earring box order awaiting admin approval.'
             )
-
-            # Book Shiprocket order
-            try:
-                from .shipping import ShiprocketService
-                shipment_id, sr_err = ShiprocketService.create_shipment(order)
-                if shipment_id:
-                    order.shipping_tracking_id = str(shipment_id)
-                    order.save()
-                    logger.info(f"Shiprocket order created for custom box {order.order_id}: {shipment_id}")
-                elif sr_err:
-                    logger.warning(f"Shiprocket creation returned message for custom box {order.order_id}: {sr_err}")
-            except Exception as e:
-                logger.error(f"Shiprocket booking failed for custom box {order.order_id}: {str(e)}")
 
             redirect_url = f'/order-success/{order.order_id}/'
             if not is_ajax:

@@ -881,7 +881,125 @@ def admin_retry_shiprocket(request, order_id):
 
     return redirect('admin_order_detail', order_id=order.order_id)
 
-    return redirect('admin_order_detail', order_id=order_id)
+
+@admin_required
+def admin_accept_order(request, order_id):
+    """Admin accepts a pending_approval order → confirms it and dispatches to Shiprocket."""
+    order = get_object_or_404(Order, order_id=order_id)
+
+    if request.method != 'POST':
+        return redirect('admin_order_detail', order_id=order.order_id)
+
+    if order.status not in ['pending_approval', 'pending', 'confirmed']:
+        messages.warning(request, f'Order {order.order_id} is already in "{order.get_status_display()}" status.')
+        return redirect('admin_order_detail', order_id=order.order_id)
+
+    # Step 1: Update order status to confirmed
+    order.status = 'confirmed'
+    admin_note = request.POST.get('admin_note', '').strip()
+    if admin_note:
+        order.admin_notes = admin_note
+    order.save()
+
+    OrderTracking.objects.create(
+        order=order,
+        status='confirmed',
+        description='Order accepted by admin. Dispatching to Shiprocket...'
+    )
+
+    # Step 2: Send billing notifications
+    try:
+        from .views import send_order_bill_email, send_order_bill_sms
+        send_order_bill_email(order)
+        send_order_bill_sms(order)
+    except Exception as notif_err:
+        import logging
+        logging.getLogger(__name__).error(f"Billing notification error for accepted order {order.order_id}: {notif_err}")
+
+    # Step 3: Create shipment in Shiprocket (same format as testing order)
+    from .shipping import ShiprocketService
+    shipment_id, error_msg = ShiprocketService.create_shipment(order)
+
+    if shipment_id:
+        order.shipping_tracking_id = str(shipment_id)
+        order.save(update_fields=['shipping_tracking_id'])
+        OrderTracking.objects.create(
+            order=order,
+            status='confirmed',
+            description=f'Shiprocket booking successful! Shipment ID: {shipment_id}'
+        )
+        messages.success(request, f'✅ Order {order.order_id} accepted & dispatched to Shiprocket! Shipment ID: {shipment_id}')
+    else:
+        OrderTracking.objects.create(
+            order=order,
+            status='shiprocket_failed',
+            description=f'Order accepted but Shiprocket sync failed: {error_msg}. Use Retry button to fix.'
+        )
+        messages.warning(request, f'⚠️ Order {order.order_id} accepted but Shiprocket failed: {error_msg}. You can retry from the order detail page.')
+
+    return redirect('admin_order_detail', order_id=order.order_id)
+
+
+@admin_required
+def admin_reject_order(request, order_id):
+    """Admin rejects a pending_approval order → cancels it and initiates Razorpay refund."""
+    order = get_object_or_404(Order, order_id=order_id)
+
+    if request.method != 'POST':
+        return redirect('admin_order_detail', order_id=order.order_id)
+
+    if order.status not in ['pending_approval', 'pending', 'confirmed']:
+        messages.warning(request, f'Order {order.order_id} is already in "{order.get_status_display()}" status.')
+        return redirect('admin_order_detail', order_id=order.order_id)
+
+    rejection_reason = request.POST.get('rejection_reason', '').strip() or 'Order rejected by admin.'
+
+    # Step 1: Cancel the order
+    order.status = 'cancelled'
+    order.admin_notes = rejection_reason
+    order.save()
+
+    OrderTracking.objects.create(
+        order=order,
+        status='cancelled',
+        description=f'Order rejected by admin. Reason: {rejection_reason}'
+    )
+
+    # Step 2: Cancel Shiprocket shipment if it was already booked
+    if order.shipping_tracking_id:
+        try:
+            from .shipping import ShiprocketService
+            ShiprocketService.cancel_shipment(order)
+        except Exception as sr_err:
+            import logging
+            logging.getLogger(__name__).warning(f"Shiprocket cancellation warning for {order.order_id}: {sr_err}")
+
+    # Step 3: Initiate Razorpay refund
+    refund_msg = ''
+    try:
+        from .utils import process_razorpay_refund
+        refund_status, refund_msg = process_razorpay_refund(order, f"Admin rejected order: {rejection_reason}")
+        if refund_status == "processed":
+            OrderTracking.objects.create(
+                order=order,
+                status='refund_initiated',
+                description=f'Refund initiated: {refund_msg}'
+            )
+        elif refund_status == "failed":
+            OrderTracking.objects.create(
+                order=order,
+                status='refund_failed',
+                description=f'Refund failed: {refund_msg}. Manual refund needed.'
+            )
+    except Exception as refund_err:
+        import logging
+        logging.getLogger(__name__).error(f"Refund error for rejected order {order.order_id}: {refund_err}")
+        refund_msg = str(refund_err)
+
+    messages.success(request, f'❌ Order {order.order_id} rejected. {refund_msg}')
+    return redirect('admin_order_detail', order_id=order.order_id)
+
+
 
 
 @admin_required
