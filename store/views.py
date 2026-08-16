@@ -1518,24 +1518,29 @@ def verify_payment(request):
 
         # Step 2: Safe Address Extraction & Customer Info (outside atomic block to prevent transaction rollbacks)
         try:
+            from store.shipping import normalize_indian_state
             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-            rzp_order = client.order.fetch(razorpay_order_id)
+            rzp_order = client.order.fetch(razorpay_order_id) if razorpay_order_id else {}
             rzp_payment = client.payment.fetch(razorpay_payment_id) if razorpay_payment_id else {}
+            if not isinstance(rzp_order, dict): rzp_order = {}
+            if not isinstance(rzp_payment, dict): rzp_payment = {}
             
-            customer_details = (rzp_order.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
+            customer_details = (rzp_order.get('customer_details') or rzp_payment.get('customer_details') or {}) if isinstance(rzp_order, dict) else {}
             if not isinstance(customer_details, dict): customer_details = {}
             
             p_notes = (rzp_payment.get('notes') or {}) if isinstance(rzp_payment, dict) else {}
             if not isinstance(p_notes, dict): p_notes = {}
             o_notes = (rzp_order.get('notes') or {}) if isinstance(rzp_order, dict) else {}
             if not isinstance(o_notes, dict): o_notes = {}
-            merged_notes = {**o_notes, **p_notes}
+            merged_notes = {**o_notes, **p_notes, **data}
             
             shipping_address = (
                 customer_details.get('shipping_address') or 
                 customer_details.get('billing_address') or 
                 rzp_order.get('shipping_address') or 
                 rzp_payment.get('shipping_address') or 
+                data.get('shipping_address') or
+                data.get('address') or
                 merged_notes.get('shipping_address') or 
                 merged_notes.get('address') or {}
             )
@@ -1547,15 +1552,16 @@ def verify_payment(request):
 
             def get_field(keys):
                 for k in keys:
-                    v = shipping_address.get(k) or merged_notes.get(k)
+                    v = shipping_address.get(k) or merged_notes.get(k) or data.get(k)
                     if v and str(v).strip():
                         return str(v).strip()
                 return ''
 
-            addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building'])
+            addr_line1 = get_field(['line1', 'address1', 'street_address', 'street1', 'address', 'shipping_address_line1', 'shipping_line1', 'house', 'building', 'addr'])
             addr_line2 = get_field(['line2', 'address2', 'street2', 'shipping_address_line2', 'shipping_line2', 'landmark', 'area', 'locality'])
             addr_city = get_field(['city', 'district', 'town', 'shipping_city', 'city_name'])
-            addr_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
+            raw_state = get_field(['state', 'province', 'state_code', 'shipping_state', 'state_name', 'region'])
+            addr_state = normalize_indian_state(raw_state) if raw_state else 'Gujarat'
             addr_pin = get_field(['pincode', 'zipcode', 'postal_code', 'zip', 'shipping_pincode', 'pin'])
             addr_name = get_field(['name', 'full_name', 'contact_name', 'shipping_name', 'customer_name'])
             if not addr_name:
@@ -1569,7 +1575,10 @@ def verify_payment(request):
             if not email:
                 email = customer_details.get('email') or rzp_payment.get('email') or rzp_order.get('email') or 'guest@hypehavenhub.in'
 
-            if addr_line1 and addr_city and addr_state and addr_pin:
+            if not addr_city and addr_state:
+                addr_city = addr_state
+
+            if addr_line1 and addr_pin:
                 from store.models import Address
                 address_obj = Address.objects.create(
                     user=order.user,
@@ -1577,12 +1586,12 @@ def verify_payment(request):
                     phone=str(contact)[:15],
                     address_line1=str(addr_line1)[:255],
                     address_line2=str(addr_line2)[:255],
-                    city=str(addr_city)[:100],
+                    city=str(addr_city or 'City')[:100],
                     state=str(addr_state)[:100],
                     pincode=str(addr_pin)[:10]
                 )
                 order.address = address_obj
-                logger.info(f"Updated fresh Magic Checkout address for order {order.order_id}: {address_obj.address_line1}, {address_obj.city}")
+                logger.info(f"Updated fresh Magic Checkout address for order {order.order_id}: {address_obj.address_line1}, {address_obj.city}, {address_obj.state}")
             
             if email and email != 'guest@hypehavenhub.in':
                 order.guest_email = email
