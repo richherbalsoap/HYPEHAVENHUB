@@ -1,19 +1,18 @@
 import os
-import psycopg2
+import django
 
-db_url = None
-with open('.env.production', 'r') as f:
-    for line in f:
-        if line.startswith('DATABASE_URL='):
-            db_url = line.strip().split('=', 1)[1]
-            # remove surrounding quotes if any
-            if db_url.startswith('"') and db_url.endswith('"'):
-                db_url = db_url[1:-1]
-            break
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'glamour_store.settings')
+django.setup()
 
-conn = psycopg2.connect(db_url)
-cur = conn.cursor()
-cur.execute("SELECT order_id_id, status, description, created_at FROM store_ordertracking WHERE status = 'shiprocket_failed' ORDER BY created_at DESC LIMIT 5;")
-for row in cur.fetchall():
-    print(row)
-conn.close()
+from store.models import OrderTracking
+
+try:
+    failed_trackings = OrderTracking.objects.filter(status='shiprocket_failed').order_by('-created_at')[:5]
+    if not failed_trackings.exists():
+        print("No shiprocket_failed tracking found in DB.")
+    for item in failed_trackings:
+        print(f"Order: {item.order_id}, Status: {item.status}, Time: {item.created_at}")
+except Exception as e:
+    print(f"Database check note: {e}")
+
+

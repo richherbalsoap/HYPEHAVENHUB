@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<script>
+  (function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HypeHavenHub | Artisanal Opulence</title>
+<link rel="canonical" href="https://hypehavenhub.in/"/>
+<meta name="description" content="Discover HypeHavenHub - Artisanal Opulence and Timeless Craftsmanship for the Modern Heritage."/>
+<meta property="og:title" content="HypeHavenHub | Artisanal Opulence"/>
+<meta property="og:description" content="Discover HypeHavenHub - Artisanal Opulence and Timeless Craftsmanship for the Modern Heritage."/>
+<meta property="og:url" content="https://hypehavenhub.in/"/>
+<meta property="og:site_name" content="HypeHavenHub"/>
+<meta property="og:type" content="website"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Montserrat:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "var(--surface-container-highest)",
+                        "outline-variant": "var(--outline-variant)",
+                        "surface-bright": "var(--surface-bright)",
+                        "on-surface": "var(--on-surface)",
+                        "on-tertiary": "var(--on-tertiary)",
+                        "tertiary-fixed-dim": "var(--tertiary-fixed-dim)",
+                        "secondary-container": "var(--secondary-container)",
+                        "surface-container-high": "var(--surface-container-high)",
+                        "on-error-container": "var(--on-error-container)",
+                        "secondary-fixed": "var(--secondary-fixed)",
+                        "on-secondary-fixed": "var(--on-secondary-fixed)",
+                        "surface-container-lowest": "var(--surface-container-lowest)",
+                        "on-surface-variant": "var(--on-surface-variant)",
+                        "tertiary-fixed": "var(--tertiary-fixed)",
+                        "surface-container": "var(--surface-container)",
+                        "on-secondary-fixed-variant": "var(--on-secondary-fixed-variant)",
+                        "on-primary-fixed-variant": "var(--on-primary-fixed-variant)",
+                        "primary": "var(--primary)",
+                        "inverse-primary": "var(--inverse-primary)",
+                        "surface-tint": "var(--surface-tint)",
+                        "primary-container": "var(--primary-container)",
+                        "surface-variant": "var(--surface-variant)",
+                        "primary-fixed-dim": "var(--primary-fixed-dim)",
+                        "on-primary-container": "var(--on-primary-container)",
+                        "secondary-fixed-dim": "var(--secondary-fixed-dim)",
+                        "inverse-surface": "var(--inverse-surface)",
+                        "tertiary": "var(--tertiary)",
+                        "surface-container-low": "var(--surface-container-low)",
+                        "on-background": "var(--on-background)",
+                        "tertiary-container": "var(--tertiary-container)",
+                        "on-primary": "var(--on-primary)",
+                        "surface-dim": "var(--surface-dim)",
+                        "outline": "var(--outline)",
+                        "surface": "var(--surface)",
+                        "inverse-on-surface": "var(--inverse-on-surface)",
+                        "error": "var(--error)",
+                        "on-tertiary-fixed": "var(--on-tertiary-fixed)",
+                        "on-secondary-container": "var(--on-secondary-container)",
+                        "on-secondary": "var(--on-secondary)",
+                        "on-error": "var(--on-error)",
+                        "on-primary-fixed": "var(--on-primary-fixed)",
+                        "error-container": "var(--error-container)",
+                        "secondary": "var(--secondary)",
+                        "on-tertiary-container": "var(--on-tertiary-container)",
+                        "primary-fixed": "var(--primary-fixed)",
+                        "on-tertiary-fixed-variant": "var(--on-tertiary-fixed-variant)",
+                        "background": "var(--background)"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "section-gap": "120px",
+                        "gutter": "32px",
+                        "margin-desktop": "80px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Montserrat"],
+                        "headline-lg": ["Playfair Display"],
+                        "headline-lg-mobile": ["Playfair Display"],
+                        "title-md": ["Playfair Display"],
+                        "body-lg": ["Montserrat"],
+                        "display-lg": ["Playfair Display"],
+                        "label-caps": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                        "headline-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "title-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "30px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+                        "display-lg": ["80px", {"lineHeight": "90px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.2em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        :root {
+            --surface-container-highest: #e9e1dc;
+            --outline-variant: #dac1bf;
+            --surface-bright: #fff8f5;
+            --on-surface: #1e1b18;
+            --on-tertiary: #ffffff;
+            --tertiary-fixed-dim: #c9c6c1;
+            --secondary-container: #fed65b;
+            --surface-container-high: #efe6e2;
+            --on-error-container: #93000a;
+            --secondary-fixed: #ffe088;
+            --on-secondary-fixed: #241a00;
+            --surface-container-lowest: #ffffff;
+            --on-surface-variant: #544341;
+            --tertiary-fixed: #e6e2dd;
+            --surface-container: #f5ece7;
+            --on-secondary-fixed-variant: #574500;
+            --on-primary-fixed-variant: #77302d;
+            --primary: #2a0002;
+            --inverse-primary: #ffb3ad;
+            --surface-tint: #954742;
+            --primary-container: #4a0e0e;
+            --surface-variant: #e9e1dc;
+            --primary-fixed-dim: #ffb3ad;
+            --on-primary-container: #cc726d;
+            --secondary-fixed-dim: #e9c349;
+            --inverse-surface: #34302c;
+            --tertiary: #0f0f0c;
+            --surface-container-low: #fbf2ed;
+            --on-background: #1e1b18;
+            --tertiary-container: #252421;
+            --on-primary: #ffffff;
+            --surface-dim: #e1d8d4;
+            --outline: #877270;
+            --surface: #fff8f5;
+            --inverse-on-surface: #f8efea;
+            --error: #ba1a1a;
+            --on-tertiary-fixed: #1c1c19;
+            --on-secondary-container: #745c00;
+            --on-secondary: #ffffff;
+            --on-error: #ffffff;
+            --on-primary-fixed: #3d0506;
+            --error-container: #ffdad6;
+            --secondary: #735c00;
+            --on-tertiary-container: #8d8b87;
+            --primary-fixed: #ffdad7;
+            --on-tertiary-fixed-variant: #484743;
+            --background: #fff8f5;
+        }
+
+        html.dark {
+            --primary: #ffdad7;
+            --primary-container: #3d1d20;
+            --on-primary: #3d0506;
+            --on-primary-container: #ffe0de;
+            --inverse-primary: #ffdad7;
+            --primary-fixed: #ffdad7;
+            --primary-fixed-dim: #ffb3ad;
+            
+            --secondary: #e9c349;
+            --secondary-container: #3a2e00;
+            --secondary-fixed: #574500;
+            --secondary-fixed-dim: #e9c349;
+            --on-secondary: #3d3000;
+            --on-secondary-container: #ffe088;
+
+            --tertiary: #c9c6c1;
+            --tertiary-container: #3e3d3a;
+            --on-tertiary-container: #e6e2dd;
+            --tertiary-fixed: #e6e2dd;
+            --tertiary-fixed-dim: #c9c6c1;
+
+            --surface: #190a0a;
+            --surface-bright: #261314;
+            --surface-dim: #130607;
+            --surface-container: #261314;
+            --surface-container-low: #200f10;
+            --surface-container-high: #31181a;
+            --surface-container-highest: #3d1d20;
+            --surface-container-lowest: #190a0a;
+            --surface-variant: #3d1d20;
+            --on-surface: #f7e0de;
+            --on-surface-variant: #dac1bf;
+            --on-background: #f7e0de;
+            --inverse-surface: #f7e0de;
+            --inverse-on-surface: #1e1b18;
+            --background: #190a0a;
+
+            --outline: #a08886;
+            --outline-variant: #5c3e40;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .arch-frame {
+            border-radius: 50% 50% 0 0 / 50% 50% 0 0;
+        }
+        .text-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+        .luxury-line {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #877270 50%, transparent);
+        }
+        .fade-in { animation: fadeIn 1.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg antialiased">
+<!-- TopNavBar -->
+<nav class="bg-surface/90 dark:bg-primary-container/90 docked full-width top-0 sticky backdrop-blur-md border-b border-outline-variant/30 z-50 transition-all duration-500">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-[1440px] mx-auto">
+<div class="flex gap-8 items-center">
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-secondary-fixed transition-colors font-label-caps text-label-caps tracking-[0.2em]" href="#">Collections</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-secondary-fixed transition-colors font-label-caps text-label-caps tracking-[0.2em]" href="#">Bespoke</a>
+</div>
+<div class="font-headline-lg text-title-md text-primary dark:text-inverse-primary tracking-tighter font-bold text-3xl">
+                HypeHavenHub
+            </div>
+<div class="flex gap-8 items-center">
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary dark:hover:text-secondary-fixed transition-colors font-label-caps text-label-caps tracking-[0.2em]" href="#">Heritage</a>
+<div class="flex items-center gap-4 text-primary">
+<span class="material-symbols-outlined cursor-pointer hover:opacity-80 transition-opacity" id="themeToggleIcon" onclick="toggleTheme()">dark_mode</span>
+<span class="material-symbols-outlined cursor-pointer hover:opacity-80 transition-opacity">favorite</span>
+<span class="material-symbols-outlined cursor-pointer hover:opacity-80 transition-opacity">shopping_bag</span>
+<span class="material-symbols-outlined cursor-pointer hover:opacity-80 transition-opacity">person</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Collection Header Section -->
+<header class="relative pt-36 pb-24 overflow-hidden">
+    <!-- Deep luxurious background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-[#2f1317] via-[#1a080a] to-[#0a0304] z-0"></div>
+    
+    <!-- Decorative subtle glow -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#954742]/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- Decorative Gold Lines -->
+    <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#e9c349]/50 to-transparent z-10"></div>
+    <div class="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#e9c349]/50 to-transparent z-10"></div>
+    
+    <div class="max-w-[1440px] mx-auto px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-12 relative z-10">
+        <!-- Left Content -->
+        <div class="flex flex-col items-start gap-5 max-w-2xl fade-in relative">
+            <!-- Decorative Accent line -->
+            <div class="absolute -left-8 top-2 bottom-2 w-px bg-gradient-to-b from-[#e9c349]/0 via-[#e9c349] to-[#e9c349]/0 hidden md:block"></div>
+
+            <!-- Pill Badge -->
+            <div class="px-4 py-1.5 rounded-full border border-[#e9c349]/40 bg-[#e9c349]/10 text-[#e9c349] font-label-caps text-[12px] tracking-[0.2em] font-bold shadow-[0_0_15px_rgba(233,195,73,0.2)]">
+                JEWELRY COLLECTION
+            </div>
+            
+            <!-- Heading -->
+            <h1 class="font-headline-lg text-[48px] md:text-[68px] leading-[1.05] mt-2 mb-2 text-transparent bg-clip-text bg-gradient-to-r from-[#ffe088] via-[#e9c349] to-[#bf953f] drop-shadow-sm">
+                Handcrafted <br/><span class="italic font-light">Indian Jewelry</span>
+            </h1>
+            
+            <!-- Subtitle -->
+            <p class="font-body-lg text-[16px] md:text-[18px] leading-relaxed text-[#dac1bf] max-w-xl font-light">
+                Discover our handcrafted jhumkas, necklaces and bracelets. Perfectly curated to add that extra spark to your ethnic wardrobe.
+            </p>
+            
+            <!-- Action Button (Optional addition for visual weight) -->
+            <button class="mt-4 px-8 py-3 border border-[#e9c349] text-[#e9c349] hover:bg-[#e9c349] hover:text-[#1a080a] transition-all duration-300 font-label-caps tracking-widest text-[12px] font-semibold">
+                EXPLORE PIECES
+            </button>
+        </div>
+
+        <!-- Right Badge -->
+        <div class="relative shrink-0 md:mr-16 mt-12 md:mt-0 fade-in group cursor-pointer" style="animation-delay: 0.3s;">
+            <!-- Outer glowing ring -->
+            <div class="absolute inset-0 bg-[#e9c349]/20 rounded-full blur-md group-hover:blur-xl group-hover:bg-[#e9c349]/40 transition-all duration-500"></div>
+            
+            <!-- Glassmorphism Circle -->
+            <div class="w-36 h-36 md:w-48 md:h-48 rounded-full bg-white/5 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                
+                <!-- Inner thin border -->
+                <div class="absolute inset-2 rounded-full border border-[#e9c349]/30 border-dashed animate-[spin_30s_linear_infinite]"></div>
+                
+                <span class="font-headline-lg text-[42px] md:text-[56px] text-[#ffe088] leading-none mb-1 z-10 font-medium">23</span>
+                <span class="font-label-caps text-[11px] md:text-[12px] tracking-[0.2em] text-[#dac1bf] font-semibold z-10">DESIGNS</span>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Filter Bar -->
+<div class="max-w-[1440px] mx-auto px-margin-desktop py-4 border-b border-outline-variant/30 flex flex-wrap gap-4 justify-between items-center bg-surface relative z-20 shadow-sm">
+    <div class="flex items-center gap-6">
+        <h3 class="font-title-md text-[16px] font-semibold text-[#2a1b1a]">Filters</h3>
+        <button class="font-body-sm text-[13px] text-[#7a6b69] underline hover:text-[#2a1b1a] transition-colors">Clear All</button>
+    </div>
+    <div class="flex-1 flex justify-center md:justify-start md:pl-12">
+        <span class="font-title-md text-[18px] font-semibold text-[#2a1b1a]">23 Jewelry Pieces</span>
+    </div>
+    <div class="flex items-center gap-6">
+        <!-- Sort By -->
+        <div class="flex items-center gap-3">
+             <span class="font-body-sm text-[#7a6b69] text-[13px]">Sort By:</span>
+             <select class="border border-outline-variant/50 rounded px-3 py-1.5 bg-transparent text-[13px] text-[#2a1b1a] focus:outline-none focus:border-[#3d1814] w-[140px] cursor-pointer hover:bg-surface-variant transition-colors">
+                 <option>Newest First</option>
+             </select>
+        </div>
+        <!-- Layout toggles -->
+        <div class="flex items-center border border-outline-variant/50 rounded overflow-hidden h-[34px]">
+            <button class="w-10 h-full bg-[#7a6b69] text-white flex items-center justify-center hover:bg-[#5c4a48] transition-colors">
+                <span class="material-symbols-outlined text-[18px]">grid_view</span>
+            </button>
+            <button class="w-10 h-full bg-transparent text-[#7a6b69] flex items-center justify-center hover:bg-surface-variant transition-colors">
+                <span class="material-symbols-outlined text-[18px]">view_list</span>
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Categories Section -->
+<section class="py-section-gap px-margin-desktop max-w-[1440px] mx-auto">
+<div class="text-center mb-24 flex flex-col items-center gap-4">
+<span class="font-label-caps text-label-caps text-outline tracking-[0.3em] uppercase">Curated Selection</span>
+<h2 class="font-headline-lg text-headline-lg text-primary">Essence of Elegance</h2>
+<div class="luxury-line w-48 mt-4"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Jhumka Earrings -->
+<div class="group cursor-pointer relative overflow-hidden">
+<div class="aspect-[3/4] mb-6 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="Close-up shot of exquisite, artisanal Jhumka earrings featuring delicate gold filigree and small pearl droplets. The jewelry is presented on a minimalist velvet display stand in a soft-focus studio setting with warm, golden-hour lighting and a rich burgundy and cream color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIPE1j1ECEFwGKw1SNaAxOS7kkvz9K9jzsctkoCagUKUc4tIdqLicjOo5L_3Dg_asB2NZCT1rOXv0e_CzAt5nmU0L2yZC_cdskX-7ldbyvAyuvkkRgkC3VMogEYD0j7tvbF4BSXIVo6Y8IoCCyxt50VmffWPVdYy06fFAHb9pGXvbe3D8IYI1kOLXn32t1zA-PQEaJM6AFQ2JVqswQxNZSXydBnje57-qD8ehiiS5msgTz7VJUIzWgSrlZrwZQwNIyyRktA9TB8iWB"/>
+</div>
+<div class="flex flex-col items-center gap-2">
+<h3 class="font-title-md text-title-md text-primary">Jhumka Earrings</h3>
+<span class="font-label-caps text-label-caps text-outline tracking-[0.1em] group-hover:text-primary transition-colors">SHOP THE COLLECTION</span>
+</div>
+</div>
+<!-- Necklaces -->
+<div class="group cursor-pointer relative overflow-hidden translate-y-12">
+<div class="aspect-[3/4] mb-6 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A luxury display of a handcrafted gold necklace with a deep red garnet pendant, styled on a textured cream surface with subtle floral accents. The lighting is soft and editorial, highlighting the intricate gold work and the deep, opulent tones of the burgundy gemstone." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0QyEvvG4fQUyoum1UaiTP7Wi1J3BfRBi4G0T8Yhmhf7D0MoBJtYl1vkMXc8gbBvwyCy3NTDps20QkLpuCCK_xUyKlApbgdTZ9caLtvMDe9BLYkLu1u1B--g3_SzHvqUVOC9uKw992_bu7OEjNZC-4w6EVgOIXniRk0dsgr24EPsjcLOvotaO4KL9aEoHF0QnfwtmFba6ei72i_rrgChdpL6yFSl72MVkYCrzGbkVTTeWCsQ64B68-TeOyWj-qenJZZ10iyN30YFGI"/>
+</div>
+<div class="flex flex-col items-center gap-2">
+<h3 class="font-title-md text-title-md text-primary">Signature Necklaces</h3>
+<span class="font-label-caps text-label-caps text-outline tracking-[0.1em] group-hover:text-primary transition-colors">BROWSE DESIGNS</span>
+</div>
+</div>
+<!-- Bracelets -->
+<div class="group cursor-pointer relative overflow-hidden">
+<div class="aspect-[3/4] mb-6 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A stack of gold and gemstone bracelets worn by a hand with manicured nails, captured in a high-fashion editorial style. The scene uses a warm cream background, with harsh but beautiful shadows that emphasize the shimmer of the gold and the luxurious craftsmanship of the jewelry." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNNagWRFCONiRe51ebYOEGp41mnrXJJVjx2NbIcmfXRM2zHgQ4VolEdub3OJ_VltWmjw05oBtI8WJOm5OOjnrdvarFxz-iXDmev872YTjwQ8aiahMDAO8-ZepQr6xf5SsJa5KruM3y55B0ag-MWPlPMb7r7z1aGxyqYWnkU1HJc11t-cng8OTZ3kd9d929Oyl31dWzngdWfbv3uH-3K1AGj7lmc6AOWTxLuEMwxaV2fFYHpdg2TeV-hkf2IwN5BYtkxf-uRygXFdon"/>
+</div>
+<div class="flex flex-col items-center gap-2">
+<h3 class="font-title-md text-title-md text-primary">Heritage Bracelets</h3>
+<span class="font-label-caps text-label-caps text-outline tracking-[0.1em] group-hover:text-primary transition-colors">DISCOVER MORE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Artisan Narrative Section -->
+<section class="bg-primary-container text-surface py-section-gap mt-section-gap relative overflow-hidden">
+<div class="absolute inset-0 opacity-10">
+
+</div>
+<div class="max-w-[1440px] mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-24 items-center relative z-10">
+<div class="relative">
+<div class="arch-frame aspect-square max-w-[480px] overflow-hidden border-[8px] border-primary-container shadow-2xl relative z-10">
+<img class="w-full h-full object-cover grayscale brightness-75" data-alt="An elderly artisan jeweler with focused attention, working in a sun-drenched, dust-moted workshop filled with vintage tools and gold scraps. The mood is respectful and warm, emphasizing the generational skill and patience inherent in artisanal jewelry making, consistent with a high-end luxury brand story." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADMB41M8MxfHm37egajR27HNmSgO8bv7sKlayUY9kSljzpNRqA_wMtqsX_rnDvERYwQRMMJTgEPYWVmtyPQz94YqRFESkQmTHhJAdHH1dsQByCBxVCUkBMT16cpeAZTpJSU4Rp92xzf90GDxzoCv6pzY0TQXXIjsYih6Nd8AUr3v7t6ON6rz5N-1KU5QZ_cIV1eYuUDoq-Lsu3nh6XgySZx0gXRSuklY0FYFA5vpB3Lwq7bmmwGTVp-_E1MAT_oOzZYPYhyo9wW3dg"/>
+</div>
+<div class="absolute -top-12 -right-12 w-64 h-64 border border-surface/20 arch-frame"></div>
+</div>
+<div class="flex flex-col gap-8">
+<span class="font-label-caps text-label-caps text-on-primary-container/80 tracking-[0.4em] uppercase">Jewelry with a Story</span>
+<h2 class="font-display-lg text-headline-lg italic">The Soul of the Atelier</h2>
+<p class="font-body-lg text-body-lg text-surface/80 leading-relaxed">
+                    Behind every piece at HypeHavenHub lies a narrative written in gold and stone. Our artisans spend hundreds of hours perfecting a single silhouette, preserving techniques that have survived centuries of transformation. 
+                </p>
+<div class="flex flex-col gap-6 border-l border-outline-variant/30 pl-8">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary-fixed">auto_awesome</span>
+<div>
+<h4 class="font-label-caps text-label-caps text-secondary-fixed tracking-widest mb-1">UNRIVALED CRAFT</h4>
+<p class="text-body-sm opacity-70">Every stone is hand-selected and ethically sourced for its unique character.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary-fixed">history_edu</span>
+<div>
+<h4 class="font-label-caps text-label-caps text-secondary-fixed tracking-widest mb-1">ANCESTRAL TECHNIQUES</h4>
+<p class="text-body-sm opacity-70">Reviving lost arts of filigree and traditional setting methods.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- New Arrivals Section -->
+<section class="py-section-gap px-margin-desktop max-w-[1440px] mx-auto overflow-hidden">
+<div class="flex justify-between items-end mb-16">
+<div class="flex flex-col gap-4">
+<span class="font-label-caps text-label-caps text-outline tracking-[0.3em] uppercase">Seasonal Curation</span>
+<h2 class="font-headline-lg text-headline-lg text-primary">New Arrivals</h2>
+</div>
+<a class="font-label-caps text-label-caps text-primary border-b border-primary pb-1 hover:opacity-60 transition-opacity" href="#">VIEW ALL COLLECTION</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap- gutter">
+<!-- Product 1 -->
+<div class="group">
+<div class="aspect-[4/5] bg-surface-container mb-6 relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A single gold drop earring with an emerald-cut ruby, floating against a clean cream-toned background. High-end product photography with soft shadows and sharp focus on the gemstone's facets, following a minimalist luxury brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx2Mk4i3J6IXL0VFFnBXc6J_vuGQl19sBqdmmBYjP2-yB_4U1XS7CEzo3fgcRKH_fiUHcYvMkFKlL_sRGA6OsdzkM9h8dRVnLg2NCwDCEjFC1uM5RHe76ZEx6GaX2Q0V4-4un1uVEqPwJAuQema9WIf38pDfeVpL4O8JMkiV2HGtREE2MV4uEAM22pwzAQ5-dyrPCX3_45tdUiKOXsTSMSUmVFWnlBhtyX9MAwPAQEqpIIQx3xcHGgT74O-b1F9YAczuylFJ2dxC1J"/>
+<div class="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+<button class="w-full py-3 bg-surface text-primary font-label-caps text-[10px] tracking-widest hover:bg-primary hover:text-surface transition-colors shadow-lg">QUICK VIEW</button>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-primary mb-1">Crimson Tear Earrings</h4>
+<p class="font-body-sm text-outline-variant">Garnet &amp; 22k Gold</p>
+</div>
+<span class="font-label-caps text-label-caps text-primary">$1,250</span>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="group">
+<div class="aspect-[4/5] bg-surface-container mb-6 relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A delicate gold chain bracelet with tiny diamond charms, laid elegantly across a piece of raw silk fabric. The lighting is warm and directional, creating long, soft shadows and highlighting the brilliance of the diamonds." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3w_BdjmKZn0Pd-nJZDczpa_XkmhWljpaN99bG17x5NPu5Bhu-uD1Zcr7PEJbvs_ukNwDdxo03-WR8WE9wZA7qgBmdyxaKb1JcmKsEZFmLOtE_lPc7aQRU4bXDAEvJnEDfOwuKtQY8vF5UE3CupmbCoorM-4GKnuxG64Eab89pqWmAOEdHcOKEmTUPuTOkL_hh-WDUbK_Ay45AbGtMq30WcYgjBEUU5dgLbIyuTfZgKX8cHtYoclqdbQpoRoahuhCSWWFZiT-k2JVC"/>
+<div class="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+<button class="w-full py-3 bg-surface text-primary font-label-caps text-[10px] tracking-widest hover:bg-primary hover:text-surface transition-colors shadow-lg">QUICK VIEW</button>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-primary mb-1">Stardust Link</h4>
+<p class="font-body-sm text-outline-variant">Diamond Accents</p>
+</div>
+<span class="font-label-caps text-label-caps text-primary">$890</span>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="group">
+<div class="aspect-[4/5] bg-surface-container mb-6 relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A bold gold statement necklace with organic, hammered textures and a large centerpiece opal. Photographed in an editorial style against a dark burgundy backdrop to make the colors of the stone pop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxQmyusveFOgDD1RkHi_ykCSjLfnQZpJk_WDUekk8--1bP1U02FHJaCq2evel_ZUVr_1QfRg5ibZYLBiHSrpjTr1hWWr2qyhWnJpFRf9-0Ema8ONpKkgTXb1Op5MdY2iqupkyH2BDpUV7Fl3OfCZpUf3FFcEVt5m552rC_S4sn1GuFmTqjgcTePpirhtyisOAyq-HMI_FlqU7IYhn5BMv1ypeUJakVZert7lJYGkk5twvrIB2NdF6Fqc5b0ddT8dWODX6D6if6gT2v"/>
+<div class="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+<button class="w-full py-3 bg-surface text-primary font-label-caps text-[10px] tracking-widest hover:bg-primary hover:text-surface transition-colors shadow-lg">QUICK VIEW</button>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-primary mb-1">Celestial Aura</h4>
+<p class="font-body-sm text-outline-variant">Opal &amp; Hammered Gold</p>
+</div>
+<span class="font-label-caps text-label-caps text-primary">$3,400</span>
+</div>
+</div>
+<!-- Product 4 -->
+<div class="group">
+<div class="aspect-[4/5] bg-surface-container mb-6 relative overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Symmetrical gold stud earrings with intricate geometric patterns, reminiscent of ancient architecture. Shot in high-key lighting on a smooth marble surface, embodying a sense of timeless luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAAPYqTmw7tUe_9syi4HxMgvvnEisqaFK5sTICFuY9wvg4XW8cad9QDyvp0_lTRyW_9fX6LR9IREQSrLyYgxKIu7e8wrFYc7pPVshS-OEElUPCMkJHtbVslKVTM0f73LI6bDEG2uH9qu8ieWlR8dZyjITX86BGKIfaZ1_VPVZRJYlm92afxLUAfoz7dpvL6O5f3_tEoUZSBkcHWTQdSlDWS5fbcpvBykYARaOWHputJYcA-Eg6zifoKrlZynlbblwU7g_aDdM0fAyh"/>
+<div class="absolute bottom-4 left-4 right-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+<button class="w-full py-3 bg-surface text-primary font-label-caps text-[10px] tracking-widest hover:bg-primary hover:text-surface transition-colors shadow-lg">QUICK VIEW</button>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-body-lg text-primary mb-1">Legacy Studs</h4>
+<p class="font-body-sm text-outline-variant">Solid 18k Yellow Gold</p>
+</div>
+<span class="font-label-caps text-label-caps text-primary">$620</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Trusted By Visionaries -->
+<section class="py-24 border-y border-outline-variant/20 bg-surface-container-low">
+<div class="max-w-[1440px] mx-auto px-margin-desktop">
+<p class="text-center font-label-caps text-label-caps text-outline tracking-[0.3em] uppercase mb-12">Trusted by Visionary Brands</p>
+<div class="flex flex-wrap justify-center items-center gap-16 opacity-50 grayscale hover:grayscale-0 transition-all">
+<span class="font-headline-lg text-title-md text-primary tracking-widest">LUMINA</span>
+<span class="font-headline-lg text-title-md text-primary tracking-widest italic">ÉLAN</span>
+<span class="font-headline-lg text-title-md text-primary tracking-widest">NOIR</span>
+<span class="font-headline-lg text-title-md text-primary tracking-widest italic">AURORA</span>
+<span class="font-headline-lg text-title-md text-primary tracking-widest">VESTIGE</span>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-primary dark:bg-tertiary-container full-width relative border-t border-outline/20">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter px-margin-desktop py-section-gap max-w-[1440px] mx-auto text-center md:text-left items-start">
+<div class="flex flex-col gap-6">
+<div class="font-headline-lg text-headline-lg text-surface-container-highest dark:text-inverse-primary">HypeHavenHub</div>
+<p class="font-body-sm text-body-sm text-surface-container-highest/70 max-w-xs">
+                    Artisanal craftsmanship for the modern heritage. Creating timeless pieces for the discerning soul since 1924.
+                </p>
+<div class="flex gap-4 justify-center md:justify-start">
+<a class="w-10 h-10 rounded-full border border-surface/20 flex items-center justify-center text-surface hover:bg-surface hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-sm">public</span>
+</a>
+<a class="w-10 h-10 rounded-full border border-surface/20 flex items-center justify-center text-surface hover:bg-surface hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined text-sm">language</span>
+</a>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-8">
+<div class="flex flex-col gap-4">
+<h5 class="font-label-caps text-label-caps text-secondary-fixed tracking-widest mb-2">COLLECTIONS</h5>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Heritage</a>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Bespoke</a>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Modern Minimalism</a>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Artisan Series</a>
+</div>
+<div class="flex flex-col gap-4">
+<h5 class="font-label-caps text-label-caps text-secondary-fixed tracking-widest mb-2">INFORMATION</h5>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Sustainability</a>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Shipping &amp; Returns</a>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-sm text-surface-container-highest/70 hover:text-surface transition-colors" href="#">Visit Our Atelier</a>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<h5 class="font-label-caps text-label-caps text-secondary-fixed tracking-widest mb-2 uppercase">Join the Collective</h5>
+<p class="font-body-sm text-surface-container-highest/70">Subscribe to receive exclusive previews of new arrivals and artisan stories.</p>
+<div class="relative">
+<input class="w-full bg-transparent border-b border-surface/20 py-3 text-surface font-body-sm focus:outline-none focus:border-secondary-fixed transition-colors" placeholder="Email Address" type="email"/>
+<button class="absolute right-0 bottom-3 text-surface hover:text-secondary-fixed transition-colors">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="max-w-[1440px] mx-auto px-margin-desktop py-8 border-t border-surface/10 text-center">
+<p class="font-body-sm text-body-sm text-surface-container-highest/50">© 2024 HypeHavenHub. Artisanal Craftsmanship for the Modern Heritage. All Rights Reserved.</p>
+</div>
+</footer>
+<script>
+        // Simple Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Sticky Navbar effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (nav) {
+                if (window.scrollY > 50) {
+                    nav.classList.add('py-2', 'shadow-md');
+                    nav.classList.remove('py-4');
+                } else {
+                    nav.classList.add('py-4');
+                    nav.classList.remove('py-2', 'shadow-md');
+                }
+            }
+        });
+
+        // Dark/Light Theme Switching
+        const themeToggleIcon = document.getElementById('themeToggleIcon');
+        
+        function updateThemeUI() {
+            if (!themeToggleIcon) return;
+            if (document.documentElement.classList.contains('dark')) {
+                themeToggleIcon.textContent = 'light_mode';
+            } else {
+                themeToggleIcon.textContent = 'dark_mode';
+            }
+        }
+
+        // Initial UI check on page load
+        document.addEventListener('DOMContentLoaded', updateThemeUI);
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeUI();
+        }
+    </script>
+</body></html>

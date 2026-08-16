@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout | HypeHavenHub</title>
+<link rel="canonical" href="https://hypehavenhub.in/artisanal_secure_checkout.html"/>
+<meta name="description" content="Secure Checkout - HypeHavenHub Artisanal Opulence."/>
+<meta property="og:title" content="Checkout | HypeHavenHub"/>
+<meta property="og:description" content="Secure Checkout - HypeHavenHub Artisanal Opulence."/>
+<meta property="og:url" content="https://hypehavenhub.in/artisanal_secure_checkout.html"/>
+<meta property="og:site_name" content="HypeHavenHub"/>
+<meta property="og:type" content="website"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e9e1dc",
+                    "surface-bright": "#fff8f5",
+                    "on-surface": "#1e1b18",
+                    "outline-variant": "#dac1bf",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#fed65b",
+                    "tertiary-fixed-dim": "#c9c6c1",
+                    "secondary-fixed": "#ffe088",
+                    "on-secondary-fixed": "#241a00",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#efe6e2",
+                    "on-surface-variant": "#544341",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#e6e2dd",
+                    "surface-container": "#f5ece7",
+                    "surface-tint": "#954742",
+                    "primary-container": "#4a0e0e",
+                    "inverse-primary": "#ffb3ad",
+                    "primary": "#2a0002",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-primary-fixed-variant": "#77302d",
+                    "primary-fixed-dim": "#ffb3ad",
+                    "surface-variant": "#e9e1dc",
+                    "tertiary": "#0f0f0c",
+                    "inverse-surface": "#34302c",
+                    "secondary-fixed-dim": "#e9c349",
+                    "on-primary-container": "#cc726d",
+                    "tertiary-container": "#252421",
+                    "surface-container-low": "#fbf2ed",
+                    "on-background": "#1e1b18",
+                    "surface": "#fff8f5",
+                    "outline": "#877270",
+                    "inverse-on-surface": "#f8efea",
+                    "surface-dim": "#e1d8d4",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#745c00",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#3d0506",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#1c1c19",
+                    "error": "#ba1a1a",
+                    "on-tertiary-container": "#8d8b87",
+                    "secondary": "#735c00",
+                    "error-container": "#ffdad6",
+                    "background": "#fff8f5",
+                    "primary-fixed": "#ffdad7",
+                    "on-tertiary-fixed-variant": "#484743"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "section-gap": "120px",
+                    "margin-desktop": "80px",
+                    "gutter": "32px",
+                    "margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"],
+                    "body-sm": ["Montserrat"],
+                    "label-caps": ["Montserrat"],
+                    "display-lg": ["Playfair Display"],
+                    "title-md": ["Playfair Display"],
+                    "body-lg": ["Montserrat"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "headline-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "22px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.2em", "fontWeight": "600"}],
+                    "display-lg": ["80px", {"lineHeight": "90px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "title-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "30px", "letterSpacing": "0.01em", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .step-active { color: theme('colors.primary'); border-bottom: 2px solid theme('colors.primary'); }
+        .step-inactive { color: theme('colors.on-surface-variant'); opacity: 0.5; }
+        
+        /* Custom Input Styling */
+        .luxury-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid theme('colors.outline-variant');
+            padding: 12px 0;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        .luxury-input:focus {
+            outline: none;
+            border-bottom-color: theme('colors.secondary');
+            box-shadow: none;
+        }
+        
+        .arch-frame {
+            border-radius: 1000px 1000px 0 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg">
+<!-- TopNavBar (Suppressed for transactional focus - only simple brand anchor) -->
+<header class="w-full bg-surface border-b border-outline-variant/30 h-20 flex items-center px-margin-mobile md:px-margin-desktop sticky top-0 z-50">
+<div class="max-w-[1440px] mx-auto w-full flex justify-between items-center">
+<a class="font-title-md text-title-md text-primary uppercase tracking-widest" href="/">HypeHavenHub</a>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined">lock</span>
+<span class="font-label-caps text-label-caps">Secure Checkout</span>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-20">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Left Column: Checkout Flow -->
+<div class="lg:col-span-7 xl:col-span-8">
+<!-- Step Navigation -->
+<nav class="flex items-center gap-8 mb-16 overflow-x-auto pb-4">
+<button class="step-active font-label-caps text-label-caps py-2 whitespace-nowrap">01. CART</button>
+<span class="text-outline-variant">/</span>
+<button class="step-active font-label-caps text-label-caps py-2 whitespace-nowrap">02. DETAILS</button>
+<span class="text-outline-variant">/</span>
+<button class="step-inactive font-label-caps text-label-caps py-2 whitespace-nowrap">03. PAYMENT</button>
+</nav>
+<!-- Details Section -->
+<section class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700" id="shipping-details">
+<div>
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-4 text-primary">Shipping Information</h1>
+<p class="text-on-surface-variant font-body-sm italic">Where should we deliver your curated pieces?</p>
+</div>
+<form class="space-y-10">
+<!-- Contact Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">EMAIL ADDRESS</label>
+<input class="luxury-input font-body-lg" placeholder="curator@hypehaven.com" type="email"/>
+</div>
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">PHONE NUMBER</label>
+<input class="luxury-input font-body-lg" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+<!-- Address -->
+<div class="space-y-10">
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">FULL NAME</label>
+<input class="luxury-input font-body-lg" placeholder="Julianne Vane" type="text"/>
+</div>
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">STREET ADDRESS</label>
+<input class="luxury-input font-body-lg" placeholder="Avenue des Champs-Élysées" type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">CITY</label>
+<input class="luxury-input font-body-lg" placeholder="Paris" type="text"/>
+</div>
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">POSTAL CODE</label>
+<input class="luxury-input font-body-lg" placeholder="75008" type="text"/>
+</div>
+<div class="group">
+<label class="font-label-caps text-label-caps text-on-surface-variant group-focus-within:text-secondary block mb-1">COUNTRY</label>
+<select class="luxury-input font-body-lg appearance-none bg-transparent">
+<option>France</option>
+<option>United Kingdom</option>
+<option>United States</option>
+<option>Japan</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Shipping Method -->
+<div class="pt-8">
+<h3 class="font-label-caps text-label-caps mb-6 text-on-surface-variant">DELIVERY PREFERENCE</h3>
+<div class="grid grid-cols-1 gap-4">
+<label class="flex items-center justify-between p-6 bg-surface-container-low border border-outline-variant/30 rounded-lg cursor-pointer group hover:border-secondary transition-all">
+<div class="flex items-center gap-4">
+<input checked="" class="w-4 h-4 text-primary focus:ring-primary border-outline" name="shipping" type="radio"/>
+<div>
+<p class="font-body-lg font-medium text-primary">Standard Atelier Delivery</p>
+<p class="font-body-sm text-on-surface-variant">3-5 Business Days</p>
+</div>
+</div>
+<span class="font-label-caps text-label-caps">COMPLIMENTARY</span>
+</label>
+<label class="flex items-center justify-between p-6 bg-surface border border-outline-variant/10 rounded-lg cursor-pointer group hover:border-secondary transition-all">
+<div class="flex items-center gap-4">
+<input class="w-4 h-4 text-primary focus:ring-primary border-outline" name="shipping" type="radio"/>
+<div>
+<p class="font-body-lg font-medium text-primary">Heritage Express</p>
+<p class="font-body-sm text-on-surface-variant">Next Day Signature Delivery</p>
+</div>
+</div>
+<span class="font-label-caps text-label-caps">€45.00</span>
+</label>
+</div>
+</div>
+<!-- CTA -->
+<div class="pt-12 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-outline-variant/20">
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-label-caps text-label-caps" type="button">
+<span class="material-symbols-outlined">arrow_back</span>
+                                RETURN TO CART
+                            </button>
+<button class="w-full md:w-auto px-12 py-5 bg-primary text-on-primary font-label-caps text-label-caps tracking-widest hover:bg-primary-container transition-all duration-300 shadow-lg" type="submit">
+                                CONTINUE TO PAYMENT
+                            </button>
+</div>
+</form>
+</section>
+</div>
+<!-- Right Column: Order Summary (Sticky) -->
+<aside class="lg:col-span-5 xl:col-span-4 mt-12 lg:mt-0">
+<div class="sticky top-32 p-8 md:p-10 bg-surface-container border border-outline-variant/20 rounded-xl">
+<h2 class="font-title-md text-title-md text-primary mb-8 pb-4 border-b border-outline-variant/20">Order Summary</h2>
+<!-- Cart Items -->
+<div class="space-y-8 mb-10">
+<!-- Item 1 -->
+<div class="flex gap-6">
+<div class="w-24 h-32 flex-shrink-0 bg-surface-container-highest arch-frame">
+<img class="w-full h-full object-cover" data-alt="A close-up shot of a handcrafted leather vessel, featuring intricate burgundy stitching and a deep, rich texture. The lighting is soft and atmospheric, highlighting the subtle sheen of the premium material. Set against a warm cream background, this luxury object exudes a sense of modern artisanal heritage and quiet opulence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIFE_OQy1uuDdO0Cm4fTH62-yHZcaMDtGPCC2sUcAKjY6zqmHQacqtsCBFkRbp9VyNRGShQ42P8vOvMllOYHW07-QeUFVTexjUHqJQD7zMqcNeyxPxSxX42NRxGnXdDHrlY61g-Y_hmxv9ibwcuHDb-qH0xDHESij14ZQPoX9AFZQS7KfDhOaqNIfLqy1acOrUBJSQO-u-0BCZM5aK4W1C5m61Xb5VKrn6R9j8MD0I4mNQF41PAyYyfS4mp91tsTqdg4w2Obp1sNM8"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h4 class="font-body-lg font-semibold text-primary">Heritage Vessel No. 04</h4>
+<p class="text-on-surface-variant font-body-sm">Deep Burgundy / Large</p>
+<p class="text-on-surface-variant font-body-sm">Qty: 1</p>
+</div>
+<p class="font-label-caps text-label-caps text-primary">€1,250.00</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex gap-6">
+<div class="w-24 h-32 flex-shrink-0 bg-surface-container-highest arch-frame">
+<img class="w-full h-full object-cover" data-alt="A minimalist architectural ceramic sculpture in off-white, with delicate gold leaf accents along its organic curves. The image is captured in a high-key editorial style with soft, diffused sunlight casting long, elegant shadows. The mood is serene, sophisticated, and aligns with a luxury light-mode aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4onVUYtPYqN0Aslx3urR-DgLfserP6t14rFQ8YSiHmT111AZLOG5PzifgBmsntOHIASIngVvZv2YrZIwSXZJh_4v8QMDqt6vuV2_ZfTmC8Ftqbce30CdW9hJNU3zdV-k7CokKMsqMejx5gRytsoklM0QxhBHr0mmihscouR4rCp-gfFp3l_092icKFlxifeIIin5fNnhqhLTjZnwzFhn_w4yKoU8Jyg7Cg4dFZArESr8sKBwdg1fcL9QfFqvUCvV2Hv7dhCCuArjI"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h4 class="font-body-lg font-semibold text-primary">Orbital Plinth Sculpture</h4>
+<p class="text-on-surface-variant font-body-sm">Ivory / Hand-finished</p>
+<p class="text-on-surface-variant font-body-sm">Qty: 1</p>
+</div>
+<p class="font-label-caps text-label-caps text-primary">€890.00</p>
+</div>
+</div>
+</div>
+<!-- Totals -->
+<div class="space-y-4 pt-8 border-t border-outline-variant/30">
+<div class="flex justify-between font-body-sm">
+<span class="text-on-surface-variant uppercase tracking-tighter">Subtotal</span>
+<span class="text-primary">€2,140.00</span>
+</div>
+<div class="flex justify-between font-body-sm">
+<span class="text-on-surface-variant uppercase tracking-tighter">Shipping</span>
+<span class="text-primary">Complimentary</span>
+</div>
+<div class="flex justify-between font-body-sm">
+<span class="text-on-surface-variant uppercase tracking-tighter">Tax</span>
+<span class="text-primary">€171.20</span>
+</div>
+<div class="flex justify-between items-end pt-4">
+<span class="font-label-caps text-label-caps text-secondary">TOTAL (EUR)</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary leading-none">€2,311.20</span>
+</div>
+</div>
+<!-- Security & Trust -->
+<div class="mt-12 p-4 bg-white/40 rounded-lg flex items-center gap-4 border border-outline-variant/10">
+<span class="material-symbols-outlined text-secondary" style="font-size: 32px;">verified_user</span>
+<div>
+<p class="font-label-caps text-[10px] leading-tight text-on-surface-variant mb-1">ENCRYPTED &amp; SECURE</p>
+<p class="font-body-sm text-[12px] leading-tight italic">Our boutique ensures your data is protected with 256-bit encryption.</p>
+</div>
+</div>
+<!-- Promo Code -->
+<div class="mt-8">
+<button class="font-label-caps text-label-caps text-secondary underline" onclick="document.getElementById('promo-field').classList.toggle('hidden')">HAVE A PROMO CODE?</button>
+<div class="hidden mt-4 flex" id="promo-field">
+<input class="luxury-input font-body-sm border-outline-variant flex-grow" placeholder="CODE" type="text"/>
+<button class="font-label-caps text-label-caps text-primary ml-4">APPLY</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Footer (Simplified for transactional page) -->
+<footer class="w-full py-12 px-margin-mobile md:px-margin-desktop bg-surface-container-high border-t border-outline-variant/20">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-8 text-on-surface-variant">
+<div class="font-title-md text-title-md text-primary opacity-50 uppercase tracking-widest text-sm">HypeHavenHub</div>
+<div class="flex flex-wrap justify-center gap-x-8 gap-y-4 font-label-caps text-[10px] tracking-[0.3em]">
+<a class="hover:text-primary transition-colors" href="#">PRIVACY POLICY</a>
+<a class="hover:text-primary transition-colors" href="#">TERMS OF SERVICE</a>
+<a class="hover:text-primary transition-colors" href="#">REFUND POLICY</a>
+<a class="hover:text-primary transition-colors" href="#">ASSISTANCE</a>
+</div>
+<p class="font-body-sm text-[12px] text-tertiary-fixed-dim">© 2024 HypeHavenHub. All rights reserved.</p>
+</div>
+</footer>
+<!-- Micro-interaction script -->
+<script>
+        // Simple input focus effects beyond CSS if needed
+        const inputs = document.querySelectorAll('.luxury-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.querySelector('label')?.classList.add('translate-y-[-2px]');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.querySelector('label')?.classList.remove('translate-y-[-2px]');
+            });
+        });
+
+        // Handle the multi-step navigation clicks (simulated)
+        const stepButtons = document.querySelectorAll('nav button');
+        stepButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (btn.classList.contains('step-inactive')) {
+                    // Logic to show payment form could go here
+                }
+            });
+        });
+    </script>
+</body></html>
