@@ -2382,10 +2382,13 @@ def razorpay_webhook(request):
             if not order and payment_id:
                 order = Order.objects.filter(payment__payment_id=payment_id).first()
             if not order and rzp_order_id:
+                order = Order.objects.filter(payment__gateway_response__razorpay_order_id=rzp_order_id).first()
+            if not order and rzp_order_id:
                 order = Order.objects.filter(payment__gateway_response__icontains=rzp_order_id).first()
                 
             if order:
                 from django.db import transaction
+                from store.shipping import normalize_indian_state, ShiprocketService
                 with transaction.atomic():
                     payment_obj, _ = Payment.objects.get_or_create(order=order)
                     if payment_id:
@@ -2398,10 +2401,10 @@ def razorpay_webhook(request):
                             import razorpay
                             client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
                             rzp_order = client.order.fetch(rzp_order_id) if rzp_order_id else {}
-                            customer_details = rzp_order.get('customer_details', {}) or {}
-                            shipping_address = customer_details.get('shipping_address') or payment_entity.get('notes', {}).get('shipping_address')
+                            customer_details = rzp_order.get('customer_details', {}) or payment_entity.get('customer_details', {}) or {}
+                            shipping_address = customer_details.get('shipping_address') or payment_entity.get('notes', {}).get('shipping_address') or payment_entity.get('shipping_address') or {}
                             contact = customer_details.get('contact', '') or payment_entity.get('contact', '')
-                            email = customer_details.get('email', '') or payment_entity.get('email', 'guest@hypehavenhub.com')
+                            email = customer_details.get('email', '') or payment_entity.get('email', 'guest@hypehavenhub.in')
 
                             if isinstance(shipping_address, str):
                                 try:
@@ -2415,7 +2418,7 @@ def razorpay_webhook(request):
                             addr_line1 = (
                                 shipping_address.get('line1') or shipping_address.get('address1') or 
                                 shipping_address.get('street_address') or shipping_address.get('street1') or 
-                                shipping_address.get('address') or 'Main Street'
+                                shipping_address.get('address') or ''
                             )
                             addr_line2 = (
                                 shipping_address.get('line2') or shipping_address.get('address2') or 
@@ -2423,37 +2426,42 @@ def razorpay_webhook(request):
                             )
                             addr_city = (
                                 shipping_address.get('city') or shipping_address.get('district') or 
-                                shipping_address.get('town') or 'City'
+                                shipping_address.get('town') or ''
                             )
-                            addr_state = (
+                            raw_state = (
                                 shipping_address.get('state') or shipping_address.get('province') or 
-                                shipping_address.get('state_code') or 'State'
+                                shipping_address.get('state_code') or ''
                             )
+                            addr_state = normalize_indian_state(raw_state) if raw_state else 'Gujarat'
                             addr_pin = (
                                 shipping_address.get('zipcode') or shipping_address.get('pincode') or 
-                                shipping_address.get('postal_code') or shipping_address.get('zip') or '110001'
+                                shipping_address.get('postal_code') or shipping_address.get('zip') or ''
                             )
                             addr_name = (
                                 shipping_address.get('name') or shipping_address.get('full_name') or 
-                                shipping_address.get('contact_name') or 'Customer'
+                                shipping_address.get('contact_name') or customer_details.get('name') or 'Customer'
                             )
 
-                            from store.models import Address
-                            address_obj = Address.objects.create(
-                                user=order.user,
-                                full_name=str(addr_name)[:100],
-                                phone=str(contact or '9876543210')[:15],
-                                address_line1=str(addr_line1)[:255],
-                                address_line2=str(addr_line2)[:255],
-                                city=str(addr_city)[:100],
-                                state=str(addr_state)[:100],
-                                pincode=str(addr_pin)[:10]
-                            )
-                            order.address = address_obj
+                            if not addr_city and addr_state:
+                                addr_city = addr_state
+
+                            if addr_line1 and addr_pin:
+                                from store.models import Address
+                                address_obj = Address.objects.create(
+                                    user=order.user,
+                                    full_name=str(addr_name)[:100],
+                                    phone=str(contact or '9876543210')[:15],
+                                    address_line1=str(addr_line1)[:255],
+                                    address_line2=str(addr_line2)[:255],
+                                    city=str(addr_city or 'City')[:100],
+                                    state=str(addr_state)[:100],
+                                    pincode=str(addr_pin)[:10]
+                                )
+                                order.address = address_obj
                         except Exception as addr_err:
                             logger.error(f"Webhook address resolution error for order {order.order_id}: {addr_err}")
 
-                    order.status = 'pending_approval'
+                    order.status = 'confirmed'
                     order.save()
 
                     for item in order.items.all():
@@ -2464,10 +2472,10 @@ def razorpay_webhook(request):
                                 variant.stock -= item.quantity
                                 variant.save()
 
-                    OrderTracking.objects.create(
+                    OrderTracking.objects.get_or_create(
                         order=order,
-                        status='pending_approval',
-                        description=f'Webhook ({event}): Payment verified. Order awaiting admin approval.'
+                        status='confirmed',
+                        defaults={'description': f'Webhook ({event}): Payment verified. Order confirmed.'}
                     )
 
                 try:
@@ -2476,7 +2484,15 @@ def razorpay_webhook(request):
                 except Exception as notify_err:
                     logger.error(f"Error sending notifications for webhook order {order.order_id}: {notify_err}")
 
-                # No auto Shiprocket booking — admin will accept/reject order manually
+                # Immediate automatic Shiprocket shipment creation upon webhook payment confirmation
+                if not order.shipping_tracking_id:
+                    try:
+                        shipment_id, sr_err = ShiprocketService.create_shipment(order)
+                        if shipment_id:
+                            order.shipping_tracking_id = str(shipment_id)
+                            order.save(update_fields=['shipping_tracking_id'])
+                    except Exception as sr_webhook_err:
+                        logger.error(f"Shiprocket webhook auto-dispatch error for order {order.order_id}: {sr_webhook_err}")
             else:
                     logger.warning(f"Razorpay webhook received for unknown order. RZP Order ID: {rzp_order_id}, Payment ID: {payment_id}")
         elif event == 'checkout.abandoned':
