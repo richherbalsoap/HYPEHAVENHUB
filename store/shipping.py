@@ -212,7 +212,7 @@ class ShiprocketService:
                 grouped_items[key] = {
                     'product': item.product,
                     'variant': item.variant,
-                    'product_name': item.product_name,
+                    'product_name': item.product_name or (item.product.name if item.product else 'Jewelry Item'),
                     'quantity': item.quantity,
                     'unit_price': float(item.unit_price),
                     'personalization_name': p_name
