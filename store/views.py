@@ -759,8 +759,7 @@ def settings_view(request):
 
 @login_required
 def address_list(request):
-    addresses = Address.objects.filter(user=request.user)
-    return render(request, 'store/addresses.html', {'addresses': addresses})
+    return redirect('profile')
 
 
 @login_required
