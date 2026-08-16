@@ -1487,8 +1487,8 @@ def verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
-            # Update order status to pending_approval (admin will review and accept/reject)
-            order.status = 'pending_approval'
+            # Update order status to confirmed upon successful payment verification
+            order.status = 'confirmed'
             order.save()
 
             # Decrement stock with row locking
@@ -1499,11 +1499,11 @@ def verify_payment(request):
                         variant.stock -= item.quantity
                         variant.save()
 
-            # Create tracking entry if not exists
+            # Create tracking entry for confirmed order
             OrderTracking.objects.get_or_create(
                 order=order,
-                status='pending_approval',
-                defaults={'description': 'Payment verified successfully. Order awaiting admin approval.'}
+                status='confirmed',
+                defaults={'description': 'Payment verified successfully. Order confirmed.'}
             )
 
             cart = get_or_create_cart(request)
@@ -1591,6 +1591,29 @@ def verify_payment(request):
                 order.save(update_fields=['address'])
         except Exception as e:
             logger.error(f"Error fetching Magic Checkout address for order {order.order_id}: {e}")
+
+        # Auto-attempt Shiprocket shipment creation immediately upon confirmed payment
+        if not order.shipping_tracking_id:
+            try:
+                from .shipping import ShiprocketService
+                shipment_id, sr_err = ShiprocketService.create_shipment(order)
+                if shipment_id:
+                    order.shipping_tracking_id = str(shipment_id)
+                    order.save(update_fields=['shipping_tracking_id'])
+                    logger.info(f"Shiprocket shipment {shipment_id} created immediately for order {order.order_id}")
+                elif sr_err:
+                    OrderTracking.objects.get_or_create(
+                        order=order,
+                        status='shiprocket_failed',
+                        defaults={'description': f'Shiprocket auto-sync pending: {sr_err}'}
+                    )
+            except Exception as sr_sync_err:
+                logger.error(f"Immediate Shiprocket auto-sync error for order {order.order_id}: {sr_sync_err}")
+                OrderTracking.objects.get_or_create(
+                    order=order,
+                    status='shiprocket_failed',
+                    defaults={'description': f'Shiprocket auto-sync error: {str(sr_sync_err)}'}
+                )
 
         # Send billing notifications safely
         try:
@@ -2836,14 +2859,25 @@ def customize_verify_payment(request):
             payment.gateway_response = params_dict
             payment.save()
 
-            order.status = 'pending_approval'
+            order.status = 'confirmed'
             order.save()
 
-            OrderTracking.objects.create(
+            OrderTracking.objects.get_or_create(
                 order=order,
-                status='pending_approval',
-                description='Payment received. Custom earring box order awaiting admin approval.'
+                status='confirmed',
+                defaults={'description': 'Payment received. Custom earring box order confirmed.'}
             )
+
+            # Auto-attempt Shiprocket shipment creation for custom order
+            if not order.shipping_tracking_id:
+                try:
+                    from .shipping import ShiprocketService
+                    shipment_id, sr_err = ShiprocketService.create_shipment(order)
+                    if shipment_id:
+                        order.shipping_tracking_id = str(shipment_id)
+                        order.save(update_fields=['shipping_tracking_id'])
+                except Exception as sr_sync_err:
+                    logger.error(f"Immediate Shiprocket auto-sync error for custom order {order.order_id}: {sr_sync_err}")
 
             redirect_url = f'/order-success/{order.order_id}/'
             if not is_ajax:
